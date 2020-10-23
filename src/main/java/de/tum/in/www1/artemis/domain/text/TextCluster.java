@@ -14,7 +14,9 @@ import de.tum.in.www1.artemis.domain.DomainObject;
  * A TextCluster.
  */
 @Entity
-@Table(name = "text_cluster")
+@Table(name = "text_cluster", uniqueConstraints={
+    @UniqueConstraint(columnNames = {"exercise_id", "tree_id"})
+})
 public class TextCluster extends DomainObject {
 
     @Lob
@@ -30,10 +32,11 @@ public class TextCluster extends DomainObject {
     @JsonIgnoreProperties("cluster")
     private List<TextBlock> blocks = new ArrayList<>();
 
-    @Column(name = "tree_Id")
+    @Column(name = "tree_id")
     private Long treeId;
 
     @ManyToOne
+    @JoinColumn(name = "exercise_id")
     @JsonIgnore
     private TextExercise exercise;
 

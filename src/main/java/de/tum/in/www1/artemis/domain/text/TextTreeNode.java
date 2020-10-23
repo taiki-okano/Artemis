@@ -16,7 +16,9 @@ import de.tum.in.www1.artemis.domain.DomainObject;
  *  interchangeably. An artificial edge is created to represent the root node.
  */
 @Entity
-@Table(name = "text_tree_node")
+@Table(name = "text_tree_node", uniqueConstraints={
+    @UniqueConstraint(columnNames = {"exercise_id", "child"})
+})
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TextTreeNode extends DomainObject {
@@ -24,7 +26,6 @@ public class TextTreeNode extends DomainObject {
     @Column(name = "parent", nullable = false)
     private long parent;
 
-    @NaturalId
     @Column(name = "child", nullable = false, unique = true)
     private long child;
 
@@ -35,6 +36,7 @@ public class TextTreeNode extends DomainObject {
     private long childSize;
 
     @ManyToOne
+    @JoinColumn(name = "exercise_id")
     @JsonIgnore
     private TextExercise exercise;
 
