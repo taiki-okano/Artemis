@@ -3,13 +3,18 @@ package de.tum.in.www1.artemis.domain.text;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import de.tum.in.www1.artemis.domain.DomainObject;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  *  Pairwise distance between two TextBlocks
  */
 @Entity
 @Table(name = "text_pairwise_distance")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TextPairwiseDistance extends DomainObject {
 
     @Column(name = "block_i", nullable = false)

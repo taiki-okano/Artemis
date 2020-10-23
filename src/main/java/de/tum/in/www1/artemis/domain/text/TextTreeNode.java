@@ -2,6 +2,9 @@ package de.tum.in.www1.artemis.domain.text;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.NaturalId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,6 +17,8 @@ import de.tum.in.www1.artemis.domain.DomainObject;
  */
 @Entity
 @Table(name = "text_tree_node")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TextTreeNode extends DomainObject {
 
     @Column(name = "parent", nullable = false)
