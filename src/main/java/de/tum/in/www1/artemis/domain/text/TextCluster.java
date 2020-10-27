@@ -1,41 +1,23 @@
 package de.tum.in.www1.artemis.domain.text;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import de.tum.in.www1.artemis.domain.DomainObject;
 
 /**
  * A TextCluster.
  */
 @Entity
-@Table(name = "text_cluster")
-public class TextCluster implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Table(name = "text_cluster", uniqueConstraints={
+    @UniqueConstraint(columnNames = {"exercise_id", "tree_id"})
+})
+public class TextCluster extends DomainObject {
 
     @Lob
     @Column(name = "probabilities")
@@ -50,29 +32,16 @@ public class TextCluster implements Serializable {
     @JsonIgnoreProperties("cluster")
     private List<TextBlock> blocks = new ArrayList<>();
 
-    @Column(name = "tree_Id")
+    @Column(name = "tree_id")
     private Long treeId;
 
     @ManyToOne
+    @JoinColumn(name = "exercise_id")
     @JsonIgnore
     private TextExercise exercise;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public double[] getProbabilities() {
         return castFromBinary(probabilities);
-    }
-
-    public TextCluster probabilities(double[] probabilities) {
-        setProbabilities(probabilities);
-        return this;
     }
 
     public void setProbabilities(double[] probabilities) {
@@ -178,22 +147,6 @@ public class TextCluster implements Serializable {
         for (int i = 0; i < size(); i++) {
             blocks.get(i).setPositionInCluster(i);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TextCluster)) {
-            return false;
-        }
-        return id != null && id.equals(((TextCluster) o).id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
     }
 
     @Override

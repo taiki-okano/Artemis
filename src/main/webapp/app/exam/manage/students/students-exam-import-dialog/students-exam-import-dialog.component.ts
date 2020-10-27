@@ -1,7 +1,7 @@
-import { Component, Input, ViewChild, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { HttpResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { ActionType } from 'app/shared/delete-dialog/delete-dialog.model';
@@ -36,14 +36,14 @@ export class StudentsExamImportDialogComponent implements OnDestroy {
     notFoundStudents: StudentDTO[] = [];
 
     isParsing = false;
-    validationError: string | null = null;
+    validationError?: string;
     isImporting = false;
     hasImported = false;
 
     private dialogErrorSource = new Subject<string>();
     dialogError$ = this.dialogErrorSource.asObservable();
 
-    constructor(private activeModal: NgbActiveModal, private jhiAlertService: AlertService, private examManagementService: ExamManagementService) {}
+    constructor(private activeModal: NgbActiveModal, private jhiAlertService: JhiAlertService, private examManagementService: ExamManagementService) {}
 
     ngOnDestroy(): void {
         this.dialogErrorSource.unsubscribe();
@@ -72,7 +72,7 @@ export class StudentsExamImportDialogComponent implements OnDestroy {
         let csvStudents: CsvStudent[] = [];
         try {
             this.isParsing = true;
-            this.validationError = null;
+            this.validationError = undefined;
             csvStudents = await this.parseCSVFile(csvFile);
         } catch (error) {
             this.validationError = error.message;
@@ -122,7 +122,7 @@ export class StudentsExamImportDialogComponent implements OnDestroy {
      * @param csvStudents Parsed list of students
      */
     computeInvalidStudentEntries(csvStudents: CsvStudent[]): string | null {
-        const invalidList = [];
+        const invalidList: number[] = [];
         for (const [i, student] of csvStudents.entries()) {
             if (!student[csvColumns.registrationNumber]) {
                 invalidList.push(i + 2); // +2 instead of +1 due to header column in csv file
@@ -151,7 +151,7 @@ export class StudentsExamImportDialogComponent implements OnDestroy {
      */
     importStudents() {
         this.isImporting = true;
-        this.examManagementService.addStudentsToExam(this.courseId, this.exam.id, this.studentsToImport).subscribe(
+        this.examManagementService.addStudentsToExam(this.courseId, this.exam.id!, this.studentsToImport).subscribe(
             (res) => this.onSaveSuccess(res),
             () => this.onSaveError(),
         );

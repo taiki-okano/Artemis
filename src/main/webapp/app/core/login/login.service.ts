@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { Router } from '@angular/router';
 import { EMPTY, from } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
@@ -16,7 +16,7 @@ export class LoginService {
         private websocketService: JhiWebsocketService,
         private authServerProvider: AuthServerProvider,
         private router: Router,
-        private alertService: AlertService,
+        private alertService: JhiAlertService,
         private notificationService: NotificationService,
     ) {}
 
@@ -70,7 +70,7 @@ export class LoginService {
                 }),
                 // 3: Set the user's auth object to null as components might have to act on the user being logged out.
                 tap(() => {
-                    return this.accountService.authenticate(null);
+                    return this.accountService.authenticate(undefined);
                 }),
                 // 4: Clear all existing alerts of the user.
                 tap(() => {

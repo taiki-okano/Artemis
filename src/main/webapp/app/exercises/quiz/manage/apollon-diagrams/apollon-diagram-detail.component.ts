@@ -8,7 +8,7 @@ import { ApollonQuizExerciseGenerationComponent } from './exercise-generation/ap
 import { convertRenderedSVGToPNG } from './exercise-generation/svg-renderer';
 import { ApollonDiagramService } from 'app/exercises/quiz/manage/apollon-diagrams/apollon-diagram.service';
 import { ApollonDiagram } from 'app/entities/apollon-diagram.model';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 
 @Component({
     selector: 'jhi-apollon-diagram-detail',
@@ -18,8 +18,8 @@ import { AlertService } from 'app/core/alert/alert.service';
 export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
     @ViewChild('editorContainer', { static: false }) editorContainer: ElementRef;
 
-    apollonDiagram: ApollonDiagram | null = null;
-    apollonEditor: ApollonEditor | null = null;
+    apollonDiagram?: ApollonDiagram;
+    apollonEditor?: ApollonEditor;
 
     /**  */
     autoSaveInterval: number;
@@ -40,7 +40,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
 
     constructor(
         private apollonDiagramService: ApollonDiagramService,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private languageService: JhiLanguageService,
         private languageHelper: JhiLanguageHelper,
         private modalService: NgbModal,
@@ -72,7 +72,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
         });
 
         this.languageHelper.language.subscribe((languageKey: string) => {
-            if (this.apollonEditor !== null) {
+            if (this.apollonEditor) {
                 this.apollonEditor.locale = languageKey as Locale;
             }
         });
@@ -83,7 +83,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
      */
     ngOnDestroy() {
         clearInterval(this.autoSaveInterval);
-        if (this.apollonEditor !== null) {
+        if (this.apollonEditor) {
             this.apollonEditor.destroy();
         }
     }
@@ -93,7 +93,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
      * @param initialModel
      */
     initializeApollonEditor(initialModel: UMLModel) {
-        if (this.apollonEditor !== null) {
+        if (this.apollonEditor) {
             this.apollonEditor.destroy();
         }
 
@@ -109,7 +109,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
      * Saves the diagram
      */
     saveDiagram() {
-        if (this.apollonDiagram === null) {
+        if (!this.apollonDiagram) {
             return;
         }
 
@@ -149,7 +149,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
         const modalRef = this.modalService.open(ApollonQuizExerciseGenerationComponent, { backdrop: 'static' });
         const modalComponentInstance = modalRef.componentInstance as ApollonQuizExerciseGenerationComponent;
         modalComponentInstance.apollonEditor = this.apollonEditor!;
-        modalComponentInstance.diagramTitle = this.apollonDiagram!.title;
+        modalComponentInstance.diagramTitle = this.apollonDiagram!.title!;
 
         try {
             const result = await modalRef.result;

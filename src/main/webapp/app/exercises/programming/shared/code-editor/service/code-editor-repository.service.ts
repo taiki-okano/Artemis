@@ -120,7 +120,7 @@ export class CodeEditorBuildLogService extends DomainDependentEndpointService {
     getBuildLogs = () => {
         const [domainType, domainValue] = this.domain;
         if (domainType === DomainType.PARTICIPATION) {
-            return this.buildLogService.getBuildLogs(domainValue.id);
+            return this.buildLogService.getBuildLogs(domainValue.id!);
         }
         return of([]);
     };
@@ -185,7 +185,7 @@ export class CodeEditorRepositoryFileService extends DomainDependentEndpointServ
     };
 
     /** Call to server to update files.
-     * Checks all returned files submissions for submissionerrors, see {@link checkIfSubmissionIsError}
+     * Checks all returned files submissions for submission errors, see {@link checkIfSubmissionIsError}
      * Currently we only handle {@link GitConflictState#CHECKOUT_CONFLICT}
      *
      * @param fileUpdates the Array of updated files

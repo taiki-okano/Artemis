@@ -7,7 +7,7 @@ import { JhiEventManager } from 'ng-jhipster';
 import { Course } from 'app/entities/course.model';
 import { CourseManagementService } from './course-management.service';
 import { CachingStrategy } from 'app/shared/image/secured-image.component';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 
 @Component({
     selector: 'jhi-course-detail',
@@ -20,7 +20,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     private subscription: Subscription;
     private eventSubscriber: Subscription;
 
-    constructor(private eventManager: JhiEventManager, private courseService: CourseManagementService, private route: ActivatedRoute, private jhiAlertService: AlertService) {}
+    constructor(private eventManager: JhiEventManager, private courseService: CourseManagementService, private route: ActivatedRoute, private jhiAlertService: JhiAlertService) {}
 
     /**
      * On init load the course information and subscribe to listen for changes in courses.
@@ -46,7 +46,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
      * Register for the currently loaded course.
      */
     registerForCourse() {
-        this.courseService.registerForCourse(this.course.id).subscribe(
+        this.courseService.registerForCourse(this.course.id!).subscribe(
             (userResponse) => {
                 if (userResponse.body != null) {
                     const message = 'Registered user for course ' + this.course.title;
@@ -82,6 +82,6 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
      * Subscribe to changes in courses and reload the course after a change.
      */
     registerChangeInCourses() {
-        this.eventSubscriber = this.eventManager.subscribe('courseListModification', () => this.load(this.course.id));
+        this.eventSubscriber = this.eventManager.subscribe('courseListModification', () => this.load(this.course.id!));
     }
 }

@@ -2,7 +2,8 @@ package de.tum.in.www1.artemis.service.connectors;
 
 import static de.tum.in.www1.artemis.service.connectors.RemoteArtemisServiceConnector.authenticationHeaderForSecret;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class TextSimilarityClusteringService {
     private final Logger log = LoggerFactory.getLogger(TextSimilarityClusteringService.class);
 
     // region Request/Response DTOs
-    private static class Request {
+    public static class Request {
 
         public List<TextEmbedding> embeddings;
 

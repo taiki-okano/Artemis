@@ -3,7 +3,10 @@ package de.tum.in.www1.artemis.service.connectors;
 import java.net.URL;
 import java.util.Set;
 
-import de.tum.in.www1.artemis.domain.*;
+import de.tum.in.www1.artemis.domain.Commit;
+import de.tum.in.www1.artemis.domain.ProgrammingExercise;
+import de.tum.in.www1.artemis.domain.User;
+import de.tum.in.www1.artemis.domain.VcsRepositoryUrl;
 import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseParticipation;
 import de.tum.in.www1.artemis.exception.VersionControlException;
 
@@ -146,16 +149,6 @@ public interface VersionControlService {
      * @throws VersionControlException        If the communication with the VCS fails.
      */
     void setRepositoryPermissionsToReadOnly(URL repositoryUrl, String projectKey, Set<User> users) throws VersionControlException;
-
-    /**
-     * Gets the repository slug from the given URL
-     *
-     * @param repositoryUrl The complete repository-url (including protocol, host and the complete path)
-     * @return The repository slug
-     * @throws VersionControlException if the URL is invalid and no repository slug could be extracted
-     */
-    // TODO: we need this functionality in ParticipationService, but it is really really Bitbucket specific, so we should find a better way to handle this in the future
-    String getRepositorySlugFromUrl(URL repositoryUrl) throws VersionControlException;
 
     /**
      * Checks if the underlying VCS server is up and running and gives some additional information about the running

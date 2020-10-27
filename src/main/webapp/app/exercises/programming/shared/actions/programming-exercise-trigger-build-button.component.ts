@@ -13,7 +13,7 @@ import { AssessmentType } from 'app/entities/assessment-type.model';
 import { SubmissionType } from 'app/entities/submission.model';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
 import { hasParticipationChanged } from 'app/overview/participation-utils';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 
 /**
  * Component for triggering a build for the CURRENT submission of the student (does not create a new commit!).
@@ -47,7 +47,7 @@ export abstract class ProgrammingExerciseTriggerBuildButtonComponent implements 
     protected constructor(
         protected submissionService: ProgrammingSubmissionService,
         protected participationWebsocketService: ParticipationWebsocketService,
-        protected alertService: AlertService,
+        protected alertService: JhiAlertService,
     ) {}
 
     /**
@@ -91,7 +91,7 @@ export abstract class ProgrammingExerciseTriggerBuildButtonComponent implements 
             this.submissionSubscription.unsubscribe();
         }
         this.submissionSubscription = this.submissionService
-            .getLatestPendingSubmissionByParticipationId(this.participation.id, this.exercise.id, this.personalParticipation)
+            .getLatestPendingSubmissionByParticipationId(this.participation.id!, this.exercise.id!, this.personalParticipation)
             .pipe(
                 tap(({ submissionState }) => {
                     switch (submissionState) {
@@ -121,7 +121,7 @@ export abstract class ProgrammingExerciseTriggerBuildButtonComponent implements 
             this.resultSubscription.unsubscribe();
         }
         this.resultSubscription = this.participationWebsocketService
-            .subscribeForLatestResultOfParticipation(this.participation.id, this.personalParticipation, this.exercise.id)
+            .subscribeForLatestResultOfParticipation(this.participation.id!, this.personalParticipation, this.exercise.id)
             .pipe(
                 filter((result) => !!result),
                 tap((result: Result) => {
@@ -135,11 +135,11 @@ export abstract class ProgrammingExerciseTriggerBuildButtonComponent implements 
 
     triggerWithType(submissionType: SubmissionType) {
         this.isRetrievingBuildStatus = true;
-        return this.submissionService.triggerBuild(this.participation.id, submissionType).pipe(tap(() => (this.isRetrievingBuildStatus = false)));
+        return this.submissionService.triggerBuild(this.participation.id!, submissionType).pipe(tap(() => (this.isRetrievingBuildStatus = false)));
     }
 
     triggerFailed(lastGraded = false) {
         this.isRetrievingBuildStatus = true;
-        return this.submissionService.triggerFailedBuild(this.participation.id, lastGraded).pipe(tap(() => (this.isRetrievingBuildStatus = false)));
+        return this.submissionService.triggerFailedBuild(this.participation.id!, lastGraded).pipe(tap(() => (this.isRetrievingBuildStatus = false)));
     }
 }

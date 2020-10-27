@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { JhiEventManager } from 'ng-jhipster';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
 import { ProgrammingExerciseService } from './services/programming-exercise.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,6 +19,7 @@ import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service'
 import { CourseExerciseService, CourseManagementService } from 'app/course/manage/course-management.service';
 import { ProgrammingExerciseSimulationUtils } from 'app/exercises/programming/shared/utils/programming-exercise-simulation-utils';
 import { SortService } from 'app/shared/service/sort.service';
+import { getCourseFromExercise } from 'app/entities/exercise.model';
 
 @Component({
     selector: 'jhi-programming-exercise',
@@ -36,7 +37,7 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
         private courseExerciseService: CourseExerciseService,
         private exerciseService: ExerciseService,
         private accountService: AccountService,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private modalService: NgbModal,
         private router: Router,
         private javaBridge: OrionConnectorService,
@@ -63,8 +64,8 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
                 // reconnect exercise with course
                 this.programmingExercises.forEach((exercise) => {
                     exercise.course = this.course;
-                    exercise.isAtLeastTutor = this.accountService.isAtLeastTutorInCourse(exercise.course || exercise.exerciseGroup!.exam!.course);
-                    exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(exercise.course || exercise.exerciseGroup!.exam!.course);
+                    exercise.isAtLeastTutor = this.accountService.isAtLeastTutorInCourse(getCourseFromExercise(exercise));
+                    exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(getCourseFromExercise(exercise));
                 });
                 this.emitExerciseCount(this.programmingExercises.length);
             },
@@ -129,7 +130,7 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
 
     openOrionEditor(exercise: ProgrammingExercise) {
         try {
-            this.router.navigate(['code-editor', 'ide', exercise.id, 'admin', exercise.templateParticipation.id]);
+            this.router.navigate(['code-editor', 'ide', exercise.id, 'admin', exercise.templateParticipation?.id]);
         } catch (e) {
             this.javaBridge.log(e);
         }

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { ComplaintService } from 'app/complaints/complaint.service';
 import { Result } from 'app/entities/result.model';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -25,16 +25,16 @@ export class ComplaintsComponent implements OnInit {
     @Input() complaintType: ComplaintType;
     @Input() isCurrentUserSubmissionAuthor = false;
     @Output() submit: EventEmitter<void> = new EventEmitter();
-    complaintText = '';
+    complaintText?: string;
     alreadySubmitted: boolean;
     submittedDate: Moment;
-    accepted: boolean;
+    accepted?: boolean;
     handled: boolean;
     complaintResponse: ComplaintResponse;
     ComplaintType = ComplaintType;
     loaded = true;
 
-    constructor(private complaintService: ComplaintService, private jhiAlertService: AlertService, private complaintResponseService: ComplaintResponseService) {}
+    constructor(private complaintService: ComplaintService, private jhiAlertService: JhiAlertService, private complaintResponseService: ComplaintResponseService) {}
 
     ngOnInit(): void {
         this.complaintService
@@ -42,18 +42,19 @@ export class ComplaintsComponent implements OnInit {
             .pipe(filter((res) => !!res.body))
             .subscribe(
                 (res) => {
-                    this.complaintText = res.body!.complaintText;
+                    const complaint = res.body!;
+                    this.complaintText = complaint.complaintText;
                     this.alreadySubmitted = true;
-                    this.submittedDate = res.body!.submittedTime!;
-                    this.accepted = res.body!.accepted;
+                    this.submittedDate = complaint.submittedTime!;
+                    this.accepted = complaint.accepted;
                     this.handled = this.accepted !== undefined;
 
                     if (this.handled) {
-                        this.complaintResponseService.findByComplaintId(res.body!.id).subscribe((complaintResponse) => (this.complaintResponse = complaintResponse.body!));
+                        this.complaintResponseService.findByComplaintId(complaint.id!).subscribe((complaintResponse) => (this.complaintResponse = complaintResponse.body!));
                     }
                 },
-                (err: HttpErrorResponse) => {
-                    this.onError(err.message);
+                () => {
+                    this.onError();
                 },
             );
     }
@@ -84,14 +85,13 @@ export class ComplaintsComponent implements OnInit {
                 if (err && err.error && err.error.errorKey === 'toomanycomplaints') {
                     this.jhiAlertService.error('artemisApp.complaint.tooManyComplaints', { maxComplaintNumber: this.maxComplaintsPerCourse });
                 } else {
-                    this.onError(err.message);
+                    this.onError();
                 }
             },
         );
     }
 
-    private onError(error: string) {
-        console.error(error);
-        this.jhiAlertService.error('error.http.400', null, undefined);
+    private onError() {
+        this.jhiAlertService.error('error.http.400');
     }
 }

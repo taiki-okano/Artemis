@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
+import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { StudentQuestionRowComponent } from 'app/overview/student-questions/student-question-row/student-question-row.component';
@@ -10,6 +11,7 @@ import { ArtemisTestModule } from '../../test.module';
 import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { LocalStorageService } from 'ngx-webstorage';
+import { MockActivatedRouteWithSubjects } from '../../helpers/mocks/activated-route/mock-activated-route-with-subjects';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -28,7 +30,7 @@ describe('StudentQuestionRowComponent', () => {
 
     const unApprovedStudentQuestionAnswer = {
         id: 1,
-        answerDate: null,
+        answerDate: undefined,
         answerText: 'not approved',
         tutorApproved: false,
         author: user1,
@@ -36,7 +38,7 @@ describe('StudentQuestionRowComponent', () => {
 
     const approvedStudentQuestionAnswer = {
         id: 2,
-        answerDate: null,
+        answerDate: undefined,
         answerText: 'approved',
         tutorApproved: true,
         author: user2,
@@ -44,14 +46,17 @@ describe('StudentQuestionRowComponent', () => {
 
     const studentQuestion = {
         id: 1,
-        creationDate: null,
+        creationDate: undefined,
         answers: [unApprovedStudentQuestionAnswer, approvedStudentQuestionAnswer],
     } as StudentQuestion;
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
             imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule],
-            providers: [{ provide: LocalStorageService, useClass: MockSyncStorage }],
+            providers: [
+                { provide: LocalStorageService, useClass: MockSyncStorage },
+                { provide: ActivatedRoute, useClass: MockActivatedRouteWithSubjects },
+            ],
             declarations: [StudentQuestionRowComponent],
         })
             .overrideTemplate(StudentQuestionRowComponent, '')
@@ -64,32 +69,23 @@ describe('StudentQuestionRowComponent', () => {
 
     it('should sort in approved and not approved answers', () => {
         component.studentQuestion = studentQuestion;
-        componentFixture.detectChanges();
-        component.ngOnInit();
-        componentFixture.detectChanges();
+        component.sortQuestionAnswers();
         expect(component.approvedQuestionAnswers).to.deep.equal([approvedStudentQuestionAnswer]);
         expect(component.sortedQuestionAnswers).to.deep.equal([unApprovedStudentQuestionAnswer]);
     });
 
     it('should delete studentQuestionAnswer from list', () => {
         component.studentQuestion = studentQuestion;
-        componentFixture.detectChanges();
-        component.ngOnInit();
-        componentFixture.detectChanges();
+        component.sortQuestionAnswers();
         component.deleteAnswerFromList(unApprovedStudentQuestionAnswer);
-        componentFixture.detectChanges();
         expect(component.studentQuestion.answers).to.deep.equal([approvedStudentQuestionAnswer]);
     });
 
     it('should add studentQuestionAnswer to list', () => {
         component.studentQuestion = studentQuestion;
-        componentFixture.detectChanges();
-        component.ngOnInit();
-        componentFixture.detectChanges();
+        component.sortQuestionAnswers();
         component.studentQuestion.answers = [approvedStudentQuestionAnswer];
-        componentFixture.detectChanges();
         component.addAnswerToList(unApprovedStudentQuestionAnswer);
-        componentFixture.detectChanges();
         expect(component.studentQuestion.answers).to.deep.equal([approvedStudentQuestionAnswer, unApprovedStudentQuestionAnswer]);
     });
 });

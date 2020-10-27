@@ -64,7 +64,7 @@ describe('Audit Component Tests', () => {
             fixture = TestBed.createComponent(AuditsComponent);
             comp = fixture.componentInstance;
             service = fixture.debugElement.injector.get(AuditsService);
-            mockActivatedRoute = TestBed.get(ActivatedRoute);
+            mockActivatedRoute = TestBed.inject(ActivatedRoute) as MockActivatedRoute;
             mockActivatedRoute.setParameters({
                 sort: 'id,desc',
             });
@@ -159,8 +159,8 @@ describe('Audit Component Tests', () => {
                 comp.ngOnInit();
 
                 // THEN
-                expect(service.query).toBeCalledWith(
-                    expect.objectContaining({
+                expect(service.query).toHaveBeenCalledWith(
+                    jasmine.objectContaining({
                         sort: ['id,desc'],
                     }),
                 );
@@ -176,8 +176,8 @@ describe('Audit Component Tests', () => {
                 comp.ngOnInit();
 
                 // THEN
-                expect(service.query).toBeCalledWith(
-                    expect.objectContaining({
+                expect(service.query).toHaveBeenCalledWith(
+                    jasmine.objectContaining({
                         sort: ['timestamp,asc', 'id'],
                     }),
                 );

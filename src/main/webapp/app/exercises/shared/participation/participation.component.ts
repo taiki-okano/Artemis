@@ -14,7 +14,7 @@ import { Exercise, ExerciseType } from 'app/entities/exercise.model';
 import { areManualResultsAllowed } from 'app/exercises/shared/exercise/exercise-utils';
 import { FeatureToggle } from 'app/shared/feature-toggle/feature-toggle.service';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { formatTeamAsSearchResult } from 'app/exercises/shared/team/team.utils';
 import { AccountService } from 'app/core/auth/account.service';
 
@@ -60,7 +60,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
     constructor(
         private route: ActivatedRoute,
         private participationService: ParticipationService,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private eventManager: JhiEventManager,
         private exerciseService: ExerciseService,
         private programmingSubmissionService: ProgrammingSubmissionService,
@@ -100,7 +100,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
                 });
                 if (this.exercise.type === ExerciseType.PROGRAMMING) {
                     this.programmingSubmissionService
-                        .getSubmissionStateOfExercise(this.exercise.id)
+                        .getSubmissionStateOfExercise(this.exercise.id!)
                         .pipe(
                             tap((exerciseSubmissionState: ExerciseSubmissionState) => {
                                 this.exerciseSubmissionState = exerciseSubmissionState;
@@ -144,7 +144,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
     };
 
     private hasFailedSubmission(participation: Participation) {
-        const submissionStateObj = this.exerciseSubmissionState[participation.id];
+        const submissionStateObj = this.exerciseSubmissionState[participation.id!];
         if (submissionStateObj) {
             const { submissionState } = submissionStateObj;
             return submissionState === ProgrammingSubmissionState.HAS_FAILED_SUBMISSION;
@@ -164,7 +164,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
         if (!this.exercise.course) {
             return false;
         }
-        return this.exercise.isAtLeastTutor && this.exercise.course.presentationScore !== 0 && this.exercise.presentationScoreEnabled;
+        return this.exercise.isAtLeastTutor === true && this.exercise.course.presentationScore !== 0 && this.exercise.presentationScoreEnabled === true;
     }
 
     addPresentation(participation: StudentParticipation) {

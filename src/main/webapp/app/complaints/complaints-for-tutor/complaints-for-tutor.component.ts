@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { ComplaintService } from 'app/complaints/complaint.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComplaintResponseService } from 'app/complaints/complaint-response.service';
@@ -18,18 +18,18 @@ export class ComplaintsForTutorComponent implements OnInit {
     // Indicates that the assessment should be updated after a complaint. Includes the corresponding complaint
     // that should be sent to the server along with the assessment update.
     @Output() updateAssessmentAfterComplaint = new EventEmitter<ComplaintResponse>();
-    complaintText = '';
+    complaintText?: string;
     handled: boolean;
     complaintResponse: ComplaintResponse = new ComplaintResponse();
     ComplaintType = ComplaintType;
 
-    constructor(private complaintService: ComplaintService, private jhiAlertService: AlertService, private complaintResponseService: ComplaintResponseService) {}
+    constructor(private complaintService: ComplaintService, private jhiAlertService: JhiAlertService, private complaintResponseService: ComplaintResponseService) {}
 
     ngOnInit(): void {
         this.complaintText = this.complaint.complaintText;
         this.handled = this.complaint.accepted !== undefined;
         if (this.handled) {
-            this.complaintResponseService.findByComplaintId(this.complaint.id).subscribe((complaintResponse) => {
+            this.complaintResponseService.findByComplaintId(this.complaint.id!).subscribe((complaintResponse) => {
                 if (complaintResponse.body) {
                     this.complaintResponse = complaintResponse.body;
                 }
@@ -71,7 +71,6 @@ export class ComplaintsForTutorComponent implements OnInit {
     }
 
     private onError(error: string): void {
-        console.error(error);
-        this.jhiAlertService.error(error, null, undefined);
+        this.jhiAlertService.error(error);
     }
 }

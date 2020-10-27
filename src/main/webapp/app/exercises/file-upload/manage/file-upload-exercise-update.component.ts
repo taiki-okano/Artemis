@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { FileUploadExerciseService } from './file-upload-exercise.service';
 import { FileUploadExercise } from 'app/entities/file-upload-exercise.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
@@ -35,7 +35,7 @@ export class FileUploadExerciseUpdateComponent implements OnInit {
         private activatedRoute: ActivatedRoute,
         private courseService: CourseManagementService,
         private exerciseService: ExerciseService,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private router: Router,
     ) {}
 
@@ -52,10 +52,10 @@ export class FileUploadExerciseUpdateComponent implements OnInit {
         this.isSaving = false;
         this.activatedRoute.data.subscribe(({ fileUploadExercise }) => {
             this.fileUploadExercise = fileUploadExercise;
-            this.isExamMode = !!this.fileUploadExercise.exerciseGroup;
+            this.isExamMode = this.fileUploadExercise.exerciseGroup !== undefined;
             if (!this.isExamMode) {
                 this.exerciseCategories = this.exerciseService.convertExerciseCategoriesFromServer(this.fileUploadExercise);
-                this.courseService.findAllCategoriesOfCourse(this.fileUploadExercise.course!.id).subscribe(
+                this.courseService.findAllCategoriesOfCourse(this.fileUploadExercise.course!.id!).subscribe(
                     (categoryRes: HttpResponse<string[]>) => {
                         this.existingCategories = this.exerciseService.convertExerciseCategoriesAsStringFromServer(categoryRes.body!);
                     },

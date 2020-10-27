@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { ApollonEditor, ApollonMode, Assessment, Selection, UMLDiagramType, UMLElementType, UMLModel, UMLRelationshipType } from '@ls1intum/apollon';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import interact from 'interactjs';
 import { Feedback, FeedbackType } from 'app/entities/feedback.model';
 import * as $ from 'jquery';
@@ -11,7 +11,7 @@ import * as $ from 'jquery';
     styleUrls: ['./modeling-assessment.component.scss'],
 })
 export class ModelingAssessmentComponent implements AfterViewInit, OnDestroy, OnChanges {
-    apollonEditor: ApollonEditor | null = null;
+    apollonEditor?: ApollonEditor;
     elementFeedback: Map<string, Feedback>; // map element.id --> Feedback
     referencedFeedbacks: Feedback[] = [];
     unreferencedFeedbacks: Feedback[] = [];
@@ -33,7 +33,7 @@ export class ModelingAssessmentComponent implements AfterViewInit, OnDestroy, On
     @Output() feedbackChanged = new EventEmitter<Feedback[]>();
     @Output() selectionChanged = new EventEmitter<Selection>();
 
-    constructor(private jhiAlertService: AlertService, private renderer: Renderer2) {}
+    constructor(private jhiAlertService: JhiAlertService, private renderer: Renderer2) {}
 
     ngAfterViewInit(): void {
         if (this.feedbacks) {
@@ -74,7 +74,7 @@ export class ModelingAssessmentComponent implements AfterViewInit, OnDestroy, On
     }
 
     ngOnDestroy() {
-        if (this.apollonEditor !== null) {
+        if (this.apollonEditor) {
             this.apollonEditor.destroy();
         }
     }
@@ -92,7 +92,7 @@ export class ModelingAssessmentComponent implements AfterViewInit, OnDestroy, On
         if (changes.highlightedElements) {
             this.highlightedElements = changes.highlightedElements.currentValue;
 
-            if (this.apollonEditor !== null) {
+            if (this.apollonEditor) {
                 this.applyStateConfiguration();
             }
         }
@@ -108,7 +108,7 @@ export class ModelingAssessmentComponent implements AfterViewInit, OnDestroy, On
      * events of Apollon an passes them on to parent components.
      */
     private initializeApollonEditor() {
-        if (this.apollonEditor !== null) {
+        if (this.apollonEditor) {
             this.apollonEditor.destroy();
         }
 
@@ -153,7 +153,7 @@ export class ModelingAssessmentComponent implements AfterViewInit, OnDestroy, On
             const existingFeedback = this.elementFeedback.get(assessment.modelElementId);
             if (existingFeedback) {
                 existingFeedback.credits = assessment.score;
-                existingFeedback.text = assessment.feedback || null;
+                existingFeedback.text = assessment.feedback;
             } else {
                 this.elementFeedback.set(assessment.modelElementId, Feedback.forModeling(assessment.score, assessment.feedback, assessment.modelElementId, assessment.elementType));
             }

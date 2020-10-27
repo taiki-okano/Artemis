@@ -31,9 +31,8 @@ import de.tum.in.www1.artemis.domain.text.TextExercise;
 import de.tum.in.www1.artemis.domain.text.TextSubmission;
 import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.service.feature.Feature;
-import de.tum.in.www1.artemis.util.DatabaseUtilService;
+import de.tum.in.www1.artemis.service.feature.FeatureToggleService;
 import de.tum.in.www1.artemis.util.ModelFactory;
-import de.tum.in.www1.artemis.util.RequestUtilService;
 
 public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTest {
 
@@ -56,10 +55,7 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
     UserRepository userRepo;
 
     @Autowired
-    RequestUtilService request;
-
-    @Autowired
-    DatabaseUtilService database;
+    FeatureToggleService featureToggleService;
 
     private Course course;
 
@@ -95,7 +91,7 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
         course.addExercises(programmingExercise);
         course = courseRepo.save(course);
 
-        doReturn("Success").when(continuousIntegrationService).copyBuildPlan(any(), any(), any(), any(), any());
+        doReturn("Success").when(continuousIntegrationService).copyBuildPlan(any(), any(), any(), any(), any(), anyBoolean());
         doNothing().when(continuousIntegrationService).configureBuildPlan(any());
         doNothing().when(continuousIntegrationService).performEmptySetupCommit(any());
     }
@@ -103,7 +99,7 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
     @AfterEach
     public void tearDown() {
         database.resetDatabase();
-        Feature.PROGRAMMING_EXERCISES.enable();
+        featureToggleService.enableFeature(Feature.PROGRAMMING_EXERCISES);
     }
 
     @Test
@@ -167,8 +163,11 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
     @Test
     @WithMockUser(username = "student1")
     public void participateInProgrammingExercise_featureDisabled() throws Exception {
-        Feature.PROGRAMMING_EXERCISES.disable();
+        featureToggleService.disableFeature(Feature.PROGRAMMING_EXERCISES);
         request.post("/api/courses/" + course.getId() + "/exercises/" + programmingExercise.getId() + "/participations", null, HttpStatus.FORBIDDEN);
+
+        // Reset
+        featureToggleService.enableFeature(Feature.PROGRAMMING_EXERCISES);
     }
 
     @Test
@@ -236,7 +235,7 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void deleteResultWithoutSubmission() throws Exception {
         StudentParticipation studentParticipation = database.addParticipationForExercise(modelingExercise, "student1");
-        database.addResultToParticipation(studentParticipation);
+        database.addResultToParticipation(null, null, studentParticipation);
         Long participationId = studentParticipation.getId();
 
         // Participation should now exist.
@@ -318,7 +317,7 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
     public void getAllParticipationsForExercise_withLatestResult() throws Exception {
         database.addParticipationForExercise(textExercise, "student1");
         var participation = database.addParticipationForExercise(textExercise, "student2");
-        database.addResultToParticipation(participation);
+        database.addResultToParticipation(null, null, participation);
         var result = ModelFactory.generateResult(true, 70).participation(participation);
         resultRepository.save(result);
         final var params = new LinkedMultiValueMap<String, String>();
@@ -437,7 +436,7 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
     @WithMockUser(username = "student1", roles = "USER")
     public void getParticipationWithLatestResult() throws Exception {
         var participation = database.addParticipationForExercise(textExercise, "student1");
-        database.addResultToParticipation(participation);
+        database.addResultToParticipation(null, null, participation);
         var result = ModelFactory.generateResult(true, 70);
         result.participation(participation).setCompletionDate(ZonedDateTime.now().minusHours(2));
         resultRepository.save(result);
@@ -471,6 +470,8 @@ public class ParticipationIntegrationTest extends AbstractSpringIntegrationBambo
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void cleanupBuildPlan() throws Exception {
         var participation = database.addStudentParticipationForProgrammingExercise(programmingExercise, "student1");
+        bambooRequestMockProvider.enableMockingOfRequests();
+        bambooRequestMockProvider.mockDeleteBambooBuildPlan(participation.getBuildPlanId());
         var actualParticipation = request.putWithResponseBody("/api/participations/" + participation.getId() + "/cleanupBuildPlan", null, Participation.class, HttpStatus.OK);
         assertThat(actualParticipation).isEqualTo(participation);
     }

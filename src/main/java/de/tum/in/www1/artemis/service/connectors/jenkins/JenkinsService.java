@@ -8,7 +8,6 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -40,12 +39,11 @@ import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.JobWithDetails;
 
 import de.tum.in.www1.artemis.domain.*;
-import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
-import de.tum.in.www1.artemis.domain.enumeration.RepositoryType;
-import de.tum.in.www1.artemis.domain.enumeration.SubmissionType;
+import de.tum.in.www1.artemis.domain.enumeration.*;
 import de.tum.in.www1.artemis.domain.participation.Participation;
 import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseParticipation;
 import de.tum.in.www1.artemis.repository.ProgrammingSubmissionRepository;
+import de.tum.in.www1.artemis.service.FeedbackService;
 import de.tum.in.www1.artemis.service.connectors.CIPermission;
 import de.tum.in.www1.artemis.service.connectors.ConnectorHealth;
 import de.tum.in.www1.artemis.service.connectors.ContinuousIntegrationService;
@@ -72,22 +70,25 @@ public class JenkinsService implements ContinuousIntegrationService {
 
     private final ProgrammingSubmissionRepository programmingSubmissionRepository;
 
-    private JenkinsServer jenkinsServer;
+    private final JenkinsServer jenkinsServer;
+
+    private final FeedbackService feedbackService;
 
     public JenkinsService(JenkinsBuildPlanCreatorProvider buildPlanCreatorFactory, @Qualifier("jenkinsRestTemplate") RestTemplate restTemplate, JenkinsServer jenkinsServer,
-            ProgrammingSubmissionRepository programmingSubmissionRepository) {
+            ProgrammingSubmissionRepository programmingSubmissionRepository, FeedbackService feedbackService) {
         this.buildPlanCreatorProvider = buildPlanCreatorFactory;
         this.restTemplate = restTemplate;
         this.jenkinsServer = jenkinsServer;
         this.programmingSubmissionRepository = programmingSubmissionRepository;
+        this.feedbackService = feedbackService;
     }
 
     @Override
-    public void createBuildPlanForExercise(ProgrammingExercise exercise, String planKey, URL repositoryURL, URL testRepositoryURL) {
+    public void createBuildPlanForExercise(ProgrammingExercise exercise, String planKey, URL repositoryURL, URL testRepositoryURL, URL solutionRepositoryURL) {
         try {
             // TODO support sequential test runs
             final var configBuilder = buildPlanCreatorProvider.builderFor(exercise.getProgrammingLanguage());
-            final var jobConfig = configBuilder.buildBasicConfig(testRepositoryURL, repositoryURL);
+            Document jobConfig = configBuilder.buildBasicConfig(testRepositoryURL, repositoryURL, Boolean.TRUE.equals(exercise.isStaticCodeAnalysisEnabled()));
             planKey = exercise.getProjectKey() + "-" + planKey;
 
             jenkinsServer.createJob(getFolderJob(exercise.getProjectKey()), planKey, writeXmlToString(jobConfig), useCrumb);
@@ -105,7 +106,8 @@ public class JenkinsService implements ContinuousIntegrationService {
     }
 
     @Override
-    public String copyBuildPlan(String sourceProjectKey, String sourcePlanName, String targetProjectKey, String targetProjectName, String targetPlanName) {
+    public String copyBuildPlan(String sourceProjectKey, String sourcePlanName, String targetProjectKey, String targetProjectName, String targetPlanName,
+            boolean targetProjectExists) {
         final var cleanTargetName = getCleanPlanName(targetPlanName);
         final var sourcePlanKey = sourceProjectKey + "-" + sourcePlanName;
         final var targetPlanKey = targetProjectKey + "-" + cleanTargetName;
@@ -250,7 +252,7 @@ public class JenkinsService implements ContinuousIntegrationService {
     }
 
     @Override
-    public Result onBuildCompletedNew(ProgrammingExerciseParticipation participation, Object requestBody) {
+    public Result onBuildCompleted(ProgrammingExerciseParticipation participation, Object requestBody) {
         final var report = TestResultsDTO.convert(requestBody);
         final var latestPendingSubmission = programmingSubmissionRepository.findByParticipationIdAndResultIsNullOrderBySubmissionDateDesc(participation.getId()).stream()
                 .filter(submission -> {
@@ -351,7 +353,7 @@ public class JenkinsService implements ContinuousIntegrationService {
     }
 
     @Override
-    public boolean buildPlanIdIsValid(String projectKey, String buildPlanId) {
+    public boolean checkIfBuildPlanExists(String projectKey, String buildPlanId) {
         try {
             getJobXmlForBuildPlanWith(projectKey, buildPlanId);
             return true;
@@ -361,64 +363,28 @@ public class JenkinsService implements ContinuousIntegrationService {
         }
     }
 
-    @Override
-    public Optional<Result> retrieveLatestBuildResult(ProgrammingExerciseParticipation participation, ProgrammingSubmission submission) {
-        final var report = fetchLatestBuildResultFromJenkins(participation);
-
-        // The retrieved build result must match the commitHash of the provided submission.
-        if (report.getCommits().stream().map(CommitDTO::getHash).noneMatch(hash -> hash.equals(submission.getCommitHash()))) {
-            return Optional.empty();
-        }
-
-        final var result = createResultFromBuildResult(report, (Participation) participation);
-        result.setRatedIfNotExceeded(report.getRunDate(), submission);
-        result.setSubmission(submission);
-
-        submission.setBuildFailed(result.getResultString().equals("No tests found"));
-        programmingSubmissionRepository.save(submission);
-
-        return Optional.empty();
-    }
-
     private void addFeedbackToResult(Result result, TestResultsDTO report) {
-        // No feedback for build errors
-        if (report.getResults() == null || report.getResults().isEmpty()) {
-            result.setHasFeedback(false);
-            return;
+        final ProgrammingExercise programmingExercise = (ProgrammingExercise) result.getParticipation().getExercise();
+        final ProgrammingLanguage programmingLanguage = programmingExercise.getProgrammingLanguage();
+
+        // Extract test case feedback
+        for (final var testSuite : report.getResults()) {
+            for (final var testCase : testSuite.getTestCases()) {
+                var errorMessage = Optional.ofNullable(testCase.getErrors()).map((errors) -> errors.get(0).getMessage());
+                var failureMessage = Optional.ofNullable(testCase.getFailures()).map((failures) -> failures.get(0).getMessage());
+                var errorList = errorMessage.or(() -> failureMessage).map(List::of).orElse(Collections.emptyList());
+
+                result.addFeedback(feedbackService.createFeedbackFromTestCase(testCase.getName(), errorList, errorList.isEmpty(), programmingLanguage));
+            }
         }
 
-        final var feedbacks = report.getResults().stream().flatMap(testsuite -> testsuite.getTestCases().stream()).map(testCase -> {
-            final var feedback = new Feedback();
-            feedback.setPositive(testCase.getErrors() == null && testCase.getFailures() == null);
-            feedback.setText(testCase.getName());
-            String errorMessage = null;
-            // If we have errors or failures, they will always be of length == 1 since JUnit (and the format itself)
-            // should generally only report the first failure in a test case
-            if (testCase.getErrors() != null) {
-                errorMessage = testCase.getErrors().get(0).getMessage();
-            }
-            else if (testCase.getFailures() != null) {
-                errorMessage = testCase.getFailures().get(0).getMessage();
-            }
-            // The assertion message can be longer than the allowed char limit, so we shorten it here if needed.
-            if (errorMessage != null && errorMessage.length() > FEEDBACK_DETAIL_TEXT_MAX_CHARACTERS) {
-                errorMessage = errorMessage.substring(0, FEEDBACK_DETAIL_TEXT_MAX_CHARACTERS);
-            }
-            feedback.setDetailText(errorMessage);
+        // Extract static code analysis feedback if option was enabled
+        if (Boolean.TRUE.equals(programmingExercise.isStaticCodeAnalysisEnabled()) && report.getStaticCodeAnalysisReports() != null) {
+            var scaFeedback = feedbackService.createFeedbackFromStaticCodeAnalysisReports(report.getStaticCodeAnalysisReports());
+            result.addFeedbacks(scaFeedback);
+        }
 
-            return feedback;
-        }).collect(Collectors.toList());
-
-        result.setHasFeedback(true);
-        result.addFeedbacks(feedbacks);
-    }
-
-    private TestResultsDTO fetchLatestBuildResultFromJenkins(ProgrammingExerciseParticipation participation) {
-        final var projectKey = participation.getProgrammingExercise().getProjectKey();
-        final var planKey = participation.getBuildPlanId();
-        final var url = Endpoint.TEST_RESULTS.buildEndpoint(JENKINS_SERVER_URL.toString(), projectKey, planKey).build(true);
-
-        return restTemplate.getForObject(url.toUri(), TestResultsDTO.class);
+        result.setHasFeedback(!result.getFeedbacks().isEmpty());
     }
 
     @Override

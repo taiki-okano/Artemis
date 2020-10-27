@@ -11,8 +11,7 @@ import { JhiEventManager, NgJhipsterModule } from 'ng-jhipster';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import * as sinon from 'sinon';
-import { AlertService } from 'app/core/alert/alert.service';
-import { MockAlertService } from '../../helpers/mocks/service/mock-alert.service';
+
 import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisTeamModule } from 'app/exercises/shared/team/team.module';
@@ -38,7 +37,6 @@ describe('TeamUpdateDialogComponent', () => {
             declarations: [],
             providers: [
                 JhiEventManager,
-                { provide: AlertService, useClass: MockAlertService },
                 { provide: TeamService, useClass: MockTeamService },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
@@ -177,12 +175,12 @@ describe('TeamUpdateDialogComponent', () => {
         studentRemoveLink.nativeElement.dispatchEvent(new Event('click'));
         tick();
         fixture.detectChanges();
-        expect(comp.pendingTeam.students).to.deep.equal(comp.team.students.slice(1));
+        expect(comp.pendingTeam.students).to.deep.equal(comp.team.students?.slice(1));
 
         // Add three new team members
         mockNonTeamStudents.forEach((student) => comp.onAddStudent(student));
         fixture.detectChanges();
-        expect(comp.pendingTeam.students).to.deep.equal(comp.team.students.slice(1).concat(mockNonTeamStudents));
+        expect(comp.pendingTeam.students).to.deep.equal(comp.team.students?.slice(1).concat(mockNonTeamStudents));
 
         // Click on save
         const modalCloseSpy = sinon.spy(ngbActiveModal, 'close');

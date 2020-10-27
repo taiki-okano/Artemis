@@ -10,7 +10,7 @@ import * as sinonChai from 'sinon-chai';
 import * as chai from 'chai';
 import { fileUploadExercise, MockFileUploadExerciseService } from '../../helpers/mocks/service/mock-file-upload-exercise.service';
 import { JhiLanguageHelper } from 'app/core/language/language.helper';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateModule } from '@ngx-translate/core';
@@ -54,7 +54,7 @@ describe('FileUploadExercise Management Detail Component', () => {
             declarations: [FileUploadExerciseDetailComponent],
             providers: [
                 JhiLanguageHelper,
-                AlertService,
+                JhiAlertService,
                 { provide: ActivatedRoute, useValue: route },
                 { provide: FileUploadExerciseService, useClass: MockFileUploadExerciseService },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
@@ -82,7 +82,7 @@ describe('FileUploadExercise Management Detail Component', () => {
             const title = debugElement.query(By.css('h2'));
             expect(title).to.exist;
             const h2: HTMLElement = title.nativeElement;
-            expect(h2.textContent!.endsWith(fileUploadExercise.id.toString())).to.be.true;
+            expect(h2.textContent!.endsWith(fileUploadExercise.id!.toString())).to.be.true;
 
             const descList = debugElement.query(By.css('dl'));
             expect(descList).to.exist;
@@ -91,7 +91,7 @@ describe('FileUploadExercise Management Detail Component', () => {
 
     describe('OnInit with course exercise', () => {
         const course: Course = { id: 123 } as Course;
-        const fileUploadExerciseWithCourse: FileUploadExercise = new FileUploadExercise(course, null);
+        const fileUploadExerciseWithCourse: FileUploadExercise = new FileUploadExercise(course, undefined);
         fileUploadExerciseWithCourse.id = 123;
 
         beforeEach(() => {
@@ -120,8 +120,7 @@ describe('FileUploadExercise Management Detail Component', () => {
     });
 
     describe('OnInit with exam exercise', () => {
-        const exerciseGroup: ExerciseGroup = new ExerciseGroup();
-        const fileUploadExerciseWithExerciseGroup: FileUploadExercise = new FileUploadExercise(null, exerciseGroup);
+        const fileUploadExerciseWithExerciseGroup: FileUploadExercise = new FileUploadExercise(undefined, new ExerciseGroup());
         fileUploadExerciseWithExerciseGroup.id = 123;
 
         beforeEach(() => {

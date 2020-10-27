@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, Renderer2, SimpleChanges, ViewChild, Output, EventEmitter } from '@angular/core';
 import { ApollonEditor, ApollonMode, UMLDiagramType, UMLElementType, UMLModel, UMLRelationship, UMLRelationshipType } from '@ls1intum/apollon';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import interact from 'interactjs';
 import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
@@ -30,10 +30,10 @@ export class ModelingEditorComponent implements AfterViewInit, OnDestroy, OnChan
     @Output()
     private onModelChanged: EventEmitter<UMLModel> = new EventEmitter<UMLModel>();
 
-    private apollonEditor: ApollonEditor | null = null;
+    private apollonEditor?: ApollonEditor;
     private modelSubscription: number;
 
-    constructor(private jhiAlertService: AlertService, private renderer: Renderer2, private modalService: NgbModal, private guidedTourService: GuidedTourService) {}
+    constructor(private jhiAlertService: JhiAlertService, private renderer: Renderer2, private modalService: NgbModal, private guidedTourService: GuidedTourService) {}
 
     /**
      * Initializes the Apollon editor.
@@ -79,7 +79,7 @@ export class ModelingEditorComponent implements AfterViewInit, OnDestroy, OnChan
      * This function initializes the Apollon editor in Modeling mode.
      */
     private initializeApollonEditor(): void {
-        if (this.apollonEditor !== null) {
+        if (this.apollonEditor) {
             this.apollonEditor.unsubscribeFromModelChange(this.modelSubscription);
             this.apollonEditor.destroy();
         }
@@ -97,7 +97,7 @@ export class ModelingEditorComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     get isApollonEditorMounted(): boolean {
-        return this.apollonEditor !== null;
+        return this.apollonEditor != null;
     }
 
     /**
@@ -146,12 +146,12 @@ export class ModelingEditorComponent implements AfterViewInit, OnDestroy, OnChan
      * If the apollon editor is not null, destroy it and set it to null, on component destruction
      */
     ngOnDestroy(): void {
-        if (this.apollonEditor !== null) {
+        if (this.apollonEditor) {
             if (this.modelSubscription) {
                 this.apollonEditor.unsubscribeFromModelChange(this.modelSubscription);
             }
             this.apollonEditor.destroy();
-            this.apollonEditor = null;
+            this.apollonEditor = undefined;
         }
     }
 

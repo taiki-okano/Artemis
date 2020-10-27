@@ -24,12 +24,13 @@ export class StudentQuestionsComponent implements OnInit, AfterViewInit {
     studentQuestions: StudentQuestion[];
     isEditMode: boolean;
     collapsed = false;
-    studentQuestionText: string | null;
-    selectedStudentQuestion: StudentQuestion | null;
+    studentQuestionText?: string;
+    selectedStudentQuestion?: StudentQuestion;
     currentUser: User;
     isAtLeastTutorInCourse: boolean;
     EditorMode = EditorMode;
     domainCommands = [new KatexCommand()];
+    courseId: number;
 
     constructor(private accountService: AccountService, private studentQuestionService: StudentQuestionService, private exerciseService: ExerciseService) {}
 
@@ -42,12 +43,14 @@ export class StudentQuestionsComponent implements OnInit, AfterViewInit {
         });
         if (this.exercise) {
             // in this case the student questions are preloaded
-            this.studentQuestions = this.sortStudentQuestionsByVote(this.exercise.studentQuestions);
+            this.studentQuestions = StudentQuestionsComponent.sortStudentQuestionsByVote(this.exercise.studentQuestions!);
             this.isAtLeastTutorInCourse = this.accountService.isAtLeastTutorInCourse(this.exercise.course!);
+            this.courseId = this.exercise.course!.id!;
         } else {
             // in this case the student questions are preloaded
-            this.studentQuestions = this.sortStudentQuestionsByVote(this.lecture.studentQuestions);
-            this.isAtLeastTutorInCourse = this.accountService.isAtLeastTutorInCourse(this.lecture.course);
+            this.studentQuestions = StudentQuestionsComponent.sortStudentQuestionsByVote(this.lecture.studentQuestions!);
+            this.isAtLeastTutorInCourse = this.accountService.isAtLeastTutorInCourse(this.lecture.course!);
+            this.courseId = this.lecture.course!.id!;
         }
     }
 
@@ -117,16 +120,16 @@ export class StudentQuestionsComponent implements OnInit, AfterViewInit {
             delete studentQuestion.lecture.attachments;
         }
         studentQuestion.creationDate = moment();
-        this.studentQuestionService.create(studentQuestion).subscribe((studentQuestionResponse: HttpResponse<StudentQuestion>) => {
+        this.studentQuestionService.create(this.courseId, studentQuestion).subscribe((studentQuestionResponse: HttpResponse<StudentQuestion>) => {
             this.studentQuestions.push(studentQuestionResponse.body!);
-            this.studentQuestionText = null;
+            this.studentQuestionText = undefined;
             this.isEditMode = false;
         });
     }
 
-    private sortStudentQuestionsByVote(studentQuestions: StudentQuestion[]): StudentQuestion[] {
+    private static sortStudentQuestionsByVote(studentQuestions: StudentQuestion[]): StudentQuestion[] {
         return studentQuestions.sort((a, b) => {
-            return b.votes - a.votes;
+            return b.votes! - a.votes!;
         });
     }
 
@@ -135,6 +138,6 @@ export class StudentQuestionsComponent implements OnInit, AfterViewInit {
             return question.id === studentQuestion.id;
         });
         this.studentQuestions[indexToUpdate] = studentQuestion;
-        this.studentQuestions = this.sortStudentQuestionsByVote(this.studentQuestions);
+        this.studentQuestions = StudentQuestionsComponent.sortStudentQuestionsByVote(this.studentQuestions);
     }
 }

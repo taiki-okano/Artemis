@@ -42,7 +42,7 @@ describe('TextblockAssessmentCardComponent', () => {
 
     it('should show text block', () => {
         const loremIpsum = 'Lorem Ipsum';
-        component.textBlockRef.block.text = loremIpsum;
+        component.textBlockRef.block!.text = loremIpsum;
         fixture.detectChanges();
 
         const compiled = fixture.debugElement.nativeElement;
@@ -60,5 +60,19 @@ describe('TextblockAssessmentCardComponent', () => {
         fixture.detectChanges();
         element = fixture.debugElement.query(By.directive(TextblockFeedbackEditorComponent));
         expect(element).toBeTruthy();
+    });
+
+    it('should delete feedback', () => {
+        component.textBlockRef.initFeedback();
+        fixture.detectChanges();
+
+        spyOn(component.didDelete, 'emit');
+        const feedbackEditor = fixture.debugElement.query(By.directive(TextblockFeedbackEditorComponent));
+        const feedbackEditorComponent = feedbackEditor.componentInstance as TextblockFeedbackEditorComponent;
+        feedbackEditorComponent.dismiss();
+
+        expect(component.textBlockRef.feedback).toBe(undefined);
+        expect(component.didDelete.emit).toHaveBeenCalledTimes(1);
+        expect(component.didDelete.emit).toHaveBeenCalledWith(component.textBlockRef);
     });
 });

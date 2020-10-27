@@ -1,6 +1,7 @@
 package de.tum.in.www1.artemis.service;
 
-import static de.tum.in.www1.artemis.domain.enumeration.BuildPlanType.*;
+import static de.tum.in.www1.artemis.domain.enumeration.BuildPlanType.SOLUTION;
+import static de.tum.in.www1.artemis.domain.enumeration.BuildPlanType.TEMPLATE;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,9 +28,18 @@ import org.springframework.transaction.annotation.Transactional;
 import de.tum.in.www1.artemis.config.Constants;
 import de.tum.in.www1.artemis.domain.*;
 import de.tum.in.www1.artemis.domain.enumeration.*;
-import de.tum.in.www1.artemis.domain.participation.*;
-import de.tum.in.www1.artemis.repository.*;
-import de.tum.in.www1.artemis.service.connectors.*;
+import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseParticipation;
+import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseStudentParticipation;
+import de.tum.in.www1.artemis.domain.participation.SolutionProgrammingExerciseParticipation;
+import de.tum.in.www1.artemis.domain.participation.TemplateProgrammingExerciseParticipation;
+import de.tum.in.www1.artemis.repository.ProgrammingExerciseRepository;
+import de.tum.in.www1.artemis.repository.ResultRepository;
+import de.tum.in.www1.artemis.repository.SolutionProgrammingExerciseParticipationRepository;
+import de.tum.in.www1.artemis.repository.TemplateProgrammingExerciseParticipationRepository;
+import de.tum.in.www1.artemis.service.connectors.CIPermission;
+import de.tum.in.www1.artemis.service.connectors.ContinuousIntegrationService;
+import de.tum.in.www1.artemis.service.connectors.GitService;
+import de.tum.in.www1.artemis.service.connectors.VersionControlService;
 import de.tum.in.www1.artemis.service.messaging.InstanceMessageSendService;
 import de.tum.in.www1.artemis.service.util.structureoraclegenerator.OracleGenerator;
 import de.tum.in.www1.artemis.web.rest.dto.PageableSearchDTO;
@@ -164,9 +174,9 @@ public class ProgrammingExerciseService {
         String projectKey = programmingExercise.getProjectKey();
         continuousIntegrationService.get().createProjectForExercise(programmingExercise);
         // template build plan
-        continuousIntegrationService.get().createBuildPlanForExercise(programmingExercise, TEMPLATE.getName(), exerciseRepoUrl, testsRepoUrl);
+        continuousIntegrationService.get().createBuildPlanForExercise(programmingExercise, TEMPLATE.getName(), exerciseRepoUrl, testsRepoUrl, solutionRepoUrl);
         // solution build plan
-        continuousIntegrationService.get().createBuildPlanForExercise(programmingExercise, SOLUTION.getName(), solutionRepoUrl, testsRepoUrl);
+        continuousIntegrationService.get().createBuildPlanForExercise(programmingExercise, SOLUTION.getName(), solutionRepoUrl, testsRepoUrl, solutionRepoUrl);
 
         // Give appropriate permissions for CI projects
         continuousIntegrationService.get().removeAllDefaultProjectPermissions(projectKey);
@@ -312,7 +322,9 @@ public class ProgrammingExerciseService {
      */
     private void setupTestTemplateAndPush(Repository repository, Resource[] resources, String prefix, String templateName, ProgrammingExercise programmingExercise, User user)
             throws Exception {
-        if (gitService.listFiles(repository).size() == 0 && programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA) { // Only copy template if repo is empty
+        // Only copy template if repo is empty
+        if (gitService.listFiles(repository).size() == 0
+                && (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA || programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.KOTLIN)) {
             String templatePath = "classpath:templates/" + programmingExercise.getProgrammingLanguage().toString().toLowerCase() + "/test";
 
             String projectTemplatePath = templatePath + "/projectTemplate/**/*.*";
@@ -389,7 +401,7 @@ public class ProgrammingExerciseService {
      * @throws IOException If replacing the directory name, or file variables throws an exception
      */
     public void replacePlaceholders(ProgrammingExercise programmingExercise, Repository repository) throws IOException {
-        if (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA) {
+        if (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA || programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.KOTLIN) {
             fileService.replaceVariablesInDirectoryName(repository.getLocalPath().toAbsolutePath().toString(), "${packageNameFolder}", programmingExercise.getPackageFolderName());
         }
 
@@ -399,7 +411,7 @@ public class ProgrammingExerciseService {
         // length, it
         // replaces fileTargets.get(i) with fileReplacements.get(i)
 
-        if (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA) {
+        if (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA || programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.KOTLIN) {
             fileTargets.add("${packageName}");
             fileReplacements.add(programmingExercise.getPackageName());
         }
@@ -451,6 +463,17 @@ public class ProgrammingExerciseService {
     }
 
     /**
+     * Find a programming exercise by its id.
+     *
+     * @param programmingExerciseId of the programming exercise.
+     * @return The programming exercise related to the given id
+     */
+    public ProgrammingExercise findById(Long programmingExerciseId) {
+        return programmingExerciseRepository.findById(programmingExerciseId)
+                .orElseThrow(() -> new EntityNotFoundException("Programming exercise not found with id " + programmingExerciseId));
+    }
+
+    /**
      * Find a programming exercise by its id, including template and solution but without results.
      * @param programmingExerciseId of the programming exercise.
      * @return The programming exercise related to the given id
@@ -480,34 +503,6 @@ public class ProgrammingExerciseService {
         else {
             throw new EntityNotFoundException("programming exercise not found with id " + programmingExerciseId);
         }
-    }
-
-    /**
-     * Find a programming exercise by its id, with eagerly loaded studentParticipations.
-     *
-     * @param programmingExerciseId of the programming exercise.
-     * @return The programming exercise related to the given id
-     * @throws EntityNotFoundException the programming exercise could not be found.
-     */
-    public ProgrammingExercise findByIdWithEagerStudentParticipations(long programmingExerciseId) throws EntityNotFoundException {
-        Optional<ProgrammingExercise> programmingExercise = programmingExerciseRepository.findWithEagerStudentParticipationsById(programmingExerciseId);
-        if (programmingExercise.isPresent()) {
-            return programmingExercise.get();
-        }
-        else {
-            throw new EntityNotFoundException("programming exercise not found");
-        }
-    }
-
-    /**
-     * Find a programming exercise by its id, with eagerly loaded studentParticipations, template and solution participation
-     *
-     * @param programmingExerciseId of the programming exercise.
-     * @return The programming exercise related to the given id
-     * @throws EntityNotFoundException the programming exercise could not be found.
-     */
-    public ProgrammingExercise findByIdWithAllParticipations(long programmingExerciseId) throws EntityNotFoundException {
-        return programmingExerciseRepository.findWithAllParticipationsById(programmingExerciseId).orElseThrow(() -> new EntityNotFoundException("programming exercise not found"));
     }
 
     /**
@@ -678,8 +673,11 @@ public class ProgrammingExerciseService {
         // TODO: This method does not accept a programming exercise to solve issues with nested Transactions.
         // It would be good to refactor the delete calls and move the validity checks down from the resources to the service methods (e.g. EntityNotFound).
         ProgrammingExercise programmingExercise = programmingExerciseRepository.findWithTemplateParticipationAndSolutionParticipationById(programmingExerciseId).get();
-        if (deleteBaseReposBuildPlans) {
+        final var templateRepositoryUrlAsUrl = programmingExercise.getTemplateRepositoryUrlAsUrl();
+        final var solutionRepositoryUrlAsUrl = programmingExercise.getSolutionRepositoryUrlAsUrl();
+        final var testRepositoryUrlAsUrl = programmingExercise.getTestRepositoryUrlAsUrl();
 
+        if (deleteBaseReposBuildPlans) {
             final var templateBuildPlanId = programmingExercise.getTemplateBuildPlanId();
             if (templateBuildPlanId != null) {
                 continuousIntegrationService.get().deleteBuildPlan(programmingExercise.getProjectKey(), templateBuildPlanId);
@@ -691,21 +689,29 @@ public class ProgrammingExerciseService {
             continuousIntegrationService.get().deleteProject(programmingExercise.getProjectKey());
 
             if (programmingExercise.getTemplateRepositoryUrl() != null) {
-                final var templateRepositoryUrlAsUrl = programmingExercise.getTemplateRepositoryUrlAsUrl();
                 versionControlService.get().deleteRepository(templateRepositoryUrlAsUrl);
-                gitService.deleteLocalRepository(templateRepositoryUrlAsUrl);
             }
             if (programmingExercise.getSolutionRepositoryUrl() != null) {
-                final var solutionRepositoryUrlAsUrl = programmingExercise.getSolutionRepositoryUrlAsUrl();
                 versionControlService.get().deleteRepository(solutionRepositoryUrlAsUrl);
-                gitService.deleteLocalRepository(solutionRepositoryUrlAsUrl);
             }
             if (programmingExercise.getTestRepositoryUrl() != null) {
-                final var testRepositoryUrlAsUrl = programmingExercise.getTestRepositoryUrlAsUrl();
                 versionControlService.get().deleteRepository(testRepositoryUrlAsUrl);
-                gitService.deleteLocalRepository(testRepositoryUrlAsUrl);
             }
             versionControlService.get().deleteProject(programmingExercise.getProjectKey());
+        }
+        /*
+         * Always delete the local copies of the repository because they can (in theory) be restored by cloning again, but they block the creation of new programming exercises with
+         * the same short name as a deleted one. The instructors might have missed selecting deleteBaseReposBuildPlans, and delete those manually later. This however leaves no
+         * chance to remove the Artemis-local repositories on the server. In summary, they should and can always be deleted.
+         */
+        if (programmingExercise.getTemplateRepositoryUrl() != null) {
+            gitService.deleteLocalRepository(templateRepositoryUrlAsUrl);
+        }
+        if (programmingExercise.getSolutionRepositoryUrl() != null) {
+            gitService.deleteLocalRepository(solutionRepositoryUrlAsUrl);
+        }
+        if (programmingExercise.getTestRepositoryUrl() != null) {
+            gitService.deleteLocalRepository(testRepositoryUrlAsUrl);
         }
 
         SolutionProgrammingExerciseParticipation solutionProgrammingExerciseParticipation = programmingExercise.getSolutionParticipation();

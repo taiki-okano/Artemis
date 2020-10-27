@@ -7,16 +7,18 @@ module.exports = {
             astTransformers: {
                 before: [require.resolve('./InlineHtmlStripStylesTransformer')],
             },
-            diagnostics: false,
+            diagnostics: {
+                ignoreCodes: [151001],
+            },
         },
     },
     coverageThreshold: {
         global: {
-            branches: 33,
-            functions: 40,
-            lines: 59,
+            branches: 36,
+            functions: 44,
+            lines: 62,
             // TODO: in the future, the following value should be increase to 80%
-            statements: 60,
+            statements: 63,
         },
     },
     preset: 'jest-preset-angular',

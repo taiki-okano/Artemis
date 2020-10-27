@@ -8,9 +8,13 @@ import org.apache.http.HttpException;
 import org.springframework.http.ResponseEntity;
 
 import de.tum.in.www1.artemis.config.Constants;
-import de.tum.in.www1.artemis.domain.*;
+import de.tum.in.www1.artemis.domain.BuildLogEntry;
+import de.tum.in.www1.artemis.domain.ProgrammingExercise;
+import de.tum.in.www1.artemis.domain.ProgrammingSubmission;
+import de.tum.in.www1.artemis.domain.Result;
 import de.tum.in.www1.artemis.domain.enumeration.ProgrammingLanguage;
 import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseParticipation;
+import de.tum.in.www1.artemis.exception.ContinousIntegrationException;
 
 /**
  * Abstract service for managing entities related to continuous integration.
@@ -24,12 +28,13 @@ public interface ContinuousIntegrationService {
     /**
      * Creates the base build plan for the given programming exercise
      *
-     * @param exercise          a programming exercise with the required information to create the base build plan
-     * @param planKey           the key of the plan
-     * @param repositoryURL     the URL of the assignment repository (used to separate between exercise and solution)
-     * @param testRepositoryURL the URL of the test repository
+     * @param exercise              a programming exercise with the required information to create the base build plan
+     * @param planKey               the key of the plan
+     * @param repositoryURL         the URL of the assignment repository (used to separate between exercise and solution)
+     * @param testRepositoryURL     the URL of the test repository
+     * @param solutionRepositoryURL the URL of the solution repository. Only used for HASKELL exercises with checkoutSolutionRepository=true. Otherwise ignored.
      */
-    void createBuildPlanForExercise(ProgrammingExercise exercise, String planKey, URL repositoryURL, URL testRepositoryURL);
+    void createBuildPlanForExercise(ProgrammingExercise exercise, String planKey, URL repositoryURL, URL testRepositoryURL, URL solutionRepositoryURL);
 
     /**
      * Clones an existing build plan. Illegal characters in the plan key, or name will be replaced.
@@ -39,9 +44,10 @@ public interface ContinuousIntegrationService {
      * @param targetProjectKey The key of the project the plan should get copied to
      * @param targetProjectName The wanted name of the new project
      * @param targetPlanName The wanted name of the new plan after copying it
+     * @param targetProjectExists whether the target project already exists or not
      * @return The key of the new build plan
      */
-    String copyBuildPlan(String sourceProjectKey, String sourcePlanName, String targetProjectKey, String targetProjectName, String targetPlanName);
+    String copyBuildPlan(String sourceProjectKey, String sourcePlanName, String targetProjectKey, String targetProjectName, String targetPlanName, boolean targetProjectExists);
 
     /**
      * Configure the build plan with the given participation on the CI system. Common configurations: - update the repository in the build plan - set appropriate user permissions -
@@ -98,9 +104,9 @@ public interface ContinuousIntegrationService {
      * @param participation The participation for which the build finished
      * @param requestBody   The request Body received from the CI-Server.
      * @return the result of the build
-     * @throws Exception if the Body could not be parsed
+     * @throws ContinousIntegrationException if the Body could not be parsed
      */
-    Result onBuildCompletedNew(ProgrammingExerciseParticipation participation, Object requestBody) throws Exception;
+    Result onBuildCompleted(ProgrammingExerciseParticipation participation, Object requestBody) throws ContinousIntegrationException;
 
     /**
      * Get the current status of the build for the given participation, i.e. INACTIVE, QUEUED, or BUILDING.
@@ -117,7 +123,7 @@ public interface ContinuousIntegrationService {
      * @param buildPlanId unique identifier for build plan on CI system
      * @return true if build plan is valid otherwise false
      */
-    boolean buildPlanIdIsValid(String projectKey, String buildPlanId);
+    boolean checkIfBuildPlanExists(String projectKey, String buildPlanId);
 
     /**
      * Get the build logs of the latest CI build.
@@ -134,14 +140,6 @@ public interface ContinuousIntegrationService {
      * @return the binary build artifact. Typically a JAR/WAR ResponseEntity.
      */
     ResponseEntity<byte[]> retrieveLatestArtifact(ProgrammingExerciseParticipation participation);
-
-    /**
-     * Retrieve the latest build result from the CIS for the given participation if it matches the commitHash of the submission and save it into the database.
-     * @param participation to identify the build artifact with.
-     * @param submission    for commitHash comparison.
-     * @return the saved Result instance if a build result could be retrieved from the CIS.
-     */
-    Optional<Result> retrieveLatestBuildResult(ProgrammingExerciseParticipation participation, ProgrammingSubmission submission);
 
     /**
      * Checks if the project with the given projectKey already exists
@@ -240,8 +238,7 @@ public interface ContinuousIntegrationService {
             @Override
             public String forProgrammingLanguage(ProgrammingLanguage language) {
                 return switch (language) {
-                    case JAVA, PYTHON, C, HASKELL -> Constants.ASSIGNMENT_CHECKOUT_PATH;
-                    default -> throw new IllegalArgumentException("Repository checkout path for assignment repo has not yet been defined for " + language);
+                    case JAVA, PYTHON, C, HASKELL, KOTLIN, VHDL, ASSEMBLER -> Constants.ASSIGNMENT_CHECKOUT_PATH;
                 };
             }
         },
@@ -250,9 +247,18 @@ public interface ContinuousIntegrationService {
             @Override
             public String forProgrammingLanguage(ProgrammingLanguage language) {
                 return switch (language) {
-                    case JAVA, PYTHON, HASKELL -> "";
-                    case C -> Constants.TESTS_CHECKOUT_PATH;
-                    default -> throw new IllegalArgumentException("Repository checkout path for test repo has not yet been defined for " + language);
+                    case JAVA, PYTHON, HASKELL, KOTLIN -> "";
+                    case C, VHDL, ASSEMBLER -> Constants.TESTS_CHECKOUT_PATH;
+                };
+            }
+        },
+        SOLUTION {
+
+            @Override
+            public String forProgrammingLanguage(ProgrammingLanguage language) {
+                return switch (language) {
+                    case HASKELL -> Constants.SOLUTION_CHECKOUT_PATH;
+                    default -> throw new IllegalArgumentException("Repository checkout path for solution repo has not yet been defined for " + language);
                 };
             }
         }

@@ -12,6 +12,7 @@ import { TextBlock } from 'app/entities/text-block.model';
 import { TextBlockRef } from 'app/entities/text-block-ref.model';
 import { cloneDeep } from 'lodash';
 import { TextSubmission } from 'app/entities/text-submission.model';
+import { FeedbackConflict } from 'app/entities/feedback-conflict';
 
 type EntityResponseType = HttpResponse<Result>;
 type TextAssessmentDTO = { feedbacks: Feedback[]; textBlocks: TextBlock[] };
@@ -94,15 +95,19 @@ export class TextAssessmentsService {
             .get<StudentParticipation>(`${this.resourceUrl}/submission/${submissionId}`, { observe: 'response' })
             .pipe(
                 // Wire up Result and Submission
-                tap((response) => (response.body!.submissions[0].result = response.body!.results[0])),
-                tap((response) => (response.body!.submissions[0].participation = response.body!)),
-                tap((response) => (response.body!.results[0].submission = response.body!.submissions[0])),
-                tap((response) => (response.body!.results[0].participation = response.body!)),
-                // Make sure Feedbacks Array is initialized
-                tap((response) => (response.body!.results[0].feedbacks = response.body!.results[0].feedbacks || [])),
-
-                // Add the jwt token for tutor assessment tracking if athene profile is active, otherwise set it null
-                tap((response) => ((response.body!.submissions[0] as TextSubmission).atheneTextAssessmentTrackingToken = response.headers.get('x-athene-tracking-authorization'))),
+                tap((response) => {
+                    const participation = response.body!;
+                    const submission = participation.submissions![0];
+                    submission.participation = participation;
+                    const result = participation.results![0];
+                    submission.result = result;
+                    result.submission = submission;
+                    result.participation = participation;
+                    // Make sure Feedbacks Array is initialized
+                    result.feedbacks = result.feedbacks || [];
+                    TextAssessmentsService.convertFeedbackConflictsFromServer(result.feedbacks);
+                    (submission as TextSubmission).atheneTextAssessmentTrackingToken = response.headers.get('x-athene-tracking-authorization') || undefined;
+                }),
                 map((response) => response.body!),
             );
     }
@@ -116,16 +121,37 @@ export class TextAssessmentsService {
         return this.http.get<Result>(`${this.resourceUrl}/exercise/${exerciseId}/submission/${submissionId}/example-result`);
     }
 
+    /**
+     * Gets an array of text submissions that contains conflicting feedback with the given feedback id.
+     *
+     * @param submissionId id of the submission feedback belongs to of type {number}
+     * @param feedbackId id of the feedback to search for conflicts of type {number}
+     */
+    public getConflictingTextSubmissions(submissionId: number, feedbackId: number): Observable<TextSubmission[]> {
+        return this.http.get<TextSubmission[]>(`${this.resourceUrl}/submission/${submissionId}/feedback/${feedbackId}/feedback-conflicts`);
+    }
+
+    /**
+     * Set feedback conflict as solved. (Tutor decides it is not a conflict)
+     *
+     * @param exerciseId id of the exercise feedback conflict belongs to
+     * @param feedbackConflictId id of the feedback conflict to be solved
+     */
+    public solveFeedbackConflict(exerciseId: number, feedbackConflictId: number): Observable<FeedbackConflict> {
+        return this.http.get<FeedbackConflict>(`${this.resourceUrl}/exercise/${exerciseId}/feedbackConflict/${feedbackConflictId}/solve-feedback-conflict`);
+    }
+
     private static prepareFeedbacksAndTextblocksForRequest(feedbacks: Feedback[], textBlocks: TextBlock[]): TextAssessmentDTO {
-        feedbacks = feedbacks.map((f) => {
-            f = Object.assign({}, f);
-            f.result = null;
-            return f;
+        feedbacks = feedbacks.map((feedback) => {
+            feedback = Object.assign({}, feedback);
+            delete feedback.result;
+            delete feedback.conflictingTextAssessments;
+            return feedback;
         });
-        textBlocks = textBlocks.map((tb) => {
-            tb = Object.assign({}, tb);
-            tb.submission = undefined;
-            return tb;
+        textBlocks = textBlocks.map((textBlock) => {
+            textBlock = Object.assign({}, textBlock);
+            textBlock.submission = undefined;
+            return textBlock;
         });
 
         return { feedbacks, textBlocks };
@@ -152,6 +178,24 @@ export class TextAssessmentsService {
     }
 
     /**
+     * Convert Feedback elements to use single array of FeedbackConflicts in the Feedback class.
+     * It is stored with two references on the server side.
+     *
+     * @param feedbacks list of Feedback elements to convert.
+     */
+    private static convertFeedbackConflictsFromServer(feedbacks: Feedback[]): void {
+        feedbacks.forEach((feedback) => {
+            feedback.conflictingTextAssessments = [...(feedback['firstConflicts'] || []), ...(feedback['secondConflicts'] || [])];
+            delete feedback['firstConflicts'];
+            delete feedback['secondConflicts'];
+            feedback.conflictingTextAssessments.forEach((textAssessmentConflict) => {
+                textAssessmentConflict.conflictingFeedbackId =
+                    textAssessmentConflict['firstFeedback'].id === feedback.id ? textAssessmentConflict['secondFeedback'].id : textAssessmentConflict['firstFeedback'].id;
+            });
+        });
+    }
+
+    /**
      * Match given text blocks and feedback items by text block references.
      * @param blocks list of text blocks of type {TextBlock[]}
      * @param feedbacks list of feedback made during assessment of type {Feedback[]}
@@ -174,19 +218,23 @@ export class TextAssessmentsService {
      * @param submission - The submission object that holds the data that is tracked
      * @param origin - The method that calls the the tracking method
      */
-    public trackAssessment(submission: TextSubmission | null, origin: string) {
+    public trackAssessment(submission?: TextSubmission, origin?: string) {
         if (submission?.atheneTextAssessmentTrackingToken) {
             // clone submission and resolve circular json properties
             const submissionForSending = cloneDeep(submission);
-            delete submissionForSending.participation?.submissions;
-            delete submissionForSending.participation?.exercise?.course;
-            delete submissionForSending.participation?.exercise?.exerciseGroup;
-            delete submissionForSending.atheneTextAssessmentTrackingToken;
+            if (submissionForSending.participation) {
+                submissionForSending.participation.submissions = [];
+                if (submissionForSending.participation.exercise) {
+                    submissionForSending.participation.exercise.course = undefined;
+                    submissionForSending.participation.exercise.exerciseGroup = undefined;
+                }
+            }
+            submissionForSending.atheneTextAssessmentTrackingToken = undefined;
 
             // eslint-disable-next-line chai-friendly/no-unused-expressions
-            submissionForSending.participation?.results?.forEach((result) => {
-                delete result.participation;
-                delete result.submission;
+            submissionForSending.participation?.results!.forEach((result) => {
+                result.participation = undefined;
+                result.submission = undefined;
             });
 
             const trackingObject = {

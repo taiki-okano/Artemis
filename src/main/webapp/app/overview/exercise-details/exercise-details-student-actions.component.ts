@@ -2,7 +2,7 @@ import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import { CourseExerciseService } from 'app/course/manage/course-management.service';
 import { Router } from '@angular/router';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { HttpClient } from '@angular/common/http';
 import { AccountService } from 'app/core/auth/account.service';
 import { SourceTreeService } from 'app/exercises/programming/shared/service/sourceTree.service';
@@ -49,11 +49,12 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
     public sshEnabled = false;
     private sshTemplateUrl: string;
     public sshKeysUrl: string;
+    private baseUrl: string;
 
     private user: User;
 
     constructor(
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private courseExerciseService: CourseExerciseService,
         private httpClient: HttpClient,
         private accountService: AccountService,
@@ -79,6 +80,9 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
             this.sshKeysUrl = info.sshKeysURL;
             this.sshTemplateUrl = info.sshCloneURLTemplate;
             this.sshEnabled = !!this.sshTemplateUrl;
+            if (info.versionControlUrl) {
+                this.baseUrl = info.versionControlUrl;
+            }
         });
     }
 
@@ -87,16 +91,16 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
      *
      * @param {Participation} participation
      */
-    repositoryUrl(participation: Participation) {
+    repositoryUrl(participation?: Participation) {
         const programmingParticipation = participation as ProgrammingExerciseStudentParticipation;
         if (this.useSsh) {
             // the same ssh url is used for individual and team exercises
-            return this.getSshCloneUrl(programmingParticipation.repositoryUrl);
+            return this.getSshCloneUrl(programmingParticipation?.repositoryUrl);
         }
-        if (programmingParticipation.team) {
+        if (programmingParticipation?.team) {
             return this.repositoryUrlForTeam(programmingParticipation);
         }
-        return programmingParticipation.repositoryUrl;
+        return programmingParticipation?.repositoryUrl;
     }
 
     /**
@@ -104,9 +108,9 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
      *
      * @return repository url with username of current user inserted
      */
-    private repositoryUrlForTeam(participation: ProgrammingExerciseStudentParticipation) {
+    private repositoryUrlForTeam(participation?: ProgrammingExerciseStudentParticipation) {
         // (https://)(bitbucket.ase.in.tum.de/...-team1.git)  =>  (https://)ga12abc@(bitbucket.ase.in.tum.de/...-team1.git)
-        return participation.repositoryUrl.replace(/^(\w*:\/\/)(.*)$/, `$1${this.user.login}@$2`);
+        return participation?.repositoryUrl?.replace(/^(\w*:\/\/)(.*)$/, `$1${this.user.login}@$2`);
     }
 
     /**
@@ -115,7 +119,7 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
      */
     isPracticeModeAvailable(): boolean {
         const quizExercise = this.exercise as QuizExercise;
-        return quizExercise.isPlannedToStart && quizExercise.isOpenForPractice && moment(quizExercise.dueDate!).isBefore(moment());
+        return quizExercise.isPlannedToStart! && quizExercise.isOpenForPractice! && moment(quizExercise.dueDate!).isBefore(moment());
     }
 
     /**
@@ -129,7 +133,7 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
      * check if onlineEditor is allowed
      * @return {boolean}
      */
-    isOnlineEditorAllowed(): boolean {
+    isOnlineEditorAllowed() {
         return (this.exercise as ProgrammingExercise).allowOnlineEditor;
     }
 
@@ -137,7 +141,7 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
      * check if offline IDE is allowed
      * @return {boolean}
      */
-    isOfflineIdeAllowed(): boolean {
+    isOfflineIdeAllowed() {
         return (this.exercise as ProgrammingExercise).allowOfflineIde;
     }
 
@@ -167,7 +171,7 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
 
         this.exercise.loading = true;
         this.courseExerciseService
-            .startExercise(this.courseId, this.exercise.id)
+            .startExercise(this.courseId, this.exercise.id!)
             .finally(() => (this.exercise.loading = false))
             .subscribe(
                 (participation) => {
@@ -194,8 +198,8 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
      * @param {string} cloneUrl
      * @return sourceTreeUrl
      */
-    buildSourceTreeUrl(cloneUrl: string): string {
-        return this.sourceTreeService.buildSourceTreeUrl(cloneUrl);
+    buildSourceTreeUrl(cloneUrl?: string) {
+        return this.sourceTreeService.buildSourceTreeUrl(this.baseUrl, cloneUrl);
     }
 
     /**
@@ -204,13 +208,13 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
     resumeProgrammingExercise() {
         this.exercise.loading = true;
         this.courseExerciseService
-            .resumeProgrammingExercise(this.courseId, this.exercise.id)
+            .resumeProgrammingExercise(this.courseId, this.exercise.id!)
             .finally(() => (this.exercise.loading = false))
             .subscribe(
                 (participation: StudentParticipation) => {
                     if (participation) {
                         // Otherwise the client would think that all results are loaded, but there would not be any (=> no graded result).
-                        participation.results = this.exercise.studentParticipations[0] ? this.exercise.studentParticipations[0].results : [];
+                        participation.results = this.exercise.studentParticipations![0] ? this.exercise.studentParticipations![0].results : [];
                         this.exercise.studentParticipations = [participation];
                         this.exercise.participationStatus = participationStatus(this.exercise);
                     }
@@ -236,7 +240,7 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
      * @return {assignedTeamId}
      */
     get assignedTeamId(): number | undefined {
-        const participation = this.exercise.studentParticipations[0];
+        const participation = this.exercise.studentParticipations![0];
         return participation ? participation.team?.id : this.exercise.studentAssignedTeamId;
     }
 
@@ -262,8 +266,8 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit {
     /**
      * Transforms the repository url to a ssh url
      */
-    getSshCloneUrl(url: string) {
-        return url.replace(/^\w*:\/\/[^/]*?\/(scm\/)?(.*)$/, this.sshTemplateUrl + '$2');
+    getSshCloneUrl(url?: string) {
+        return url?.replace(/^\w*:\/\/[^/]*?\/(scm\/)?(.*)$/, this.sshTemplateUrl + '$2');
     }
 
     /**

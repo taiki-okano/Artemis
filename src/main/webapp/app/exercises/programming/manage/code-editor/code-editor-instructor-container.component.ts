@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { UpdatingResultComponent } from 'app/exercises/shared/result/updating-result.component';
 import { CodeEditorInstructorBaseContainerComponent } from 'app/exercises/programming/manage/code-editor/code-editor-instructor-base-container.component';
 import { CourseExerciseService } from 'app/course/manage/course-management.service';
@@ -32,7 +32,7 @@ export class CodeEditorInstructorContainerComponent extends CodeEditorInstructor
         participationService: ParticipationService,
         translateService: TranslateService,
         route: ActivatedRoute,
-        jhiAlertService: AlertService,
+        jhiAlertService: JhiAlertService,
     ) {
         super(
             router,
@@ -46,34 +46,6 @@ export class CodeEditorInstructorContainerComponent extends CodeEditorInstructor
             route,
             jhiAlertService,
         );
-    }
-
-    /**
-     * Select the solution participation repository and navigate to it
-     */
-    selectSolutionParticipation() {
-        this.router.navigate(['..', this.exercise.solutionParticipation.id], { relativeTo: this.route });
-    }
-
-    /**
-     * Select the template participation repository and navigate to it
-     */
-    selectTemplateParticipation() {
-        this.router.navigate(['..', this.exercise.templateParticipation.id], { relativeTo: this.route });
-    }
-
-    /**
-     * Select the assignment participation repository and navigate to it
-     */
-    selectAssignmentParticipation() {
-        this.router.navigate(['..', this.exercise.studentParticipations[0].id], { relativeTo: this.route });
-    }
-
-    /**
-     * Select the test repository and navigate to it
-     */
-    selectTestRepository() {
-        this.router.navigate(['..', 'test'], { relativeTo: this.route });
     }
 
     onResizeEditorInstructions() {

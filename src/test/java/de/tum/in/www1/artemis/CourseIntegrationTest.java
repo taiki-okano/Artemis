@@ -57,18 +57,11 @@ import de.tum.in.www1.artemis.repository.TutorLeaderboardComplaintsViewRepositor
 import de.tum.in.www1.artemis.repository.TutorLeaderboardMoreFeedbackRequestsViewRepository;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.service.UserService;
-import de.tum.in.www1.artemis.util.DatabaseUtilService;
+import de.tum.in.www1.artemis.util.FileUtils;
 import de.tum.in.www1.artemis.util.ModelFactory;
-import de.tum.in.www1.artemis.util.RequestUtilService;
 import de.tum.in.www1.artemis.web.rest.dto.StatsForInstructorDashboardDTO;
 
 public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTest {
-
-    @Autowired
-    DatabaseUtilService database;
-
-    @Autowired
-    RequestUtilService request;
 
     @Autowired
     CourseRepository courseRepo;
@@ -309,7 +302,7 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
             for (Exercise exercise : course.getExercises()) {
                 if (exercise instanceof ProgrammingExercise) {
                     final String projectKey = ((ProgrammingExercise) exercise).getProjectKey();
-                    bambooRequestMockProvider.mockDeleteProject(projectKey);
+                    bambooRequestMockProvider.mockDeleteBambooBuildProject(projectKey);
                     bitbucketRequestMockProvider.mockDeleteRepository(projectKey, (projectKey + "-" + RepositoryType.TEMPLATE.getName()).toLowerCase());
                     bitbucketRequestMockProvider.mockDeleteRepository(projectKey, (projectKey + "-" + RepositoryType.SOLUTION.getName()).toLowerCase());
                     bitbucketRequestMockProvider.mockDeleteRepository(projectKey, (projectKey + "-" + RepositoryType.TESTS.getName()).toLowerCase());
@@ -603,7 +596,6 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
                 if (exercise.getTutorParticipations().size() > 0) {
                     TutorParticipation tutorParticipation = exercise.getTutorParticipations().iterator().next();
                     assertThat(tutorParticipation.getStatus()).as("Tutor participation status is correctly initialized").isEqualTo(TutorParticipationStatus.NOT_PARTICIPATED);
-                    assertThat(tutorParticipation.getPoints()).as("Tutor participation points are correctly initialized").isNull();
                 }
             }
 
@@ -624,17 +616,15 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
             }
             else {
                 assertThat(stats2).as("Stats are available for instructor").isNotNull();
-                assertThat(stats2.getNumberOfSubmissions()).as("Submission stats for instructor are correct.").isEqualToComparingOnlyGivenFields(stats.getNumberOfSubmissions(),
-                        "inTime", "late");
-                assertThat(stats2.getNumberOfAssessments()).as("Assessment stats for instructor are correct.").isEqualToComparingOnlyGivenFields(stats.getNumberOfAssessments(),
-                        "inTime", "late");
+                assertThat(stats2.getNumberOfSubmissions()).as("Submission stats for instructor are correct.").usingRecursiveComparison().isEqualTo(stats.getNumberOfSubmissions());
+                assertThat(stats2.getNumberOfAssessments()).as("Assessment stats for instructor are correct.").usingRecursiveComparison().isEqualTo(stats.getNumberOfAssessments());
             }
         }
     }
 
     @Test
     @WithMockUser(username = "tutor1", roles = "TA")
-    public void testGetCourseForTutorDashboardWithStats() throws Exception {
+    public void testGetCourseForAssessmentDashboardWithStats() throws Exception {
         getCourseForDashboardWithStats(false);
     }
 
@@ -654,7 +644,7 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
 
     @Test
     @WithMockUser(username = "tutor6", roles = "TA")
-    public void testGetCourseForTutorDashboardWithStats_tutorNotInCourse() throws Exception {
+    public void testGetCourseForAssessmentDashboardWithStats_tutorNotInCourse() throws Exception {
         List<Course> testCourses = database.createCoursesWithExercisesAndLectures(true);
         request.get("/api/courses/" + testCourses.get(0).getId() + "/for-tutor-dashboard", HttpStatus.FORBIDDEN, Course.class);
         request.get("/api/courses/" + testCourses.get(0).getId() + "/stats-for-tutor-dashboard", HttpStatus.FORBIDDEN, StatsForInstructorDashboardDTO.class);
@@ -662,17 +652,17 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
 
     @Test
     @WithMockUser(username = "tutor1", roles = "TA")
-    public void testGetTutorDashboardStats_withComplaints() throws Exception {
-        getTutorDashboardsStatsWithComplaints(true);
+    public void testGetAssessmentDashboardStats_withComplaints() throws Exception {
+        getAssessmentDashboardsStatsWithComplaints(true);
     }
 
     @Test
     @WithMockUser(username = "tutor1", roles = "TA")
-    public void testGetTutorDashboardStats_withComplaints_withoutPoints() throws Exception {
-        getTutorDashboardsStatsWithComplaints(false);
+    public void testGetAssessmentDashboardStats_withComplaints_withoutPoints() throws Exception {
+        getAssessmentDashboardsStatsWithComplaints(false);
     }
 
-    private void getTutorDashboardsStatsWithComplaints(boolean withPoints) throws Exception {
+    private void getAssessmentDashboardsStatsWithComplaints(boolean withPoints) throws Exception {
         Course testCourse = database.addCourseWithOneReleasedTextExercise();
         var points = withPoints ? 15L : null;
         var leaderboardId = new LeaderboardId(database.getUserByLogin("tutor1").getId(), testCourse.getExercises().iterator().next().getId());
@@ -720,10 +710,10 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
             assertThat(courseOnly.getExercises().size()).as("Course without exercises contains no exercises").isZero();
 
             // Assert that course properties on courseWithExercises and courseWithExercisesAndRelevantParticipations match those of courseOnly
-            String[] fields = { "studentGroupName", "teachingAssistantGroupName", "instructorGroupName", "startDate", "endDate", "maxComplaints", "presentationScore" };
-            assertThat(courseWithExercises).as("courseWithExercises same as courseOnly").isEqualToComparingOnlyGivenFields(courseOnly, fields);
-            assertThat(courseWithExercisesAndRelevantParticipations).as("courseWithExercisesAndRelevantParticipations same as courseOnly")
-                    .isEqualToComparingOnlyGivenFields(courseOnly, fields);
+            String[] ignoringFields = { "exercises", "tutorGroups", "lectures", "exams", "fileService" };
+            assertThat(courseWithExercises).as("courseWithExercises same as courseOnly").usingRecursiveComparison().ignoringFields(ignoringFields).isEqualTo(courseOnly);
+            assertThat(courseWithExercisesAndRelevantParticipations).as("courseWithExercisesAndRelevantParticipations same as courseOnly").usingRecursiveComparison()
+                    .ignoringFields(ignoringFields).isEqualTo(courseOnly);
 
             // Verify presence of exercises in mock courses
             // - Course 1 has 5 exercises in total, 4 exercises with relevant participations
@@ -757,10 +747,10 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
     }
 
     @Test
-    @WithMockUser(username = "ab123cd")
+    @WithMockUser(username = "ab12cde")
     public void testRegisterForCourse() throws Exception {
         jiraRequestMockProvider.enableMockingOfRequests();
-        User student = ModelFactory.generateActivatedUser("ab123cd");
+        User student = ModelFactory.generateActivatedUser("ab12cde");
         userRepo.save(student);
 
         ZonedDateTime pastTimestamp = ZonedDateTime.now().minusDays(5);
@@ -777,7 +767,7 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
         User updatedStudent = request.postWithResponseBody("/api/courses/" + course1.getId() + "/register", null, User.class, HttpStatus.OK);
         assertThat(updatedStudent.getGroups()).as("User is registered for course").contains(course1.getStudentGroupName());
 
-        List<AuditEvent> auditEvents = auditEventRepo.find("ab123cd", Instant.now().minusSeconds(20), Constants.REGISTER_FOR_COURSE);
+        List<AuditEvent> auditEvents = auditEventRepo.find("ab12cde", Instant.now().minusSeconds(20), Constants.REGISTER_FOR_COURSE);
         assertThat(auditEvents).as("Audit Event for course registration added").hasSize(1);
         AuditEvent auditEvent = auditEvents.get(0);
         assertThat(auditEvent.getData().get("course")).as("Correct Event Data").isEqualTo(course1.getTitle());
@@ -786,10 +776,10 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
     }
 
     @Test
-    @WithMockUser(username = "ab123cd")
+    @WithMockUser(username = "ab12cde")
     public void testRegisterForCourse_notMeetsDate() throws Exception {
         jiraRequestMockProvider.enableMockingOfRequests();
-        User student = ModelFactory.generateActivatedUser("ab123cd");
+        User student = ModelFactory.generateActivatedUser("ab12cde");
         userRepo.save(student);
 
         ZonedDateTime pastTimestamp = ZonedDateTime.now().minusDays(5);
@@ -981,7 +971,7 @@ public class CourseIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
         assertThat(lockedSubmissions).as("Locked Submissions is not null").isNotNull();
         assertThat(lockedSubmissions).as("Locked Submissions length is 0").hasSize(0);
 
-        String validModel = database.loadFileFromResources("test-data/model-submission/model.54727.json");
+        String validModel = FileUtils.loadFileFromResources("test-data/model-submission/model.54727.json");
 
         ModelingSubmission submission = ModelFactory.generateModelingSubmission(validModel, true);
         database.addModelingSubmissionWithResultAndAssessor(classExercise, submission, "student1", "tutor1");

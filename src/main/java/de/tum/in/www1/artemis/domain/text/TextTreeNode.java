@@ -1,12 +1,14 @@
 package de.tum.in.www1.artemis.domain.text;
 
-import java.io.Serializable;
-
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.NaturalId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.tum.in.www1.artemis.domain.DomainObject;
 
 /**
  *  An node in the cluster tree. The nodes here actually have the properties of edges.
@@ -14,20 +16,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *  interchangeably. An artificial edge is created to represent the root node.
  */
 @Entity
-@Table(name = "text_tree_node")
-public class TextTreeNode implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
-    private Long id;
+@Table(name = "text_tree_node", uniqueConstraints={
+    @UniqueConstraint(columnNames = {"exercise_id", "child"})
+})
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class TextTreeNode extends DomainObject {
 
     @Column(name = "parent", nullable = false)
     private long parent;
 
-    @NaturalId
     @Column(name = "child", nullable = false, unique = true)
     private long child;
 
@@ -38,16 +36,9 @@ public class TextTreeNode implements Serializable {
     private long childSize;
 
     @ManyToOne
+    @JoinColumn(name = "exercise_id")
     @JsonIgnore
     private TextExercise exercise;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public long getParent() {
         return parent;

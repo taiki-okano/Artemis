@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { HttpResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { TeamService } from 'app/exercises/shared/team/team.service';
@@ -30,13 +30,13 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
 
     searchingExercises = false;
     searchingExercisesFailed = false;
-    searchingExercisesNoResultsForQuery: string | null = null;
+    searchingExercisesNoResultsForQuery?: string;
 
-    sourceTeams: Team[] | null;
+    sourceTeams?: Team[];
     loadingSourceTeams = false;
     loadingSourceTeamsFailed = false;
 
-    importStrategy: ImportStrategy | null;
+    importStrategy?: ImportStrategy;
     readonly defaultImportStrategy: ImportStrategy = ImportStrategy.CREATE_ONLY;
 
     isImporting = false;
@@ -49,7 +49,7 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
     private dialogErrorSource = new Subject<string>();
     dialogError$ = this.dialogErrorSource.asObservable();
 
-    constructor(private teamService: TeamService, private activeModal: NgbActiveModal, private jhiAlertService: AlertService) {}
+    constructor(private teamService: TeamService, private activeModal: NgbActiveModal, private jhiAlertService: JhiAlertService) {}
 
     /**
      * Life cycle hook to indicate component creation is done
@@ -70,10 +70,10 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
      * @param {Exercise} sourceExercise - Source exercise to load teams from
      */
     loadSourceTeams(sourceExercise: Exercise) {
-        this.sourceTeams = null;
+        this.sourceTeams = undefined;
         this.loadingSourceTeams = true;
         this.loadingSourceTeamsFailed = false;
-        this.teamService.findAllByExerciseId(sourceExercise.id).subscribe(
+        this.teamService.findAllByExerciseId(sourceExercise.id!).subscribe(
             (teamsResponse) => {
                 this.sourceTeams = teamsResponse.body!;
                 this.computeSourceTeamsFreeOfConflicts();
@@ -104,7 +104,7 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
      * since there is no need for conflict handling decisions when no teams exist yet.
      */
     initImportStrategy() {
-        this.importStrategy = this.teams.length === 0 ? this.defaultImportStrategy : null;
+        this.importStrategy = this.teams.length === 0 ? this.defaultImportStrategy : undefined;
     }
 
     /**
@@ -113,8 +113,8 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
      * 2. The logins of students who already belong to teams of this exercise
      */
     computePotentialConflictsBasedOnExistingTeams() {
-        this.teamShortNamesAlreadyExistingInExercise = this.teams.map((team) => team.shortName);
-        this.studentLoginsAlreadyExistingInExercise = flatMap(this.teams, (team) => team.students.map((student) => student.login!));
+        this.teamShortNamesAlreadyExistingInExercise = this.teams.map((team) => team.shortName!);
+        this.studentLoginsAlreadyExistingInExercise = flatMap(this.teams, (team) => team.students!.map((student) => student.login!));
     }
 
     /**
@@ -135,11 +135,11 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
      */
     isSourceTeamFreeOfAnyConflicts(sourceTeam: Team): boolean {
         // Short name of source team already exists among teams of destination exercise
-        if (this.teamShortNamesAlreadyExistingInExercise.includes(sourceTeam.shortName)) {
+        if (this.teamShortNamesAlreadyExistingInExercise.includes(sourceTeam.shortName!)) {
             return false;
         }
         // One of the students of the source team is already part of a team in the destination exercise
-        if (sourceTeam.students.some((student) => this.studentLoginsAlreadyExistingInExercise.includes(student.login!))) {
+        if (sourceTeam.students!.some((student) => this.studentLoginsAlreadyExistingInExercise.includes(student.login!))) {
             return false;
         }
         // This source team can be imported without any issues
@@ -150,36 +150,30 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
         return this.sourceTeamsFreeOfConflicts.length;
     }
 
-    get numberOfTeamsToBeDeleted(): number | null {
+    get numberOfTeamsToBeDeleted() {
         switch (this.importStrategy) {
             case ImportStrategy.PURGE_EXISTING:
                 return this.teams.length;
             case ImportStrategy.CREATE_ONLY:
                 return 0;
-            default:
-                return null;
         }
     }
 
-    get numberOfTeamsToBeImported(): number | null {
+    get numberOfTeamsToBeImported() {
         switch (this.importStrategy) {
             case ImportStrategy.PURGE_EXISTING:
                 return this.sourceTeams!.length;
             case ImportStrategy.CREATE_ONLY:
                 return this.numberOfConflictFreeSourceTeams;
-            default:
-                return null;
         }
     }
 
-    get numberOfTeamsAfterImport(): number | null {
+    get numberOfTeamsAfterImport() {
         switch (this.importStrategy) {
             case ImportStrategy.PURGE_EXISTING:
                 return this.sourceTeams!.length;
             case ImportStrategy.CREATE_ONLY:
                 return this.teams.length + this.numberOfConflictFreeSourceTeams;
-            default:
-                return null;
         }
     }
 
@@ -285,6 +279,6 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
     }
 
     get sampleErrorStudentLoginsForLegend() {
-        return this.sampleTeamForLegend.students.map((student) => student.login);
+        return this.sampleTeamForLegend.students!.map((student) => student.login);
     }
 }

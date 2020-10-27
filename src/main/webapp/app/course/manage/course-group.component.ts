@@ -4,7 +4,7 @@ import { JhiEventManager } from 'ng-jhipster';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { User } from 'app/core/user/user.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { Course, CourseGroup, courseGroups } from 'app/entities/course.model';
@@ -52,7 +52,7 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private eventManager: JhiEventManager,
         private courseService: CourseManagementService,
         private userService: UserService,
@@ -85,7 +85,7 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
                 if (!courseGroups.includes(this.courseGroup)) {
                     return this.router.navigate(['/course-management']);
                 }
-                this.courseService.getAllUsersInCourseGroup(this.course.id, this.courseGroup).subscribe((usersResponse) => {
+                this.courseService.getAllUsersInCourseGroup(this.course.id!, this.courseGroup).subscribe((usersResponse) => {
                     this.allCourseGroupUsers = usersResponse.body!;
                     this.isLoading = false;
                 });
@@ -154,7 +154,7 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
         // If the user is not part of this course group yet, perform the server call to add them
         if (!this.allCourseGroupUsers.map((u) => u.id).includes(user.id) && user.login) {
             this.isTransitioning = true;
-            this.courseService.addUserToCourseGroup(this.course.id, this.courseGroup, user.login).subscribe(
+            this.courseService.addUserToCourseGroup(this.course.id!, this.courseGroup, user.login).subscribe(
                 () => {
                     this.isTransitioning = false;
 
@@ -184,7 +184,7 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
      */
     removeFromGroup(user: User) {
         if (user.login) {
-            this.courseService.removeUserFromCourseGroup(this.course.id, this.courseGroup, user.login).subscribe(
+            this.courseService.removeUserFromCourseGroup(this.course.id!, this.courseGroup, user.login).subscribe(
                 () => {
                     this.allCourseGroupUsers = this.allCourseGroupUsers.filter((u) => u.login !== user.login);
                     this.dialogErrorSource.next('');

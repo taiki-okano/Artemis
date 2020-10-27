@@ -34,22 +34,14 @@ import de.tum.in.www1.artemis.repository.ParticipationTestRepository;
 import de.tum.in.www1.artemis.security.SecurityUtils;
 import de.tum.in.www1.artemis.service.dto.StudentDTO;
 import de.tum.in.www1.artemis.service.ldap.LdapUserDto;
-import de.tum.in.www1.artemis.util.DatabaseUtilService;
 import de.tum.in.www1.artemis.util.ModelFactory;
-import de.tum.in.www1.artemis.util.RequestUtilService;
 import de.tum.in.www1.artemis.web.rest.dto.ExamInformationDTO;
 import de.tum.in.www1.artemis.web.rest.dto.ExamScoresDTO;
 
 public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTest {
 
     @Autowired
-    DatabaseUtilService database;
-
-    @Autowired
     JiraRequestMockProvider jiraRequestMockProvider;
-
-    @Autowired
-    RequestUtilService request;
 
     @Autowired
     CourseRepository courseRepo;
@@ -488,8 +480,11 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
         exam.setTitle("Over 9000!");
         long examCountBefore = examRepository.count();
         Exam createdExam = request.putWithResponseBody("/api/courses/" + course1.getId() + "/exams", exam, Exam.class, HttpStatus.CREATED);
-        createdExam.setId(null);
-        assertEquals(exam, createdExam);
+        assertThat(exam.getEndDate()).isEqualTo(createdExam.getEndDate());
+        assertThat(exam.getStartDate()).isEqualTo(createdExam.getStartDate());
+        assertThat(exam.getVisibleDate()).isEqualTo(createdExam.getVisibleDate());
+        // Note: ZonedDateTime has problems with comparison due to time zone differences for values saved in the database and values not saved in the database
+        assertThat(exam).usingRecursiveComparison().ignoringFields("id", "course", "endDate", "startDate", "visibleDate").isEqualTo(createdExam);
         assertThat(examCountBefore + 1).isEqualTo(examRepository.count());
         // No course is set -> conflict
         exam = ModelFactory.generateExam(course1);
@@ -753,18 +748,20 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testDeleteExamWithOneTestRun() throws Exception {
         var instructor = database.getUserByLogin("instructor1");
-        var exam = database.addTextModelingProgrammingExercisesToExam(exam1, false);
-        database.setupTestRunForExamWithExerciseGroupsForInstructor(exam1, instructor, exam.getExerciseGroups());
-        request.delete("/api/courses/" + course1.getId() + "/exams/" + exam1.getId(), HttpStatus.OK);
+        var exam = database.addExam(course1);
+        exam = database.addTextModelingProgrammingExercisesToExam(exam, false);
+        database.setupTestRunForExamWithExerciseGroupsForInstructor(exam, instructor, exam.getExerciseGroups());
+        request.delete("/api/courses/" + exam.getCourse().getId() + "/exams/" + exam.getId(), HttpStatus.OK);
     }
 
     @Test
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testGetExamForTestRunDashboard_ok() throws Exception {
         var instructor = database.getUserByLogin("instructor1");
-        var exam = database.addTextModelingProgrammingExercisesToExam(exam1, false);
-        database.setupTestRunForExamWithExerciseGroupsForInstructor(exam1, instructor, exam.getExerciseGroups());
-        exam = request.get("/api/courses/" + course1.getId() + "/exams/" + exam1.getId() + "/for-exam-tutor-test-run-dashboard", HttpStatus.OK, Exam.class);
+        var exam = database.addExam(course1);
+        exam = database.addTextModelingProgrammingExercisesToExam(exam, false);
+        database.setupTestRunForExamWithExerciseGroupsForInstructor(exam, instructor, exam.getExerciseGroups());
+        exam = request.get("/api/courses/" + exam.getCourse().getId() + "/exams/" + exam.getId() + "/for-exam-tutor-test-run-dashboard", HttpStatus.OK, Exam.class);
         assertThat(exam.getExerciseGroups().stream().flatMap(exerciseGroup -> exerciseGroup.getExercises().stream()).collect(Collectors.toList())).isNotEmpty();
     }
 
@@ -957,7 +954,7 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
 
     @Test
     @WithMockUser(username = "tutor1", roles = "TA")
-    public void testGetExamForExamTutorDashboard() throws Exception {
+    public void testGetExamForExamAssessmentDashboard() throws Exception {
         User user = userRepo.findOneByLogin("student1").get();
         // we need an exam from the past, otherwise the tutor won't have access
         Course course = database.createCourseWithExamAndExerciseGroupAndExercises(user, now().minusHours(3), now().minusHours(2), now().minusHours(1));
@@ -972,7 +969,7 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
 
     @Test
     @WithMockUser(username = "tutor1", roles = "TA")
-    public void testGetExamForExamTutorDashboard_beforeDueDate() throws Exception {
+    public void testGetExamForExamAssessmentDashboard_beforeDueDate() throws Exception {
         User user = userRepo.findOneByLogin("student1").get();
         Course course = database.createCourseWithExamAndExerciseGroupAndExercises(user);
         Exam exam = course.getExams().iterator().next();
@@ -984,7 +981,7 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
 
     @Test
     @WithMockUser(username = "student1", roles = "STUDENT")
-    public void testGetExamForExamTutorDashboard_asStudent_forbidden() throws Exception {
+    public void testGetExamForExamAssessmentDashboard_asStudent_forbidden() throws Exception {
         User user = userRepo.findOneByLogin("student1").get();
         Course course = database.createCourseWithExamAndExerciseGroupAndExercises(user);
         request.get("/api/courses/" + course.getId() + "/exams/" + course.getExams().iterator().next().getId() + "/for-exam-tutor-dashboard", HttpStatus.FORBIDDEN, Course.class);
@@ -992,13 +989,13 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
 
     @Test
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
-    public void testGetExamForExamTutorDashboard_courseIdDoesNotMatch_conflict() throws Exception {
+    public void testGetExamForExamAssessmentDashboard_courseIdDoesNotMatch_conflict() throws Exception {
         request.get("/api/courses/" + course2.getId() + "/exams/" + exam1.getId() + "/for-exam-tutor-dashboard", HttpStatus.CONFLICT, Course.class);
     }
 
     @Test
     @WithMockUser(username = "tutor1", roles = "TA")
-    public void testGetExamForExamTutorDashboard_notFound() throws Exception {
+    public void testGetExamForExamAssessmentDashboard_notFound() throws Exception {
         request.get("/api/courses/1/exams/1/for-exam-tutor-dashboard", HttpStatus.NOT_FOUND, Course.class);
     }
 

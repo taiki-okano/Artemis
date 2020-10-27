@@ -4,7 +4,7 @@ import { Exam } from 'app/entities/exam.model';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { Course } from 'app/entities/course.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import * as moment from 'moment';
@@ -21,7 +21,7 @@ export class ExamUpdateComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private examManagementService: ExamManagementService,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private courseManagementService: CourseManagementService,
     ) {}
 
@@ -48,9 +48,9 @@ export class ExamUpdateComponent implements OnInit {
     save() {
         this.isSaving = true;
         if (this.exam.id !== undefined) {
-            this.subscribeToSaveResponse(this.examManagementService.update(this.course.id, this.exam));
+            this.subscribeToSaveResponse(this.examManagementService.update(this.course.id!, this.exam));
         } else {
-            this.subscribeToSaveResponse(this.examManagementService.create(this.course.id, this.exam));
+            this.subscribeToSaveResponse(this.examManagementService.create(this.course.id!, this.exam));
         }
     }
 
@@ -67,7 +67,7 @@ export class ExamUpdateComponent implements OnInit {
     }
 
     private onSaveError(error: HttpErrorResponse) {
-        this.jhiAlertService.error(error.message, null, undefined);
+        this.jhiAlertService.error(error.message);
         this.isSaving = false;
     }
 
@@ -82,18 +82,15 @@ export class ExamUpdateComponent implements OnInit {
     }
 
     get isValidVisibleDate(): boolean {
-        // note: != includes a check for undefined
-        return this.exam.visibleDate != null;
+        return this.exam.visibleDate !== undefined;
     }
 
     get isValidStartDate(): boolean {
-        // note: != includes a check for undefined
-        return this.exam.startDate != null && moment(this.exam.startDate).isAfter(this.exam.visibleDate);
+        return this.exam.startDate !== undefined && moment(this.exam.startDate).isAfter(this.exam.visibleDate);
     }
 
     get isValidEndDate(): boolean {
-        // note: != includes a check for undefined
-        return this.exam.endDate != null && moment(this.exam.endDate).isAfter(this.exam.startDate);
+        return this.exam.endDate !== undefined && moment(this.exam.endDate).isAfter(this.exam.startDate);
     }
 
     get isValidPublishResultsDate(): boolean {

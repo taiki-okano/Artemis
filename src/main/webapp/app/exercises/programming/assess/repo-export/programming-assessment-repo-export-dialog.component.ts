@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { ProgrammingAssessmentRepoExportService, RepositoryExportOptions } from 'app/exercises/programming/assess/repo-export/programming-assessment-repo-export.service';
 import { catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -32,7 +32,7 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
         private exerciseService: ExerciseService,
         private repoExportService: ProgrammingAssessmentRepoExportService,
         public activeModal: NgbActiveModal,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
     ) {}
 
     ngOnInit() {
@@ -41,7 +41,6 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
         this.repositoryExportOptions = {
             exportAllParticipants: false,
             filterLateSubmissions: false,
-            filterLateSubmissionsDate: null,
             addParticipantName: true,
             combineStudentCommits: false,
             normalizeCodeStyle: false, // disabled by default because it is rather unstable
@@ -55,7 +54,7 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
                 catchError((err) => {
                     this.jhiAlertService.error(err);
                     this.clear();
-                    return of(null);
+                    return of(undefined);
                 }),
             )
             .subscribe(() => {
@@ -67,7 +66,10 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
         this.activeModal.dismiss('cancel');
     }
 
-    exportRepos(exerciseId: number) {
+    exportRepos(exerciseId?: number) {
+        if (!exerciseId) {
+            return;
+        }
         this.exportInProgress = true;
         // The participation ids take priority over the participant identifiers (student login or team names).
         if (this.participationIdList) {

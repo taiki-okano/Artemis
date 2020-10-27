@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { AccountService } from 'app/core/auth/account.service';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { UMLModel } from '@ls1intum/apollon';
@@ -27,7 +27,7 @@ export class ExampleModelingSolutionComponent implements OnInit {
 
     constructor(
         private exerciseService: ModelingExerciseService,
-        private jhiAlertService: AlertService,
+        private jhiAlertService: JhiAlertService,
         private accountService: AccountService,
         private route: ActivatedRoute,
         private router: Router,
@@ -62,7 +62,6 @@ export class ExampleModelingSolutionComponent implements OnInit {
                 this.jhiAlertService.success('artemisApp.modelingEditor.saveSuccessful');
             },
             (error: HttpErrorResponse) => {
-                console.error(error);
                 this.jhiAlertService.error(error.message);
             },
         );
@@ -70,13 +69,13 @@ export class ExampleModelingSolutionComponent implements OnInit {
 
     async back() {
         if (this.exercise.course) {
-            await this.router.navigate(['/course-management', this.exercise.course!.id, 'modeling-exercises', this.exerciseId, 'edit']);
+            await this.router.navigate(['/course-management', this.exercise.course?.id, 'modeling-exercises', this.exerciseId, 'edit']);
         } else {
             await this.router.navigate([
                 '/course-management',
-                this.exercise.exerciseGroup!.exam!.course.id,
+                this.exercise.exerciseGroup?.exam?.course?.id,
                 'exams',
-                this.exercise.exerciseGroup!.exam!.id,
+                this.exercise.exerciseGroup?.exam?.id,
                 'exercise-groups',
                 this.exercise.exerciseGroup?.id,
                 'modeling-exercises',

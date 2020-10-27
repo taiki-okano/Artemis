@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +31,6 @@ import de.tum.in.www1.artemis.domain.FileType;
 import de.tum.in.www1.artemis.domain.ProgrammingExercise;
 import de.tum.in.www1.artemis.domain.ProgrammingSubmission;
 import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
-import de.tum.in.www1.artemis.domain.enumeration.Language;
 import de.tum.in.www1.artemis.domain.enumeration.SubmissionType;
 import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseParticipation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
@@ -44,12 +44,6 @@ import de.tum.in.www1.artemis.web.rest.repository.FileSubmission;
 public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTest {
 
     private final String studentRepoBaseUrl = "/api/repository/";
-
-    @Autowired
-    private DatabaseUtilService database;
-
-    @Autowired
-    private RequestUtilService request;
 
     @Autowired
     ProgrammingExerciseRepository programmingExerciseRepository;
@@ -75,6 +69,14 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
 
     BuildLogEntry buildLogEntry = new BuildLogEntry(ZonedDateTime.now(), "Checkout to revision e65aa77cc0380aeb9567ccceb78aca416d86085b has failed.");
 
+    BuildLogEntry largeBuildLogEntry = new BuildLogEntry(ZonedDateTime.now(),
+            "[ERROR] Failed to execute goal org.apache.maven.plugins:maven-checkstyle-plugin:3.1.1:checkstyle (default-cli)"
+                    + "on project testPluginSCA-Tests: An error has occurred in Checkstyle report generation. Failed during checkstyle"
+                    + "configuration: Exception was thrown while processing C:\\Users\\Stefan\\bamboo-home\\xml-data\\build-dir\\STCTES"
+                    + "TPLUGINSCA-SOLUTION-JOB1\\assignment\\src\\www\\testPluginSCA\\BubbleSort.java: MismatchedTokenException occurred"
+                    + "while parsing file C:\\Users\\Stefan\\bamboo-home\\xml-data\\build-dir\\STCTESTPLUGINSCA-SOLUTION-JOB1\\assignment\\"
+                    + "src\\www\\testPluginSCA\\BubbleSort.java. expecting EOF, found '}' -> [Help 1]");
+
     StudentParticipation participation;
 
     @BeforeEach
@@ -91,7 +93,7 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
         var file = Files.createFile(filePath).toFile();
 
         // write content to the created file
-        FileUtils.write(file, currentLocalFileContent);
+        FileUtils.write(file, currentLocalFileContent, Charset.defaultCharset());
 
         // add folder to the repository folder
         filePath = Paths.get(studentRepository.localRepoFile + "/" + currentLocalFolderName);
@@ -108,6 +110,7 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
                 .getOrCheckoutRepository(((ProgrammingExerciseParticipation) participation).getRepositoryUrlAsUrl(), false);
 
         logs.add(buildLogEntry);
+        logs.add(largeBuildLogEntry);
     }
 
     @AfterEach
@@ -224,7 +227,7 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
         request.put(studentRepoBaseUrl + participation.getId() + "/files?commit=false", getFileSubmissions(), HttpStatus.OK);
 
         Path filePath = Paths.get(studentRepository.localRepoFile + "/" + currentLocalFileName);
-        assertThat(FileUtils.readFileToString(filePath.toFile())).isEqualTo("updatedFileContent");
+        assertThat(FileUtils.readFileToString(filePath.toFile(), Charset.defaultCharset())).isEqualTo("updatedFileContent");
     }
 
     @Test
@@ -241,7 +244,7 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
         assertThat(receivedStatusAfterCommit.repositoryStatus.toString()).isEqualTo("CLEAN");
 
         Path filePath = Paths.get(studentRepository.localRepoFile + "/" + currentLocalFileName);
-        assertThat(FileUtils.readFileToString(filePath.toFile())).isEqualTo("updatedFileContent");
+        assertThat(FileUtils.readFileToString(filePath.toFile(), Charset.defaultCharset())).isEqualTo("updatedFileContent");
 
         var testRepoCommits = studentRepository.getAllLocalCommits();
         assertThat(testRepoCommits.size() == 1).isTrue();
@@ -303,7 +306,7 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
         Path localFilePath = Paths.get(studentRepository.localRepoFile + "/" + fileName);
         var localFile = Files.createFile(localFilePath).toFile();
         // write content to the created file
-        FileUtils.write(localFile, "local");
+        FileUtils.write(localFile, "local", Charset.defaultCharset());
         gitService.stageAllChanges(localRepo);
         studentRepository.localGit.commit().setMessage("local").call();
 
@@ -311,7 +314,7 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
         Path remoteFilePath = Paths.get(studentRepository.originRepoFile + "/" + fileName);
         var remoteFile = Files.createFile(remoteFilePath).toFile();
         // write content to the created file
-        FileUtils.write(remoteFile, "remote");
+        FileUtils.write(remoteFile, "remote", Charset.defaultCharset());
         gitService.stageAllChanges(remoteRepo);
         studentRepository.originGit.commit().setMessage("remote").call();
 
@@ -385,8 +388,10 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
         database.addResultToSubmission(submission, AssessmentType.AUTOMATIC);
         var receivedLogs = request.getList(studentRepoBaseUrl + participation.getId() + "/buildlogs", HttpStatus.OK, BuildLogEntry.class);
         assertThat(receivedLogs).isNotNull();
-        assertThat(receivedLogs).hasSize(1);
-        assertThat(receivedLogs).isEqualTo(logs);
+        assertThat(receivedLogs).hasSize(2);
+        assertThat(receivedLogs.get(0).getTime()).isEqualTo(logs.get(0).getTime());
+        // due to timezone assertThat isEqualTo issues, we compare those directly first and ignore them afterwards
+        assertThat(receivedLogs).usingElementComparatorIgnoringFields("time", "id").isEqualTo(logs);
     }
 
     @Test
@@ -394,7 +399,6 @@ public class RepositoryProgrammingExerciseParticipationResourceIntegrationTest e
     public void testBuildLogsFromDatabase() throws Exception {
         var submission = new ProgrammingSubmission();
         submission.setSubmissionDate(ZonedDateTime.now().minusMinutes(4));
-        submission.setLanguage(Language.ENGLISH);
         submission.setSubmitted(true);
         submission.setCommitHash(TestConstants.COMMIT_HASH_STRING);
         submission.setType(SubmissionType.MANUAL);

@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import de.tum.in.www1.artemis.domain.text.TextBlock;
@@ -27,4 +28,7 @@ public interface TextBlockRepository extends JpaRepository<TextBlock, String> {
     List<TextBlock> findAllBySubmission_Participation_Exercise_IdAndTreeIdNotNull(Long exerciseId);
 
     List<TextBlock> findAllBySubmissionId(Long id);
+
+    @EntityGraph(type = LOAD, attributePaths = { "submission" })
+    List<TextBlock> findAllBySubmissionIdIn(List<Long> submissionIdList);
 }

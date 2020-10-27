@@ -9,7 +9,7 @@ import { Interactable } from '@interactjs/core/Interactable';
 import interact from 'interactjs';
 import { ArtemisMarkdownService } from 'app/shared/markdown.service';
 import { FileUploaderService } from 'app/shared/http/file-uploader.service';
-import { AlertService } from 'app/core/alert/alert.service';
+import { JhiAlertService } from 'ng-jhipster';
 import { ColorSelectorComponent } from 'app/shared/color-selector/color-selector.component';
 import { DomainTagCommand } from './domainCommands/domainTag.command';
 import { escapeStringForUseInRegex } from 'app/shared/util/global.utils';
@@ -152,7 +152,7 @@ export class MarkdownEditorComponent implements AfterViewInit {
     enableFileUpload = true;
     acceptedFileExtensions = 'png,jpg,jpeg,svg';
 
-    constructor(private artemisMarkdown: ArtemisMarkdownService, private fileUploaderService: FileUploaderService, private jhiAlertService: AlertService) {}
+    constructor(private artemisMarkdown: ArtemisMarkdownService, private fileUploaderService: FileUploaderService, private jhiAlertService: JhiAlertService) {}
 
     /** {boolean} true when the plane html view is needed, false when the preview content is needed from the parent */
     get showDefaultPreview(): boolean {
@@ -388,7 +388,7 @@ export class MarkdownEditorComponent implements AfterViewInit {
         $event.preventDefault();
         if ($event.dataTransfer?.items) {
             // Use DataTransferItemList interface to access the file(s)
-            const files = [];
+            const files = new Array<File>();
             for (let i = 0; i < $event.dataTransfer.items.length; i++) {
                 // If dropped items aren't files, reject them
                 if ($event.dataTransfer.items[i].kind === 'file') {
@@ -412,7 +412,7 @@ export class MarkdownEditorComponent implements AfterViewInit {
      */
     onFilePaste($event: ClipboardEvent): void {
         if ($event.clipboardData?.items) {
-            const images = [];
+            const images = new Array<File>();
             for (let i = 0; i < $event.clipboardData.items.length; i++) {
                 if ($event.clipboardData.items[i].kind === 'file') {
                     const file = $event.clipboardData.items[i].getAsFile();
