@@ -37,9 +37,8 @@ public class AutomaticTextFeedbackService {
 
     private final TextClusterRepository clusterRepository;
 
-    public AutomaticTextFeedbackService(FeedbackService feedbackService, TextBlockRepository textBlockRepository,
-                                        TextTreeNodeRepository treeNodeRepository, TextPairwiseDistanceRepository pairwiseDistanceRepository,
-                                        TextClusterRepository clusterRepository) {
+    public AutomaticTextFeedbackService(FeedbackService feedbackService, TextBlockRepository textBlockRepository, TextTreeNodeRepository treeNodeRepository,
+            TextPairwiseDistanceRepository pairwiseDistanceRepository, TextClusterRepository clusterRepository) {
         this.feedbackService = feedbackService;
         this.textBlockRepository = textBlockRepository;
         this.treeNodeRepository = treeNodeRepository;
@@ -89,13 +88,14 @@ public class AutomaticTextFeedbackService {
                     }
                 }
                 final Optional<Feedback> feedbackOptional = findFeedbackForBlockInClusterWithoutFeedback(clusterTree, block, cluster, exercise);
-                if(feedbackOptional.isPresent()) {
+                if (feedbackOptional.isPresent()) {
                     return feedbackOptional.get();
                 }
-            } else if (block.getTreeId() != null) {
+            }
+            else if (block.getTreeId() != null) {
                 // If block has no tree id, it means that it was created manually after the initial clustering
                 final Optional<Feedback> feedbackOptional = findFeedbackForBlockWithoutCluster(clusterTree, block, exercise);
-                if(feedbackOptional.isPresent()) {
+                if (feedbackOptional.isPresent()) {
                     feedbackOptional.get();
                 }
             }
@@ -114,7 +114,7 @@ public class AutomaticTextFeedbackService {
      * @param exercise - Text exercise of the text block
      * @return The feedback of a text block that fits as a candidate, if such a TextBlock is found
      */
-    private Optional<Feedback> findFeedbackForBlockInClusterWithoutFeedback(TextTreeNode[] clusterTree, TextBlock block, TextCluster cluster, TextExercise exercise){
+    private Optional<Feedback> findFeedbackForBlockInClusterWithoutFeedback(TextTreeNode[] clusterTree, TextBlock block, TextCluster cluster, TextExercise exercise) {
         TextTreeNode clusterNode = clusterTree[(int) cluster.getTreeId()];
         return traverseTreeForClusterNode(clusterTree, block, clusterNode, exercise);
     }
@@ -126,47 +126,48 @@ public class AutomaticTextFeedbackService {
      * @param exercise - text exercise of the text block
      * @return The feedback of a text block that fits as a candidate, if such a TextBlock is found
      */
-    private Optional<Feedback> findFeedbackForBlockWithoutCluster(TextTreeNode[] clusterTree, TextBlock block, TextExercise exercise){
+    private Optional<Feedback> findFeedbackForBlockWithoutCluster(TextTreeNode[] clusterTree, TextBlock block, TextExercise exercise) {
         TextTreeNode blockNode = clusterTree[block.getTreeId()];
         TextTreeNode parentNode = clusterTree[(int) blockNode.getParent()];
         return traverseTreeForClusterNode(clusterTree, block, parentNode, exercise);
     }
 
-    private Optional<Feedback> traverseTreeForClusterNode(TextTreeNode[] clusterTree, TextBlock block, TextTreeNode clusterNode, TextExercise exercise){
-        if(clusterNode.isBlockNode()) {
+    private Optional<Feedback> traverseTreeForClusterNode(TextTreeNode[] clusterTree, TextBlock block, TextTreeNode clusterNode, TextExercise exercise) {
+        if (clusterNode.isBlockNode()) {
             return Optional.empty();
         }
         TextTreeNode currentNode = clusterNode;
         // currentDist = distance between block and the node representing its cluster
         double currentDist = 0;
         TextTreeNode temp = clusterTree[block.getTreeId()];
-        while(temp.getChild() != currentNode.getChild()) {
+        while (temp.getChild() != currentNode.getChild()) {
             currentDist += 1 / temp.getLambdaVal();
             temp = clusterTree[(int) temp.getParent()];
         }
-        while(currentDist <= LAMBDA_THRESHOLD) {
+        while (currentDist <= LAMBDA_THRESHOLD) {
             // parent is not an actual TextCluster but a "cluster of (clusters of) TextClusters"
             long parentId = currentNode.getParent();
             List<TextTreeNode> siblings = treeNodeRepository.findAllByParentAndExercise(parentId, exercise);
             siblings.remove(currentNode);
             siblings.sort(Comparator.comparingDouble(TextTreeNode::getLambdaVal).reversed());
             // In the following loop, we trace all ancestors within the threshold of the siblings for feedback
-            while(!siblings.isEmpty()) {
+            while (!siblings.isEmpty()) {
                 TextTreeNode x = siblings.remove(0);
                 // If already above lambda threshold or a block node remove x directly
-                if(1 / x.getLambdaVal() + currentDist > LAMBDA_THRESHOLD) {
+                if (1 / x.getLambdaVal() + currentDist > LAMBDA_THRESHOLD) {
                     continue;
                 }
-                if(!x.isBlockNode()) {
+                if (!x.isBlockNode()) {
                     Optional<TextCluster> clusterOptional = clusterRepository.findByTreeIdAndExercise(x.getChild(), exercise);
-                    if(clusterOptional.isPresent()) {
+                    if (clusterOptional.isPresent()) {
                         TextCluster currentCluster = clusterOptional.get();
                         final Map<String, Feedback> feedbackForTextExerciseInCluster = feedbackService.getFeedbackForTextExerciseInCluster(currentCluster);
-                        if(!feedbackForTextExerciseInCluster.isEmpty()) {
+                        if (!feedbackForTextExerciseInCluster.isEmpty()) {
                             return getFeedbackInCluster(currentCluster, block, feedbackForTextExerciseInCluster);
                         }
-                    } else {
-                        for(TextTreeNode y : treeNodeRepository.findAllByParentAndExercise(x.getChild(), exercise)) {
+                    }
+                    else {
+                        for (TextTreeNode y : treeNodeRepository.findAllByParentAndExercise(x.getChild(), exercise)) {
                             y.setLambdaVal(sumLambdaValues(y.getLambdaVal(), x.getLambdaVal()));
                             siblings.add(y);
                         }
@@ -175,7 +176,7 @@ public class AutomaticTextFeedbackService {
                 }
             }
             // Give up when there is no level more to expand
-            if(parentId == -1) {
+            if (parentId == -1) {
                 return Optional.empty();
             }
             currentDist = currentDist + 1 / currentNode.getLambdaVal();
@@ -184,27 +185,26 @@ public class AutomaticTextFeedbackService {
         return Optional.empty();
     }
 
-    private Optional<Feedback> getFeedbackInCluster(TextCluster cluster, TextBlock block,  Map<String, Feedback> feedbackMap) {
+    private Optional<Feedback> getFeedbackInCluster(TextCluster cluster, TextBlock block, Map<String, Feedback> feedbackMap) {
         final List<TextBlock> allBlocksInCluster = cluster.getBlocks().parallelStream().filter(elem -> !elem.equals(block)).collect(toList());
         // K: treeId of text block in cluster, V: Distance to "block"
         Map<Integer, Double> distances = new HashMap<>();
-        for (TextBlock b: allBlocksInCluster) {
+        for (TextBlock b : allBlocksInCluster) {
             int i = b.getTreeId();
             long j = block.getTreeId();
             distances.put(i, getDistanceBetweenBlocks(cluster.getExercise(), i, j));
         }
 
         final Optional<TextBlock> mostSimilarBlockInClusterWithFeedback = allBlocksInCluster.parallelStream()
-            // Filter all other blocks in the cluster for those with Feedback
-            .filter(element -> feedbackMap.containsKey(element.getId()))
-            // Find the closest block
-            .min(comparing(element -> distances.get(element.getTreeId())));
+                // Filter all other blocks in the cluster for those with Feedback
+                .filter(element -> feedbackMap.containsKey(element.getId()))
+                // Find the closest block
+                .min(comparing(element -> distances.get(element.getTreeId())));
 
-        if (mostSimilarBlockInClusterWithFeedback.isPresent()
-            && distances.get(mostSimilarBlockInClusterWithFeedback.get().getTreeId()) < DISTANCE_THRESHOLD) {
+        if (mostSimilarBlockInClusterWithFeedback.isPresent() && distances.get(mostSimilarBlockInClusterWithFeedback.get().getTreeId()) < DISTANCE_THRESHOLD) {
             final Feedback similarFeedback = feedbackMap.get(mostSimilarBlockInClusterWithFeedback.get().getId());
-            return Optional.of(new Feedback().reference(block.getId()).credits(similarFeedback.getCredits()).detailText(similarFeedback.getDetailText())
-                .type(FeedbackType.AUTOMATIC));
+            return Optional
+                    .of(new Feedback().reference(block.getId()).credits(similarFeedback.getCredits()).detailText(similarFeedback.getDetailText()).type(FeedbackType.AUTOMATIC));
         }
         return Optional.empty();
     }
@@ -218,7 +218,7 @@ public class AutomaticTextFeedbackService {
     private TextTreeNode[] fetchClusterTreeForExercise(TextExercise exercise) {
         final List<TextTreeNode> unorderedTreeNodes = treeNodeRepository.findAllByExercise(exercise);
         final TextTreeNode[] clusterTree = new TextTreeNode[unorderedTreeNodes.size()];
-        for (TextTreeNode node: unorderedTreeNodes) {
+        for (TextTreeNode node : unorderedTreeNodes) {
             clusterTree[(int) node.getChild()] = node;
         }
         return clusterTree;
@@ -242,11 +242,13 @@ public class AutomaticTextFeedbackService {
      * @return the distance
      */
     private double getDistanceBetweenBlocks(TextExercise exercise, long i, long j) {
-        if(i == j) {
+        if (i == j) {
             return 0;
-        } else if(i < j) {
+        }
+        else if (i < j) {
             return pairwiseDistanceRepository.findByExerciseAndAndBlockIAndBlockJ(exercise, i, j).getDistance();
-        } else {
+        }
+        else {
             return pairwiseDistanceRepository.findByExerciseAndAndBlockIAndBlockJ(exercise, j, i).getDistance();
         }
     }

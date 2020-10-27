@@ -2,12 +2,11 @@ package de.tum.in.www1.artemis.domain.text;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.NaturalId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import de.tum.in.www1.artemis.domain.DomainObject;
 
 /**
@@ -16,9 +15,7 @@ import de.tum.in.www1.artemis.domain.DomainObject;
  *  interchangeably. An artificial edge is created to represent the root node.
  */
 @Entity
-@Table(name = "text_tree_node", uniqueConstraints={
-    @UniqueConstraint(columnNames = {"exercise_id", "child"})
-})
+@Table(name = "text_tree_node", uniqueConstraints = { @UniqueConstraint(columnNames = { "exercise_id", "child" }) })
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TextTreeNode extends DomainObject {

@@ -14,9 +14,7 @@ import de.tum.in.www1.artemis.domain.DomainObject;
  * A TextCluster.
  */
 @Entity
-@Table(name = "text_cluster", uniqueConstraints={
-    @UniqueConstraint(columnNames = {"exercise_id", "tree_id"})
-})
+@Table(name = "text_cluster", uniqueConstraints = { @UniqueConstraint(columnNames = { "exercise_id", "tree_id" }) })
 public class TextCluster extends DomainObject {
 
     @Lob

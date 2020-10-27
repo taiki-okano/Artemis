@@ -2,11 +2,12 @@ package de.tum.in.www1.artemis.domain.text;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import de.tum.in.www1.artemis.domain.DomainObject;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  *  Pairwise distance between two TextBlocks

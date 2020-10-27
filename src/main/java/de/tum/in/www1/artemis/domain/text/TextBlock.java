@@ -14,9 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * A TextBlock.
  */
 @Entity
-@Table(name = "text_block", uniqueConstraints={
-    @UniqueConstraint(columnNames = {"submission_id", "tree_id"})
-})
+@Table(name = "text_block", uniqueConstraints = { @UniqueConstraint(columnNames = { "submission_id", "tree_id" }) })
 public class TextBlock implements Serializable {
 
     private static final long serialVersionUID = 1L;

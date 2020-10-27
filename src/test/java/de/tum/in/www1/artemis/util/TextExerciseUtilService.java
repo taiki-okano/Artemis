@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import de.tum.in.www1.artemis.domain.text.*;
 import de.tum.in.www1.artemis.domain.*;
 import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
 import de.tum.in.www1.artemis.domain.enumeration.Language;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
+import de.tum.in.www1.artemis.domain.text.*;
 import de.tum.in.www1.artemis.repository.StudentParticipationRepository;
 import de.tum.in.www1.artemis.repository.TextExerciseRepository;
 import de.tum.in.www1.artemis.repository.TextSubmissionRepository;
@@ -104,7 +104,7 @@ public class TextExerciseUtilService {
             clusterTree.add(0, child1);
             clusterTree.add(0, child2);
 
-            if(partialList.size() == 3) {
+            if (partialList.size() == 3) {
                 // Create a block node and add to the head of the tree
                 TextTreeNode child3 = new TextTreeNode();
                 child3.setChildSize(1);
@@ -113,7 +113,8 @@ public class TextExerciseUtilService {
                 child3.setLambdaVal(random.nextDouble() + 2.5);
                 clusterTree.add(0, child3);
             }
-        } else {
+        }
+        else {
             // Create 2 cluster nodes with the same lambda value and add them to the tree
             List<Integer> subList1 = partialList.subList(0, partialList.size() / 2);
             long childId1 = clusterTree.get(clusterTree.size() - 1).getChild() + 1;
@@ -233,7 +234,7 @@ public class TextExerciseUtilService {
             // Move downwards in the tree until we have all the blocks
             while (!clusterChildren.isEmpty()) {
                 allChildren.removeAll(clusterChildren);
-                for (TextTreeNode removed: clusterChildren) {
+                for (TextTreeNode removed : clusterChildren) {
                     allChildren.addAll(clusterTree.stream().filter(x -> x.getParent() == removed.getChild()).collect(Collectors.toList()));
                 }
                 clusterChildren = allChildren.stream().filter(x -> !x.isBlockNode()).collect(Collectors.toList());
