@@ -2,8 +2,9 @@
     "artemisApp": {
         "FeedbackType": {
             "null": "",
-            "AUTOMATIC": "AUTOMATIC",
-            "MANUAL": "MANUAL"
+            "AUTOMATIC": "Automatic",
+            "AUTOMATIC_MERGED": "Automatic (Merged)",
+            "MANUAL": "Manual"
         }
     }
 }

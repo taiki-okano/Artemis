@@ -96,7 +96,7 @@ public class AutomaticTextFeedbackService {
                 // If block has no tree id, it means that it was created manually after the initial clustering
                 final Optional<Feedback> feedbackOptional = findFeedbackForBlockWithoutCluster(clusterTree, block, exercise);
                 if (feedbackOptional.isPresent()) {
-                    feedbackOptional.get();
+                    return feedbackOptional.get();
                 }
             }
 
@@ -204,7 +204,7 @@ public class AutomaticTextFeedbackService {
         if (mostSimilarBlockInClusterWithFeedback.isPresent() && distances.get(mostSimilarBlockInClusterWithFeedback.get().getTreeId()) < DISTANCE_THRESHOLD) {
             final Feedback similarFeedback = feedbackMap.get(mostSimilarBlockInClusterWithFeedback.get().getId());
             return Optional
-                    .of(new Feedback().reference(block.getId()).credits(similarFeedback.getCredits()).detailText(similarFeedback.getDetailText()).type(FeedbackType.AUTOMATIC));
+                    .of(new Feedback().reference(block.getId()).credits(similarFeedback.getCredits()).detailText(similarFeedback.getDetailText()).type(FeedbackType.AUTOMATIC_MERGED));
         }
         return Optional.empty();
     }

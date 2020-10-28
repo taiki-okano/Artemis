@@ -1,6 +1,9 @@
-<span class="badge badge-primary" title="{{ 'artemisApp.assessment.automaticGenerated' | translate }}" *ngIf="feedback.type === FeedbackType.AUTOMATIC">
-    <fa-icon [icon]="'robot'"></fa-icon>
-    <span [jhiTranslate]="'artemisApp.AssessmentType.' + feedback.type"></span>
+<span class="badge badge-primary" title="{{ 'artemisApp.assessment.automaticGenerated' | translate }}" *ngIf="feedback.type && [FeedbackType.AUTOMATIC, FeedbackType.AUTOMATIC_MERGED].includes(feedback.type)">
+    <ng-container [ngSwitch]="feedback.type">
+        <fa-icon [icon]="'robot'" *ngSwitchCase="FeedbackType.AUTOMATIC"></fa-icon>
+        <fa-icon [icon]="'project-diagram'" *ngSwitchCase="FeedbackType.AUTOMATIC_MERGED"></fa-icon>
+    </ng-container>
+    <span [jhiTranslate]="'artemisApp.FeedbackType.' + feedback.type"></span>
 </span>
 
 <span class="badge badge-warning" *ngIf="!conflictMode && feedback.conflictingTextAssessments?.length > 0" (click)="onConflictsClicked.emit(feedback.id)">
@@ -12,6 +15,11 @@
     <fa-icon [icon]="'balance-scale-right'"></fa-icon>
     <span [jhiTranslate]="'artemisApp.textAssessment.conflict.type.' + conflictType"></span>
 </span>
+
+<p *ngIf="feedback.type == FeedbackType.AUTOMATIC_MERGED" class="text-center">
+    <fa-icon [icon]="'exclamation-triangle'" style="color: red;"></fa-icon>
+    <span class="font-weight-bold" jhiTranslate="artemisApp.textAssessment.feedbackEditor.manualValidation"></span>
+</p>
 
 <div class="form-row" (drop)="connectFeedbackWithInstruction($event)" (dragover)="$event.preventDefault()">
     <div class="form-group col-10">

@@ -48,7 +48,8 @@
             "feedbackEditor": {
                 "dismissFeedback": "Möchtest du das Feedback löschen?",
                 "dismissFeedbackConfirmation": "Bitte bestätige, dass du das Feedback löschen möchtest!",
-                "feedbackCommentPlaceholder": "Gib deine Anmerkung bitte hier ein.."
+                "feedbackCommentPlaceholder": "Gib deine Anmerkung bitte hier ein..",
+                "manualValidation": "Manuelle Validierung erforderlich"
             },
             "assessmentInstruction": "Bitte halte deine Maus über und klicke auf den Textblock, den du bewerten möchten.<br>Drücke <code>alt</code>/<code>option</code> und wähle gleichzeitig Text aus, um eigene Textblöcke zu bewerten.",
             "conflict": {

@@ -103,7 +103,6 @@ public class TextAssessmentQueueService {
         double sum = 0.0;
         for (TextBlock block : blocks) {
             TextPairwiseDistance distance;
-            // TODO: Why 1 - distance? (Entries in textPairwiseDistanceRepository have the actual distances)
             if (block.getTreeId() < textBlock.getTreeId()) {
                 distance = textPairwiseDistanceRepository.findByExerciseAndAndBlockIAndBlockJ(cluster.getExercise(), block.getTreeId(), textBlock.getTreeId());
                 sum += 1 - distance.getDistance();
@@ -122,7 +121,6 @@ public class TextAssessmentQueueService {
      * @param textBlockList list of the TextBlocks
      * @param textCluster Cluster
      */
-    @Transactional(readOnly = true)
     public void setAddedDistances(List<TextBlock> textBlockList, TextCluster textCluster) {
         textBlockList.forEach(textBlock -> {
             double addedDistance = calculateAddedDistance(textBlock, textCluster);
