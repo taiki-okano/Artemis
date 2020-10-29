@@ -33,6 +33,10 @@ public class TextExercise extends Exercise {
     @JsonIgnore
     private List<TextTreeNode> clusterTree;
 
+    public List<TextPairwiseDistance> getPairwiseDistances() {
+        return pairwiseDistances;
+    }
+
     public String getSampleSolution() {
         return sampleSolution;
     }
