@@ -2,6 +2,7 @@ package de.tum.in.www1.artemis.service;
 
 import static java.util.stream.Collectors.toList;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +48,9 @@ public class TextClusterTreeMigrationService {
 
     @NotNull
     private List<TextExercise> findAllTextExercisesNeedingMigration() {
-        return findAllTextExercises().parallelStream().filter(ex -> ex.getPairwiseDistances() == null || ex.getPairwiseDistances().isEmpty()).collect(toList());
+        return findAllTextExercises().parallelStream().filter(
+            ex -> ex.getDueDate() != null && ex.getDueDate().isBefore(ZonedDateTime.now()) && (ex.getPairwiseDistances() == null || ex.getPairwiseDistances().isEmpty())
+        ).collect(toList());
     }
 
     @NotNull
