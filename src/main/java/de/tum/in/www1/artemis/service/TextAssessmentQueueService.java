@@ -14,7 +14,7 @@ import de.tum.in.www1.artemis.repository.TextClusterRepository;
 import de.tum.in.www1.artemis.repository.TextPairwiseDistanceRepository;
 
 @Service
-@Profile("automaticText")
+@Profile("athene")
 public class TextAssessmentQueueService {
 
     private final TextClusterRepository textClusterRepository;

@@ -20,7 +20,7 @@ import de.tum.in.www1.artemis.repository.TextPairwiseDistanceRepository;
 import de.tum.in.www1.artemis.repository.TextTreeNodeRepository;
 
 @Service
-@Profile("automaticText")
+@Profile("athene")
 public class AutomaticTextFeedbackService {
 
     private final FeedbackService feedbackService;

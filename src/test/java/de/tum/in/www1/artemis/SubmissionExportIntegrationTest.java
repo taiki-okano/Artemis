@@ -69,9 +69,9 @@ public class SubmissionExportIntegrationTest extends AbstractSpringIntegrationBa
         users.remove(database.getUserByLogin("admin"));
         course1 = database.addCourseWithModelingAndTextAndFileUploadExercise();
         course1.getExercises().forEach(exercise -> {
-            database.addParticipationForExercise(exercise, "student1");
-            database.addParticipationForExercise(exercise, "student2");
-            database.addParticipationForExercise(exercise, "student3");
+            database.createAndSaveParticipationForExercise(exercise, "student1");
+            database.createAndSaveParticipationForExercise(exercise, "student2");
+            database.createAndSaveParticipationForExercise(exercise, "student3");
 
             if (exercise instanceof ModelingExercise) {
                 modelingExercise = (ModelingExercise) exercise;
@@ -87,9 +87,9 @@ public class SubmissionExportIntegrationTest extends AbstractSpringIntegrationBa
             else if (exercise instanceof TextExercise) {
                 textExercise = (TextExercise) exercise;
 
-                textSubmission1 = database.addTextSubmission(textExercise, ModelFactory.generateTextSubmission("example text", Language.ENGLISH, true), "student1");
-                textSubmission2 = database.addTextSubmission(textExercise, ModelFactory.generateTextSubmission("some other text", Language.ENGLISH, true), "student2");
-                textSubmission3 = database.addTextSubmission(textExercise, ModelFactory.generateTextSubmission("a third text", Language.ENGLISH, true), "student3");
+                textSubmission1 = database.saveTextSubmission(textExercise, ModelFactory.generateTextSubmission("example text", Language.ENGLISH, true), "student1");
+                textSubmission2 = database.saveTextSubmission(textExercise, ModelFactory.generateTextSubmission("some other text", Language.ENGLISH, true), "student2");
+                textSubmission3 = database.saveTextSubmission(textExercise, ModelFactory.generateTextSubmission("a third text", Language.ENGLISH, true), "student3");
             }
             else if (exercise instanceof FileUploadExercise) {
                 fileUploadExercise = (FileUploadExercise) exercise;

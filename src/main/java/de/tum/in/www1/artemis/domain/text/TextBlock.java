@@ -8,13 +8,19 @@ import java.util.Objects;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * A TextBlock.
  */
 @Entity
 @Table(name = "text_block", uniqueConstraints = { @UniqueConstraint(columnNames = { "submission_id", "tree_id" }) })
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TextBlock implements Serializable {
 
     private static final long serialVersionUID = 1L;

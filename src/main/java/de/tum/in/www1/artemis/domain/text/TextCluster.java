@@ -6,15 +6,21 @@ import java.util.List;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.tum.in.www1.artemis.domain.DomainObject;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * A TextCluster.
  */
 @Entity
 @Table(name = "text_cluster", uniqueConstraints = { @UniqueConstraint(columnNames = { "exercise_id", "tree_id" }) })
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TextCluster extends DomainObject {
 
     @Lob
