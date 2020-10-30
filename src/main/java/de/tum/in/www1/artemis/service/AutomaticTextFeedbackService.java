@@ -147,6 +147,10 @@ public class AutomaticTextFeedbackService {
         while (currentDist <= LAMBDA_THRESHOLD) {
             // parent is not an actual TextCluster but a "cluster of (clusters of) TextClusters"
             long parentId = currentNode.getParent();
+            // Give up when there is no level more to expand
+            if (parentId == -1) {
+                return Optional.empty();
+            }
             List<TextTreeNode> siblings = treeNodeRepository.findAllByParentAndExercise(parentId, exercise);
             siblings.remove(currentNode);
             siblings.sort(Comparator.comparingDouble(TextTreeNode::getLambdaVal).reversed());
@@ -174,10 +178,6 @@ public class AutomaticTextFeedbackService {
                         siblings.sort(Comparator.comparingDouble(TextTreeNode::getLambdaVal).reversed());
                     }
                 }
-            }
-            // Give up when there is no level more to expand
-            if (parentId == -1) {
-                return Optional.empty();
             }
             currentDist = currentDist + 1 / currentNode.getLambdaVal();
             currentNode = clusterTree[(int) parentId];
