@@ -3,6 +3,7 @@ package de.tum.in.www1.artemis.repository;
 import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,5 +30,8 @@ public interface TextClusterRepository extends JpaRepository<TextCluster, Long> 
     List<TextCluster> findAllByIdsWithEagerTextBlocks(@Param("clusterIds") Set<Long> clusterIds);
 
     Optional<TextCluster> findByTreeIdAndExercise(long treeId, TextExercise exercise);
+
+    @EntityGraph(type = LOAD, attributePaths = {"exercise", "exercise.pairwiseDistances"})
+    List<TextCluster> findAllByProbabilitiesIsNotNull();
 
 }

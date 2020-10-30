@@ -1,12 +1,6 @@
 package de.tum.in.www1.artemis.service;
 
-import static java.util.stream.Collectors.toList;
-
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 
@@ -16,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import static java.util.stream.Collectors.*;
 
 @Service
 public class TextClusterTreeMigrationService {
@@ -42,20 +38,10 @@ public class TextClusterTreeMigrationService {
     }
 
     @NotNull
-    private List<TextExercise> findAllTextExercises() {
-        return textExerciseRepository.findAll();
-    }
-
-    @NotNull
-    private List<TextExercise> findAllTextExercisesNeedingMigration() {
-        return findAllTextExercises().parallelStream().filter(
-            ex -> ex.getDueDate() != null && ex.getDueDate().isBefore(ZonedDateTime.now()) && (ex.getPairwiseDistances() == null || ex.getPairwiseDistances().isEmpty())
-        ).collect(toList());
-    }
-
-    @NotNull
-    private List<TextCluster> findTextClustersForExercise(TextExercise exercise) {
-        return textClusterRepository.findAllByExercise(exercise);
+    private Map<TextExercise, List<TextCluster>> findAllTextExercisesNeedingMigrationWithClusters() {
+        return textClusterRepository.findAllByProbabilitiesIsNotNull().parallelStream().filter(
+            cluster -> (cluster.getExercise().getPairwiseDistances() == null || cluster.getExercise().getPairwiseDistances().isEmpty())
+        ).collect(groupingBy(c -> c.getExercise()));
     }
 
     @NotNull
@@ -71,14 +57,15 @@ public class TextClusterTreeMigrationService {
         log.info("Starting Migration of Text Feedback");
         final long start = System.currentTimeMillis();
 
-        final List<TextExercise> exerciseList = findAllTextExercisesNeedingMigration();
+        Map<TextExercise, List<TextCluster>> allTextExercisesNeedingMigrationWithClusters = findAllTextExercisesNeedingMigrationWithClusters();
+        final Set<TextExercise> exerciseList = allTextExercisesNeedingMigrationWithClusters.keySet();
         log.info("Found {} Text Exercises in need of a migration.", exerciseList.size());
 
         int clusterCounter = 0;
         int blockCounter = 0;
 
         for (TextExercise exercise : exerciseList) {
-            List<TextCluster> clusters = findTextClustersForExercise(exercise);
+            List<TextCluster> clusters = allTextExercisesNeedingMigrationWithClusters.get(exercise);
             List<TextBlock> blocks = findTextBlocksForExercise(exercise);
             List<TextPairwiseDistance> pairwiseDistances = new ArrayList<>();
             List<TextTreeNode> clusterTree = new ArrayList<>();
@@ -90,7 +77,16 @@ public class TextClusterTreeMigrationService {
                 block.setTreeId(treeIdCounter++);
                 blockMap.put(block.getId(), block);
             }
-            treeIdCounter++;
+            assert treeIdCounter == blocks.size();
+
+            // Add artificial unconnected root node
+            TextTreeNode rootNode = new TextTreeNode().exercise(exercise);
+            rootNode.setChild(treeIdCounter++);
+            rootNode.setLambdaVal(0);
+            rootNode.setChildSize(blocks.size());
+            rootNode.setParent(-1);
+            clusterTree.add(rootNode);
+
             for (TextCluster cluster : clusters) {
                 // Update treeIds of clusters and update block references
                 cluster.setTreeId(treeIdCounter++);
@@ -115,25 +111,19 @@ public class TextClusterTreeMigrationService {
                 clusterNode.setParent(-1);
                 clusterNode.setChildSize(cluster.getBlocks().size());
                 clusterNode.setChild(cluster.getTreeId());
-                clusterNode.setLambdaVal(Double.POSITIVE_INFINITY);
+                clusterNode.setLambdaVal(0);
                 clusterTree.add(clusterNode);
 
                 for (TextBlock blockInCluster : cluster.getBlocks()) {
                     TextTreeNode blockNode = new TextTreeNode().exercise(exercise);
                     blockNode.setChild(blockInCluster.getTreeId());
-                    blockNode.setLambdaVal(Double.POSITIVE_INFINITY);
+                    blockNode.setLambdaVal(0);
                     blockNode.setChildSize(1);
                     blockNode.setParent(cluster.getTreeId());
                     clusterTree.add(blockNode);
                 }
-
-                // Add artificial unconnected root node
-                TextTreeNode rootNode = new TextTreeNode().exercise(exercise);
-                rootNode.setChild(cluster.getBlocks().size());
-                rootNode.setLambdaVal(Double.POSITIVE_INFINITY);
-                rootNode.setChildSize(cluster.getBlocks().size());
-                rootNode.setParent(-1);
-                clusterTree.add(rootNode);
+                // Used as a flag to remember that we migrated the cluster
+                cluster.setProbabilities(null);
             }
 
             // Save all to the database

@@ -3,7 +3,6 @@ package de.tum.in.www1.artemis.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.*;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,8 +14,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -25,18 +22,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import de.tum.in.www1.artemis.AbstractSpringIntegrationBambooBitbucketJiraTest;
 import de.tum.in.www1.artemis.domain.enumeration.Language;
 import de.tum.in.www1.artemis.domain.text.*;
-import de.tum.in.www1.artemis.exception.NetworkingError;
 import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.security.SecurityUtils;
-import de.tum.in.www1.artemis.service.connectors.TextEmbeddingService;
-import de.tum.in.www1.artemis.service.connectors.TextSegmentationService;
-import de.tum.in.www1.artemis.service.connectors.TextSimilarityClusteringService;
 import de.tum.in.www1.artemis.util.DatabaseUtilService;
 import de.tum.in.www1.artemis.util.ModelFactory;
 import de.tum.in.www1.artemis.util.RequestUtilService;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBitbucketJiraTest {
+public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbucketJiraTest {
 
     // Sentences taken from the book Object-Oriented Software Engineering by B. Bruegge and A. Dutoit
     private static final String[] BLOCK_TEXT = { "The purpose of science is to describe and understand complex systems,",
@@ -48,21 +41,6 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
             "Examples of artificial systems include the space shuttle, airline reservation systems, and stock trading systems.",
             "Herbert Simon coined the term sciences of the artificial to describe the sciences that deal with artificial systems [Simon, 1970].",
             "Whereas natural and social sciences have been around for centuries, the sciences of the artificial are recent." };
-
-    @Autowired
-    TextClusteringService textClusteringService;
-
-    @Mock
-    TextSegmentationService textSegmentationService = mock(TextSegmentationService.class);
-
-    @Mock
-    TextEmbeddingService textEmbeddingService = mock(TextEmbeddingService.class);
-
-    @Mock
-    TextSimilarityClusteringService textSimilarityClusteringService = mock(TextSimilarityClusteringService.class);
-
-    @Mock
-    TextAssessmentQueueService textAssessmentQueueService = mock(TextAssessmentQueueService.class);
 
     @Autowired
     TextExerciseRepository textExerciseRepository;
@@ -90,8 +68,6 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
 
     @Autowired
     DatabaseUtilService database;
-
-    private AutoCloseable closable;
 
     private List<TextExercise> exercises;
 
@@ -132,37 +108,13 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
             fail("JSON files for clusterTree or pairwiseDistances not successfully read/parsed.");
         }
 
-        // Mock Services using Athene in TextClusteringService
-        closable = MockitoAnnotations.openMocks(this);
-        try {
-            when(textSegmentationService.segmentSubmissions(anyList())).thenReturn(blocks);
-            when(textEmbeddingService.embedTextBlocks(anyList(), any())).thenReturn(new ArrayList<>());
-            when(textSimilarityClusteringService.clusterTextBlocks(anyList())).thenReturn(prepareMockResponse());
-            doNothing().when(textAssessmentQueueService).setAddedDistances(anyList(), any());
-        }
-        catch (NetworkingError error) {
-            fail("Mocks could not be initialized.");
-            return;
-        }
-
-        // Insert mocks into TextClusteringService and call calculateClusters
-        ReflectionTestUtils.setField(textClusteringService, "textSimilarityClusteringService", textSimilarityClusteringService);
-        ReflectionTestUtils.setField(textClusteringService, "textSegmentationService", textSegmentationService);
-        ReflectionTestUtils.setField(textClusteringService, "textEmbeddingService", textEmbeddingService);
-        ReflectionTestUtils.setField(textClusteringService, "textAssessmentQueueService", textAssessmentQueueService);
-
-        textClusteringService.calculateClusters(exercise);
-
-        clusters = textClusterRepository.findAllByExercise(exercise);
-        blocks = textBlockRepository.findAll();
-        treeNodes = textTreeNodeRepository.findAllByExercise(exercise);
-        pairwiseDistances = textPairwiseDistanceRepository.findAllByExercise(exercise);
-        submissions = textSubmissionRepository.findAll();
+        textTreeNodeRepository.saveAll(treeNodes);
+        textPairwiseDistanceRepository.saveAll(pairwiseDistances);
 
         // Initialize data for the second exercise
         TextExercise exercise2 = exercises.get(1);
         submission = ModelFactory.generateTextSubmission("Submission to be deleted...", Language.ENGLISH, true);
-        database.addTextSubmission(exercise2, submission, "student1");
+        database.saveTextSubmission(exercise2, submission, "student1");
 
         TextBlock block = ModelFactory.generateTextBlock(0, 1, "b1");
         block.setSubmission(submission);
@@ -181,9 +133,8 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
     }
 
     @AfterAll
-    public void tearDown() throws Exception {
+    public void tearDown() {
         database.resetDatabase();
-        closable.close();
     }
 
     @Test
@@ -220,51 +171,6 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
 
         // TreeIds of clusters not null
         assertThat(clusters.stream().map(TextCluster::getTreeId).collect(Collectors.toList()), everyItem(notNullValue()));
-    }
-
-    @Test
-    @WithMockUser(value = "student1", roles = "USER")
-    public void testStateAfterClustering() {
-
-        TextExercise exercise = exercises.get(0);
-        TextExercise exercise2 = exercises.get(1);
-
-        TextBlock block1 = ModelFactory.generateTextBlock(0, 1, "b1");
-        block1.setSubmission(blocks.get(0).getSubmission());
-        textBlockRepository.save(block1);
-
-        TextBlock block2 = ModelFactory.generateTextBlock(0, 1, "b2");
-        block2.setTreeId(10);
-        textBlockRepository.save(block2);
-
-        List<TextBlock> currentBlocks = textBlockRepository.findAllBySubmission_Participation_Exercise_IdAndTreeIdNotNull(exercise.getId());
-        assertThat(currentBlocks, hasSize(blocks.size()));
-        assertThat(currentBlocks.contains(block1), equalTo(false));
-        assertThat(currentBlocks.contains(block2), equalTo(false));
-        textBlockRepository.delete(block1);
-        textBlockRepository.delete(block2);
-
-        TextCluster cluster = new TextCluster().exercise(exercise2);
-        textClusterRepository.save(cluster);
-        List<TextCluster> currentClusters = textClusterRepository.findAllByExercise(exercise);
-        assertThat(currentClusters, hasSize(clusters.size()));
-        assertThat(currentClusters.contains(cluster), equalTo(false));
-        textClusterRepository.delete(cluster);
-
-        TextTreeNode incorrectTreeNode = new TextTreeNode().exercise(exercise2);
-        incorrectTreeNode.setChild(-2);
-        textTreeNodeRepository.save(incorrectTreeNode);
-        List<TextTreeNode> currentTreeNodes = textTreeNodeRepository.findAllByExercise(exercise);
-        assertThat(currentTreeNodes, hasSize(treeNodes.size()));
-        assertThat(currentTreeNodes.contains(incorrectTreeNode), equalTo(false));
-        textTreeNodeRepository.delete(incorrectTreeNode);
-
-        TextPairwiseDistance incorrectPairwiseDistance = new TextPairwiseDistance().exercise(exercise2);
-        textPairwiseDistanceRepository.save(incorrectPairwiseDistance);
-        List<TextPairwiseDistance> currentPairwiseDistances = textPairwiseDistanceRepository.findAllByExercise(exercise);
-        assertThat(currentPairwiseDistances, hasSize(pairwiseDistances.size()));
-        assertThat(currentPairwiseDistances.contains(incorrectPairwiseDistance), equalTo(false));
-        textPairwiseDistanceRepository.delete(incorrectPairwiseDistance);
     }
 
     @Test
@@ -402,7 +308,7 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
     private void initializeBlocksAndSubmissions(TextExercise exercise) {
         // Create text blocks and first submission, save submission
         submission = ModelFactory.generateTextSubmission(BLOCK_TEXT[0] + " " + BLOCK_TEXT[1], Language.ENGLISH, true);
-        database.addTextSubmission(exercise, submission, "student1");
+        database.saveTextSubmission(exercise, submission, "student1");
 
         TextBlock bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[0]);
         bl.computeId();
@@ -420,7 +326,7 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
         // Create text blocks and submissions, save submissions
         for (int i = 2; i <= 10; i++) {
             submission = ModelFactory.generateTextSubmission(BLOCK_TEXT[i], Language.ENGLISH, true);
-            database.addTextSubmission(exercise, submission, "student" + i);
+            database.saveTextSubmission(exercise, submission, "student" + i);
             bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[i]);
             bl.computeId();
             bl.setTreeId(i);
@@ -428,6 +334,7 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
             submissions.add(submission);
             textSubmissionRepository.save(submission);
         }
+        textBlockRepository.saveAll(blocks);
     }
 
     /**
@@ -471,31 +378,6 @@ public class TextClusteringServiceTest extends AbstractSpringIntegrationBambooBi
         clusters.add(cluster2);
         clusters.add(cluster3);
         clusters.add(cluster4);
-    }
-
-    /**
-     * Prepares a mock response that should be sent from TextSimilarityClusteringService to TextClusteringService
-     * @return Mock Response
-     */
-    private TextSimilarityClusteringService.Response prepareMockResponse() {
-        TextSimilarityClusteringService.Response response = new TextSimilarityClusteringService.Response();
-        response.clusters = new LinkedHashMap<>();
-        for (int i = 0; i < clusters.size(); i++) {
-            response.clusters.put(i, clusters.get(i));
-        }
-
-        response.clusterTree = treeNodes;
-
-        double[][] matrix = new double[blocks.size()][blocks.size()];
-        pairwiseDistances.forEach(dist -> matrix[(int) dist.getBlockI()][(int) dist.getBlockJ()] = dist.getDistance());
-        response.distanceMatrix = new ArrayList<>();
-        for (int i = 0; i < blocks.size(); i++) {
-            List<Double> row = new ArrayList<>();
-            for (int j = 0; j < blocks.size(); j++) {
-                row.add(matrix[i][j]);
-            }
-            response.distanceMatrix.add(row);
-        }
-        return response;
+        textClusterRepository.saveAll(clusters);
     }
 }
