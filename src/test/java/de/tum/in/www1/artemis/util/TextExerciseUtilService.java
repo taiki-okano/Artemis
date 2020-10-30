@@ -1,9 +1,15 @@
 package de.tum.in.www1.artemis.util;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -274,5 +280,77 @@ public class TextExerciseUtilService {
             textSubmissionRepository.save(submission);
         }
         return textExercise;
+    }
+
+    /**
+     * Reads and parses the cluster tree from json file for given exercise
+     * @param exercise
+     * @return list of tree nodes
+     * @throws IOException
+     * @throws ParseException
+     */
+    public List<TextTreeNode> parseClusterTree(TextExercise exercise) throws IOException, ParseException {
+        List<TextTreeNode> result = new ArrayList<>();
+        JSONParser jsonParser = new JSONParser();
+        FileReader reader = new FileReader("src/test/resources/test-data/clustering/clusterTree.json");
+        JSONArray treeList = (JSONArray) jsonParser.parse(reader);
+        for (int i = 0; i < treeList.size(); i++) {
+            JSONObject n = (JSONObject) treeList.get(i);
+            TextTreeNode node = new TextTreeNode();
+            node.setExercise(exercise);
+            node.setParent((long) n.get("parent"));
+            node.setLambdaVal((double) n.get("lambdaVal"));
+            node.setChildSize((long) n.get("childSize"));
+            node.setChild((long) n.get("child"));
+            result.add(node);
+        }
+        return result;
+    }
+
+    /**
+     * Reads and parses the pairwise distances from json file for given exercise
+     * @param exercise
+     * @return list of pairwise distances
+     * @throws IOException
+     * @throws ParseException
+     */
+    public List<TextPairwiseDistance> parsePairwiseDistances(TextExercise exercise) throws IOException, ParseException {
+        List<TextPairwiseDistance> result = new ArrayList<>();
+        JSONParser jsonParser = new JSONParser();
+        FileReader reader = new FileReader("src/test/resources/test-data/clustering/pairwiseDistances.json");
+        JSONArray distList = (JSONArray) jsonParser.parse(reader);
+        for (int i = 0; i < distList.size(); i++) {
+            JSONObject d = (JSONObject) distList.get(i);
+            TextPairwiseDistance dist = new TextPairwiseDistance();
+            dist.setExercise(exercise);
+            dist.setDistance((double) d.get("distance"));
+            dist.setBlockI((long) d.get("blockI"));
+            dist.setBlockJ((long) d.get("blockJ"));
+            result.add(dist);
+        }
+        return result;
+    }
+
+    /**
+     * Crates the 2D distance matrix from the parsed pairwise distances for given blocks size
+     * @param blocksSize - number of text blocks in exercise
+     * @return list of list of double as distance matrix
+     * @throws IOException
+     * @throws ParseException
+     */
+    public List<List<Double>> generateDistanceMatrix(int blocksSize, TextExercise exercise) throws IOException, ParseException {
+        // Trim the pairwise distances to fit this mock data
+        List<TextPairwiseDistance> pairwiseDistances = parsePairwiseDistances(exercise).stream().filter(dist -> dist.getBlockJ() < blocksSize && dist.getBlockI() < blocksSize).collect(Collectors.toList());
+        double[][] matrix = new double[blocksSize][blocksSize];
+        pairwiseDistances.forEach(dist -> matrix[(int) dist.getBlockI()][(int) dist.getBlockJ()] = dist.getDistance());
+        List<List<Double>> distanceMatrix = new ArrayList<>();
+        for (int i = 0; i < blocksSize; i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < blocksSize; j++) {
+                row.add(matrix[i][j]);
+            }
+            distanceMatrix.add(row);
+        }
+        return distanceMatrix;
     }
 }

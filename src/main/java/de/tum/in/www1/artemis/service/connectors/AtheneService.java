@@ -219,6 +219,7 @@ public class AtheneService {
             newBlock.setText(textBlockDTO.getText());
             newBlock.setStartIndex(textBlockDTO.getStartIndex());
             newBlock.setEndIndex(textBlockDTO.getEndIndex());
+            newBlock.setTreeId(textBlockDTO.getTreeId());
             newBlock.automatic();
 
             // take the corresponding TextSubmission and add the text blocks.

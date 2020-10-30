@@ -10,14 +10,11 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import de.tum.in.www1.artemis.util.TextExerciseUtilService;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +62,8 @@ public class AtheneServiceTest extends AbstractSpringIntegrationBambooBitbucketJ
 
     @Mock
     TextTreeNodeRepository textTreeNodeRepository;
+
+    private TextExerciseUtilService textExerciseUtilService = new TextExerciseUtilService();
 
     private final static String SUBMIT_API_ENDPOINT = "http://localhost/submit";
 
@@ -183,8 +182,8 @@ public class AtheneServiceTest extends AbstractSpringIntegrationBambooBitbucketJ
         List<TextTreeNode> clusterTree = new ArrayList<>();
         List<List<Double>> distanceMatrix = new ArrayList<>();
         try{
-            clusterTree = parseClusterTree();
-            distanceMatrix = generateDistanceMatrix(blocks.size());
+            clusterTree = textExerciseUtilService.parseClusterTree(exercise1);
+            distanceMatrix = textExerciseUtilService.generateDistanceMatrix(blocks.size(), exercise1);
         }
         catch (ParseException | IOException e) {
             fail("JSON files for clusterTree or pairwiseDistances not successfully read/parsed.");
@@ -243,6 +242,7 @@ public class AtheneServiceTest extends AbstractSpringIntegrationBambooBitbucketJ
             newBlock.setStartIndex(0);
             newBlock.setEndIndex(30);
             newBlock.setText("This is an example text");
+            newBlock.setTreeId(i);
             // Calculate realistic hash (also see TextBlock.computeId())
             final String idString = newBlock.getSubmissionId() + ";" + newBlock.getStartIndex() + "-" + newBlock.getEndIndex() + ";" + newBlock.getText();
             newBlock.setId(sha1Hex(idString));
@@ -259,82 +259,8 @@ public class AtheneServiceTest extends AbstractSpringIntegrationBambooBitbucketJ
     private Map<Integer, TextCluster> generateClusters() {
         Map<Integer, TextCluster> clusters = new HashMap<>();
         TextCluster c1 = new TextCluster();
+        c1.setTreeId(11);
         clusters.put(0, c1);
         return clusters;
-    }
-
-    /**
-     * Reads and parses the cluster tree from json file for given exercise
-     * @return list of tree nodes
-     * @throws IOException
-     * @throws ParseException
-     */
-    private List<TextTreeNode> parseClusterTree() throws IOException, ParseException {
-        List<TextTreeNode> result = new ArrayList<>();
-        JSONParser jsonParser = new JSONParser();
-        FileReader reader = new FileReader("src/test/resources/test-data/clustering/clusterTree.json");
-        JSONArray treeList = (JSONArray) jsonParser.parse(reader);
-        for (int i = 0; i < treeList.size(); i++) {
-            JSONObject n = (JSONObject) treeList.get(i);
-            TextTreeNode node = new TextTreeNode();
-            node.setExercise(exercise1);
-            node.setParent((long) n.get("parent"));
-            node.setLambdaVal((double) n.get("lambdaVal"));
-            node.setChildSize((long) n.get("childSize"));
-            node.setChild((long) n.get("child"));
-            result.add(node);
-        }
-        return result;
-    }
-
-    /**
-     * Reads and parses the pairwise distances from json file for given exercise
-     * @return list of pairwise distances
-     * @throws IOException
-     * @throws ParseException
-     */
-    private List<TextPairwiseDistance> parsePairwiseDistances() throws IOException, ParseException {
-        List<TextPairwiseDistance> result = new ArrayList<>();
-        JSONParser jsonParser = new JSONParser();
-        FileReader reader = new FileReader("src/test/resources/test-data/clustering/pairwiseDistances.json");
-        JSONArray distList = (JSONArray) jsonParser.parse(reader);
-        for (int i = 0; i < distList.size(); i++) {
-            JSONObject d = (JSONObject) distList.get(i);
-            TextPairwiseDistance dist = new TextPairwiseDistance();
-            dist.setExercise(exercise1);
-            dist.setDistance((double) d.get("distance"));
-            dist.setBlockI((long) d.get("blockI"));
-            dist.setBlockJ((long) d.get("blockJ"));
-            result.add(dist);
-        }
-        return result;
-    }
-
-    /**
-     * Crates the 2D distance matrix from the pairwise distances
-     * @param blocksSize - number of text blocks in exercise
-     * @return list of list of double as distance matrix
-     * @throws IOException
-     * @throws ParseException
-     */
-    private List<List<Double>> generateDistanceMatrix(int blocksSize) throws IOException, ParseException {
-        List<TextPairwiseDistance> trimmedPairwiseDistances = new ArrayList<>();
-        // Trim the pairwise distances to fit this mock data
-        parsePairwiseDistances().forEach(dist -> {
-            if (dist.getBlockJ() < blocksSize && dist.getBlockI() < blocksSize) {
-                trimmedPairwiseDistances.add(dist);
-            }
-        });
-        double[][] matrix = new double[blocksSize][blocksSize];
-        trimmedPairwiseDistances.forEach(dist -> matrix[(int) dist.getBlockI()][(int) dist.getBlockJ()] = dist.getDistance());
-        List<List<Double>> distanceMatrix = new ArrayList<>();
-        for (int i = 0; i < blocksSize; i++) {
-            List<Double> row = new ArrayList<>();
-            for (int j = 0; j < blocksSize; j++) {
-                row.add(matrix[i][j]);
-            }
-            distanceMatrix.add(row);
-        }
-        return distanceMatrix;
     }
 }

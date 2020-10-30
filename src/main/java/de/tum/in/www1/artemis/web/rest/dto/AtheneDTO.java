@@ -56,6 +56,8 @@ public class AtheneDTO {
 
         private int endIndex;
 
+        private Integer treeId;
+
         private TextBlockType type = TextBlockType.AUTOMATIC;
 
         public String getId() {
@@ -106,6 +108,9 @@ public class AtheneDTO {
             this.type = type;
         }
 
+        public Integer getTreeId() { return treeId; }
+
+        public void setTreeId(Integer treeId) { this.treeId = treeId; }
     }
 
 }

@@ -4,14 +4,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import de.tum.in.www1.artemis.util.TextExerciseUtilService;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +66,8 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
     @Autowired
     DatabaseUtilService database;
 
+    private TextExerciseUtilService textExerciseUtilService = new TextExerciseUtilService();
+
     private List<TextExercise> exercises;
 
     private List<TextSubmission> submissions = new ArrayList<>();
@@ -100,8 +99,8 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
 
         // Read pre-computed results from JSON
         try {
-            treeNodes = parseClusterTree(exercise);
-            pairwiseDistances = parsePairwiseDistances(exercise);
+            treeNodes = textExerciseUtilService.parseClusterTree(exercise);
+            pairwiseDistances = textExerciseUtilService.parsePairwiseDistances(exercise);
         }
         catch (ParseException | IOException e) {
             database.resetDatabase();
@@ -250,55 +249,6 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
         assertThat(textExerciseRepository.findById(exercise.getId()).isPresent(), equalTo(false));
         assertThat(textTreeNodeRepository.findAllByExercise(exercise), hasSize(0));
         assertThat(textPairwiseDistanceRepository.findAllByExercise(exercise), hasSize(0));
-    }
-
-    /**
-     * Reads and parses the cluster tree from json file for given exercise
-     * @param exercise
-     * @return list of tree nodes
-     * @throws IOException
-     * @throws ParseException
-     */
-    private static List<TextTreeNode> parseClusterTree(TextExercise exercise) throws IOException, ParseException {
-        List<TextTreeNode> result = new ArrayList<>();
-        JSONParser jsonParser = new JSONParser();
-        FileReader reader = new FileReader("src/test/resources/test-data/clustering/clusterTree.json");
-        JSONArray treeList = (JSONArray) jsonParser.parse(reader);
-        for (int i = 0; i < treeList.size(); i++) {
-            JSONObject n = (JSONObject) treeList.get(i);
-            TextTreeNode node = new TextTreeNode();
-            node.setExercise(exercise);
-            node.setParent((long) n.get("parent"));
-            node.setLambdaVal((double) n.get("lambdaVal"));
-            node.setChildSize((long) n.get("childSize"));
-            node.setChild((long) n.get("child"));
-            result.add(node);
-        }
-        return result;
-    }
-
-    /**
-     * Reads and parses the pairwise distances from json file for given exercise
-     * @param exercise
-     * @return list of pairwise distances
-     * @throws IOException
-     * @throws ParseException
-     */
-    private static List<TextPairwiseDistance> parsePairwiseDistances(TextExercise exercise) throws IOException, ParseException {
-        List<TextPairwiseDistance> result = new ArrayList<>();
-        JSONParser jsonParser = new JSONParser();
-        FileReader reader = new FileReader("src/test/resources/test-data/clustering/pairwiseDistances.json");
-        JSONArray distList = (JSONArray) jsonParser.parse(reader);
-        for (int i = 0; i < distList.size(); i++) {
-            JSONObject d = (JSONObject) distList.get(i);
-            TextPairwiseDistance dist = new TextPairwiseDistance();
-            dist.setExercise(exercise);
-            dist.setDistance((double) d.get("distance"));
-            dist.setBlockI((long) d.get("blockI"));
-            dist.setBlockJ((long) d.get("blockJ"));
-            result.add(dist);
-        }
-        return result;
     }
 
     /**
