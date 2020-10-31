@@ -105,11 +105,11 @@ public class TextAssessmentQueueService {
             TextPairwiseDistance distance;
             if (block.getTreeId() < textBlock.getTreeId()) {
                 distance = textPairwiseDistanceRepository.findByExerciseAndAndBlockIAndBlockJ(cluster.getExercise(), block.getTreeId(), textBlock.getTreeId());
-                sum += distance.getDistance();
+                sum += 1 - distance.getDistance();
             }
             else if (block.getTreeId() > textBlock.getTreeId()) {
                 distance = textPairwiseDistanceRepository.findByExerciseAndAndBlockIAndBlockJ(cluster.getExercise(), textBlock.getTreeId(), block.getTreeId());
-                sum += distance.getDistance();
+                sum += 1 - distance.getDistance();
             }
         }
         return sum;
