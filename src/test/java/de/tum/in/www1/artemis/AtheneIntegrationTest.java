@@ -9,9 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.tum.in.www1.artemis.domain.text.TextPairwiseDistance;
-import de.tum.in.www1.artemis.repository.TextPairwiseDistanceRepository;
-import de.tum.in.www1.artemis.repository.TextTreeNodeRepository;
 import de.tum.in.www1.artemis.util.TextExerciseUtilService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -48,12 +45,6 @@ public class AtheneIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
 
     @Autowired
     TextClusterRepository textClusterRepository;
-
-    @Autowired
-    TextPairwiseDistanceRepository textPairwiseDistanceRepository;
-
-    @Autowired
-    TextTreeNodeRepository textTreeNodeRepository;
 
     TextExerciseUtilService textExerciseUtilService = new TextExerciseUtilService();
 
@@ -121,7 +112,7 @@ public class AtheneIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
 
         requestBody.setDistanceMatrix(distanceMatrix);
 
-        final var clusterTree = textExerciseUtilService.parseClusterTree(exercise);
+        final var clusterTree = textExerciseUtilService.generateClusterTree(textBlockDTOs.stream().map(AtheneDTO.TextBlockDTO::getTreeId).collect(Collectors.toList()));
 
         requestBody.setClusterTree(clusterTree);
 

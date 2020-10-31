@@ -13,6 +13,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import de.tum.in.www1.artemis.util.TextExerciseUtilService;
 import org.json.simple.parser.ParseException;
@@ -182,7 +183,7 @@ public class AtheneServiceTest extends AbstractSpringIntegrationBambooBitbucketJ
         List<TextTreeNode> clusterTree = new ArrayList<>();
         List<List<Double>> distanceMatrix = new ArrayList<>();
         try{
-            clusterTree = textExerciseUtilService.parseClusterTree(exercise1);
+            clusterTree = textExerciseUtilService.generateClusterTree(blocks.stream().map(AtheneDTO.TextBlockDTO::getTreeId).collect(Collectors.toList()));
             distanceMatrix = textExerciseUtilService.generateDistanceMatrix(blocks.size(), exercise1);
         }
         catch (ParseException | IOException e) {
