@@ -81,7 +81,7 @@ public class AutomaticTextFeedbackService {
                             .min(comparing(element -> cluster.distanceBetweenBlocks(block, element)));
 
                     if (mostSimilarBlockInClusterWithFeedback.isPresent()
-                            && cluster.distanceBetweenBlocks(block, mostSimilarBlockInClusterWithFeedback.get()) < DISTANCE_THRESHOLD) {
+                            && getDistanceBetweenBlocks(exercise, block.getTreeId(), mostSimilarBlockInClusterWithFeedback.get().getTreeId()) < DISTANCE_THRESHOLD) {
                         final Feedback similarFeedback = feedbackForTextExerciseInCluster.get(mostSimilarBlockInClusterWithFeedback.get().getId());
                         return new Feedback().reference(block.getId()).credits(similarFeedback.getCredits()).detailText(similarFeedback.getDetailText())
                                 .type(FeedbackType.AUTOMATIC);
@@ -136,6 +136,7 @@ public class AutomaticTextFeedbackService {
         if (clusterNode.isBlockNode()) {
             return Optional.empty();
         }
+
         TextTreeNode currentNode = clusterNode;
         // currentDist = distance between block and the node representing its cluster
         double currentDist = 0;
@@ -144,6 +145,13 @@ public class AutomaticTextFeedbackService {
             currentDist += 1 / temp.getLambdaVal();
             temp = clusterTree[(int) temp.getParent()];
         }
+
+        // If the given text block was a child of the root node, set current node back to it to search other children of the root node
+        // Otherwise the algorithm won't find feedback for it
+        if (clusterNode.getParent() == -1) {
+            currentNode = clusterTree[block.getTreeId()];
+        }
+
         while (currentDist <= LAMBDA_THRESHOLD) {
             // parent is not an actual TextCluster but a "cluster of (clusters of) TextClusters"
             long parentId = currentNode.getParent();
