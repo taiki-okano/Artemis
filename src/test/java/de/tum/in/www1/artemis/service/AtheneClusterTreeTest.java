@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import de.tum.in.www1.artemis.domain.Feedback;
+import de.tum.in.www1.artemis.domain.Result;
+import de.tum.in.www1.artemis.domain.enumeration.FeedbackType;
 import de.tum.in.www1.artemis.util.TextExerciseUtilService;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.*;
@@ -32,12 +35,26 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
     private static final String[] BLOCK_TEXT = { "The purpose of science is to describe and understand complex systems,",
             "such as a system of atoms, a society of human beings, or a solar system.",
             "Traditionally, a distinction is made between natural sciences and social sciences to distinguish between two major types of systems.",
-            "The purpose of natural sciences is to understand nature and its subsystems.", "Natural sciences include, for example, biology, chemistry, physics, and paleontology.",
-            "The purpose of the social sciences is to understand human beings.", "Social sciences include psychology and sociology.",
+            "The purpose of natural sciences is to understand nature and its subsystems.",
+            "Natural sciences include, for example, biology, chemistry, physics, and paleontology.",
+            "The purpose of the social sciences is to understand human beings.",
+            "Social sciences include psychology and sociology.",
             "There is another type of system that we call an artificial system.",
             "Examples of artificial systems include the space shuttle, airline reservation systems, and stock trading systems.",
             "Herbert Simon coined the term sciences of the artificial to describe the sciences that deal with artificial systems [Simon, 1970].",
             "Whereas natural and social sciences have been around for centuries, the sciences of the artificial are recent." };
+
+    @Autowired
+    FeedbackService feedbackService;
+
+    @Autowired
+    AutomaticTextFeedbackService automaticTextFeedbackService;
+
+    @Autowired
+    FeedbackRepository feedbackRepository;
+
+    @Autowired
+    ResultRepository resultRepository;
 
     @Autowired
     TextExerciseRepository textExerciseRepository;
@@ -85,7 +102,7 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
     @BeforeAll
     public void init() {
         SecurityUtils.setAuthorizationObject(); // TODO: Why do we need this
-        database.addUsers(10, 0, 1);
+        database.addUsers(10, 1, 1);
         database.addCourseWithOneFinishedTextExercise();
         database.addCourseWithOneFinishedTextExercise();
 
@@ -174,6 +191,84 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
 
     @Test
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
+    public void testTraversalForFeedback() {
+        TextExercise exercise = exercises.get(0);
+        List<TextTreeNode> clusterTree = textTreeNodeRepository.findAllByExercise(exercise);
+        clusterTree.sort(Comparator.comparingLong(TextTreeNode::getChild));
+
+        // Give manual feedback to block 3
+        Result result3 = blocks.get(3).getSubmission().getResult();
+        Feedback manualFeedback3 = new Feedback().reference(blocks.get(3).getId()).credits(1.).result(result3).detailText("Feedback text 3").type(FeedbackType.MANUAL);
+        feedbackRepository.save(manualFeedback3);
+        assertThat(feedbackRepository.findAll(), hasSize(1));
+        assertThat(feedbackRepository.findAll().get(0).getType(), equalTo(FeedbackType.MANUAL));
+
+        // Block 4 should receive automatic feedback, as it shares the cluster with 3
+        Result result4 = blocks.get(4).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result4);
+        List<Feedback> feedback4 = result4.getFeedbacks();
+        assertThat(feedback4, hasSize(1));
+        assertThat(feedback4.get(0).getType(), equalTo(FeedbackType.AUTOMATIC));
+
+        // Block 2 shouldn't receive automatic_merged feedback, as it is too far from cluster 13 in the tree
+        Result result2 = blocks.get(2).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result2);
+        List<Feedback> feedback2 = result2.getFeedbacks();
+        assertThat(feedback2, hasSize(0));
+
+        // Block 8 should receive automatic_merged feedback, as it gets it from cluster 13 after the traversal
+        Result result8 = blocks.get(8).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result8);
+        List<Feedback> feedback8 = result8.getFeedbacks();
+        assertThat(feedback8, hasSize(1));
+        assertThat(feedback8.get(0).getType(), equalTo(FeedbackType.AUTOMATIC_MERGED));
+
+        // Block 0 and 1 are blocks of the same submission
+        // Block 0 should receive automatic_merged feedback, as it gets it from cluster 13 after the traversal
+        // Block 1 shouldn't receive automatic_merged feedback, as it is too far from cluster 13
+        Result result0and1 = blocks.get(0).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result0and1);
+        List<Feedback> feedback0and1 = result0and1.getFeedbacks();
+        assertThat(feedback0and1, hasSize(1));
+        assertThat(feedback0and1.get(0).getType(), equalTo(FeedbackType.AUTOMATIC_MERGED));
+
+        // Block 7 shouldn't receive automatic_merged feedback, as it is too far from cluster 14
+        Result result7 = blocks.get(7).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result7);
+        List<Feedback> feedback7 = result7.getFeedbacks();
+        assertThat(feedback7, hasSize(0));
+
+        // Block 10 should receive automatic feedback, as it shares the clusters with block 8
+        Result result10 = blocks.get(10).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result10);
+        List<Feedback> feedback10 = result10.getFeedbacks();
+        assertThat(feedback10, hasSize(1));
+        assertThat(feedback10.get(0).getType(), equalTo(FeedbackType.AUTOMATIC_MERGED));
+
+        // Block 5 shouldn't receive automatic_merged feedback, as it is too far from cluster 14
+        Result result5 = blocks.get(5).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result5);
+        List<Feedback> feedback5 = result5.getFeedbacks();
+        assertThat(feedback5, hasSize(0));
+
+        // Block 6 shouldn't receive automatic_merged feedback, as it is too far from cluster 14
+        Result result6 = blocks.get(6).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result6);
+        List<Feedback> feedback6 = result6.getFeedbacks();
+        assertThat(feedback6, hasSize(0));
+
+        // Block 9 should receive automatic_merged feedback, as it receives it from cluster 17 after the traversal
+        Result result9 = blocks.get(9).getSubmission().getResult();
+        automaticTextFeedbackService.suggestFeedback(result9);
+        List<Feedback> feedback9 = result9.getFeedbacks();
+        assertThat(feedback9, hasSize(1));
+        assertThat(feedback9.get(0).getType(), equalTo(FeedbackType.AUTOMATIC_MERGED));
+
+        // For this example execution, 4 additional feedback elements were created by traversing the tree
+    }
+
+    @Test
+    @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testExerciseRemoval() throws Exception {
         TextExercise exercise = exercises.get(1);
 
@@ -258,7 +353,7 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
     private void initializeBlocksAndSubmissions(TextExercise exercise) {
         // Create text blocks and first submission, save submission
         submission = ModelFactory.generateTextSubmission(BLOCK_TEXT[0] + " " + BLOCK_TEXT[1], Language.ENGLISH, true);
-        database.saveTextSubmission(exercise, submission, "student1");
+        database.saveTextSubmissionWithResultAndAssessor(exercise, submission, "student1", "tutor1");
 
         TextBlock bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[0]);
         bl.computeId();
@@ -272,17 +367,23 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
 
         submissions.add(submission);
         textSubmissionRepository.save(submission);
+        Result result = submission.getResult();
+        result.setSubmission(submission);
+        resultRepository.save(result);
 
         // Create text blocks and submissions, save submissions
         for (int i = 2; i <= 10; i++) {
             submission = ModelFactory.generateTextSubmission(BLOCK_TEXT[i], Language.ENGLISH, true);
-            database.saveTextSubmission(exercise, submission, "student" + i);
+            database.saveTextSubmissionWithResultAndAssessor(exercise, submission, "student" + i, "tutor1");
             bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[i]);
             bl.computeId();
             bl.setTreeId(i);
             blocks.add(bl);
             submissions.add(submission);
             textSubmissionRepository.save(submission);
+            result = submission.getResult();
+            result.setSubmission(submission);
+            resultRepository.save(result);
         }
         textBlockRepository.saveAll(blocks);
     }
@@ -293,41 +394,42 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
      */
     private void initializeClusters(TextExercise exercise) {
         TextCluster cluster1 = new TextCluster().exercise(exercise);
-        cluster1.addBlocks(blocks.get(1));
-        cluster1.addBlocks(blocks.get(7));
+        cluster1.addBlocks(blocks.get(3));
+        cluster1.addBlocks(blocks.get(4));
         cluster1.setTreeId(13);
-        blocks.add(1, blocks.remove(1).cluster(cluster1));
-        blocks.add(7, blocks.remove(7).cluster(cluster1));
+        blocks.add(3, blocks.remove(3).cluster(cluster1));
+        blocks.add(4, blocks.remove(4).cluster(cluster1));
 
         TextCluster cluster2 = new TextCluster().exercise(exercise);
-        cluster2.addBlocks(blocks.get(4));
-        cluster2.addBlocks(blocks.get(6));
-        cluster2.setTreeId(15);
-        blocks.add(4, blocks.remove(4).cluster(cluster2));
-        blocks.add(6, blocks.remove(6).cluster(cluster2));
+        cluster2.addBlocks(blocks.get(1));
+        cluster2.addBlocks(blocks.get(7));
+        cluster2.setTreeId(17);
+        blocks.add(1, blocks.remove(1).cluster(cluster2));
+        blocks.add(7, blocks.remove(7).cluster(cluster2));
 
         TextCluster cluster3 = new TextCluster().exercise(exercise);
         cluster3.addBlocks(blocks.get(2));
-        cluster3.addBlocks(blocks.get(9));
-        cluster3.addBlocks(blocks.get(10));
+        cluster3.addBlocks(blocks.get(5));
+        cluster3.addBlocks(blocks.get(6));
         cluster3.setTreeId(16);
         blocks.add(2, blocks.remove(2).cluster(cluster3));
-        blocks.add(9, blocks.remove(9).cluster(cluster3));
-        blocks.add(10, blocks.remove(10).cluster(cluster3));
+        blocks.add(5, blocks.remove(5).cluster(cluster3));
+        blocks.add(6, blocks.remove(6).cluster(cluster3));
 
         TextCluster cluster4 = new TextCluster().exercise(exercise);
         cluster4.addBlocks(blocks.get(0));
-        cluster4.addBlocks(blocks.get(3));
-        cluster4.addBlocks(blocks.get(5));
-        cluster4.setTreeId(17);
+        cluster4.addBlocks(blocks.get(8));
+        cluster4.addBlocks(blocks.get(10));
+        cluster4.setTreeId(14);
         blocks.add(0, blocks.remove(0).cluster(cluster4));
-        blocks.add(3, blocks.remove(3).cluster(cluster4));
-        blocks.add(5, blocks.remove(5).cluster(cluster3));
+        blocks.add(8, blocks.remove(8).cluster(cluster4));
+        blocks.add(10, blocks.remove(10).cluster(cluster4));
 
         clusters.add(cluster1);
         clusters.add(cluster2);
         clusters.add(cluster3);
         clusters.add(cluster4);
         textClusterRepository.saveAll(clusters);
+        textBlockRepository.saveAll(blocks);
     }
 }
