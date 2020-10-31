@@ -59,6 +59,9 @@ public class TextAssessmentIntegrationTest extends AbstractSpringIntegrationBamb
     private TextBlockRepository textBlockRepository;
 
     @Autowired
+    private TextPairwiseDistanceRepository textPairwiseDistanceRepository;
+
+    @Autowired
     private TextTreeNodeRepository textTreeNodeRepository;
 
     @Autowired
@@ -239,8 +242,7 @@ public class TextAssessmentIntegrationTest extends AbstractSpringIntegrationBamb
         textBlocks.forEach(TextBlock::computeId);
 
         // Generate a valid cluster tree
-        List<TextTreeNode> clusterTree = textExerciseUtilService.generateClusterTree(textBlocks.stream().map(TextBlock::getTreeId).collect(Collectors.toList()));
-        clusterTree.forEach(node -> node.setExercise(textExercise));
+        List<TextTreeNode> clusterTree = textExerciseUtilService.generateClusterTree(textBlocks.stream().map(TextBlock::getTreeId).collect(Collectors.toList()), textExercise);
         textTreeNodeRepository.saveAll(clusterTree);
 
         long[] clusterTreeIds = textExerciseUtilService.getTreeIdsOfClustersInFlatPartitioning(clusterTree, 4);
@@ -653,6 +655,11 @@ public class TextAssessmentIntegrationTest extends AbstractSpringIntegrationBamb
 
     @NotNull
     private List<TextSubmission> prepareTextSubmissionsWithFeedbackForAutomaticFeedback() {
+        // Generate a cluster tree
+        textTreeNodeRepository.saveAll(textExerciseUtilService.generateClusterTree(List.of(0, 1, 2, 3), textExercise));
+        // Generate a distance matrix for the exercise
+        textPairwiseDistanceRepository.saveAll(textExerciseUtilService.generatePairwiseDistances(4, textExercise));
+
         TextSubmission textSubmission1 = ModelFactory.generateTextSubmission("This is Part 1, and this is Part 2. There is also Part 3.", Language.ENGLISH, true);
         TextSubmission textSubmission2 = ModelFactory.generateTextSubmission("This is another Submission.", Language.ENGLISH, true);
         database.saveTextSubmission(textExercise, textSubmission1, "student1");
@@ -662,13 +669,14 @@ public class TextAssessmentIntegrationTest extends AbstractSpringIntegrationBamb
         final TextCluster cluster = new TextCluster().exercise(textExercise);
         textClusterRepository.save(cluster);
 
-        final TextBlock textBlockSubmission1 = new TextBlock().startIndex(0).endIndex(15).automatic().cluster(cluster);
-        final TextBlock textBlockSubmission2 = new TextBlock().startIndex(0).endIndex(27).automatic().cluster(cluster);
+        final TextBlock textBlockSubmission1 = new TextBlock().startIndex(0).endIndex(15).automatic().cluster(cluster).treeId(0);
+        final TextBlock textBlockSubmission2 = new TextBlock().startIndex(0).endIndex(27).automatic().cluster(cluster).treeId(1);
 
         cluster.blocks(asList(textBlockSubmission1, textBlockSubmission2)).distanceMatrix(new double[][] { { 0.1, 0.1 }, { 0.1, 0.1 } });
+        cluster.setTreeId(5);
 
         textSubmission1 = database.addTextBlocksToTextSubmission(
-                asList(textBlockSubmission1, new TextBlock().startIndex(16).endIndex(35).automatic(), new TextBlock().startIndex(36).endIndex(57).automatic()), textSubmission1);
+                asList(textBlockSubmission1, new TextBlock().startIndex(16).endIndex(35).automatic().treeId(2), new TextBlock().startIndex(36).endIndex(57).automatic().treeId(3)), textSubmission1);
 
         textSubmission2 = database.addTextBlocksToTextSubmission(Collections.singletonList(textBlockSubmission2), textSubmission2);
 
@@ -695,7 +703,7 @@ public class TextAssessmentIntegrationTest extends AbstractSpringIntegrationBamb
                 TextSubmission.class, parameters);
 
         textSubmissionWithoutAssessment.getBlocks()
-                .forEach(block -> assertThat(block).isEqualToIgnoringGivenFields(blocksSubmission1.get(block.getId()), "positionInCluster", "submission", "cluster"));
+                .forEach(block -> assertThat(block).isEqualToIgnoringGivenFields(blocksSubmission1.get(block.getId()), "positionInCluster", "submission", "cluster", "treeId"));
 
         textBlockRepository.findAllWithEagerClusterBySubmissionId(textSubmissionWithoutAssessment.getId())
                 .forEach(block -> assertThat(block).isEqualToComparingFieldByField(blocksSubmission1.get(block.getId())));

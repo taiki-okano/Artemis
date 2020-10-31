@@ -4,19 +4,16 @@ import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import de.tum.in.www1.artemis.util.TextExerciseUtilService;
-import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -180,15 +177,8 @@ public class AtheneServiceTest extends AbstractSpringIntegrationBambooBitbucketJ
         // generate required parameters
         List<AtheneDTO.TextBlockDTO> blocks = generateTextBlocks(10);
         Map<Integer, TextCluster> clusters = generateClusters();
-        List<TextTreeNode> clusterTree = new ArrayList<>();
-        List<List<Double>> distanceMatrix = new ArrayList<>();
-        try{
-            clusterTree = textExerciseUtilService.generateClusterTree(blocks.stream().map(AtheneDTO.TextBlockDTO::getTreeId).collect(Collectors.toList()));
-            distanceMatrix = textExerciseUtilService.generateDistanceMatrix(blocks.size(), exercise1);
-        }
-        catch (ParseException | IOException e) {
-            fail("JSON files for clusterTree or pairwiseDistances not successfully read/parsed.");
-        }
+        List<TextTreeNode> clusterTree = textExerciseUtilService.generateClusterTree(blocks.stream().map(AtheneDTO.TextBlockDTO::getTreeId).collect(Collectors.toList()), exercise1);
+        List<List<Double>> distanceMatrix = textExerciseUtilService.generateDistanceMatrixFromPairwiseDistances(blocks.size(), textExerciseUtilService.generatePairwiseDistances(blocks.size(), exercise1));
 
         // Catch call of atheneService to the textBlockRepository
         when(textBlockRepository.saveAll(anyIterable())).thenAnswer(invocation -> {

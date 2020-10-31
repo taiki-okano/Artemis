@@ -355,14 +355,12 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
         submission = ModelFactory.generateTextSubmission(BLOCK_TEXT[0] + " " + BLOCK_TEXT[1], Language.ENGLISH, true);
         database.saveTextSubmissionWithResultAndAssessor(exercise, submission, "student1", "tutor1");
 
-        TextBlock bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[0]);
+        TextBlock bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[0]).treeId(0);
         bl.computeId();
-        bl.setTreeId(0);
         blocks.add(bl);
 
-        bl = new TextBlock().automatic().startIndex(1).endIndex(2).submission(submission).text(BLOCK_TEXT[1]);
+        bl = new TextBlock().automatic().startIndex(1).endIndex(2).submission(submission).text(BLOCK_TEXT[1]).treeId(1);
         bl.computeId();
-        bl.setTreeId(1);
         blocks.add(bl);
 
         submissions.add(submission);
@@ -375,9 +373,8 @@ public class AtheneClusterTreeTest extends AbstractSpringIntegrationBambooBitbuc
         for (int i = 2; i <= 10; i++) {
             submission = ModelFactory.generateTextSubmission(BLOCK_TEXT[i], Language.ENGLISH, true);
             database.saveTextSubmissionWithResultAndAssessor(exercise, submission, "student" + i, "tutor1");
-            bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[i]);
+            bl = new TextBlock().automatic().startIndex(0).endIndex(1).submission(submission).text(BLOCK_TEXT[i]).treeId(i);
             bl.computeId();
-            bl.setTreeId(i);
             blocks.add(bl);
             submissions.add(submission);
             textSubmissionRepository.save(submission);

@@ -185,6 +185,11 @@ public class TextBlock implements Serializable {
         this.treeId = treeId;
     }
 
+    public TextBlock treeId(int treeId) {
+        this.treeId = treeId;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

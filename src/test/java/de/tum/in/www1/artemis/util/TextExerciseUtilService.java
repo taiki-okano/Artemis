@@ -65,21 +65,40 @@ public class TextExerciseUtilService {
     }
 
     /**
+     * Builds a valid distance matrix in form of pairwise distances
+     * @param blocksSize - The number of text blocks
+     * @return List of TextPairwiseDistances
+     */
+    public List<TextPairwiseDistance> generatePairwiseDistances(int blocksSize, TextExercise exercise) {
+        List<TextPairwiseDistance> distances = new ArrayList<>();
+        for (int i = 0; i < blocksSize; i++) {
+            for (int j = i + 1; j < blocksSize; j++) {
+                TextPairwiseDistance dist = new TextPairwiseDistance().exercise(exercise);
+                dist.setBlockI(i);
+                dist.setBlockJ(j);
+                dist.setDistance(Math.random());
+                distances.add(dist);
+            }
+        }
+        return distances;
+    }
+
+    /**
      * Builds a valid cluster tree
      * @param blockTreeIds - TreeIds of the blocks in the cluster tree
      * @return List of TextTreeNodes
      */
-    public List<TextTreeNode> generateClusterTree(List<Integer> blockTreeIds) {
+    public List<TextTreeNode> generateClusterTree(List<Integer> blockTreeIds, TextExercise exercise) {
         List<TextTreeNode> clusterTree = new ArrayList<>();
         // Create and add root node
-        TextTreeNode rootNode = new TextTreeNode();
+        TextTreeNode rootNode = new TextTreeNode().exercise(exercise);
         rootNode.setChildSize(blockTreeIds.size());
         rootNode.setChild(blockTreeIds.size());
         rootNode.setParent(-1);
         rootNode.setLambdaVal(-1);
 
         clusterTree.add(rootNode);
-        clusterTree = treeGenerationRecursiveHelper(blockTreeIds, clusterTree, rootNode.getChild());
+        clusterTree = treeGenerationRecursiveHelper(blockTreeIds, clusterTree, rootNode.getChild(), exercise);
         return clusterTree.stream().sorted(Comparator.comparingLong(TextTreeNode::getChild)).collect(Collectors.toList());
     }
 
@@ -90,7 +109,7 @@ public class TextExerciseUtilService {
      * @param parentId - Id of the parent of the nodes to be created in this step
      * @return - Intermediate result as the current cluster tree after execution
      */
-    private List<TextTreeNode> treeGenerationRecursiveHelper(List<Integer> partialList, List<TextTreeNode> clusterTree, long parentId) {
+    private List<TextTreeNode> treeGenerationRecursiveHelper(List<Integer> partialList, List<TextTreeNode> clusterTree, long parentId, TextExercise exercise) {
         double lambdaVal = random.nextDouble() + 2.5;
         if (partialList.size() <= 3) {
             // Create 2 block nodes with the same lambda value
@@ -99,12 +118,14 @@ public class TextExerciseUtilService {
             child1.setChild(partialList.get(0));
             child1.setParent(parentId);
             child1.setLambdaVal(lambdaVal);
+            child1.setExercise(exercise);
 
             TextTreeNode child2 = new TextTreeNode();
             child2.setChildSize(1);
             child2.setChild(partialList.get(1));
             child2.setParent(parentId);
             child2.setLambdaVal(lambdaVal);
+            child2.setExercise(exercise);
 
             // Add new nodes to the head of the tree
             clusterTree.add(0, child1);
@@ -117,6 +138,7 @@ public class TextExerciseUtilService {
                 child3.setChild(partialList.get(2));
                 child3.setParent(parentId);
                 child3.setLambdaVal(random.nextDouble() + 2.5);
+                child3.setExercise(exercise);
                 clusterTree.add(0, child3);
             }
         }
@@ -131,6 +153,7 @@ public class TextExerciseUtilService {
             child1.setChild(childId1);
             child1.setParent(parentId);
             child1.setLambdaVal(lambdaVal);
+            child1.setExercise(exercise);
 
             List<Integer> subList2 = partialList.subList(partialList.size() / 2, partialList.size());
             TextTreeNode child2 = new TextTreeNode();
@@ -138,12 +161,13 @@ public class TextExerciseUtilService {
             child2.setChild(childId2);
             child2.setParent(parentId);
             child2.setLambdaVal(lambdaVal);
+            child2.setExercise(exercise);
 
             clusterTree.add(child1);
             clusterTree.add(child2);
             // Increase granularity after adding new nodes
-            treeGenerationRecursiveHelper(subList1, clusterTree, childId1);
-            treeGenerationRecursiveHelper(subList2, clusterTree, childId2);
+            treeGenerationRecursiveHelper(subList1, clusterTree, childId1, exercise);
+            treeGenerationRecursiveHelper(subList2, clusterTree, childId2, exercise);
         }
         return clusterTree;
     }
@@ -332,15 +356,12 @@ public class TextExerciseUtilService {
     }
 
     /**
-     * Crates the 2D distance matrix from the parsed pairwise distances for given blocks size
+     * Crates the 2D distance matrix from pairwise distances for given blocks size
      * @param blocksSize - number of text blocks in exercise
+     * @param pairwiseDistances - List of pairwise distances
      * @return list of list of double as distance matrix
-     * @throws IOException
-     * @throws ParseException
      */
-    public List<List<Double>> generateDistanceMatrix(int blocksSize, TextExercise exercise) throws IOException, ParseException {
-        // Trim the pairwise distances to fit this mock data
-        List<TextPairwiseDistance> pairwiseDistances = parsePairwiseDistances(exercise).stream().filter(dist -> dist.getBlockJ() < blocksSize && dist.getBlockI() < blocksSize).collect(Collectors.toList());
+    public List<List<Double>> generateDistanceMatrixFromPairwiseDistances(int blocksSize, List<TextPairwiseDistance> pairwiseDistances) {
         double[][] matrix = new double[blocksSize][blocksSize];
         pairwiseDistances.forEach(dist -> matrix[(int) dist.getBlockI()][(int) dist.getBlockJ()] = dist.getDistance());
         List<List<Double>> distanceMatrix = new ArrayList<>();

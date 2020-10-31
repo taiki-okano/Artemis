@@ -108,11 +108,11 @@ public class AtheneIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
 
         requestBody.setClusters(clusterDTOs);
 
-        final var distanceMatrix = textExerciseUtilService.generateDistanceMatrix(textBlockDTOs.size(), exercise);
+        final var distanceMatrix = textExerciseUtilService.generateDistanceMatrixFromPairwiseDistances(textBlockDTOs.size(), textExerciseUtilService.generatePairwiseDistances(textBlockDTOs.size(), exercise));
 
         requestBody.setDistanceMatrix(distanceMatrix);
 
-        final var clusterTree = textExerciseUtilService.generateClusterTree(textBlockDTOs.stream().map(AtheneDTO.TextBlockDTO::getTreeId).collect(Collectors.toList()));
+        final var clusterTree = textExerciseUtilService.generateClusterTree(textBlockDTOs.stream().map(AtheneDTO.TextBlockDTO::getTreeId).collect(Collectors.toList()), exercise);
 
         requestBody.setClusterTree(clusterTree);
 
@@ -135,7 +135,7 @@ public class AtheneIntegrationTest extends AbstractSpringIntegrationBambooBitbuc
             List<TextBlock> blocks = cluster.getBlocks();
             for (int blockIndex = 0; blockIndex < blocks.size(); blockIndex++) {
                 TextBlock block = blocks.get(blockIndex);
-                assertThat(block.getAddedDistance(), greaterThan(1.));
+                assertThat(block.getAddedDistance(), greaterThan(0.35));
                 final TextBlock textBlockFromRequest = clusterDTOs.get(clusterIndex).getBlocks().get(blockIndex);
                 assertThat(block.getId(), is(equalTo(textBlockFromRequest.getId())));
                 var positionInCluster = ReflectionTestUtils.getField(block, "positionInCluster");
