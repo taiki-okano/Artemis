@@ -76,7 +76,7 @@ public class TextExerciseUtilService {
                 TextPairwiseDistance dist = new TextPairwiseDistance().exercise(exercise);
                 dist.setBlockI(i);
                 dist.setBlockJ(j);
-                dist.setDistance(Math.random());
+                dist.setDistance(1 - (Math.random() + 1) / 2);
                 distances.add(dist);
             }
         }
