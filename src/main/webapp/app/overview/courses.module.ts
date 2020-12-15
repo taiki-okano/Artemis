@@ -34,6 +34,7 @@ import { ExerciseUnitComponent } from './course-lectures/exercise-unit/exercise-
 import { AttachmentUnitComponent } from './course-lectures/attachment-unit/attachment-unit.component';
 import { VideoUnitComponent } from './course-lectures/video-unit/video-unit.component';
 import { ArtemisSharedPipesModule } from 'app/shared/pipes/shared-pipes.module';
+import { AchievementsComponent } from 'app/achievements/achievements.component';
 import { TextUnitComponent } from './course-lectures/text-unit/text-unit.component';
 import { ArtemisMarkdownEditorModule } from 'app/shared/markdown-editor/markdown-editor.module';
 import { RatingModule } from 'app/exercises/shared/rating/rating.module';
@@ -80,6 +81,7 @@ import { RatingModule } from 'app/exercises/shared/rating/rating.module';
         AttachmentUnitComponent,
         VideoUnitComponent,
         TextUnitComponent,
+        AchievementsComponent,
     ],
     exports: [ExerciseActionButtonComponent, ExerciseDetailsStudentActionsComponent, ExerciseUnitComponent, AttachmentUnitComponent, VideoUnitComponent, TextUnitComponent],
 })
