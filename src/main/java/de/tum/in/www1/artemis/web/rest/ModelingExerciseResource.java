@@ -118,7 +118,6 @@ public class ModelingExerciseResource {
         }
 
         ModelingExercise result = modelingExerciseRepository.save(modelingExercise);
-
         groupNotificationService.notifyTutorGroupAboutExerciseCreated(modelingExercise);
         return ResponseEntity.created(new URI("/api/modeling-exercises/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString())).body(result);

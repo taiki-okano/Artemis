@@ -170,7 +170,6 @@ public class TextExerciseResource {
         if (textExercise.hasCourse()) {
             groupNotificationService.notifyTutorGroupAboutExerciseCreated(textExercise);
         }
-
         return ResponseEntity.created(new URI("/api/text-exercises/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString())).body(result);
     }
