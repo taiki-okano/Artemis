@@ -1,8 +1,8 @@
 package de.tum.in.www1.artemis.service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import de.tum.in.www1.artemis.web.rest.dto.StudentLeaderboardDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -123,5 +123,41 @@ public class StudentScoreService {
             studentScoreRepository.save(studentScore);
             log.info("Created StudentScore: " + studentScore);
         }
+    }
+
+    public List<StudentLeaderboardDTO> getStudentLeaderboardForExercises(List<User> students, List<Exercise> exercises) {
+        List<StudentLeaderboardDTO> entries = new ArrayList<>();
+
+        List<StudentScore> allScores = studentScoreRepository.findAllForLeaderboard(exercises);
+
+        if (allScores.isEmpty() || students.isEmpty() || exercises.isEmpty()) {
+            return entries;
+        }
+
+        var maxPoints = 0.0;
+
+        for (Exercise exercise: exercises) {
+            maxPoints += exercise.getMaxScore();
+        }
+
+        for (User student: students) {
+            var totalPoints = 0.0;
+
+            for (StudentScore score: allScores) {
+                if (score.getStudent().getLogin() == student.getLogin()) {
+                    totalPoints += (score.getScore() * score.getExercise().getMaxScore()) / 100;
+                }
+            }
+
+            var totalScore = Math.round((totalPoints / maxPoints) * 100);
+
+            StudentLeaderboardDTO newEntry = new StudentLeaderboardDTO(student.getId(), student.getLogin(), totalScore, totalPoints);
+            entries.add(newEntry);
+        }
+
+        entries.sort(Comparator.comparingDouble(StudentLeaderboardDTO::getPoints));
+        Collections.reverse(entries);
+
+        return entries;
     }
 }

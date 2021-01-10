@@ -39,6 +39,7 @@ import { ArtemisMarkdownEditorModule } from 'app/shared/markdown-editor/markdown
 import { RatingModule } from 'app/exercises/shared/rating/rating.module';
 import { CourseLearningGoalsComponent } from './course-learning-goals/course-learning-goals.component';
 import { ArtemisLearningGoalsModule } from 'app/course/learning-goals/learning-goal.module';
+import { ArtemisStudentLeaderboardModule } from 'app/shared/dashboards/student-leaderboard/student-leaderboard.module';
 
 @NgModule({
     imports: [
@@ -61,6 +62,7 @@ import { ArtemisLearningGoalsModule } from 'app/course/learning-goals/learning-g
         ArtemisTeamModule,
         RatingModule,
         ArtemisLearningGoalsModule,
+        ArtemisStudentLeaderboardModule,
     ],
     declarations: [
         CoursesComponent,

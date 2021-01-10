@@ -27,4 +27,7 @@ public interface StudentScoreRepository extends JpaRepository<StudentScore, Long
     Optional<StudentScore> findByResult(Result result);
 
     Optional<StudentScore> findByStudentAndExercise(@Param("student") User student, @Param("exercise") Exercise exercise);
+
+    @Query("SELECT s FROM StudentScore s WHERE s.exercise IN :#{#exercises}")
+    List<StudentScore> findAllForLeaderboard(@Param("exercises") List<Exercise> exercises);
 }

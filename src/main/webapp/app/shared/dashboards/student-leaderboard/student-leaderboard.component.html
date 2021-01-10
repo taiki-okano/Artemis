@@ -1,0 +1,30 @@
+<div class="row table-responsive mt-3" *ngIf="show">
+    <h3>Student Leaderboard</h3>
+    <table class="table">
+        <thead>
+            <tr jhiSort [(predicate)]="sortPredicate" [(ascending)]="reverseOrder" [callback]="sortRows.bind(this)">
+                <th>#</th>
+                <th>
+                    <a class="th-link">Student</a>
+                    <fa-icon [icon]="'sort'"></fa-icon>
+                </th>
+                <th>
+                    <a class="th-link">Points</a>
+                    <fa-icon [icon]="'sort'"></fa-icon>
+                </th>
+                <th>
+                    <a class="th-link">Score</a>
+                    <fa-icon [icon]="'sort'"></fa-icon>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let entry of leaderboardEntries; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ entry.name }}</td>
+                <td>{{ entry.points }}</td>
+                <td>{{ entry.score }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

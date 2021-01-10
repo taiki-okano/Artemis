@@ -2,9 +2,12 @@ package de.tum.in.www1.artemis.web.rest;
 
 import static de.tum.in.www1.artemis.web.rest.util.ResponseUtil.forbidden;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.*;
 
+import de.tum.in.www1.artemis.web.rest.dto.StudentLeaderboardDTO;
+import org.hibernate.internal.util.ZonedDateTimeComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -119,5 +122,52 @@ public class StudentScoreResource {
 
         Optional<StudentScore> studentScore = studentScoreService.getStudentScoreForStudentAndExercise(student.get(), exercise);
         return ResponseEntity.ok(studentScore);
+    }
+
+    /**
+     * GET /student-leaderboard/course/{courseId}/mode/{mode} : Get StudentLeaderboard for course id with mode.
+     *
+     * @param courseId id of the course
+     * @param mode mode of the leaderboard (0: all finished exercises, 1: finished exercises in last week, 2: finished exercises in last 3 weeks)
+     * @return the ResponseEntity with status 200 (OK) and with the found student scores as body
+     */
+    @GetMapping("/student-leaderboard/course/{courseId}/mode/{mode}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR', 'TA', 'USER')")
+    public ResponseEntity<List<StudentLeaderboardDTO>> getStudentLeaderboard(@PathVariable Long courseId, @PathVariable Long mode) {
+        log.debug("REST request to get student leaderboard for course {} with mode {}", courseId, mode);
+        Course course = courseService.findOneWithExercises(courseId);
+        List<User> students = userService.findAllUsersInGroup(course.getStudentGroupName());
+
+        Set<Exercise> exercisesFromCourse = course.getExercises();
+        List<Exercise> exercises = new ArrayList<>();
+
+        if (mode == 0) {
+            for (Exercise exercise : exercisesFromCourse) {
+                if (exercise.isAssessmentDueDateOver()) {
+                    exercises.add(exercise);
+                }
+            }
+        } else if (mode == 1) {
+            for (Exercise exercise : exercisesFromCourse) {
+                if (exercise.isAssessmentDueDateOver() && !exercise.getAssessmentDueDate().isBefore(ZonedDateTime.now().minusDays(7))) {
+                    exercises.add(exercise);
+                }
+            }
+        } else if (mode == 2) {
+            for (Exercise exercise : exercisesFromCourse) {
+                if (exercise.isAssessmentDueDateOver() && !exercise.getAssessmentDueDate().isBefore(ZonedDateTime.now().minusDays(21))) {
+                    exercises.add(exercise);
+                }
+            }
+        }
+
+        List<StudentLeaderboardDTO> entries = studentScoreService.getStudentLeaderboardForExercises(students, exercises);
+
+        User user = userService.getUserWithGroupsAndAuthorities();
+        if (!authCheckService.isAtLeastTeachingAssistantInCourse(course, user)) {
+            entries = entries.subList(0, (Math.round(entries.size() / 2) + 1));
+        }
+
+        return ResponseEntity.ok(entries);
     }
 }

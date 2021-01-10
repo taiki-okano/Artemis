@@ -75,6 +75,7 @@ public class StudentScoreIntegrationTest extends AbstractSpringIntegrationBamboo
         courseRepo.save(course);
         // exercise1
         exercise = course.getExercises().stream().findFirst().get();
+        exercise.setMaxScore(5.0);
         exerciseRepo.save(exercise);
 
         // score for student1 in exercise1 in course1
@@ -109,6 +110,7 @@ public class StudentScoreIntegrationTest extends AbstractSpringIntegrationBamboo
         courseRepo.save(course);
         // exercise2
         exercise = course.getExercises().stream().findFirst().get();
+        exercise.setMaxScore(5.0);
         exerciseRepo.save(exercise);
 
         // score for student1 in exercise2 in course2
@@ -127,6 +129,59 @@ public class StudentScoreIntegrationTest extends AbstractSpringIntegrationBamboo
     @AfterEach
     public void tearDown() {
         database.resetDatabase();
+    }
+
+    @Test
+    @WithMockUser(value = "student1", roles = "USER")
+    public void studentLeaderboardTest() throws Exception {
+        course = courseRepo.findAll().get(0);
+        var mode = 0;
+
+        // exercise3
+        exercise = new TextExercise();
+        exercise.setCourse(course);
+        exercise.setMaxScore(10.0);
+        exerciseRepo.save(exercise);
+
+        // score for student1 in exercise3 in course1
+        user = userRepo.findAllInGroup("tumuser").get(0);
+        studentParticipation = new StudentParticipation().exercise(exercise);
+        studentParticipation.setParticipant(user);
+        studentParticipation.setInitializationDate(ZonedDateTime.now());
+        studentParticipationRepo.save(studentParticipation);
+        result = new Result();
+        result.setParticipation(studentParticipation);
+        result.setRated(true);
+        result.setScore(90L);
+        resultRepo.save(result);
+
+        // score for student2 in exercise3 in course1
+        user = userRepo.findAllInGroup("tumuser").get(1);
+        studentParticipation = new StudentParticipation().exercise(exercise);
+        studentParticipation.setParticipant(user);
+        studentParticipation.setInitializationDate(ZonedDateTime.now());
+        studentParticipationRepo.save(studentParticipation);
+        result = new Result();
+        result.setParticipation(studentParticipation);
+        result.setRated(true);
+        result.setScore(40L);
+        resultRepo.save(result);
+
+        // score for student3 in exercise3 in course1
+        user = userRepo.findAllInGroup("tumuser").get(2);
+        studentParticipation = new StudentParticipation().exercise(exercise);
+        studentParticipation.setParticipant(user);
+        studentParticipation.setInitializationDate(ZonedDateTime.now());
+        studentParticipationRepo.save(studentParticipation);
+        result = new Result();
+        result.setParticipation(studentParticipation);
+        result.setRated(true);
+        result.setScore(100L);
+        resultRepo.save(result);
+
+        var response = request.get("/api/student-leaderboard/course/" + course.getId() + "/mode/" + mode, HttpStatus.OK, List.class);
+        assertThat(response.isEmpty()).as("response is not empty").isFalse();
+        assertThat(response.size()).as("response has length 2").isEqualTo(2);
     }
 
     @Test
