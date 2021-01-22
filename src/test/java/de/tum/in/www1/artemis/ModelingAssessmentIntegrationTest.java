@@ -958,8 +958,8 @@ public class ModelingAssessmentIntegrationTest extends AbstractSpringIntegration
         List<Feedback> feedbacks = ModelFactory.generateFeedback().stream().peek(feedback -> feedback.setDetailText("Good work here")).collect(Collectors.toList());
         params = new LinkedMultiValueMap<>();
         params.add("submit", "true");
-        final var firstSubmittedManualResult = request.putWithResponseBodyAndParams(API_MODELING_SUBMISSIONS + submissionWithoutFirstAssessment.getId() + "/assessment", feedbacks,
-                Result.class, HttpStatus.OK, params);
+        final var firstSubmittedManualResult = request.putWithResponseBodyAndParams(
+                API_MODELING_SUBMISSIONS + submissionWithoutFirstAssessment.getId() + "/result/" + 1 + "/assessment", feedbacks, Result.class, HttpStatus.OK, params);
 
         // make sure that new result correctly appears after the assessment for first correction round
         assessedSubmissionList = request.getList("/api/exercises/" + exerciseWithParticipation.getId() + "/modeling-submissions", HttpStatus.OK, ModelingSubmission.class,
@@ -1034,8 +1034,8 @@ public class ModelingAssessmentIntegrationTest extends AbstractSpringIntegration
         feedbacks = ModelFactory.generateFeedback().stream().peek(feedback -> feedback.setDetailText("Good work here")).collect(Collectors.toList());
         params = new LinkedMultiValueMap<>();
         params.add("submit", "true");
-        final var secondSubmittedManualResult = request.putWithResponseBodyAndParams(API_MODELING_SUBMISSIONS + submissionWithoutFirstAssessment.getId() + "/assessment", feedbacks,
-                Result.class, HttpStatus.OK, params);
+        final var secondSubmittedManualResult = request.putWithResponseBodyAndParams(
+                API_MODELING_SUBMISSIONS + submissionWithoutFirstAssessment.getId() + "/result/" + 2 + "/assessment", feedbacks, Result.class, HttpStatus.OK, params);
         assertThat(secondSubmittedManualResult).isNotNull();
 
         // make sure that new result correctly appears after the assessment for second correction round
