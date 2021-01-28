@@ -1,1 +1,5 @@
-{}
+{
+    "baseUrl": "http://localhost:9000",
+    "username": "ab12cde",
+    "password": "test_user_pwd"
+}
