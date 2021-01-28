@@ -173,7 +173,8 @@
         "webpack-merge": "5.7.3",
         "webpack-notifier": "1.12.0",
         "workbox-webpack-plugin": "5.1.4",
-        "write-file-webpack-plugin": "4.5.1"
+        "write-file-webpack-plugin": "4.5.1",
+        "cypress": "^6.3.0"
     },
     "engines": {
         "node": ">=15.4.0",
@@ -210,6 +211,8 @@
         "webpack:prod:main": "yarn run webpack --config webpack/webpack.prod.js --progress",
         "webpack:prod": "yarn run cleanup && yarn run webpack:prod:main && yarn run clean-www",
         "webpack-dev-server": "node --max-old-space-size=3072 node_modules/webpack-dev-server/bin/webpack-dev-server.js",
-        "webpack": "node --max-old-space-size=3072 --report-on-fatalerror node_modules/webpack/bin/webpack.js"
+        "webpack": "node --max-old-space-size=3072 --report-on-fatalerror node_modules/webpack/bin/webpack.js",
+        "cypress:open": "cypress open",
+        "cypress:run": "cypress run"
     }
 }
