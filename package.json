@@ -207,7 +207,7 @@
         "webpack:prod": "yarn run cleanup && yarn run webpack:prod:main && yarn run clean-www",
         "webpack-dev-server": "node --max-old-space-size=3072 node_modules/webpack-dev-server/bin/webpack-dev-server.js",
         "webpack": "node --max-old-space-size=3072 --report-on-fatalerror node_modules/webpack/bin/webpack.js",
-        "cypress:open": "cypress open",
-        "cypress:run": "cypress run"
+        "cypress:open": "src/test/e2e-tests/cypress open",
+        "cypress:run": "src/test/e2e-tests/cypress run"
     }
 }

@@ -14,7 +14,7 @@ describe('SignIn Page', () => {
         cy.get('#username').type(Cypress.config('username'));
         // @ts-ignore
         cy.get('#password').type(Cypress.config('password'));
-        cy.get('.btn').click();
+        cy.get('#signIn-button').click();
         cy.wait('@authenticate');
         cy.url().should('contain', 'courses');
         cy.wait('@dashboard');
