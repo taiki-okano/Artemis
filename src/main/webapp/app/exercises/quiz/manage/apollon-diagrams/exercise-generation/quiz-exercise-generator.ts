@@ -110,7 +110,7 @@ function createDragAndDropQuestion(
     dragAndDropQuestion.title = title;
     dragAndDropQuestion.text = 'Fill the empty spaces in the UML diagram by dragging and dropping the elements below the diagram into the correct places.';
     dragAndDropQuestion.scoringType = ScoringType.PROPORTIONAL_WITH_PENALTY;
-    dragAndDropQuestion.score = 1;
+    dragAndDropQuestion.points = 1;
     dragAndDropQuestion.backgroundFilePath = backgroundFilePath;
     dragAndDropQuestion.dropLocations = dropLocations;
     dragAndDropQuestion.dragItems = dragItems;
