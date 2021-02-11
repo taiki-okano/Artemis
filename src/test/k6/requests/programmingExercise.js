@@ -182,7 +182,7 @@ export function startExercise(artemis, courseId, exerciseId) {
 export function createNewFile(artemis, participationId, filename) {
     const res = artemis.post(NEW_FILE(participationId), undefined, { file: filename });
 
-    if (res[0].status !== 200) {
+    if (res[0].status !== 200 && res[0].status !== 400) {
         fail('FAILTEST: Unable to create new file ' + filename);
     }
 }
@@ -207,7 +207,7 @@ export function simulateSubmission(artemis, participationSimulation, expectedRes
     artemis.websocket(function (socket) {
         // Subscribe to new results and participations
         socket.setTimeout(function () {
-            subscribe(participationSimulation.exerciseId, participationSimulation.participationId);
+            subscribe(socket, participationSimulation.exerciseId);
         }, 5 * 1000);
 
         socket.setTimeout(function () {
