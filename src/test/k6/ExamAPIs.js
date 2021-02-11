@@ -201,7 +201,6 @@ export default function (data) {
                             case 'programming':
                                 console.log('Programming submission counter is ' + programmingSubmissionCounter);
                                 if (programmingSubmissionCounter === 0) {
-                                    let simulation = new ParticipationSimulation(websocketConnectionTime, exercise.id, studentParticipations[0].id, someSuccessfulErrorContentJava);
                                     let simulation = new ParticipationSimulation(websocketConnectionTime, exercise.id, studentParticipations[0].id, someSuccessfulErrorContentJava(false));
                                     simulateSubmission(artemis, simulation, TestResult.FAIL, '2 of 13 passed');
                                 } else if (programmingSubmissionCounter === 1) {
