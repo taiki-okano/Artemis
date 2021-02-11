@@ -27,9 +27,9 @@ import { someSuccessfulErrorContentJava, allSuccessfulContentJava, buildErrorCon
 
 export let options = {
     maxRedirects: 0,
-    iterations: __ENV.ITERATIONS,
     vus: __ENV.ITERATIONS,
     rps: 5,
+    duration: '7200s',
     setupTimeout: '480s',
     teardownTimeout: '240s',
 };
