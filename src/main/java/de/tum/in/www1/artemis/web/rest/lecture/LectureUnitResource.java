@@ -2,6 +2,8 @@ package de.tum.in.www1.artemis.web.rest.lecture;
 
 import static de.tum.in.www1.artemis.web.rest.util.ResponseUtil.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +18,12 @@ import org.springframework.web.bind.annotation.*;
 
 import de.tum.in.www1.artemis.domain.LearningGoal;
 import de.tum.in.www1.artemis.domain.Lecture;
+import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.domain.lecture.AttachmentUnit;
 import de.tum.in.www1.artemis.domain.lecture.ExerciseUnit;
 import de.tum.in.www1.artemis.domain.lecture.LectureUnit;
-import de.tum.in.www1.artemis.repository.LearningGoalRepository;
-import de.tum.in.www1.artemis.repository.LectureRepository;
-import de.tum.in.www1.artemis.repository.LectureUnitRepository;
+import de.tum.in.www1.artemis.domain.lecture.LectureUnitInteraction;
+import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.service.AuthorizationCheckService;
 import de.tum.in.www1.artemis.web.rest.util.HeaderUtil;
 
@@ -44,12 +46,63 @@ public class LectureUnitResource {
 
     private final LearningGoalRepository learningGoalRepository;
 
+    private final LectureUnitInteractionRepository lectureUnitInteractionRepository;
+
+    private final UserRepository userRepository;
+
     public LectureUnitResource(AuthorizationCheckService authorizationCheckService, LectureRepository lectureRepository, LectureUnitRepository lectureUnitRepository,
-            LearningGoalRepository learningGoalRepository) {
+            LearningGoalRepository learningGoalRepository, LectureUnitInteractionRepository lectureUnitInteractionRepository, UserRepository userRepository) {
         this.authorizationCheckService = authorizationCheckService;
         this.lectureUnitRepository = lectureUnitRepository;
         this.lectureRepository = lectureRepository;
         this.learningGoalRepository = learningGoalRepository;
+        this.lectureUnitInteractionRepository = lectureUnitInteractionRepository;
+        this.userRepository = userRepository;
+
+    }
+
+    @GetMapping("/lectures/{lectureId}/interactions")
+    @PreAuthorize("hasAnyRole('USER', 'TA', 'INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<List<LectureUnitInteraction>> getInteractionsOfUserWithLecture(@PathVariable Long lectureId) throws URISyntaxException {
+        log.debug("REST request to get the interaction with lecture {}", lectureId);
+        Lecture lecture = lectureRepository.findByIdElseThrow(lectureId);
+        User user = userRepository.getUserWithGroupsAndAuthorities();
+        if (!authorizationCheckService.isAtLeastStudentInCourse(lecture.getCourse(), user)) {
+            return forbidden();
+        }
+        List<LectureUnitInteraction> interactionsOfUserWithLecture = lectureUnitInteractionRepository.interactionsOfUserWithLecture(lecture, user);
+        return ResponseEntity.ok().body(interactionsOfUserWithLecture);
+    }
+
+    /**
+     * POST /lectures/:lectureId/lecture-units/:lectureUnitId/interactions : creates a new interaction of a student with a lecture unit
+     *
+     * @param lectureId     the id of the lecture to which the lecture unit belongs
+     * @param lectureUnitId the id of the lecture unit to which the interaction should be added
+     * @return the ResponseEntity with status 201 (Created) and with body the newly created interaction
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/lectures/{lectureId}/lecture-units/{lectureUnitId}/interactions")
+    @PreAuthorize("hasAnyRole('USER', 'TA', 'INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<LectureUnitInteraction> createInteractionWithLectureUnit(@PathVariable Long lectureId, @PathVariable Long lectureUnitId,
+            @RequestBody LectureUnitInteraction interactionFromClient) throws URISyntaxException {
+        log.debug("REST request to create interaction with lecture unit: {}", lectureUnitId);
+        LectureUnit lectureUnit = lectureUnitRepository.findByIdElseThrow(lectureUnitId);
+        if (!lectureUnit.getLecture().getId().equals(lectureId)) {
+            return badRequest();
+        }
+        User user = userRepository.getUserWithGroupsAndAuthorities();
+        if (!authorizationCheckService.isAtLeastStudentInCourse(lectureUnit.getLecture().getCourse(), user)) {
+            return forbidden();
+        }
+        if (interactionFromClient.getId() != null) {
+            return badRequest();
+        }
+        LectureUnitInteraction persistedInteraction = new LectureUnitInteraction(interactionFromClient.getProgressInPercent(), user, lectureUnit);
+        persistedInteraction = lectureUnitInteractionRepository.saveAndFlush(persistedInteraction);
+
+        return ResponseEntity.created(new URI("/api/lecture-unit-interactions/" + persistedInteraction.getId()))
+                .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "lectureUnitInteraction", "")).body(persistedInteraction);
     }
 
     /**

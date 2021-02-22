@@ -9,6 +9,7 @@ import { AttachmentUnit } from 'app/entities/lecture-unit/attachmentUnit.model';
 import { AttachmentService } from 'app/lecture/attachment.service';
 import { ExerciseUnit } from 'app/entities/lecture-unit/exerciseUnit.model';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
+import { LectureUnitInteraction } from 'app/entities/lecture-unit/lectureUnitInteraction.model';
 
 type EntityArrayResponseType = HttpResponse<LectureUnit[]>;
 
@@ -19,6 +20,16 @@ export class LectureUnitService {
     private resourceURL = SERVER_API_URL + 'api';
 
     constructor(private httpClient: HttpClient, private attachmentService: AttachmentService, private exerciseService: ExerciseService) {}
+
+    getInteractions(lectureId: number) {
+        return this.httpClient.get<LectureUnitInteraction[]>(`${this.resourceURL}/lectures/${lectureId}/interactions`, { observe: 'response' });
+    }
+
+    createInteraction(lectureUnitInteraction: LectureUnitInteraction, lectureId: number, lectureUnitId: number): Observable<HttpResponse<LectureUnitInteraction>> {
+        return this.httpClient.post<ExerciseUnit>(`${this.resourceURL}/lectures/${lectureId}/lecture-units/${lectureUnitId}/interactions`, lectureUnitInteraction, {
+            observe: 'response',
+        });
+    }
 
     updateOrder(lectureId: number, lectureUnits: LectureUnit[]): Observable<HttpResponse<LectureUnit[]>> {
         // need to remove participations from exercise units to prevent circular structure failure

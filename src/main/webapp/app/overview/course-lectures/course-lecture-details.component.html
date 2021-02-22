@@ -1,10 +1,17 @@
-<div *ngIf="lecture">
+<jhi-alert></jhi-alert>
+
+<div *ngIf="isLoading" class="d-flex justify-content-center">
+    <div class="spinner-border" role="status">
+        <span class="sr-only">{{ 'loading' | translate }}</span>
+    </div>
+</div>
+
+<div *ngIf="!isLoading && lecture">
     <!-- HEADER INFORMATION START -->
     <div class="course-info-bar">
         <div class="row">
             <div class="col general-info">
                 <h3>
-                    <fa-icon [icon]="'arrow-left'" (click)="backToCourse()" class="back-button mr-2"></fa-icon>
                     <span>{{ lecture!.title }}</span>
                 </h3>
                 <h4>
@@ -34,11 +41,14 @@
                 </div>
             </div>
             <div class="row mb-4" *ngFor="let lectureUnit of lectureUnits">
-                <div class="col-11" [ngSwitch]="lectureUnit.type">
+                <div class="col-10" [ngSwitch]="lectureUnit.type">
                     <jhi-exercise-unit *ngSwitchCase="LectureUnitType.EXERCISE" [exerciseUnit]="lectureUnit" [course]="lecture?.course"></jhi-exercise-unit>
                     <jhi-attachment-unit *ngSwitchCase="LectureUnitType.ATTACHMENT" [attachmentUnit]="lectureUnit"></jhi-attachment-unit>
                     <jhi-video-unit *ngSwitchCase="LectureUnitType.VIDEO" [videoUnit]="lectureUnit"></jhi-video-unit>
                     <jhi-text-unit *ngSwitchCase="LectureUnitType.TEXT" [textUnit]="lectureUnit"></jhi-text-unit>
+                </div>
+                <div class="col-1 my-auto mx-auto">
+                    <jhi-lecture-unit-check-mark [isChecked]="getInteraction(lectureUnit) !== undefined"></jhi-lecture-unit-check-mark>
                 </div>
                 <div class="col-1 my-auto mx-auto">
                     <jhi-learning-goals-popover
