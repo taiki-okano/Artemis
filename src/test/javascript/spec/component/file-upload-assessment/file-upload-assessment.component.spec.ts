@@ -160,6 +160,7 @@ describe('FileUploadAssessmentComponent', () => {
         it('should get correctionRound', fakeAsync(() => {
             getFileUploadSubmissionForExerciseWithoutAssessmentStub.returns(throwError({ status: 404 }));
 
+            // set all attributes for comp
             comp.ngOnInit();
 
             comp.userId = 99;
@@ -256,10 +257,13 @@ describe('FileUploadAssessmentComponent', () => {
         const result = createResult(submission);
         result.hasFeedback = true;
         const feedback1 = new Feedback();
-        feedback1.type = FeedbackType.AUTOMATIC;
+        feedback1.type = FeedbackType.MANUAL_UNREFERENCED;
+        feedback1.credits = 5;
+        feedback1.detailText = 'Unreferenced Feedback 1';
         const feedback2 = new Feedback();
         feedback2.credits = 10;
-        feedback2.type = FeedbackType.AUTOMATIC;
+        feedback2.type = FeedbackType.MANUAL_UNREFERENCED;
+        feedback2.detailText = 'Unreferenced Feedback 2';
         const feedbacks = [feedback1, feedback2];
         result.feedbacks = cloneDeep(feedbacks);
         stub(fileUploadSubmissionService, 'get').returns(of({ body: submission } as EntityResponseType));
@@ -267,12 +271,15 @@ describe('FileUploadAssessmentComponent', () => {
         setLatestSubmissionResult(comp.submission, result);
 
         fixture.detectChanges();
-        expect(comp.generalFeedback).to.deep.equal(feedbacks[0]);
-        expect(comp.unreferencedFeedback.length).to.equal(1);
+        expect(comp.unreferencedFeedback.length).to.equal(2);
         expect(comp.busy).to.be.false;
-        expect(comp.totalScore).to.equal(10);
+        expect(comp.totalScore).to.equal(15);
 
         // delete feedback
+        comp.deleteAssessment(comp.unreferencedFeedback[0]);
+        expect(comp.unreferencedFeedback.length).to.equal(1);
+        expect(comp.totalScore).to.equal(10);
+
         comp.deleteAssessment(comp.unreferencedFeedback[0]);
         expect(comp.unreferencedFeedback.length).to.equal(0);
         expect(comp.totalScore).to.equal(0);
@@ -312,7 +319,7 @@ describe('FileUploadAssessmentComponent', () => {
             // changed result
             const feedback = new Feedback();
             feedback.credits = 10;
-            feedback.type = FeedbackType.AUTOMATIC;
+            feedback.type = FeedbackType.MANUAL;
             const changedResult = cloneDeep(initResult);
             changedResult.feedbacks = [feedback];
             changedResult.hasFeedback = true;
@@ -358,10 +365,11 @@ describe('FileUploadAssessmentComponent', () => {
         const submission = createSubmission(exercise);
         const feedback = new Feedback();
         feedback.credits = 20;
-        feedback.type = FeedbackType.AUTOMATIC;
+        feedback.detailText = 'Feedback 1';
+        feedback.type = FeedbackType.MANUAL_UNREFERENCED;
         // initial result
         const initResult = createResult(submission);
-        initResult.assessmentType = AssessmentType.AUTOMATIC;
+        initResult.assessmentType = AssessmentType.MANUAL;
         initResult.hasFeedback = true;
         initResult.feedbacks = [feedback];
         // changed result
@@ -384,10 +392,11 @@ describe('FileUploadAssessmentComponent', () => {
             const submission = createSubmission(exercise);
             const feedback = new Feedback();
             feedback.credits = 10;
-            feedback.type = FeedbackType.AUTOMATIC;
+            feedback.detailText = 'Feedback 1';
+            feedback.type = FeedbackType.MANUAL_UNREFERENCED;
             // initial result
             const initResult = createResult(submission);
-            initResult.assessmentType = AssessmentType.AUTOMATIC;
+            initResult.assessmentType = AssessmentType.MANUAL;
             initResult.hasFeedback = true;
             initResult.feedbacks = [feedback];
             // changed result
