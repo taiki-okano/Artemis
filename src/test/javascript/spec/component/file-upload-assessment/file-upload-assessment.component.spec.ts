@@ -427,10 +427,11 @@ describe('FileUploadAssessmentComponent', () => {
             const submission = createSubmission(exercise);
             const feedback = new Feedback();
             feedback.credits = 10;
-            feedback.type = FeedbackType.AUTOMATIC;
+            feedback.detailText = 'Feedback 1';
+            feedback.type = FeedbackType.MANUAL_UNREFERENCED;
             // initial result
             const initResult = createResult(submission);
-            initResult.assessmentType = AssessmentType.AUTOMATIC;
+            initResult.assessmentType = AssessmentType.MANUAL;
             initResult.hasFeedback = true;
             initResult.feedbacks = [feedback];
             // changed result
@@ -460,10 +461,11 @@ describe('FileUploadAssessmentComponent', () => {
             const submission = createSubmission(exercise);
             const feedback = new Feedback();
             feedback.credits = 10;
-            feedback.type = FeedbackType.AUTOMATIC;
+            feedback.detailText = 'Feedback 1';
+            feedback.type = FeedbackType.MANUAL_UNREFERENCED;
             // initial result
             const initResult = createResult(submission);
-            initResult.assessmentType = AssessmentType.AUTOMATIC;
+            feedback.type = FeedbackType.MANUAL_UNREFERENCED;
             initResult.hasFeedback = true;
             initResult.feedbacks = [feedback];
             // changed result
