@@ -131,6 +131,9 @@
                             <span jhiTranslate="artemisApp.exam.examSummary.points.bonus">Bonus points</span>
                         </th>
                         <th>
+                            <span jhiTranslate="artemisApp.studentExamDetail.hasComplaint">Has Complaint</span>
+                        </th>
+                        <th>
                             <span jhiTranslate="artemisApp.studentExamDetail.reviewer">Reviewer</span>
                         </th>
                     </tr>
@@ -156,6 +159,12 @@
                         </td>
                         <td class="align-middle">
                             {{ exercise?.bonusPoints }}
+                        </td>
+                        <td class="align-middle">
+                            <div *ngIf="exercise?.studentParticipations && exercise?.studentParticipations.length > 0 && (exercise?.studentParticipations)![0].results">
+                                <span *ngIf="(exercise?.studentParticipations)![0].results[0].hasComplaint" jhiTranslate="artemisApp.studentExamDetail.hasComplaintYes"></span>
+                                <span *ngIf="!(exercise?.studentParticipations)![0].results[0].hasComplaint" jhiTranslate="artemisApp.studentExamDetail.hasComplaintNo"></span>
+                            </div>
                         </td>
                         <td class="align-middle">
                             <ng-container
