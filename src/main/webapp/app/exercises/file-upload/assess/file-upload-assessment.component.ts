@@ -104,6 +104,9 @@ export class FileUploadAssessmentComponent implements OnInit, OnDestroy {
         });
 
         this.route.params.subscribe((params) => {
+            const resultId = Number(params['resultId']);
+            console.log('resultId', resultId);
+
             this.courseId = Number(params['courseId']);
             const exerciseId = Number(params['exerciseId']);
             this.exerciseId = exerciseId;

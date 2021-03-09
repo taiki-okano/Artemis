@@ -95,6 +95,8 @@ export class ModelingAssessmentEditorComponent implements OnInit {
             this.correctionRound = Number(queryParams.get('correction-round'));
         });
         this.route.paramMap.subscribe((params) => {
+            const resultId = Number(params.get('resultId'));
+            console.log('resultId', resultId);
             this.courseId = Number(params.get('courseId'));
             const exerciseId = Number(params.get('exerciseId'));
             const submissionId = params.get('submissionId');
