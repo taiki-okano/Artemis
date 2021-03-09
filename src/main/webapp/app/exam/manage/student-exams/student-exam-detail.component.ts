@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StudentExam } from 'app/entities/student-exam.model';
 import { StudentExamService } from 'app/exam/manage/student-exams/student-exam.service';
 import { Course } from 'app/entities/course.model';
@@ -12,6 +12,7 @@ import { JhiAlertService } from 'ng-jhipster';
 import { round } from 'app/shared/util/utils';
 import * as moment from 'moment';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Submission } from 'app/entities/submission.model';
 
 @Component({
     selector: 'jhi-student-exam-detail',
@@ -30,8 +31,11 @@ export class StudentExamDetailComponent implements OnInit {
     achievedTotalPoints = 0;
     bonusTotalPoints = 0;
     busy = false;
+    openingAssessmentEditorForNewSubmission = false;
+    readonly ExerciseType = ExerciseType;
 
     constructor(
+        private router: Router,
         private route: ActivatedRoute,
         private studentExamService: StudentExamService,
         private courseService: CourseManagementService,
@@ -123,6 +127,7 @@ export class StudentExamDetailComponent implements OnInit {
                 this.achievedTotalPoints += this.rounding((exercise.studentParticipations[0].results[0].score! * exercise.maxPoints!) / 100);
             }
         });
+        console.log(this.studentExam);
     }
 
     private initWorkingTimeForm() {
@@ -208,5 +213,40 @@ export class StudentExamDetailComponent implements OnInit {
             },
             () => {},
         );
+    }
+
+    /**
+     * Uses the router to navigate to the assessment editor for a given/new submission
+     *
+     * @param exercise Exercise
+     * @param submission Either submission or 'new'.
+     * @param resultId
+     */
+    async openAssessmentEditor(exercise: Exercise, submission: Submission, resultId?: number): Promise<void> {
+        // new button here submissions/:submissionId/assessments/:resultsId
+        console.log('routes', exercise, submission, resultId);
+        if (!exercise || !exercise.type || !submission || !submission.id) {
+            return;
+        }
+
+        this.openingAssessmentEditorForNewSubmission = true;
+        let route;
+        if (exercise.type === ExerciseType.PROGRAMMING) {
+            // open submissions dashboard in case of programming exercises
+            route = `/course-management/${this.courseId}/${exercise.type}-exercises/${exercise.id}/assessment`;
+        } else {
+            if (resultId === undefined) {
+                route = `/course-management/${this.courseId}/${exercise.type}-exercises/${exercise.id}/submissions/${submission.id!}/assessment`;
+            } else {
+                route = `/course-management/${this.courseId}/${exercise.type}-exercises/${exercise.id}/submissions/${submission.id!}/assessments/${resultId}`;
+            }
+            console.log(route);
+        }
+        if (this.isTestRun) {
+            await this.router.navigate([route], { queryParams: { testRun: this.isTestRun } });
+        } else {
+            await this.router.navigate([route]);
+        }
+        this.openingAssessmentEditorForNewSubmission = false;
     }
 }
