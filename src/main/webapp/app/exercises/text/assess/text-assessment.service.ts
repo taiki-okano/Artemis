@@ -124,6 +124,34 @@ export class TextAssessmentService {
             );
     }
 
+    public getFeedbackDataForExerciseSubmissionByResultId(submissionId: number, resultId: number) {
+        console.log('this is a new route!', submissionId, resultId);
+        /*let params = new HttpParams();
+        params = params.set('resultId', resultId.toString());
+        return this.http
+            .get<StudentParticipation>(`${this.resourceUrl}/submission/${submissionId}`, { observe: 'response', params })
+            .pipe(
+                // Wire up Result and Submission
+                tap((response) => {
+                    const participation = response.body!;
+                    const submission = participation.submissions![0];
+                    setLatestSubmissionResult(submission, getLatestSubmissionResult(submission));
+                    submission.participation = participation;
+                    participation.results = submission.results!;
+                     todo const result = getSubmissionResultByCorrectionRound(submission, correctionRound)!;
+                    result.submission = submission;
+                    result.participation = participation;
+                    // Make sure Feedbacks Array is initialized
+                    result.feedbacks = result.feedbacks || [];
+                    TextAssessmentService.convertFeedbackConflictsFromServer(result.feedbacks);
+                    (submission as TextSubmission).atheneTextAssessmentTrackingToken = response.headers.get('x-athene-tracking-authorization') || undefined;
+                }),
+                map((response) => response.body!),
+            );
+            */
+        return Observable.of({});
+    }
+
     /**
      * Gets an example result for defined exercise and submission.
      * @param exerciseId id of the exercise for which the example result should be retrieved of type {number}
