@@ -16,6 +16,15 @@ export const routes: Routes = [
         canActivate: [UserRouteAccessService],
     },
     {
+        path: ':courseId/file-upload-exercises/:exerciseId/submissions/:submissionId/assessments/:resultid',
+        component: FileUploadAssessmentComponent,
+        data: {
+            authorities: [Authority.ADMIN, Authority.INSTRUCTOR],
+            pageTitle: 'artemisApp.fileUploadExercise.home.title',
+        },
+        canActivate: [UserRouteAccessService],
+    },
+    {
         path: ':courseId/file-upload-exercises/:exerciseId/assessment',
         component: FileUploadAssessmentDashboardComponent,
         data: {
