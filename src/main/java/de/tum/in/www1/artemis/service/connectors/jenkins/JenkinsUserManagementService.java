@@ -78,13 +78,19 @@ public class JenkinsUserManagementService implements CIUserManagementService {
             throw new JenkinsException("Cannot create user: " + user.getLogin() + " because the login contains illegal characters");
         }
 
+        // Guarantee that the groups are loaded
+        var userWithGroups = userRepository.findOneWithGroupsByLogin(user.getLogin());
+        if (userWithGroups.isEmpty()) {
+            throw new JenkinsException("Cannot create user: " + user.getLogin() + " because the it groups cannot be loaded.");
+        }
+
         try {
             // Create the Jenkins user
             var uri = UriComponentsBuilder.fromHttpUrl(jenkinsServerUrl.toString()).pathSegment("securityRealm", "createAccountByAdmin").build().toUri();
             restTemplate.exchange(uri, HttpMethod.POST, getCreateUserFormHttpEntity(user), Void.class);
 
             // Adds the user to groups of existing programming exercises
-            addUserToGroups(user.getLogin(), user.getGroups());
+            addUserToGroups(user.getLogin(), userWithGroups.get().getGroups());
         }
         catch (RestClientException e) {
             throw new JenkinsException("Cannot create user: " + user.getLogin(), e);
@@ -114,16 +120,23 @@ public class JenkinsUserManagementService implements CIUserManagementService {
     @Override
     public void deleteUser(User user) throws ContinuousIntegrationException {
         var userLogin = user.getLogin();
+
         // Only delete a user if it exists.
         var jenkinsUser = getUser(userLogin);
         if (jenkinsUser == null) {
             return;
         }
 
+        // Guarantee that the groups are loaded
+        var userWithGroups = userRepository.findOneWithGroupsByLogin(user.getLogin());
+        if (userWithGroups.isEmpty()) {
+            throw new JenkinsException("Cannot delete user: " + user.getLogin() + " because the it groups cannot be loaded.");
+        }
+
         try {
             var uri = UriComponentsBuilder.fromHttpUrl(jenkinsServerUrl.toString()).pathSegment("user", userLogin, "doDelete").build().toUri();
             restTemplate.exchange(uri, HttpMethod.POST, null, Void.class);
-            removeUserFromGroups(userLogin, user.getGroups());
+            removeUserFromGroups(userLogin, userWithGroups.get().getGroups());
         }
         catch (RestClientException e) {
             throw new JenkinsException("Cannot delete user: " + userLogin, e);
@@ -166,12 +179,18 @@ public class JenkinsUserManagementService implements CIUserManagementService {
             return;
         }
 
+        // Guarantee that the groups are loaded
+        var userWithGroups = userRepository.findOneWithGroupsByLogin(user.getLogin());
+        if (userWithGroups.isEmpty()) {
+            throw new JenkinsException("Cannot update user: " + user.getLogin() + " because the it groups cannot be loaded.");
+        }
+
         // We create a new user object which has the old user login and groups.
         // We do this to revoke the old permissions for that user before creating
         // the new one.
         var oldUser = new User();
         oldUser.setLogin(oldLogin);
-        oldUser.setGroups(user.getGroups());
+        oldUser.setGroups(userWithGroups.get().getGroups());
         deleteUser(oldUser);
 
         createUser(user);
