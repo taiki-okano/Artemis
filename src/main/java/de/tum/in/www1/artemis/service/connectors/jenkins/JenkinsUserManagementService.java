@@ -133,10 +133,20 @@ public class JenkinsUserManagementService implements CIUserManagementService {
             throw new JenkinsException("Cannot delete user: " + user.getLogin() + " because the it groups cannot be loaded.");
         }
 
+        deleteUser(userLogin, userWithGroups.get().getGroups());
+    }
+
+    /**
+     * Deletes the user from Jenkins and removes its permissions for each
+     * exercise belonging to the group.
+     * @param userLogin the login of the Jenkins user
+     * @param groups the groups of the user
+     */
+    private void deleteUser(String userLogin, Set<String> groups) {
         try {
             var uri = UriComponentsBuilder.fromHttpUrl(jenkinsServerUrl.toString()).pathSegment("user", userLogin, "doDelete").build().toUri();
             restTemplate.exchange(uri, HttpMethod.POST, null, Void.class);
-            removeUserFromGroups(userLogin, userWithGroups.get().getGroups());
+            removeUserFromGroups(userLogin, groups);
         }
         catch (RestClientException e) {
             throw new JenkinsException("Cannot delete user: " + userLogin, e);
@@ -191,8 +201,7 @@ public class JenkinsUserManagementService implements CIUserManagementService {
         var oldUser = new User();
         oldUser.setLogin(oldLogin);
         oldUser.setGroups(userWithGroups.get().getGroups());
-        deleteUser(oldUser);
-
+        deleteUser(oldLogin, userWithGroups.get().getGroups());
         createUser(user);
     }
 
