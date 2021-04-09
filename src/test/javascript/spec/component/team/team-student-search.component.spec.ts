@@ -1,4 +1,4 @@
-import { async, ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
@@ -39,7 +39,6 @@ describe('TeamStudentSearchComponent', () => {
     let debugElement: DebugElement;
 
     let teamService: TeamService;
-    const inputFieldValue = 'input#student-search-input.form-control.open';
     const teamSearchUser1: TeamSearchUser = { id: 1, login: 'artemis_user_1', assignedTeamId: undefined };
     const teamSearchUser2: TeamSearchUser = { id: 2, login: 'artemis_user_2', assignedTeamId: undefined };
     const textMock$: Observable<string> = of('artemis');
