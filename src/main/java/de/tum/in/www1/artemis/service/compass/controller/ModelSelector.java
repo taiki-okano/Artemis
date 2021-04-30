@@ -4,9 +4,14 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.tum.in.www1.artemis.service.compass.umlmodel.UMLDiagram;
 
 public class ModelSelector {
+
+    private final Logger log = LoggerFactory.getLogger(ModelSelector.class);
 
     /**
      * Maximal number of models that are considered for calculating the next optimal models that need to be assessed, i.e. we take the MAX_CANDIDATE_LIST_SIZE models with the
@@ -40,6 +45,7 @@ public class ModelSelector {
     private AutomaticAssessmentController automaticAssessmentController;
 
     public ModelSelector(AutomaticAssessmentController automaticAssessmentController) {
+        log.info("Create model selector");
         this.automaticAssessmentController = automaticAssessmentController;
     }
 
@@ -53,6 +59,7 @@ public class ModelSelector {
      * @return the ids of the models which should be assessed next by an assessor, or an empty list if there are no unhandled models
      */
     public List<Long> selectNextModels(ModelIndex modelIndex, int numberOfModels) {
+        log.info("Select next models with {} number of models=> selectNextModels()", numberOfModels);
         double threshold = 0.15;
         int maxCandidateListSize = 10;
 
@@ -64,6 +71,7 @@ public class ModelSelector {
             }
         }
 
+        log.info("Select define candidate models {}=> selectNextModels()", unhandledModels);
         List<UMLDiagram> candidates = unhandledModels;
         candidates.sort(Comparator.comparingDouble(model -> automaticAssessmentController.getLastAssessmentCoverage(model.getModelSubmissionId())));
         // Make sure that the candidate list is not too big
@@ -86,10 +94,11 @@ public class ModelSelector {
         if (!nextOptimalModels.isEmpty()) {
             alreadyHandledModels.addAll(nextOptimalModels);
             modelsWaitingForAssessment.addAll(nextOptimalModels);
-
+            log.info("Return next optimal models {} => selectNextModels()", nextOptimalModels);
             return nextOptimalModels;
         }
 
+        log.info("Select any unassessed modes from model index since no optimal model has been found  => selectNextModels()");
         // Fallback: if no optimal models could be determined by similarity, select any unassessed models
         for (UMLDiagram model : modelIndex.getModelCollection()) {
             if (automaticAssessmentController.isUnassessed(model.getModelSubmissionId()) && !alreadyHandledModels.contains(model.getModelSubmissionId())) {
@@ -114,6 +123,7 @@ public class ModelSelector {
      * @return the given number of candidate models with the highest mean similarity
      */
     private List<Long> computeModelsWithHighestSimilarity(int numberOfModels, List<UMLDiagram> candidates, List<UMLDiagram> unhandledModels) {
+        log.info("Compute models with highest similarity => computeModelsWithHighestSimilarity({},{},{})", numberOfModels, candidates, unhandledModels);
         if (numberOfModels == 0 || candidates == null || candidates.isEmpty() || unhandledModels == null || unhandledModels.isEmpty()) {
             return new ArrayList<>();
         }
@@ -142,18 +152,22 @@ public class ModelSelector {
     }
 
     public List<Long> getModelsWaitingForAssessment() {
+        log.info("getModelsWaitingForAssessment()");
         return new ArrayList<>(modelsWaitingForAssessment);
     }
 
     public void addAlreadyHandledModel(long modelId) {
+        log.info("addAlreadyHandledModel({})", modelId);
         alreadyHandledModels.add(modelId);
     }
 
     public void removeModelWaitingForAssessment(long modelId) {
+        log.info("removeModelWaitingForAssessment({})", modelId);
         modelsWaitingForAssessment.remove(modelId);
     }
 
     public void removeAlreadyHandledModel(long modelId) {
+        log.info("removeAlreadyHandledModel({})", modelId);
         alreadyHandledModels.remove(modelId);
     }
 }

@@ -73,6 +73,7 @@ public class CompassCalculationEngine {
      * @return true if the submission already has a completed manual assessment, false otherwise
      */
     private boolean hasCompletedManualAssessment(ModelingSubmission modelingSubmission) {
+        log.info("hasCompletedManualAssessment({})", modelingSubmission.getId());
         return modelingSubmission.getLatestResult() != null && modelingSubmission.getLatestResult().getCompletionDate() != null
                 && modelingSubmission.getLatestResult().getAssessmentType().equals(AssessmentType.MANUAL);
     }
@@ -85,6 +86,7 @@ public class CompassCalculationEngine {
      * @param modelingSubmission the modeling submission containing the model as JSON string
      */
     private void buildModel(ModelingSubmission modelingSubmission) {
+        log.info("buildModel({})", modelingSubmission.getId());
         if (modelingSubmission.getModel() != null) {
             buildModel(modelingSubmission.getId(), parseString(modelingSubmission.getModel()).getAsJsonObject());
         }
@@ -98,6 +100,7 @@ public class CompassCalculationEngine {
      * @param jsonModel         JSON representation of the UML model
      */
     private void buildModel(long modelSubmissionId, JsonObject jsonModel) {
+        log.info("buildModel({},{})", modelSubmissionId, jsonModel);
         try {
             UMLDiagram model = UMLModelParser.buildModelFromJSON(jsonModel, modelSubmissionId);
             SimilarityDetector.analyzeSimilarity(model, modelIndex);
@@ -115,6 +118,7 @@ public class CompassCalculationEngine {
      * @param submission the submission for which the manual assessment is added
      */
     private void addManualAssessmentForSubmission(ModelingSubmission submission) {
+        log.info("Get model for submission {} from model index => addManualAssessmentForSubmission()", submission.getId());
         UMLDiagram model = modelIndex.getModelMap().get(submission.getId());
 
         if (model == null || submission.getLatestResult() == null || submission.getLatestResult().getCompletionDate() == null) {
@@ -129,24 +133,29 @@ public class CompassCalculationEngine {
     }
 
     protected Collection<UMLDiagram> getUmlModelCollection() {
+        log.info("getUmlModelCollection()");
         return modelIndex.getModelCollection();
     }
 
     protected Map<Long, UMLDiagram> getModelMap() {
+        log.info("getModelMap()");
         return modelIndex.getModelMap();
     }
 
     @SuppressWarnings("unused")
     private double getTotalCoverage() {
+        log.info("getTotalCoverage()");
         return automaticAssessmentController.getTotalCoverage();
     }
 
     @SuppressWarnings("unused")
     private double getTotalConfidence() {
+        log.info("getTotalConfidence()");
         return automaticAssessmentController.getTotalConfidence();
     }
 
     private void assessModelsAutomatically() {
+        log.info("assessModelsAutomatically()");
         automaticAssessmentController.assessModelsAutomatically(modelIndex);
     }
 
@@ -158,6 +167,7 @@ public class CompassCalculationEngine {
      * @return the ids of the next optimal modeling submissions, or an empty list if there are no unhandled submissions
      */
     public List<Long> getNextOptimalModels(int numberOfModels) {
+        log.info("getNextOptimalModels({})", numberOfModels);
         lastUsed = LocalDateTime.now();
         return modelSelector.selectNextModels(modelIndex, numberOfModels);
     }
@@ -170,10 +180,12 @@ public class CompassCalculationEngine {
      */
     public Grade getGradeForModel(long modelSubmissionId) {
         lastUsed = LocalDateTime.now();
+        log.info("Check if submission {} is in model index => getGradeForModel({})", modelSubmissionId, modelSubmissionId);
         if (!modelIndex.getModelMap().containsKey(modelSubmissionId)) {
             return null;
         }
 
+        log.info("Get model for submission {} from model index => getGradeForModel({})", modelSubmissionId, modelSubmissionId);
         UMLDiagram model = modelIndex.getModelMap().get(modelSubmissionId);
         CompassResult compassResult = automaticAssessmentController.getLastAssessmentCompassResult(modelSubmissionId);
 
@@ -184,6 +196,7 @@ public class CompassCalculationEngine {
     }
 
     public Collection<Long> getModelIds() {
+        log.info("Get submission ids for models in model index => getModelIds()");
         return modelIndex.getModelMap().keySet();
     }
 
@@ -196,6 +209,7 @@ public class CompassCalculationEngine {
     public void notifyNewAssessment(List<Feedback> modelingAssessment, long assessedModelSubmissionId) {
         lastUsed = LocalDateTime.now();
         modelSelector.addAlreadyHandledModel(assessedModelSubmissionId);
+        log.info("Notify for new assessment => notifyNewAssessment({},{})", modelingAssessment, assessedModelSubmissionId);
         UMLDiagram model = modelIndex.getModel(assessedModelSubmissionId);
         if (model == null) {
             log.warn("Cannot add manual assessment to Compass, because the model in modelIndex is null for submission id {}", assessedModelSubmissionId);
@@ -215,6 +229,7 @@ public class CompassCalculationEngine {
     public void notifyNewModel(String model, long modelId) {
         lastUsed = LocalDateTime.now();
         // Do not add models that might already exist
+        log.info("Check if model {} is in model index => notifyNewModel({},{})", modelId, model, modelId);
         if (modelIndex.getModelMap().containsKey(modelId)) {
             return;
         }
@@ -233,6 +248,7 @@ public class CompassCalculationEngine {
      */
     public void notifyNewModels(List<ModelingSubmission> submissions) {
         lastUsed = LocalDateTime.now();
+        log.info("notifyNewModels({})", submissions);
         for (ModelingSubmission submission : submissions) {
             notifyNewModel(submission.getModel(), submission.getId());
         }
@@ -242,6 +258,7 @@ public class CompassCalculationEngine {
      * @return the time when the engine has been used last
      */
     public LocalDateTime getLastUsedAt() {
+        log.info("getLastUsedAt()");
         return lastUsed;
     }
 
@@ -252,6 +269,7 @@ public class CompassCalculationEngine {
      * @return a list of modelIds that should be assessed next
      */
     public List<Long> getModelsWaitingForAssessment() {
+        log.info("getModelsWaitingForAssessment()");
         return modelSelector.getModelsWaitingForAssessment();
     }
 
@@ -263,6 +281,7 @@ public class CompassCalculationEngine {
      * @param isAssessed a flag indicating if the model still needs an assessment or not
      */
     public void removeModelWaitingForAssessment(long modelSubmissionId, boolean isAssessed) {
+        log.info("removeModelWaitingForAssessment()");
         modelSelector.removeModelWaitingForAssessment(modelSubmissionId);
         if (isAssessed) {
             modelSelector.addAlreadyHandledModel(modelSubmissionId);
@@ -278,6 +297,7 @@ public class CompassCalculationEngine {
      * @param modelSubmissionId the id of the model that should be marked as unassessed
      */
     public void markModelAsUnassessed(long modelSubmissionId) {
+        log.info("markModelAsUnassessed({})", modelSubmissionId);
         modelSelector.removeAlreadyHandledModel(modelSubmissionId);
     }
 
@@ -291,6 +311,7 @@ public class CompassCalculationEngine {
      * @return the list of Feedback items generated from the Grade
      */
     public List<Feedback> convertToFeedback(Grade grade, long modelId, Result result) {
+        log.info("Get model {} from model index model map => convertToFeedback({},{},{})", modelId, grade, modelId, result);
         UMLDiagram model = this.modelIndex.getModelMap().get(modelId);
 
         if (model == null || grade == null || grade.getJsonIdPointsMapping() == null) {
@@ -354,6 +375,7 @@ public class CompassCalculationEngine {
 
         JsonObject uniqueElements = new JsonObject();
         int numberOfConflicts = 0;
+        log.info("Get elements from model index");
         for (UMLElement umlElement : modelIndex.getUniqueElements()) {
             JsonObject uniqueElement = new JsonObject();
             uniqueElement.addProperty("name", umlElement.toString());
@@ -407,6 +429,7 @@ public class CompassCalculationEngine {
      * @return the confidence for the model element with the given id
      */
     public double getConfidenceForElement(String elementId, long submissionId) {
+        log.info("getConfidenceForElement({},{})", elementId, submissionId);
         UMLDiagram model = modelIndex.getModel(submissionId);
         UMLElement element = model.getElementByJSONID(elementId);
         if (element == null) {
@@ -425,10 +448,12 @@ public class CompassCalculationEngine {
      * @param model              the corresponding model
      */
     private void addNewManualAssessment(List<Feedback> modelingAssessment, UMLDiagram model) {
+        log.info("addNewManualAssessment({},{})", modelingAssessment, model);
         automaticAssessmentController.addFeedbacksToSimilaritySet(modelingAssessment, model);
     }
 
     private boolean hasConflict(int elementId) {
+        log.info("hasConflict({})", elementId);
         Optional<SimilaritySetAssessment> optionalAssessment = automaticAssessmentController.getAssessmentForSimilaritySet(elementId);
 
         if (optionalAssessment.isEmpty() || optionalAssessment.get().getFeedbackList() == null || optionalAssessment.get().getFeedbackList().isEmpty()) {
@@ -514,8 +539,11 @@ public class CompassCalculationEngine {
             }
         }
 
+        log.info("Get models map and calculate its size from model index");
         long numberOfModels = modelIndex.getModelCollection().size();
+        log.info("Get model element map from model index");
         Map<UMLElement, Integer> modelElementMapping = modelIndex.getElementSimilarityMap();
+        log.info("Get size of model element map");
         long numberOfModelElements = modelElementMapping.size();
         long numberOfClasses = 0;
         long numberOfAttrbutes = 0;
@@ -523,6 +551,7 @@ public class CompassCalculationEngine {
         long numberOfRelationships = 0;
         long numberOfPackages = 0;
 
+        log.info("Calculate statistics from each element in model element map");
         for (UMLElement element : modelElementMapping.keySet()) {
             if (element instanceof UMLClass) {
                 numberOfClasses++;
@@ -591,12 +620,14 @@ public class CompassCalculationEngine {
 
         // Note, that these two value refer to all similarity sets that have an assessment, i.e. it is not the total number as it excludes the sets without assessments. This might
         // distort the analysis values below.
+        log.info("Get assessment map from automatic assessment controller and calculate size");
         long numberOfSimilaritySets = automaticAssessmentController.getAssessmentMap().size();
         long numberOfElementsInSimilaritySets = 0;
 
         long numberOfSimilaritySetsPositiveScore = 0;
         long numberOfSimilaritySetsPositiveScoreRegardingConfidence = 0;
 
+        log.info("For each assessment in automatic assessment controller calculate score statistics");
         for (SimilaritySetAssessment similaritySetAssessment : automaticAssessmentController.getAssessmentMap().values()) {
             numberOfElementsInSimilaritySets += similaritySetAssessment.getFeedbackList().size();
 

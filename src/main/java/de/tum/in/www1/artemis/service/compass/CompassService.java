@@ -64,6 +64,7 @@ public class CompassService {
         this.modelingSubmissionRepository = modelingSubmissionRepository;
         this.studentParticipationRepository = studentParticipationRepository;
         this.hazelcastInstance = hazelcastInstance;
+        log.info("Get semi automatic results map from hazelcast => CompassService()");
         this.semiAutomaticResults = hazelcastInstance.getMap("semi_automatic_results");
     }
 
@@ -74,7 +75,7 @@ public class CompassService {
      * @return true if the given diagram type is supported by Compass, false otherwise
      */
     public boolean isSupported(ModelingExercise modelingExercise) {
-
+        log.info("isSupported({}) with exercise as input", modelingExercise.getId());
         // only use compass for course exercises, in exam exercises the additional delay is too much so it is currently deactivated
         // TODO: we should support compass also for the exam mode
         if (modelingExercise.isExamExercise()) {
@@ -102,6 +103,7 @@ public class CompassService {
      * @return true if the diagram type of the given exercise is supported by Compass, false otherwise
      */
     private boolean isSupported(long exerciseId) {
+        log.info("isSupported({})", exerciseId);
         ModelingExercise modelingExercise = findModelingExerciseById(exerciseId);
         return modelingExercise != null && isSupported(modelingExercise);
     }
@@ -114,6 +116,7 @@ public class CompassService {
      * @return Ids of the next optimal models, an empty list if all models have been assessed for the given exercise
      */
     private List<Long> getNextOptimalModels(long exerciseId) {
+        log.info("getNextOptimalModels({})", exerciseId);
         return compassCalculationEngines.get(exerciseId).getNextOptimalModels(NUMBER_OF_NEW_OPTIMAL_MODELS);
     }
 
@@ -124,6 +127,7 @@ public class CompassService {
      * @param modelSubmissionId the id of the model submission which can be removed
      */
     public void removeModelWaitingForAssessment(long exerciseId, long modelSubmissionId) {
+        log.info("removeModelWaitingForAssessment({},{})", exerciseId, modelSubmissionId);
         if (!isSupported(exerciseId) || !loadExerciseIfSuspended(exerciseId)) {
             return;
         }
@@ -139,6 +143,7 @@ public class CompassService {
      * @return a list of optimal model Ids waiting for an assessment by an assessor
      */
     public List<Long> getModelsWaitingForAssessment(long exerciseId) {
+        log.info("getModelsWaitingForAssessment({})", exerciseId);
         if (!isSupported(exerciseId) || !loadExerciseIfSuspended(exerciseId)) {
             return new ArrayList<>();
         }
@@ -166,6 +171,7 @@ public class CompassService {
      * @param exerciseId      the id of the exercise the optimal models belong to
      */
     private void removeManuallyAssessedModels(List<Long> optimalModelIds, long exerciseId) {
+        log.info("removeManuallyAssessedModels({},{})", optimalModelIds, exerciseId);
         Iterator<Long> iterator = optimalModelIds.iterator();
         while (iterator.hasNext()) {
             Long modelId = iterator.next();
@@ -186,11 +192,14 @@ public class CompassService {
      * @param modelSubmissionId the id of the model submission which should be marked as unassessed
      */
     public void cancelAssessmentForSubmission(ModelingExercise modelingExercise, long modelSubmissionId) {
+        log.info("cancelAssessmentForSubmission({},{})", modelingExercise, modelSubmissionId);
         if (!isSupported(modelingExercise) || !loadExerciseIfSuspended(modelingExercise.getId())) {
             return;
         }
         Long exerciseId = modelingExercise.getId();
         compassCalculationEngines.get(exerciseId).markModelAsUnassessed(modelSubmissionId);
+        log.info("Remove semi automatic result for {} from semi automatic result map => cancelAssessmentForSubmission({},{}) ", modelSubmissionId, modelingExercise,
+                modelSubmissionId);
         semiAutomaticResults.remove(modelSubmissionId);
 
         generateAutomaticFeedbackSuggestions(modelSubmissionId, modelingExercise.getId());
@@ -202,6 +211,7 @@ public class CompassService {
      * @param exerciseId the exerciseId
      */
     public void resetModelsWaitingForAssessment(long exerciseId) {
+        log.info("resetModelsWaitingForAssessment({})", exerciseId);
         if (!isSupported(exerciseId) || !loadExerciseIfSuspended(exerciseId)) {
             return;
         }
@@ -219,7 +229,7 @@ public class CompassService {
      * @param modelingAssessment the new assessment as a list of Feedback
      */
     public void addAssessment(long exerciseId, long submissionId, List<Feedback> modelingAssessment) {
-        log.info("Add assessment for exercise {} and model {}", exerciseId, submissionId);
+        log.info("Add assessment for exercise {} and model {} => addAssessment({},{},{})", exerciseId, submissionId, exerciseId, submissionId, modelingAssessment);
         if (!isSupported(exerciseId) || !loadExerciseIfSuspended(exerciseId)) { // TODO rework after distinguishing between saved and submitted assessments
             return;
         }
@@ -242,6 +252,7 @@ public class CompassService {
      * @return the semi automatic result for the submission with the given id
      */
     public Result getResultWithFeedbackSuggestionsForSubmission(long submissionId) {
+        log.info("Get semi automatic result for {} from semi automatic result map => getResultWithFeedbackSuggestionsForSubmission({})", submissionId, submissionId);
         return semiAutomaticResults.get(submissionId);
     }
 
@@ -252,6 +263,7 @@ public class CompassService {
      * @param exerciseId the exercise the given submission belongs to
      */
     public void removeSemiAutomaticResultForSubmission(long submissionId, long exerciseId) {
+        log.info("Remove semi automatic result for {} from semi automatic result map => removeSemiAutomaticResultForSubmission({},{})", submissionId, submissionId, exerciseId);
         semiAutomaticResults.remove(submissionId);
     }
 
@@ -265,11 +277,13 @@ public class CompassService {
      * @param exerciseId   the id of the corresponding exercise
      */
     private void generateAutomaticFeedbackSuggestions(long submissionId, long exerciseId) {
+        log.info("generateAutomaticFeedbackSuggestions({},{})", submissionId, exerciseId);
         CompassCalculationEngine engine = compassCalculationEngines.get(exerciseId);
         ModelingSubmission modelingSubmission = findModelingSubmissionById(submissionId);
 
         if (engine == null || modelingSubmission == null) {
-            log.error("No calculation engine or submission - submission with ID {} could not be assessed automatically", submissionId);
+            log.error("No calculation engine or submission - submission with ID {} could not be assessed automatically => generateAutomaticFeedbackSuggestions({},{})",
+                    submissionId, submissionId, exerciseId);
             return;
         }
 
@@ -287,11 +301,13 @@ public class CompassService {
      * @param exerciseId    the id of the corresponding exercise
      */
     private void assessAllAutomatically(Collection<Long> submissionIds, long exerciseId) {
+        log.info("assessAllAutomatically({},{})", submissionIds, exerciseId);
         CompassCalculationEngine engine = compassCalculationEngines.get(exerciseId);
         List<ModelingSubmission> modelingSubmissions = modelingSubmissionRepository.findWithEagerResultsFeedbacksAssessorAndParticipationResultsByIdIn(submissionIds);
 
         if (engine == null) {
-            log.error("No calculation engine - submissions of exercise with ID {} could not be assessed automatically", exerciseId);
+            log.error("No calculation engine - submissions of exercise with ID {} could not be assessed automatically => assessAllAutomatically({},{})", exerciseId, submissionIds,
+                    exerciseId);
             return;
         }
 
@@ -312,6 +328,7 @@ public class CompassService {
      * @param engine the calculation engine for the corresponding exercise
      */
     private void generateSemiAutomaticResult(long submissionId, Result result, CompassCalculationEngine engine) {
+        log.info("generateSemiAutomaticResult({},{})", submissionId, result);
         if (result.getAssessmentType() != AssessmentType.MANUAL && result.getAssessor() == null) {
             // Round compass grades to avoid machine precision errors, make the grades more readable and give a slight advantage.
             Grade grade = roundGrades(engine.getGradeForModel(submissionId));
@@ -321,6 +338,8 @@ public class CompassService {
             result.getFeedbacks().addAll(automaticFeedback);
             result.setHasFeedback(false);
             result.setAssessmentType(AssessmentType.SEMI_AUTOMATIC);
+            log.info("Put result {} for submission {} into semi automatic results map => generateSemiAutomaticResult({},{},{})", result, submissionId, submissionId, result,
+                    engine);
             semiAutomaticResults.put(submissionId, result);
         }
         else {
@@ -336,9 +355,10 @@ public class CompassService {
      * @return the modeling exercise with the given id, or null if no exercise could be found
      */
     private ModelingExercise findModelingExerciseById(long exerciseId) {
+        log.info("findModelingExerciseById({})", exerciseId);
         Optional<ModelingExercise> optionalModelingExercise = modelingExerciseRepository.findById(exerciseId);
         if (!optionalModelingExercise.isPresent()) {
-            log.error("Exercise with ID {} could not be found", exerciseId);
+            log.error("Exercise with ID {} could not be found => findModelingExerciseById({})", exerciseId, exerciseId);
             return null;
         }
         return optionalModelingExercise.get();
@@ -351,9 +371,10 @@ public class CompassService {
      * @return the modeling submission with the given id, or null if no submission could be found
      */
     private ModelingSubmission findModelingSubmissionById(long submissionId) {
+        log.info("findModelingSubmissionById({})", submissionId);
         Optional<ModelingSubmission> optionalModelingSubmission = modelingSubmissionRepository.findWithResultsFeedbacksAssessorAndParticipationResultsById(submissionId);
         if (!optionalModelingSubmission.isPresent()) {
-            log.error("Modeling submission with ID {} could not be found.", submissionId);
+            log.error("Modeling submission with ID {} could not be found. => findModelingSubmissionById({})", submissionId, submissionId);
             return null;
         }
         return optionalModelingSubmission.get();
@@ -368,9 +389,11 @@ public class CompassService {
      * @return the result of the given submission either obtained from the submission or the semi automatic result map, or a newly created one if it does not exist already
      */
     private Result provideResultForSubmission(ModelingSubmission modelingSubmission) {
+        log.info("provideResultForSubmission({})", modelingSubmission);
         Result result = modelingSubmission.getLatestResult();
 
         if (result == null || !AssessmentType.MANUAL.equals(result.getAssessmentType())) {
+            log.info("Get result for submission {} from semi automatic results map => provideResultForSubmission({})", modelingSubmission.getId(), modelingSubmission);
             result = semiAutomaticResults.get(modelingSubmission.getId());
 
             if (result == null) {
@@ -393,6 +416,7 @@ public class CompassService {
      * @return the rounded compass grade
      */
     private Grade roundGrades(Grade grade) {
+        log.info("roundGrades({})", grade);
         if (grade == null) {
             return null;
         }
@@ -435,6 +459,8 @@ public class CompassService {
      * @param model      the new model as raw string
      */
     public void addModel(long exerciseId, long modelId, String model) {
+        log.info("addModel({},{},{})", exerciseId, modelId, model);
+
         if (!isSupported(exerciseId) || !loadExerciseIfSuspended(exerciseId)) {
             return;
         }
@@ -448,6 +474,7 @@ public class CompassService {
      * @return true if a calculation engine for the exercise exists or could be loaded successfully, false otherwise
      */
     private boolean loadExerciseIfSuspended(long exerciseId) {
+        log.info("loadExerciseIfSuspended({})", exerciseId);
         if (compassCalculationEngines.containsKey(exerciseId)) {
             return true;
         }
@@ -468,7 +495,7 @@ public class CompassService {
         if (compassCalculationEngines.containsKey(exerciseId)) {
             return;
         }
-        log.info("Loading Compass calculation engine for exercise {}", exerciseId);
+        log.info("Loading Compass calculation engine for exercise {} => loadCalculationEngineForExercise({})", exerciseId, exerciseId);
 
         Set<ModelingSubmission> modelingSubmissions = getSubmissionsForExercise(exerciseId);
         CompassCalculationEngine calculationEngine = new CompassCalculationEngine(exerciseId, modelingSubmissions, hazelcastInstance);
@@ -482,6 +509,7 @@ public class CompassService {
      * @return the list of modeling submissions
      */
     private Set<ModelingSubmission> getSubmissionsForExercise(long exerciseId) {
+        log.info("getSubmissionsForExercise({})", exerciseId);
         List<ModelingSubmission> submissions = modelingSubmissionRepository.findSubmittedByExerciseIdWithEagerResultsAndFeedback(exerciseId);
         return new HashSet<>(submissions);
     }
@@ -528,6 +556,7 @@ public class CompassService {
      * @return a list of modelIds that should be assessed next
      */
     public List<Long> getCalculationEngineModelsWaitingForAssessment(Long exerciseId) {
+        log.info("getCalculationEngineModelsWaitingForAssessment({})", exerciseId);
         List<ModelingSubmission> modelingSubmissions = modelingSubmissionRepository.findSubmittedByExerciseIdWithEagerResultsAndFeedback(exerciseId);
 
         CompassCalculationEngine engine = compassCalculationEngines.get(exerciseId);

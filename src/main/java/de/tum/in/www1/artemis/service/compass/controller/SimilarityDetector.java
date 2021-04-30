@@ -1,5 +1,8 @@
 package de.tum.in.www1.artemis.service.compass.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.tum.in.www1.artemis.service.compass.assessment.Context;
 import de.tum.in.www1.artemis.service.compass.umlmodel.UMLDiagram;
 import de.tum.in.www1.artemis.service.compass.umlmodel.UMLElement;
@@ -7,6 +10,8 @@ import de.tum.in.www1.artemis.service.compass.umlmodel.classdiagram.UMLAttribute
 import de.tum.in.www1.artemis.service.compass.umlmodel.classdiagram.UMLMethod;
 
 public class SimilarityDetector {
+
+    private static final Logger log = LoggerFactory.getLogger(SimilarityDetector.class);
 
     /**
      * Analyze the similarity of all model elements of the given UML diagram. It gets the similarityId for every model element from the model index and assigns it to the
@@ -16,7 +21,7 @@ public class SimilarityDetector {
      * @param index the modelIndex which keeps track of all similarityIds of all the model elements in one modeling exercise
      */
     public static void analyzeSimilarity(UMLDiagram model, ModelIndex index) {
-
+        log.info("analyzeSimilarity({})", model);
         for (UMLElement element : model.getAllModelElements()) {
             index.retrieveSimilarityId(element);
         }
@@ -31,6 +36,7 @@ public class SimilarityDetector {
      * @param model the model containing the model elements for which the context should be set
      */
     private static void setContextOfModelElements(UMLDiagram model) {
+        log.info("setContextOfModelElements({})", model);
         Context context;
 
         for (UMLElement element : model.getAllModelElements()) {

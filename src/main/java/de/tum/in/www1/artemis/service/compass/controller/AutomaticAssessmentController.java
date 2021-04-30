@@ -34,7 +34,9 @@ public class AutomaticAssessmentController {
     private Long exerciseId;
 
     public AutomaticAssessmentController(Long exerciseId, HazelcastInstance hazelcastInstance) {
+        log.info("Get assessment map for similarity ids from hazelcast for {} ", exerciseId);
         similarityIdAssessmentMapping = hazelcastInstance.getMap("modelAssessments - " + exerciseId);
+        log.info("Get last assessment result map from hazelcast for {} ", exerciseId);
         lastAssessmentResultMapping = hazelcastInstance.getMap("modelResults - " + exerciseId);
         this.hazelcastInstance = hazelcastInstance;
         this.exerciseId = exerciseId;
@@ -47,6 +49,7 @@ public class AutomaticAssessmentController {
      * @return an Optional containing the assessment if the similarity ID exists, an empty Optional otherwise
      */
     public Optional<SimilaritySetAssessment> getAssessmentForSimilaritySet(int similarityId) {
+        log.info("Get assessment for similarity id {} from hazelcast", similarityId);
         SimilaritySetAssessment similaritySetAssessment = similarityIdAssessmentMapping.get(similarityId);
         return Optional.ofNullable(similaritySetAssessment);
     }
@@ -58,6 +61,8 @@ public class AutomaticAssessmentController {
      * @param similaritySetAssessment the assessment for the corresponding similarity set
      */
     protected void addSimilaritySetAssessment(int similarityId, SimilaritySetAssessment similaritySetAssessment) {
+        log.info("Add assessment {} for similarity id {} if it is not already there => addSimilaritySetAssessment({},{})", similaritySetAssessment, similarityId, similarityId,
+                similaritySetAssessment);
         similarityIdAssessmentMapping.putIfAbsent(similarityId, similaritySetAssessment);
     }
 
@@ -67,6 +72,7 @@ public class AutomaticAssessmentController {
      * @return The complete map with all similarity set assessments
      */
     public Map<Integer, SimilaritySetAssessment> getAssessmentMap() {
+        log.info("Get similarity id - assessment mapping => getAssessmentMap()");
         return this.similarityIdAssessmentMapping;
     }
 
@@ -78,6 +84,7 @@ public class AutomaticAssessmentController {
      * @param model                the UML model - contains all elements with its jsonIds
      */
     public void addFeedbacksToSimilaritySet(List<Feedback> feedbacks, UMLDiagram model) {
+        log.info("Add feedbacks to similarity set => addFeedbacksToSimilaritySet({},{})", feedbacks, model);
         for (Feedback feedback : feedbacks) {
             String jsonElementId = feedback.getReferenceElementId();
             if (jsonElementId != null) {
@@ -92,6 +99,8 @@ public class AutomaticAssessmentController {
 
                 if (optionalAssessment.isPresent()) {
                     optionalAssessment.get().addFeedback(feedback);
+                    log.info("Put assessment {} for similarity id {} into map => addFeedbacksToSimilaritySet({},{})", optionalAssessment.get(), element.getSimilarityID(),
+                            feedbacks, model);
                     similarityIdAssessmentMapping.put(element.getSimilarityID(), optionalAssessment.get());
                 }
                 else {
@@ -109,12 +118,12 @@ public class AutomaticAssessmentController {
      */
     // TODO CZ: only assess models automatically that do not already have a complete manual assessment?
     public void assessModelsAutomatically(ModelIndex modelIndex) {
-
+        log.info("Assess models automatically => assessModelsAutomatically()");
         double totalCoverage = 0;
         double totalConfidence = 0;
 
         for (UMLDiagram model : modelIndex.getModelCollection()) {
-
+            log.info("Assess model {} => assessModelsAutomatically()", model);
             CompassResult compassResult = assessModelAutomatically(model);
 
             totalCoverage += compassResult.getCoverage();
@@ -136,6 +145,7 @@ public class AutomaticAssessmentController {
      * @return a Compass result built from the assessments of the model elements
      */
     public CompassResult assessModelAutomatically(UMLDiagram model) {
+        log.info("assessModelAutomatically({})", model);
         double totalCount = 0;
         double missingCount = 0;
 
@@ -171,6 +181,7 @@ public class AutomaticAssessmentController {
 
         CompassResult compassResult = new CompassResult(scoreHashMap, coverage);
 
+        log.info("Put result {} for submission {} => assessModelAutomatically({})", compassResult, model.getModelSubmissionId(), model);
         lastAssessmentResultMapping.put(model.getModelSubmissionId(), compassResult);
 
         return compassResult;
@@ -178,29 +189,37 @@ public class AutomaticAssessmentController {
 
     public void setTotalCoverage(double totalCoverage) {
         if (AutomaticAssessmentController.totalCoverages == null) {
+            log.info("Get total coverages map from hazelcast since it does not exist => setTotalCoverage({})", totalCoverage);
             AutomaticAssessmentController.totalCoverages = hazelcastInstance.getMap("totalCoverages");
         }
+        log.info("Put total coverage {} for exercise {} into total coverages map => setTotalCoverage({})", totalCoverage, exerciseId, totalCoverage);
         AutomaticAssessmentController.totalCoverages.put(exerciseId, totalCoverage);
     }
 
     public double getTotalCoverage() {
         if (AutomaticAssessmentController.totalCoverages == null) {
+            log.info("Get total coverages map from hazelcast since it does not exist => getTotalCoverage()");
             AutomaticAssessmentController.totalCoverages = hazelcastInstance.getMap("totalCoverages");
         }
+        log.info("Get total coverage for exercise {} from total coverages map => getTotalCoverage()", exerciseId);
         return AutomaticAssessmentController.totalCoverages.get(exerciseId);
     }
 
     public void setTotalConfidence(double totalConfidence) {
         if (AutomaticAssessmentController.totalConfidences == null) {
-            AutomaticAssessmentController.totalConfidences = hazelcastInstance.getMap("totalCoverages");
+            log.info("Get total confidences map from hazelcast since it does not exist => setTotalConfidence({})", totalConfidence);
+            AutomaticAssessmentController.totalConfidences = hazelcastInstance.getMap("totalConfidences");
         }
+        log.info("Put total confidence {} for exercise {} into total confidences map  => setTotalConfidence({})", totalConfidence, exerciseId, totalConfidence);
         AutomaticAssessmentController.totalConfidences.put(exerciseId, totalConfidence);
     }
 
     public double getTotalConfidence() {
         if (AutomaticAssessmentController.totalConfidences == null) {
-            AutomaticAssessmentController.totalConfidences = hazelcastInstance.getMap("totalCoverages");
+            log.info("Get total confidences map from hazelcast since it does not exist => getTotalConfidence()");
+            AutomaticAssessmentController.totalConfidences = hazelcastInstance.getMap("totalConfidences");
         }
+        log.info("Get total confidence for exercise {} from total confidences map => getTotalConfidence()", exerciseId);
         return AutomaticAssessmentController.totalConfidences.get(exerciseId);
     }
 
@@ -211,6 +230,7 @@ public class AutomaticAssessmentController {
      * @param compassResult the most recent Compass result for this diagram
      */
     public void setLastAssessmentCompassResult(Long submissionId, CompassResult compassResult) {
+        log.info("Put assessment {} for submission {} into last results map => setLastAssessmentCompassResult()", compassResult, submissionId);
         lastAssessmentResultMapping.put(submissionId, compassResult);
     }
 
@@ -222,6 +242,7 @@ public class AutomaticAssessmentController {
      * @return the most recent Compass result for the submission
      */
     public CompassResult getLastAssessmentCompassResult(Long submissionId) {
+        log.info("Get assessment for submission {} from last results map => getLastAssessmentCompassResult()", submissionId);
         return lastAssessmentResultMapping.get(submissionId);
     }
 
@@ -232,6 +253,7 @@ public class AutomaticAssessmentController {
      * @return true if Compass has not already calculated an automatic assessment for the submission, false otherwise
      */
     public boolean isUnassessed(Long submissionId) {
+        log.info("Check if submission {} is unassessed => isUnassessed({})", submissionId, submissionId);
         return getLastAssessmentCompassResult(submissionId) == null;
     }
 
@@ -241,6 +263,7 @@ public class AutomaticAssessmentController {
      * @return The confidence of the last compass result, -1 if no compass result is available
      */
     public double getLastAssessmentConfidence(Long submissionId) {
+        log.info("Get last assessment confidence => getLastAssessmentConfidence({})", submissionId);
         if (isUnassessed(submissionId)) {
             return -1;
         }
@@ -255,6 +278,7 @@ public class AutomaticAssessmentController {
      * @return The coverage of the last compass result, -1 if no compass result is available
      */
     public double getLastAssessmentCoverage(Long submissionId) {
+        log.info("Get last assessment coverage => getLastAssessmentCoverage({})", submissionId);
         if (isUnassessed(submissionId)) {
             return -1;
         }

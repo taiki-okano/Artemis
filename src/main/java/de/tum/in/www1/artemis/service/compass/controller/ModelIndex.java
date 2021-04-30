@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 
 import com.hazelcast.core.HazelcastInstance;
@@ -15,6 +17,8 @@ import de.tum.in.www1.artemis.service.compass.utils.CompassConfiguration;
 
 public class ModelIndex {
 
+    private final Logger log = LoggerFactory.getLogger(ModelIndex.class);
+
     private Queue<UMLElement> uniqueModelElementList;
 
     /**
@@ -25,8 +29,11 @@ public class ModelIndex {
     private IMap<UMLElement, Integer> elementSimilarityMap;
 
     public ModelIndex(Long exerciseId, HazelcastInstance hazelcastInstance) {
+        log.info("Get similarities map from hazelcast for {} => ModelIndex()", exerciseId);
         elementSimilarityMap = hazelcastInstance.getMap("similarities - " + exerciseId);
+        log.info("Get unique model element list from hazelcast for {} => ModelIndex()", exerciseId);
         uniqueModelElementList = hazelcastInstance.getQueue("elements - " + exerciseId);
+        log.info("Get models map from hazelcast for {} => ModelIndex()", exerciseId);
         modelMap = hazelcastInstance.getMap("models - " + exerciseId);
 
     }
@@ -39,13 +46,16 @@ public class ModelIndex {
      * @return the similarity ID for the given model element, i.e. the ID of the similarity set the element belongs to
      */
     int retrieveSimilarityId(UMLElement element) {
+        log.info("Check if {} is in element similarity map => retrieveSimilarityId()", element);
         if (elementSimilarityMap.containsKey(element)) {
+            log.info("Return {} since it is already in element map => retrieveSimilarityId()", element);
             return elementSimilarityMap.get(element);
         }
 
         // Pair of similarity value and similarity ID
         var bestSimilarityFit = Pair.of(-1.0, -1);
 
+        log.info("For each element in unique model element list make similarity comparison => retrieveSimilarityId()");
         for (final var knownElement : uniqueModelElementList) {
             final var similarity = knownElement.similarity(element);
             if (similarity > CompassConfiguration.EQUALITY_THRESHOLD && similarity > bestSimilarityFit.getFirst()) {
@@ -57,6 +67,7 @@ public class ModelIndex {
         if (bestSimilarityFit.getFirst() != -1.0) {
             int similarityId = bestSimilarityFit.getSecond();
             element.setSimilarityID(similarityId);
+            log.info("Put {} with {} into similarity map since a similar element has been found => retrieveSimilarityId()", element, similarityId);
             elementSimilarityMap.put(element, similarityId);
             return bestSimilarityFit.getSecond();
         }
@@ -64,7 +75,9 @@ public class ModelIndex {
         // element does not fit already known element / similarity set
         int similarityId = uniqueModelElementList.size();
         element.setSimilarityID(similarityId);
+        log.info("Add element {} into unique model element list => retrieveSimilarityId()", element);
         uniqueModelElementList.add(element);
+        log.info("Put element {} with similarityId {} into similarity map since no similar element has been found => retrieveSimilarityId", element, similarityId);
         elementSimilarityMap.put(element, similarityId);
         return similarityId;
     }
@@ -75,6 +88,7 @@ public class ModelIndex {
      * @param model the new model that should be added
      */
     public void addModel(UMLDiagram model) {
+        log.info("Put submission {} into model map => addModel()", model.getModelSubmissionId());
         modelMap.put(model.getModelSubmissionId(), model);
     }
 
@@ -85,6 +99,7 @@ public class ModelIndex {
      * @return the model that belong to the submission with the given ID
      */
     public UMLDiagram getModel(long modelSubmissionId) {
+        log.info("Get model {} => getModel()", modelSubmissionId);
         return modelMap.get(modelSubmissionId);
     }
 
@@ -94,6 +109,7 @@ public class ModelIndex {
      * @return the model map
      */
     public Map<Long, UMLDiagram> getModelMap() {
+        log.info("Get model map => getModelMap()");
         return modelMap;
     }
 
@@ -103,6 +119,7 @@ public class ModelIndex {
      * @return the collection of models
      */
     public Collection<UMLDiagram> getModelCollection() {
+        log.info("Get current models => getModelCollection()");
         return modelMap.values();
     }
 
@@ -112,6 +129,7 @@ public class ModelIndex {
      * @return the number of models
      */
     int getModelCollectionSize() {
+        log.info("Get number of models => getModelCollectionSize()");
         return modelMap.size();
     }
 
@@ -121,6 +139,7 @@ public class ModelIndex {
      * @return the number of unique model elements
      */
     public int getNumberOfUniqueElements() {
+        log.info("Get number of unique model elements => getNumberOfUniqueElements()");
         return uniqueModelElementList.size();
     }
 
@@ -130,6 +149,7 @@ public class ModelIndex {
      * @return the model element to similarity id mapping
      */
     public Map<UMLElement, Integer> getElementSimilarityMap() {
+        log.info("Get similarities between elements => getElementSimilarityMap()");
         return elementSimilarityMap;
     }
 
@@ -139,6 +159,7 @@ public class ModelIndex {
      * @return the collection of unique elements
      */
     public Collection<UMLElement> getUniqueElements() {
+        log.info("Get unique elements => getUniqueElements()");
         return uniqueModelElementList;
     }
 }
