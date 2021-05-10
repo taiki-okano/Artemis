@@ -35,6 +35,18 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             group by s.submissionDate
             order by s.submissionDate asc
             """)
+    List<StatisticsEntry> getTotalSubmissionsForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(s.submissionDate, 1, 10), count(s.id)
+                )
+            from Submission s
+            where s.submissionDate >= :#{#startDate} and s.submissionDate <= :#{#endDate} and (s.participation.exercise.exerciseGroup IS NOT NULL or exists (select c from Course c where s.participation.exercise.course.testCourse = false))
+            group by substring(s.submissionDate, 1, 10)
+            order by substring(s.submissionDate, 1, 10) asc
+            """)
     List<StatisticsEntry> getTotalSubmissions(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
 
     @Query("""
@@ -47,6 +59,20 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             where s.submissionDate >= :#{#startDate} and s.submissionDate <= :#{#endDate} and s.participation.exercise.id in :exerciseIds
             group by s.submissionDate
             order by s.submissionDate asc
+            """)
+    List<StatisticsEntry> getTotalSubmissionsForCourseForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
+            @Param("exerciseIds") List<Long> exerciseIds);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(s.submissionDate, 1, 10),
+                count(s.id)
+                )
+            from Submission s
+            where s.submissionDate >= :#{#startDate} and s.submissionDate <= :#{#endDate} and s.participation.exercise.id in :exerciseIds
+            group by substring(s.submissionDate, 1, 10)
+            order by substring(s.submissionDate, 1, 10) asc
             """)
     List<StatisticsEntry> getTotalSubmissionsForCourse(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
             @Param("exerciseIds") List<Long> exerciseIds);
@@ -61,7 +87,7 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             and (s.participation.exercise.exerciseGroup IS NOT NULL or exists (select c from Course c where s.participation.exercise.course.testCourse = false))
             order by s.submissionDate asc
             """)
-    List<StatisticsEntry> getActiveUsers(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
+    List<StatisticsEntry> getActiveUsersForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
 
     @Query("""
             select
@@ -73,8 +99,33 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             and p.exercise.id in :exerciseIds
             order by s.submissionDate asc
             """)
+    List<StatisticsEntry> getActiveUsersForCourseForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
+            @Param("exerciseIds") List<Long> exerciseIds);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(s.submissionDate, 1, 10), u.login
+                )
+            from User u, Submission s, StudentParticipation p
+            where s.participation.id = p.id and p.student.id = u.id and s.submissionDate >= :#{#startDate} and s.submissionDate <= :#{#endDate} and u.login not like '%test%'
+            and p.exercise.id in :exerciseIds
+            group by substring(s.submissionDate, 1, 10), p.student.login
+            """)
     List<StatisticsEntry> getActiveUsersForCourse(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
             @Param("exerciseIds") List<Long> exerciseIds);
+
+    @Query("""
+            SELECT new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(s.submissionDate, 1, 10), p.student.login
+                )
+            FROM StudentParticipation p JOIN p.submissions s
+            WHERE s.submissionDate >= :#{#startDate}
+                AND s.submissionDate <= :#{#endDate}
+                AND p.student.login not like '%test%'
+                group by substring(s.submissionDate, 1, 10), p.student.login
+            """)
+    List<StatisticsEntry> getActiveUsers(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
 
     @Query("""
             select
@@ -134,6 +185,17 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             from User u, PersistentAuditEvent p
             where u.login = p.principal and p.auditEventType = 'AUTHENTICATION_SUCCESS' and u.login not like '%test%' and p.auditEventDate >= :#{#startDate} and p.auditEventDate <= :#{#endDate}
             order by p.auditEventDate asc
+            """)
+    List<StatisticsEntry> getLoggedInUsersForDay(@Param("startDate") Instant startDate, @Param("endDate") Instant endDate);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(p.auditEventDate, 1, 10), u.login
+                )
+            from User u, PersistentAuditEvent p
+            where u.login = p.principal and p.auditEventType = 'AUTHENTICATION_SUCCESS' and u.login not like '%test%' and p.auditEventDate >= :#{#startDate} and p.auditEventDate <= :#{#endDate}
+            group by substring(p.auditEventDate, 1, 10), u.login
             """)
     List<StatisticsEntry> getLoggedInUsers(@Param("startDate") Instant startDate, @Param("endDate") Instant endDate);
 
@@ -241,6 +303,18 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             group by r.completionDate
             order by r.completionDate
             """)
+    List<StatisticsEntry> getCreatedResultsForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(r.completionDate, 1, 10), count(r.id)
+                )
+            from Result r
+            where r.completionDate >= :#{#startDate} and r.completionDate <= :#{#endDate} and (r.participation.exercise.exerciseGroup IS NOT NULL or exists (select c from Course c where r.participation.exercise.course.testCourse = false))
+            group by substring(r.completionDate, 1, 10)
+            order by substring(r.completionDate, 1, 10)
+            """)
     List<StatisticsEntry> getCreatedResults(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
 
     @Query("""
@@ -252,6 +326,19 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             where r.completionDate >= :#{#startDate} and r.completionDate <= :#{#endDate} and r.participation.exercise.id in :exerciseIds
             group by r.completionDate
             order by r.completionDate
+            """)
+    List<StatisticsEntry> getCreatedResultsForCourseForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
+            @Param("exerciseIds") List<Long> exerciseIds);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(r.completionDate, 1, 10), count(r.id)
+                )
+            from Result r
+            where r.completionDate >= :#{#startDate} and r.completionDate <= :#{#endDate} and r.participation.exercise.id in :exerciseIds
+            group by substring(r.completionDate, 1, 10)
+            order by substring(r.completionDate, 1, 10)
             """)
     List<StatisticsEntry> getCreatedResultsForCourse(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
             @Param("exerciseIds") List<Long> exerciseIds);
@@ -266,6 +353,18 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             group by r.completionDate
             order by r.completionDate
             """)
+    List<StatisticsEntry> getResultFeedbacksForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(r.completionDate, 1, 10), sum(size(r.feedbacks))
+                )
+            from Result r
+            where r.completionDate >= :#{#startDate} and r.completionDate <= :#{#endDate} and (r.participation.exercise.exerciseGroup IS NOT NULL or exists (select c from Course c where r.participation.exercise.course.testCourse = false))
+            group by substring(r.completionDate, 1, 10)
+            order by substring(r.completionDate, 1, 10)
+            """)
     List<StatisticsEntry> getResultFeedbacks(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
 
     @Query("""
@@ -277,6 +376,19 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             where r.completionDate >= :#{#startDate} and r.completionDate <= :#{#endDate} and r.participation.exercise.id in :exerciseIds
             group by r.completionDate
             order by r.completionDate
+            """)
+    List<StatisticsEntry> getResultFeedbacksForCourseForDay(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
+            @Param("exerciseIds") List<Long> exerciseIds);
+
+    @Query("""
+            select
+            new de.tum.in.www1.artemis.domain.statistics.StatisticsEntry(
+                substring(r.completionDate, 1, 10), sum(size(r.feedbacks))
+                )
+            from Result r
+            where r.completionDate >= :#{#startDate} and r.completionDate <= :#{#endDate} and r.participation.exercise.id in :exerciseIds
+            group by substring(r.completionDate, 1, 10)
+            order by substring(r.completionDate, 1, 10)
             """)
     List<StatisticsEntry> getResultFeedbacksForCourse(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate,
             @Param("exerciseIds") List<Long> exerciseIds);
@@ -342,6 +454,59 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
      * @param courseId the courseId which is null for a user statistics call and contains the courseId for the course statistics
      * @return the return value of the processed database call which returns a list of entries
      */
+    default List<StatisticsEntry> getNumberOfEntriesPerTimeSlotForDay(SpanType span, ZonedDateTime startDate, ZonedDateTime endDate, GraphType graphType, Long courseId) {
+        var exerciseIds = courseId != null ? findExerciseIdsByCourseId(courseId) : null;
+        switch (graphType) {
+            case SUBMISSIONS -> {
+                return courseId == null ? getTotalSubmissionsForDay(startDate, endDate) : getTotalSubmissionsForCourseForDay(startDate, endDate, exerciseIds);
+            }
+            case ACTIVE_USERS -> {
+                List<StatisticsEntry> result = courseId == null ? getActiveUsersForDay(startDate, endDate) : getActiveUsersForCourseForDay(startDate, endDate, exerciseIds);
+                return filterDuplicatedUsers(span, result, startDate, graphType);
+            }
+            case LOGGED_IN_USERS -> {
+                Instant startDateInstant = startDate.toInstant();
+                Instant endDateInstant = endDate.toInstant();
+                List<StatisticsEntry> result = getLoggedInUsersForDay(startDateInstant, endDateInstant);
+                return filterDuplicatedUsers(span, result, startDate, graphType);
+            }
+            case RELEASED_EXERCISES -> {
+                return courseId == null ? getReleasedExercises(startDate, endDate) : getReleasedExercisesForCourse(startDate, endDate, exerciseIds);
+            }
+            case EXERCISES_DUE -> {
+                return courseId == null ? getExercisesDue(startDate, endDate) : getExercisesDueForCourse(startDate, endDate, exerciseIds);
+            }
+            case CONDUCTED_EXAMS -> {
+                return courseId == null ? getConductedExams(startDate, endDate) : getConductedExamsForCourse(startDate, endDate, courseId);
+            }
+            case EXAM_PARTICIPATIONS -> {
+                return courseId == null ? getExamParticipations(startDate, endDate) : getExamParticipationsForCourse(startDate, endDate, courseId);
+            }
+            case EXAM_REGISTRATIONS -> {
+                return courseId == null ? getExamRegistrations(startDate, endDate) : getExamRegistrationsForCourse(startDate, endDate, courseId);
+            }
+            case ACTIVE_TUTORS -> {
+                List<StatisticsEntry> result = courseId == null ? getActiveTutors(startDate, endDate) : getActiveTutorsForCourse(startDate, endDate, exerciseIds);
+                return filterDuplicatedUsers(span, result, startDate, graphType);
+            }
+            case CREATED_RESULTS -> {
+                return courseId == null ? getCreatedResultsForDay(startDate, endDate) : getCreatedResultsForCourseForDay(startDate, endDate, exerciseIds);
+            }
+            case CREATED_FEEDBACKS -> {
+                return courseId == null ? getResultFeedbacksForDay(startDate, endDate) : getResultFeedbacksForCourseForDay(startDate, endDate, exerciseIds);
+            }
+            case QUESTIONS_ASKED -> {
+                return courseId != null ? getQuestionsAskedForCourse(startDate, endDate, courseId) : new ArrayList<>();
+            }
+            case QUESTIONS_ANSWERED -> {
+                return courseId != null ? getQuestionsAnsweredForCourse(startDate, endDate, courseId) : new ArrayList<>();
+            }
+            default -> {
+                return new ArrayList<>();
+            }
+        }
+    }
+
     default List<StatisticsEntry> getNumberOfEntriesPerTimeSlot(SpanType span, ZonedDateTime startDate, ZonedDateTime endDate, GraphType graphType, Long courseId) {
         var exerciseIds = courseId != null ? findExerciseIdsByCourseId(courseId) : null;
         switch (graphType) {
@@ -355,7 +520,7 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             case LOGGED_IN_USERS -> {
                 Instant startDateInstant = startDate.toInstant();
                 Instant endDateInstant = endDate.toInstant();
-                List<StatisticsEntry> result = getLoggedInUsers(startDateInstant, endDateInstant);
+                List<StatisticsEntry> result = getLoggedInUsersForDay(startDateInstant, endDateInstant);
                 return filterDuplicatedUsers(span, result, startDate, graphType);
             }
             case RELEASED_EXERCISES -> {
@@ -515,6 +680,7 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             ZonedDateTime date = (ZonedDateTime) entry.getDay();
             int amount = (int) entry.getAmount();
             int dayDifference = (int) ChronoUnit.DAYS.between(startDate, date);
+            dayDifference = dayDifference == -1 ? dayDifference = 0 : dayDifference;
             result[dayDifference] += amount;
         }
         return result;
@@ -534,6 +700,7 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             ZonedDateTime date = (ZonedDateTime) map.getDay();
             int amount = (int) map.getAmount();
             int dayDifference = (int) ChronoUnit.DAYS.between(startDate, date);
+            dayDifference = dayDifference == -1 ? dayDifference = 0 : dayDifference;
             result[dayDifference] += amount;
         }
         return result;
@@ -556,7 +723,7 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             int startDateWeek = getWeekOfDate(startDate);
             int weeksDifference;
             // if the graph contains two different years
-            weeksDifference = dateWeek < startDateWeek ? dateWeek + 53 - startDateWeek : dateWeek - startDateWeek;
+            weeksDifference = dateWeek < startDateWeek ? dateWeek == startDateWeek - 1 ? 0 : dateWeek + 53 - startDateWeek : dateWeek - startDateWeek;
             result[weeksDifference] += amount;
 
         }
@@ -578,6 +745,7 @@ public interface StatisticsRepository extends JpaRepository<User, Long> {
             int amount = (int) map.getAmount();
             int monthOfDate = date.getMonth().getValue();
             int monthOfStartDate = startDate.getMonth().getValue();
+            monthOfDate = monthOfDate == monthOfStartDate - 1 ? monthOfStartDate : monthOfDate;
             result[(monthOfDate + monthOfStartDate + 2) % 12] += amount;
         }
         return result;

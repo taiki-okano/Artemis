@@ -1,5 +1,8 @@
 package de.tum.in.www1.artemis.domain.statistics;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
 /**
@@ -32,9 +35,20 @@ public class StatisticsEntry {
     }
 
     public StatisticsEntry(String date, String username) {
-        this.date = date;
         this.amount = 1L;
         this.username = username;
+        var zone = ZonedDateTime.now().getZone();
+        String dateOfElement = date + " 10:00";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        this.day = LocalDateTime.parse(dateOfElement, formatter).atZone(zone);
+    }
+
+    public StatisticsEntry(String date, long amount) {
+        var zone = ZonedDateTime.now().getZone();
+        String dateOfElement = date + " 10:00";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        this.day = LocalDateTime.parse(dateOfElement, formatter).atZone(zone);
+        this.amount = amount;
     }
 
     public StatisticsEntry() {

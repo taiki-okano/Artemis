@@ -57,7 +57,7 @@ public class StatisticsService {
             case DAY:
                 startDate = now.minusDays(-periodIndex).withHour(0).withMinute(0).withSecond(0).withNano(0);
                 endDate = now.minusDays(-periodIndex).withHour(23).withMinute(59).withSecond(59);
-                outcome = this.statisticsRepository.getNumberOfEntriesPerTimeSlot(span, startDate, endDate, graphType, courseId);
+                outcome = this.statisticsRepository.getNumberOfEntriesPerTimeSlotForDay(span, startDate, endDate, graphType, courseId);
                 return this.statisticsRepository.mergeResultsIntoArrayForDay(outcome, result);
             case WEEK:
                 startDate = now.minusWeeks(-periodIndex).minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);

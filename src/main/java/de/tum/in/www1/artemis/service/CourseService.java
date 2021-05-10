@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -338,11 +337,7 @@ public class CourseService {
         int startIndex = getWeekOfDate(startDate);
         Map<Object, List<String>> usersByDate = new HashMap<>();
         for (StatisticsEntry listElement : activeUserRows) {
-            // listElement.date has the form "2021-05-04", to convert it to ZonedDateTime, it needs a time
-            String dateOfElement = listElement.getDate() + " 10:00";
-            var zone = startDate.getZone();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            ZonedDateTime date = LocalDateTime.parse(dateOfElement, formatter).atZone(zone);
+            ZonedDateTime date = (ZonedDateTime) listElement.getDay();
             int index = getWeekOfDate(date);
             // the database stores entries in UTC, so it can happen that entries have a date one date before the startDate
             index = index == startIndex - 1 ? startIndex : index;
