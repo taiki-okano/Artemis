@@ -80,9 +80,9 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         final var testRepoName = exercise.generateRepositoryName(RepositoryType.TESTS);
         gitlabRequestMockProvider.mockCheckIfProjectExists(exercise, false);
         gitlabRequestMockProvider.mockCreateProjectForExercise(exercise);
-        gitlabRequestMockProvider.mockCreateRepository(exercise, exerciseRepoName);
-        gitlabRequestMockProvider.mockCreateRepository(exercise, testRepoName);
-        gitlabRequestMockProvider.mockCreateRepository(exercise, solutionRepoName);
+        gitlabRequestMockProvider.mockCreateRepository(exercise, exerciseRepoName, false);
+        gitlabRequestMockProvider.mockCreateRepository(exercise, testRepoName, false);
+        gitlabRequestMockProvider.mockCreateRepository(exercise, solutionRepoName, false);
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
         jenkinsRequestMockProvider.mockCreateProjectForExercise(exercise, failToCreateCiProject);
         jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, TEMPLATE.getName());
@@ -124,9 +124,9 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         gitlabRequestMockProvider.mockCheckIfProjectExists(exerciseToBeImported, false);
 
         gitlabRequestMockProvider.mockCreateProjectForExercise(exerciseToBeImported);
-        gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTemplateRepoName);
-        gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetSolutionRepoName);
-        gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTestsRepoName);
+        gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTemplateRepoName, false);
+        gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetSolutionRepoName, false);
+        gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTestsRepoName, false);
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook();

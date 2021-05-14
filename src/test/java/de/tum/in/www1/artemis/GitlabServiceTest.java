@@ -2,6 +2,7 @@ package de.tum.in.www1.artemis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.gitlab4j.api.models.AccessLevel.DEVELOPER;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import org.gitlab4j.api.ProjectApi;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,9 +24,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import de.tum.in.www1.artemis.domain.Course;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.domain.VcsRepositoryUrl;
 import de.tum.in.www1.artemis.exception.VersionControlException;
+import de.tum.in.www1.artemis.repository.ProgrammingExerciseRepository;
 import de.tum.in.www1.artemis.service.connectors.gitlab.GitLabException;
 import de.tum.in.www1.artemis.util.ModelFactory;
 
@@ -32,6 +36,9 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
 
     @Value("${artemis.version-control.url}")
     private URL gitlabServerUrl;
+
+    @Autowired
+    private ProgrammingExerciseRepository programmingExerciseRepository;
 
     @BeforeEach
     public void initTestCase() {
@@ -160,5 +167,64 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
 
         String expectedMessage = "Error while trying to add user to repository: " + user.getLogin() + " to repo " + repositoryUrl;
         assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldNotThrowExceptionWhenRepositoryExists() throws GitLabApiException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        var exercise = database.addTemplateParticipationForProgrammingExercise(optionalExercise.get());
+
+        gitlabRequestMockProvider.mockCreateRepositoryExists(exercise);
+        assertDoesNotThrow(() -> versionControlService.createRepository(exercise.getProjectKey(), "repo-name", exercise.getProjectKey()));
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldThrowExceptionWhenFailToCreateRepository() throws GitLabApiException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        var exercise = database.addTemplateParticipationForProgrammingExercise(optionalExercise.get());
+
+        gitlabRequestMockProvider.mockCreateRepository(exercise, "repo-name", true);
+        Exception exception = assertThrows(GitLabException.class, () -> {
+            versionControlService.createRepository(exercise.getProjectKey(), "repo-name", exercise.getProjectKey());
+
+        });
+
+        String expectedMessage = "Error creating new repository " + "repo-name";
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldThrowExceptionWhenFailToCreateGitlabGroupForExercise() throws GitLabApiException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        var exercise = database.addTemplateParticipationForProgrammingExercise(optionalExercise.get());
+
+        gitlabRequestMockProvider.mockCreateGitlabGroupForExercise(exercise, false, true);
+        Exception exception = assertThrows(GitLabException.class, () -> {
+            versionControlService.createProjectForExercise(exercise);
+        });
+
+        String expectedMessage = "Unable to create new group for course ";
+        assertThat(exception.getMessage()).startsWith(expectedMessage);
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldNotThrowExceptionWhenCreateGitlabGroupForExerciseExists() throws GitLabApiException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        var exercise = database.addTemplateParticipationForProgrammingExercise(optionalExercise.get());
+
+        gitlabRequestMockProvider.mockCreateGitlabGroupForExercise(exercise, true, false);
+        assertDoesNotThrow(() -> versionControlService.createProjectForExercise(exercise));
     }
 }

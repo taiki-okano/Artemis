@@ -154,14 +154,36 @@ public class GitlabRequestMockProvider {
         doReturn(member).when(groupApi).addMember(group, userId, accessLevel);
     }
 
-    public void mockCreateRepository(ProgrammingExercise exercise, String repositoryName) throws GitLabApiException {
+    public void mockCreateRepository(ProgrammingExercise exercise, String repositoryName, boolean shouldFailToCreate) throws GitLabApiException {
         Namespace exerciseNamespace = new Namespace().withName(exercise.getProjectKey());
-        final var project = new Project().withName(repositoryName.toLowerCase()).withNamespace(exerciseNamespace).withVisibility(Visibility.PRIVATE).withJobsEnabled(false)
-                .withSharedRunnersEnabled(false).withContainerRegistryEnabled(false);
+        final var project = new Project().withPath(repositoryName.toLowerCase()).withName(repositoryName.toLowerCase()).withNamespaceId(1).withVisibility(Visibility.PRIVATE)
+                .withJobsEnabled(false).withSharedRunnersEnabled(false).withContainerRegistryEnabled(false);
         final var group = new Group();
         group.setId(1);
         doReturn(group).when(groupApi).getGroup(exercise.getProjectKey());
-        doReturn(project).when(projectApi).createProject(project);
+
+        if (shouldFailToCreate) {
+            GitLabApiException exception = mock(GitLabApiException.class);
+            doReturn(new HashMap<String, List<String>>()).when(exception).getValidationErrors();
+            doThrow(exception).when(projectApi).createProject(any(Project.class));
+        }
+        else {
+            doReturn(project).when(projectApi).createProject(project);
+        }
+    }
+
+    public void mockCreateRepositoryExists(ProgrammingExercise exercise) throws GitLabApiException {
+        final var group = new Group();
+        group.setId(1);
+        doReturn(group).when(groupApi).getGroup(exercise.getProjectKey());
+
+        Map<String, List<String>> validationErrors = new HashMap<>();
+        validationErrors.put("path", List.of("has already been taken"));
+
+        GitLabApiException exception = mock(GitLabApiException.class);
+        when(exception.getValidationErrors()).thenReturn(validationErrors);
+
+        doThrow(exception).when(projectApi).createProject(any(Project.class));
     }
 
     public void mockCheckIfProjectExists(final ProgrammingExercise exercise, final boolean exists) throws GitLabApiException {
@@ -206,7 +228,7 @@ public class GitlabRequestMockProvider {
         final var projectKey = exercise.getProjectKey();
         final var clonedRepoName = projectKey.toLowerCase() + "-" + username.toLowerCase();
 
-        mockCreateRepository(exercise, clonedRepoName);
+        mockCreateRepository(exercise, clonedRepoName, false);
     }
 
     public void mockConfigureRepository(ProgrammingExercise exercise, String username, Set<de.tum.in.www1.artemis.domain.User> users, boolean ltiUserExists)
@@ -597,5 +619,25 @@ public class GitlabRequestMockProvider {
             final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
             doReturn(new Member()).when(projectApi).updateMember(repositoryPath, 1, GUEST);
         }
+    }
+
+    public void mockCreateGitlabGroupForExercise(ProgrammingExercise exercise, boolean groupExists, boolean shouldFail) throws GitLabApiException {
+        final String exercisePath = exercise.getProjectKey();
+        final String exerciseName = exercisePath + " " + exercise.getTitle();
+        final Group group = new Group().withPath(exercisePath).withName(exerciseName).withVisibility(Visibility.PRIVATE);
+
+        if (shouldFail) {
+            doThrow(new GitLabApiException("Internal Error", 500)).when(groupApi).addGroup(any(Group.class));
+            return;
+        }
+
+        if (groupExists) {
+            GitLabApiException exception = mock(GitLabApiException.class);
+            when(exception.getMessage()).thenReturn("has already been taken");
+            doThrow(exception).when(groupApi).addGroup(any(Group.class));
+            return;
+        }
+
+        doReturn(group).when(groupApi).addGroup(group);
     }
 }
