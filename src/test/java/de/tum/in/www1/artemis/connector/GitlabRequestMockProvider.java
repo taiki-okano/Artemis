@@ -261,6 +261,34 @@ public class GitlabRequestMockProvider {
         }
     }
 
+    public ProjectApi mockAddMemberToRepositoryUserExists(String repositoryPath, String login, boolean updateMemberFails) throws GitLabApiException {
+        final int mockedUserId = 1;
+        doReturn(mockedUserId).when(gitLabUserManagementService).getUserId(login);
+        doThrow(new GitLabApiException("Member already exists.", 409)).when(projectApi).addMember(repositoryPath, mockedUserId, DEVELOPER);
+
+        if (updateMemberFails) {
+            doThrow(new GitLabApiException("Failrue", 403)).when(projectApi).updateMember(repositoryPath, mockedUserId, DEVELOPER);
+        }
+        else {
+            doReturn(new Member()).when(projectApi).updateMember(repositoryPath, mockedUserId, DEVELOPER);
+        }
+        return projectApi;
+    }
+
+    public ProjectApi mockAddMemberToRepositoryLowerAccessLevel(String repositoryPath, String login) throws GitLabApiException {
+        final int mockedUserId = 1;
+        doReturn(mockedUserId).when(gitLabUserManagementService).getUserId(login);
+
+        Map<String, List<String>> validationErrors = new HashMap<>();
+        validationErrors.put("access_level", List.of("should be greater than or equal to"));
+
+        GitLabApiException exception = mock(GitLabApiException.class);
+        doReturn(validationErrors).when(exception).getValidationErrors();
+
+        doThrow(exception).when(projectApi).addMember(repositoryPath, mockedUserId, DEVELOPER);
+        return projectApi;
+    }
+
     private void mockProtectBranch(String branch, VcsRepositoryUrl repositoryUrl) throws GitLabApiException {
         final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
         doReturn(new Branch()).when(repositoryApi).unprotectBranch(repositoryPath, branch);
