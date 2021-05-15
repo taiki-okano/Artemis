@@ -83,7 +83,7 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         gitlabRequestMockProvider.mockCreateRepository(exercise, exerciseRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exercise, testRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exercise, solutionRepoName, false);
-        gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
+        gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
         jenkinsRequestMockProvider.mockCreateProjectForExercise(exercise, failToCreateCiProject);
         jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, TEMPLATE.getName());
         jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, SOLUTION.getName());
@@ -127,9 +127,9 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTemplateRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetSolutionRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTestsRepoName, false);
-        gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
-        gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
-        gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
+        gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
+        gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
+        gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
     }
 
     private void mockCloneAndEnableAllBuildPlans(ProgrammingExercise sourceExercise, ProgrammingExercise exerciseToBeImported, boolean planExistsInCi, boolean shouldPlanEnableFail)
@@ -188,7 +188,7 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         jenkinsRequestMockProvider.mockConfigureBuildPlan(exercise, username);
         // Note: Step 2c) is not needed in the Jenkins setup
         // Step 1c)
-        gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
+        gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
     }
 
     @Override
@@ -339,12 +339,12 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
 
     @Override
     public void mockDeleteRepository(String projectKey, String repostoryName, boolean shouldFail) throws Exception {
-        gitlabRequestMockProvider.mockDeleteRepository(projectKey + "/" + repostoryName, shouldFail);
+        gitlabRequestMockProvider.mockDeleteRepository(projectKey + "/" + repostoryName, shouldFail, true);
     }
 
     @Override
     public void mockDeleteProjectInVcs(String projectKey, boolean shouldFail) throws Exception {
-        gitlabRequestMockProvider.mockDeleteProject(projectKey, shouldFail);
+        gitlabRequestMockProvider.mockDeleteProject(projectKey, shouldFail, true);
     }
 
     @Override

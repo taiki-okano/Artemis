@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.gitlab4j.api.models.AccessLevel.DEVELOPER;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -226,5 +225,53 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
 
         gitlabRequestMockProvider.mockCreateGitlabGroupForExercise(exercise, true, false);
         assertDoesNotThrow(() -> versionControlService.createProjectForExercise(exercise));
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldReturnFalseIfRepositoryUrlIsNotValid() {
+        VcsRepositoryUrl vcsRepositoryUrl = mock(VcsRepositoryUrl.class);
+        when(vcsRepositoryUrl.getURL()).thenReturn(null);
+        assertThat(versionControlService.repositoryUrlIsValid(vcsRepositoryUrl)).isFalse();
+        assertThat(versionControlService.repositoryUrlIsValid(null)).isFalse();
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldNotThrowWhenDeletingNonExistantRepository() throws MalformedURLException, GitLabApiException {
+        VcsRepositoryUrl repositoryUrl = new VcsRepositoryUrl("http://gitlab/CS1JAVA1/cs1java1-artemis_admin");
+        String repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+
+        gitlabRequestMockProvider.mockDeleteRepository(repositoryPath, false, false);
+        assertDoesNotThrow(() -> versionControlService.deleteRepository(repositoryUrl));
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldNotThrowWhenDeletingNonExistantProject() throws GitLabApiException {
+        gitlabRequestMockProvider.mockDeleteProject("projectKey", false, false);
+        assertDoesNotThrow(() -> versionControlService.deleteProject("projectKey"));
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldThrowExceptionWhenFailToAddAuthenticatedWebhook() throws GitLabApiException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        database.addTemplateParticipationForProgrammingExercise(optionalExercise.get());
+        database.addSolutionParticipationForProgrammingExercise(optionalExercise.get());
+
+        optionalExercise = programmingExerciseRepository.findWithTemplateAndSolutionParticipationById(optionalExercise.get().getId());
+        assertThat(optionalExercise).isPresent();
+
+        gitlabRequestMockProvider.mockAddAuthenticatedWebHook(true);
+        var finalOptionalExercise = optionalExercise;
+        Exception exception = assertThrows(GitLabException.class, () -> {
+            versionControlService.addWebHooksForExercise(finalOptionalExercise.get());
+        });
+
+        String expectedMessage = "Unable to add webhook for ";
+        assertThat(exception.getMessage()).startsWith(expectedMessage);
     }
 }

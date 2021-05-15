@@ -164,7 +164,9 @@ public class GitlabRequestMockProvider {
 
         if (shouldFailToCreate) {
             GitLabApiException exception = mock(GitLabApiException.class);
-            doReturn(new HashMap<String, List<String>>()).when(exception).getValidationErrors();
+            Map<String, List<String>> validationErrors = new HashMap<>();
+            validationErrors.put("path", List.of("some error"));
+            doReturn(validationErrors).when(exception).getValidationErrors();
             doThrow(exception).when(projectApi).createProject(any(Project.class));
         }
         else {
@@ -196,9 +198,14 @@ public class GitlabRequestMockProvider {
         doReturn(result).when(projectApi).getProjects(exercise.getProjectKey());
     }
 
-    public void mockAddAuthenticatedWebHook() throws GitLabApiException {
+    public void mockAddAuthenticatedWebHook(boolean shouldFail) throws GitLabApiException {
         final var hook = new ProjectHook().withPushEvents(true).withIssuesEvents(false).withMergeRequestsEvents(false).withWikiPageEvents(false);
-        doReturn(hook).when(projectApi).addHook(any(), anyString(), any(ProjectHook.class), anyBoolean(), anyString());
+        if (shouldFail) {
+            doThrow(new GitLabApiException("Internal Error", 500)).when(projectApi).addHook(any(), anyString(), any(ProjectHook.class), anyBoolean(), anyString());
+        }
+        else {
+            doReturn(hook).when(projectApi).addHook(any(), anyString(), any(ProjectHook.class), anyBoolean(), anyString());
+        }
     }
 
     public void mockFailOnGetUserById(String login) throws GitLabApiException {
@@ -579,18 +586,24 @@ public class GitlabRequestMockProvider {
         doThrow(GitLabApiException.class).when(groupApi).removeMember(programmingExercise.getProjectKey(), 1);
     }
 
-    public void mockDeleteRepository(String repositoryPath, boolean shouldFail) throws GitLabApiException {
+    public void mockDeleteRepository(String repositoryPath, boolean shouldFail, boolean repositoryExists) throws GitLabApiException {
         if (shouldFail) {
             doThrow(new GitLabApiException("Bad Request", 400)).when(projectApi).deleteProject(repositoryPath);
+        }
+        else if (!repositoryExists) {
+            doThrow(new GitLabApiException("Not found", 404)).when(projectApi).deleteProject(repositoryPath);
         }
         else {
             doNothing().when(projectApi).deleteProject(repositoryPath);
         }
     }
 
-    public void mockDeleteProject(String projectKey, boolean shouldFail) throws GitLabApiException {
+    public void mockDeleteProject(String projectKey, boolean shouldFail, boolean projectExists) throws GitLabApiException {
         if (shouldFail) {
             doThrow(new GitLabApiException("Bad request", 400)).when(groupApi).deleteGroup(projectKey);
+        }
+        else if (!projectExists) {
+            doThrow(new GitLabApiException("Not found", 404)).when(groupApi).deleteGroup(projectKey);
         }
         else {
             doNothing().when(groupApi).deleteGroup(projectKey);
