@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Artemis: Interactive Learning with Individual Feedback &mdash; Artemis  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Exercises" href="user/exercises.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home" alt="Documentation Home"> Artemis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user/exercises.html">Exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user/exam_mode.html">Exam Mode</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributor Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dev/setup.html">Setup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/guidelines.html">Coding and design guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/system-design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/use-local-user-management.html">Using local user management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/saml2-shibboleth.html">Shibboleth/SAML2 Login &amp; Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/guided-tour.html">Guided Tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/testservers.html">Test Servers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/docker.html">Builds and Dependency Management</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administration Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="admin/registration.html">User Registration</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Artemis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Artemis: Interactive Learning with Individual Feedback</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="artemis-interactive-learning-with-individual-feedback">
+<span id="artemis"></span><h1>Artemis: Interactive Learning with Individual Feedback<a class="headerlink" href="#artemis-interactive-learning-with-individual-feedback" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="main-features">
+<h2>Main features<a class="headerlink" href="#main-features" title="Permalink to this headline">¶</a></h2>
+<p>Artemis supports the following exercises:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="user/exercises/programming.html"><span class="doc">Programming exercises</span></a> with version control and automatic assessment with test cases and continuous integration</p></li>
+<li><p><a class="reference internal" href="user/exercises/quiz.html"><span class="doc">Quiz exercises</span></a> with multiple choice, drag and drop and short answer quiz questions</p></li>
+<li><p><a class="reference internal" href="user/exercises/modeling.html"><span class="doc">Modeling exercises</span></a> with semi-automatic assessment using machine learning concepts</p></li>
+<li><p><a class="reference internal" href="user/exercises/textual.html"><span class="doc">Textual exercises</span></a> with manual (and experimental semi-automatic) assessment</p></li>
+<li><p><a class="reference internal" href="user/exercises/file-upload.html"><span class="doc">File upload exercises</span></a> with manual assessment</p></li>
+</ol>
+<p>All these exercises are supposed to be run either live in the lecture with instant feedback or as homework. Students can submit their solutions multiple times within the due date and use the (semi-)automatically provided feedback to improve their solution.</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user/exercises.html">Exercises</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user/exercises/programming.html">Programming Exercise</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/programming.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/programming.html#setup">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/programming.html#static-code-analysis-default-configuration">Static Code Analysis Default Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/programming.html#online-editor">Online Editor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/programming.html#testing-with-artemis-java-test-sandbox">Testing with Artemis Java Test Sandbox</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/programming.html#best-practices-for-writing-test-cases">Best practices for writing test cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/programming.html#sending-feedback-back-to-artemis">Sending Feedback back to Artemis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user/exercises/quiz.html">Quiz exercise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/exercises/modeling.html">Modeling exercise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/exercises/textual.html">Textual exercise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/exercises/file-upload.html">File Upload Exercise</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/file-upload.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/file-upload.html#setup">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/file-upload.html#student-submission">Student Submission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exercises/file-upload.html#assessment">Assessment</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user/exam_mode.html">Exam Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user/exams/instructors_guide.html">Instructors’ Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user/exams/instructors_guide.html#timeline-of-an-artemis-online-exam">Timeline of an Artemis Online Exam</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user/exams/students_guide.html">Students’ Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user/exams/students_guide.html#general-information">General Information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user/exams/students_guide.html#participating-in-the-artemis-online-exam">Participating in the Artemis Online Exam</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contributor Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dev/setup.html">Setup Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/setup.html#server-setup">Server Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup/bamboo-bitbucket-jira.html">Bamboo, Bitbucket and Jira</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup/jenkins-gitlab.html">Jenkins and Gitlab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup/distributed.html">Multiple instances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup/programming-exercises.html">Adjustments for programming exercises</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup/programming-exercises.html#caching-example-for-maven">Caching example for Maven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#run-the-server-via-a-service-configuration">Run the server via a service configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#run-the-server-via-a-run-configuration-in-intellij">Run the server via a run configuration in IntelliJ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#typical-problems-with-liquibase-checksums">Typical problems with Liquibase checksums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#run-the-server-with-spring-boot-and-spring-profiles">Run the server with Spring Boot and Spring profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#run-the-server-with-the-command-line-gradle-wrapper">Run the server with the command line (Gradle wrapper)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/setup.html#client-setup">Client Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#using-intellij">Using IntelliJ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#using-the-command-line">Using the command line</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/setup.html#customize-your-artemis-instance">Customize your Artemis instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/setup.html#alternative-using-docker-compose">Alternative: Using docker-compose</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#get-a-shell-into-the-containers">Get a shell into the containers:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#other-useful-commands">Other useful commands:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/setup.html#athene-service">Athene Service</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#enable-the-athene-spring-profile">Enable the <code class="docutils literal notranslate"><span class="pre">athene</span></code> Spring profile:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/setup.html#configure-api-endpoints">Configure API Endpoints:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev/guidelines.html">Coding and design guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/guidelines/server.html">Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#folder-structure">0. Folder structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#naming-convention">1. Naming convention</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#single-responsibility-principle">2. Single responsibility principle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#small-methods">3. Small methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#duplication">4. Duplication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#variables-and-methods-declaration">5. Variables and methods declaration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#structure-your-code-correctly">6. Structure your code correctly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#database">7. Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#comments">8. Comments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#utility">9. Utility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#auto-configuration">10. Auto configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#keep-your-restcontrollers-clean-and-focused">11. Keep your <code class="docutils literal notranslate"><span class="pre">&#64;RestController</span></code>’s clean and focused</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#dependency-injection">12. Dependency injection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#keep-it-simple-and-stupid">13. Keep it simple and stupid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#file-handling">14. File handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#general-best-practices">15. General best practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#avoid-service-dependencies">16. Avoid service dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#proper-annotation-of-sql-query-parameters">17. Proper annotation of SQL query parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#sql-statement-formatting">18. SQL statement formatting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#avoid-the-usage-of-sub-queries">19. Avoid the usage of Sub-queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#rest-endpoint-best-practices-for-authorization">20. REST endpoint best practices for authorization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#assert-using-the-most-specific-overload-method">21. Assert using the most specific overload method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#general-testing-tips">22. General Testing Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/server.html#avoid-using-mockbean">23. Avoid using &#64;MockBean</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guidelines/client.html">Client</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#general">0. General</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#names">1. Names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#components">2. Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#types">3. Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#null-and-undefined">4. <code class="docutils literal notranslate"><span class="pre">null</span></code> and <code class="docutils literal notranslate"><span class="pre">undefined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#general-assumptions">5. General Assumptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#comments">6. Comments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#strings">7. Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#style">8. Style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#testing">9. Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#preventing-memory-leaks">10. Preventing Memory Leaks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#defining-routes-and-breadcrumbs">11. Defining Routes and Breadcrumbs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/client.html#strict-template-check">12. Strict Template Check</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guidelines/database.html">Database Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/database.html#retrieving-and-building-objects">1. Retrieving and Building Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/database.html#relationships">2. Relationships</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/database.html#cascade-types">2. Cascade Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/database.html#best-practices">Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/database.html#solutions-for-known-issues">Solutions for known issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guidelines/code-review.html">Code Review</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#steps">STEPS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#precondition-only-developer">0. Precondition -&gt; only Developer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#start-implementation-only-developer">1. Start Implementation -&gt; only Developer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#implementation-is-done-only-developer">2. Implementation is “done” -&gt; only Developer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#review-only-reviewer">3. Review -&gt; only Reviewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#respond-to-review-developer-reviewer">4. Respond to review -&gt; Developer &amp; Reviewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#developer">Developer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#reviewer">Reviewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#iterate-steps-3-4-until-ready-for-merge-all-reviewers-approve-thumbs-up">Iterate steps 3 &amp; 4 until ready for merge (= all reviewers approve (thumbs up) )</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guidelines/code-review.html#merge">4. Merge</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev/system-design.html">System Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/system-design.html#top-level-design">Top-Level Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/system-design.html#deployment">Deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/system-design.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/system-design.html#server-architecture">Server Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev/use-local-user-management.html">Using local user management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/saml2-shibboleth.html">Shibboleth/SAML2 Login &amp; Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/guided-tour.html">Guided Tour</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#create-guidedtour-object">Create GuidedTour object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#texttourstep-with-highlighted-element">TextTourStep with highlighted element</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#texttourstep-with-multiple-markdown-elements">TextTourStep with multiple markdown elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#imagetourstep">ImageTourStep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#videotourstep">VideoTourStep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#userinteractiontourstep">UserInteractionTourStep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#modelingtasktourstep">ModelingTaskTourStep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#assessmenttasktourstep">AssessmentTaskTourStep</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#example-implementation-of-a-guidedtour-object">Example implementation of a GuidedTour object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#mandatory-attributes">Mandatory attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#optional-attributes">Optional attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#add-translations">Add translations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#embed-in-component-file">Embed in component file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev/guided-tour.html#example-of-integrating-the-guidedtour-exampletutorial-into-a-component-file">Example of integrating the GuidedTour <code class="docutils literal notranslate"><span class="pre">exampleTutorial</span></code> into a component file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#extend-configuration-file">Extend configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/guided-tour.html#writing-test-cases-for-guided-tutorials">Writing test cases for guided tutorials</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev/testservers.html">Test Servers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/testservers.html#test-server-1-3">Test Server 1-3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/testservers.html#test-server-5">Test Server 5</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev/docker.html">Builds and Dependency Management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/docker.html#general-structure-of-programming-exercise-execution">General Structure of Programming Exercise Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/docker.html#steps-for-updating-the-dockerbuilds-used-in-artemis">Steps for Updating the DockerBuilds used in Artemis</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Administration Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="admin/registration.html">User Registration</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="user/exercises.html" class="btn btn-neutral float-right" title="Exercises" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
