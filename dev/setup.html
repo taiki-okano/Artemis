@@ -126,6 +126,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#configure-api-endpoints">Configure API Endpoints:</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Athene Service</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enable-the-apollon-spring-profile">Enable the <code class="docutils literal notranslate"><span class="pre">apollon</span></code> Spring profile:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Configure API Endpoints:</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guidelines.html">Coding and design guidelines</a></li>
@@ -590,6 +595,27 @@ HTTP. We need to extend the configuration in the file
     <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost</span>
     <span class="nt">base64-secret</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">YWVuaXF1YWRpNWNlaXJpNmFlbTZkb283dXphaVF1b29oM3J1MWNoYWlyNHRoZWUzb2huZ2FpM211bGVlM0VpcAo=</span>
     <span class="nt">token-validity-in-seconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10800</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>Athene Service<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The semi-automatic text assessment relies on the <a class="reference external" href="https://github.com/ls1intum/Athene">Athene</a> service.
+To enable automatic text assessments, special configuration is required:</p>
+<div class="section" id="enable-the-apollon-spring-profile">
+<h3>Enable the <code class="docutils literal notranslate"><span class="pre">apollon</span></code> Spring profile:<a class="headerlink" href="#enable-the-apollon-spring-profile" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">spring</span><span class="o">.</span><span class="n">profiles</span><span class="o">.</span><span class="n">active</span><span class="o">=</span><span class="n">dev</span><span class="p">,</span><span class="n">bamboo</span><span class="p">,</span><span class="n">bitbucket</span><span class="p">,</span><span class="n">jira</span><span class="p">,</span><span class="n">artemis</span><span class="p">,</span><span class="n">scheduling</span><span class="p">,</span><span class="n">apollon</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Configure API Endpoints:<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The Apollon conversion service is running on a dedicated machine and is adressed via
+HTTP. We need to extend the configuration in the file
+<code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code> like so:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apollon</span><span class="p">:</span>
+   <span class="nt">conversion-service-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost:8080</span>
 </pre></div>
 </div>
 </div>
