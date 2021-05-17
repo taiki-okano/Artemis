@@ -252,7 +252,7 @@ public class GitlabRequestMockProvider {
 
             mockAddMemberToRepository(repositoryUrl, user.getLogin());
         }
-        mockProtectBranch("master", repositoryUrl);
+        mockProtectBranch("master", repositoryUrl, false);
     }
 
     private void mockUserExists(String username, boolean exists) throws GitLabApiException {
@@ -318,10 +318,26 @@ public class GitlabRequestMockProvider {
         return projectApi;
     }
 
-    private void mockProtectBranch(String branch, VcsRepositoryUrl repositoryUrl) throws GitLabApiException {
+    public void mockProtectBranch(String branch, VcsRepositoryUrl repositoryUrl, boolean shouldFailToProtect) throws GitLabApiException {
         final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
         doReturn(new Branch()).when(repositoryApi).unprotectBranch(repositoryPath, branch);
-        doReturn(new ProtectedBranch()).when(protectedBranchesApi).protectBranch(repositoryPath, branch);
+
+        if (shouldFailToProtect) {
+            doThrow(new GitLabApiException("Internal Error", 500)).when(protectedBranchesApi).protectBranch(repositoryPath, branch, DEVELOPER, DEVELOPER, OWNER, false);
+        }
+        else {
+            doReturn(new ProtectedBranch()).when(protectedBranchesApi).protectBranch(repositoryPath, branch, DEVELOPER, DEVELOPER, OWNER, false);
+        }
+    }
+
+    public void mockUnprotectBranch(String branch, VcsRepositoryUrl repositoryUrl, boolean shouldFail) throws GitLabApiException {
+        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        if (shouldFail) {
+            doThrow(new GitLabApiException("Internal Error", 500)).when(protectedBranchesApi).unprotectBranch(repositoryPath, branch);
+        }
+        else {
+            doReturn(new ProtectedBranch()).when(protectedBranchesApi).unprotectBranch(repositoryPath, branch);
+        }
     }
 
     public void mockFailToCheckIfProjectExists(String projectKey) throws GitLabApiException {
@@ -334,10 +350,15 @@ public class GitlabRequestMockProvider {
         mockServerShortTimeout.expect(requestTo(uri)).andExpect(method(HttpMethod.GET)).andRespond(withStatus(httpStatus).contentType(MediaType.APPLICATION_JSON).body(response));
     }
 
-    public void mockRemoveMemberFromRepository(String repositoryPath, String login) throws GitLabApiException {
+    public void mockRemoveMemberFromRepository(String repositoryPath, String login, boolean shouldFailToRemove) throws GitLabApiException {
         final var mockedUserId = 1;
         doReturn(mockedUserId).when(gitLabUserManagementService).getUserId(login);
-        doNothing().when(projectApi).removeMember(repositoryPath, mockedUserId);
+        if (shouldFailToRemove) {
+            doThrow(new GitLabApiException("Internal Error", 500)).when(projectApi).removeMember(repositoryPath, mockedUserId);
+        }
+        else {
+            doNothing().when(projectApi).removeMember(repositoryPath, mockedUserId);
+        }
     }
 
     public void mockUpdateVcsUser(String login, de.tum.in.www1.artemis.domain.User user, Set<String> removedGroups, Set<String> addedGroups, boolean shouldSynchronizePassword)

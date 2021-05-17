@@ -216,7 +216,7 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
     @Override
     public void mockRemoveRepositoryAccess(ProgrammingExercise exercise, Team team, User firstStudent) throws Exception {
         final var repositorySlug = (exercise.getProjectKey() + "-" + team.getParticipantIdentifier()).toLowerCase();
-        gitlabRequestMockProvider.mockRemoveMemberFromRepository(repositorySlug, firstStudent.getLogin());
+        gitlabRequestMockProvider.mockRemoveMemberFromRepository(repositorySlug, firstStudent.getLogin(), false);
     }
 
     @Override

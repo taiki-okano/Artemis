@@ -1,6 +1,7 @@
 package de.tum.in.www1.artemis;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.gitlab4j.api.models.AccessLevel.DEVELOPER;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,6 +10,8 @@ import static org.mockito.Mockito.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.ProjectApi;
@@ -24,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.tum.in.www1.artemis.domain.Course;
+import de.tum.in.www1.artemis.domain.ProgrammingExercise;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.domain.VcsRepositoryUrl;
 import de.tum.in.www1.artemis.exception.VersionControlException;
@@ -273,5 +277,56 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
 
         String expectedMessage = "Unable to add webhook for ";
         assertThat(exception.getMessage()).startsWith(expectedMessage);
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldThrowExceptionWhenFailToRemoveMemberFromRepository() throws GitLabApiException, MalformedURLException {
+        VcsRepositoryUrl repositoryUrl = new VcsRepositoryUrl("http://gitlab/CS1JAVA1/cs1java1-artemis_admin");
+        String repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+
+        User user = ModelFactory.generateActivatedUser("userLogin");
+
+        gitlabRequestMockProvider.mockRemoveMemberFromRepository(repositoryPath, user.getLogin(), true);
+        Exception exception = assertThrows(GitLabException.class, () -> {
+            versionControlService.removeMemberFromRepository(repositoryUrl, user);
+        });
+
+        String expectedMessage = "Error while trying to remove user from repository: " + user.getLogin() + " from repo " + repositoryUrl;
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldNotThrowExceptionWhenFailToUnprotectBranch() throws GitLabApiException, MalformedURLException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        ProgrammingExercise exercise = optionalExercise.get();
+
+        User user = ModelFactory.generateActivatedUser("userLogin");
+
+        gitlabRequestMockProvider.mockUnprotectBranch("master", exercise.getVcsTestRepositoryUrl(), true);
+        assertDoesNotThrow(() -> {
+            versionControlService.configureRepository(exercise, exercise.getVcsTestRepositoryUrl(), Set.of(user), false);
+            await().timeout(1, TimeUnit.MINUTES).pollDelay(25, TimeUnit.SECONDS).until(() -> true);
+        });
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldNotThrowExceptionWhenFailToProtectBranch() throws GitLabApiException, MalformedURLException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        ProgrammingExercise exercise = optionalExercise.get();
+
+        User user = ModelFactory.generateActivatedUser("userLogin");
+
+        gitlabRequestMockProvider.mockProtectBranch("master", exercise.getVcsTestRepositoryUrl(), true);
+        assertDoesNotThrow(() -> {
+            versionControlService.configureRepository(exercise, exercise.getVcsTestRepositoryUrl(), Set.of(user), false);
+            await().timeout(1, TimeUnit.MINUTES).pollDelay(25, TimeUnit.SECONDS).until(() -> true);
+        });
     }
 }

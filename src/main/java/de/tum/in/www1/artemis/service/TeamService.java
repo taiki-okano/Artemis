@@ -79,8 +79,11 @@ public class TeamService {
      * @param updatedTeam New team after update
      */
     public void updateRepositoryMembersIfNeeded(Long exerciseId, Team existingTeam, Team updatedTeam) {
-        var optionalParticipation = programmingExerciseStudentParticipationRepository.findByExerciseIdAndTeamId(exerciseId, existingTeam.getId());
+        if (versionControlService.isEmpty()) {
+            return;
+        }
 
+        var optionalParticipation = programmingExerciseStudentParticipationRepository.findByExerciseIdAndTeamId(exerciseId, existingTeam.getId());
         optionalParticipation.ifPresent(participation -> {
             // Users in the existing team that are no longer in the updated team need to be removed
             Set<User> usersToRemove = new HashSet<>(existingTeam.getStudents());
