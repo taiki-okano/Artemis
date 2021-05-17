@@ -298,7 +298,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
 
     @Test
     @WithMockUser(username = "student1")
-    public void testShouldNotThrowExceptionWhenFailToUnprotectBranch() throws GitLabApiException, MalformedURLException {
+    public void testShouldNotThrowExceptionWhenFailToUnprotectBranch() throws GitLabApiException {
         Course course = database.addCourseWithOneProgrammingExercise();
         var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
         assertThat(optionalExercise).isPresent();
@@ -315,7 +315,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
 
     @Test
     @WithMockUser(username = "student1")
-    public void testShouldNotThrowExceptionWhenFailToProtectBranch() throws GitLabApiException, MalformedURLException {
+    public void testShouldNotThrowExceptionWhenFailToProtectBranch() throws GitLabApiException {
         Course course = database.addCourseWithOneProgrammingExercise();
         var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
         assertThat(optionalExercise).isPresent();
@@ -328,5 +328,24 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
             versionControlService.configureRepository(exercise, exercise.getVcsTestRepositoryUrl(), Set.of(user), false);
             await().timeout(1, TimeUnit.MINUTES).pollDelay(25, TimeUnit.SECONDS).until(() -> true);
         });
+    }
+
+    @Test
+    @WithMockUser(username = "student1")
+    public void testShouldThrowExceptionWhenFailToConfigureRepository() throws GitLabApiException {
+        Course course = database.addCourseWithOneProgrammingExercise();
+        var optionalExercise = programmingExerciseRepository.findAllByCourse(course).stream().findFirst();
+        assertThat(optionalExercise).isPresent();
+        ProgrammingExercise exercise = optionalExercise.get();
+
+        User user = ModelFactory.generateActivatedUser("edx_userLogin");
+
+        gitlabRequestMockProvider.mockGetUserId(user.getLogin(), true, true);
+        Exception exception = assertThrows(GitLabException.class, () -> {
+            versionControlService.configureRepository(exercise, exercise.getVcsTestRepositoryUrl(), Set.of(user), false);
+        });
+
+        String expectedMessage = "Unable to fetch user ID for " + user.getLogin();
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
     }
 }
