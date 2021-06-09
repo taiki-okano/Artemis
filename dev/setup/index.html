@@ -522,6 +522,12 @@ and will start the client application in your browser on
 above in Server Setup) and if you have configured
 <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code> correctly, then you should be able to login
 with your TUM Online account.</p>
+<p>In case you encounter any problems regarding JavaScript heap memory leaks when executing <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">start</span></code> or any other scripts from <code class="docutils literal notranslate"><span class="pre">package.json</span></code>, you can change the memory limit parameter used in the <code class="docutils literal notranslate"><span class="pre">webpack-ts</span></code> script in <code class="docutils literal notranslate"><span class="pre">package.json</span></code> to the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This local change in `package.json` should not be comitted.</span>
+<span class="s2">&quot;webpack-ts&quot;</span><span class="p">:</span> <span class="s2">&quot;cross-env NODE_OPTIONS=--max_old_space_size=5120 TS_NODE_PROJECT=</span><span class="se">\&quot;</span><span class="s2">tsconfig.webpack.json</span><span class="se">\&quot;</span><span class="s2"> webpack&quot;</span> <span class="c1"># possible higher values are 6144, 7168, and 8192</span>
+</pre></div>
+</div>
+<p>Make sure to <strong>not commit this change</strong> in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
 <p>For more information, review <a class="reference external" href="https://www.jhipster.tech/development/#working-with-angular">Working with
 Angular</a>.
 For further instructions on how to develop with JHipster, have a look at
