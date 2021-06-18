@@ -104,7 +104,7 @@ export const commonConfig = (options: Options) => ({
         }),
         new HtmlWebpackPlugin({
             template: './src/main/webapp/index.html',
-            chunks: ['polyfills', 'main', 'global'],
+            chunks: ['polyfills', 'main'],
             chunksSortMode: 'manual',
             inject: 'body',
             base: '/',
