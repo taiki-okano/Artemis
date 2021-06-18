@@ -32,7 +32,8 @@ export const commonConfig = (options: Options) => ({
         maxAssetSize: 1024 * 1024,
     },
     output: {
-        publicPath: '',
+        publicPath: 'auto',
+        clean: true,
     },
     module: {
         rules: [
@@ -104,9 +105,10 @@ export const commonConfig = (options: Options) => ({
         }),
         new HtmlWebpackPlugin({
             template: './src/main/webapp/index.html',
-            chunks: ['polyfills', 'main'],
+            chunks: ['polyfills', 'main', 'global'],
             chunksSortMode: 'manual',
             inject: 'body',
+            hash: true,
             base: '/',
         }),
         new AngularWebpackPlugin({

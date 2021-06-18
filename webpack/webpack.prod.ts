@@ -21,8 +21,8 @@ module.exports = merge(commonConfig({ env: '"production"' }), {
     },
     output: {
         path: root('build/resources/main/static/'),
-        filename: 'app/[name].[chunkhash].bundle.js',
-        chunkFilename: 'app/[id].[chunkhash].chunk.js'
+        filename: 'app/[name].[hash].bundle.js',
+        chunkFilename: 'app/[id].[hash].chunk.js'
     },
     module: {
         rules: [
@@ -143,7 +143,8 @@ module.exports = merge(commonConfig({ env: '"production"' }), {
         new BundleAnalyzerPlugin({
             analyzerMode: 'static',
             openAnalyzer: false,
-            generateStatsFile: true}),
+            generateStatsFile: true
+        }),
         new webpack.LoaderOptionsPlugin({
             minimize: true,
             debug: false
