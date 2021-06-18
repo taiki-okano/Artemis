@@ -92,6 +92,7 @@ module.exports = merge(commonConfig({ env: '"production"' }), {
     },
     optimization: {
         runtimeChunk: false,
+        removeEmptyChunks: true,
         minimizer: [
             new TerserPlugin({
                 parallel: 2,
