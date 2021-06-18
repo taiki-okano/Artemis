@@ -3,7 +3,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { ArtemisTestModule } from '../../test.module';
 import { MockComponent } from 'ng-mocks';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { RouterModule } from '@angular/router';
 import { SidePanelComponent } from 'app/shared/side-panel/side-panel.component';
 import { TutorLeaderboardComponent } from 'app/shared/dashboards/tutor-leaderboard/tutor-leaderboard.component';
@@ -22,7 +22,7 @@ describe('InstructorExerciseDashboardComponent', () => {
     let fixture: ComponentFixture<InstructorExerciseDashboardComponent>;
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, RouterModule, ChartsModule, TranslateModule.forRoot()],
+            imports: [ArtemisTestModule, SharedModule, RouterModule, ChartsModule, TranslateModule.forRoot()],
             declarations: [
                 InstructorExerciseDashboardComponent,
                 MockComponent(HeaderExercisePageWithDetailsComponent),

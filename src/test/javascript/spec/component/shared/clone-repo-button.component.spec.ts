@@ -22,7 +22,7 @@ import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.s
 import { LocalStorageService } from 'ngx-webstorage';
 import { By } from '@angular/platform-browser';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.module';
 import { MockAlertService } from '../../helpers/mocks/service/mock-alert.service';
 import { MockFeatureToggleService } from '../../helpers/mocks/service/mock-feature-toggle.service';
@@ -63,7 +63,7 @@ describe('JhiCloneRepoButtonComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, TranslateModule.forRoot(), NgbModule, ArtemisSharedModule, FeatureToggleModule, ClipboardModule],
+            imports: [ArtemisTestModule, TranslateModule.forRoot(), NgbModule, SharedModule, FeatureToggleModule, ClipboardModule],
             declarations: [CloneRepoButtonComponent, MockComponent(ExerciseActionButtonComponent)],
             providers: [
                 { provide: JhiAlertService, useClass: MockAlertService },

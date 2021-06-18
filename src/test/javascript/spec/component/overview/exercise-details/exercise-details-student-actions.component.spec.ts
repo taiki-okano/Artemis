@@ -8,7 +8,7 @@ import { SinonStub, stub } from 'sinon';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject, of } from 'rxjs';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { MockComponent } from 'ng-mocks';
 import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.module';
 import { FeatureToggleService } from 'app/shared/feature-toggle/feature-toggle.service';
@@ -62,7 +62,7 @@ describe('ExerciseDetailsStudentActionsComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, TranslateModule.forRoot(), NgbModule, ArtemisSharedModule, FeatureToggleModule, RouterModule, ClipboardModule],
+            imports: [ArtemisTestModule, TranslateModule.forRoot(), NgbModule, SharedModule, FeatureToggleModule, RouterModule, ClipboardModule],
             declarations: [ExerciseDetailsStudentActionsComponent, MockComponent(ExerciseActionButtonComponent), MockComponent(CloneRepoButtonComponent)],
             providers: [
                 { provide: CourseExerciseService, useClass: MockCourseExerciseService },

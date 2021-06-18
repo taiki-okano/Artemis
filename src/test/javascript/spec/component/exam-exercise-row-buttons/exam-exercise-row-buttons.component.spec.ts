@@ -10,7 +10,7 @@ import { ArtemisTestModule } from '../../test.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockCookieService } from '../../helpers/mocks/service/mock-cookie.service';
 import { DeviceDetectorService } from 'ngx-device-detector';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
 import { ExamExerciseRowButtonsComponent } from 'app/exercises/shared/exam-exercise-row-buttons/exam-exercise-row-buttons.component';
 import { Course } from 'app/entities/course.model';
@@ -68,7 +68,7 @@ describe('ExamExerciseRowButtonsComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 RouterTestingModule.withRoutes([
                     {
                         path: 'courses',

@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ManualTextblockSelectionComponent } from 'app/exercises/text/assess/manual-textblock-selection/manual-textblock-selection.component';
 import { ArtemisConfirmIconModule } from 'app/shared/confirm-icon/confirm-icon.module';
 import { TextSharedModule } from 'app/exercises/text/shared/text-shared.module';
@@ -66,7 +66,7 @@ describe('ManualTextblockSelectionComponent', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, ArtemisConfirmIconModule, TextSharedModule],
+            imports: [ArtemisTestModule, SharedModule, ArtemisConfirmIconModule, TextSharedModule],
             declarations: [
                 TextblockAssessmentCardComponent,
                 TextblockFeedbackEditorComponent,

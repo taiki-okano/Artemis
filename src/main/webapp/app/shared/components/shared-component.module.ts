@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.module';
 import { ConfirmAutofocusButtonComponent, ConfirmAutofocusModalComponent } from 'app/shared/components/confirm-autofocus-button.component';
 import { HelpIconComponent } from 'app/shared/components/help-icon.component';
@@ -13,7 +13,7 @@ import { NotReleasedTagComponent } from 'app/shared/components/not-released-tag.
 import { HelpIconComponentWithoutTranslationComponent } from 'app/shared/components/help-icon-without-translation.component';
 
 @NgModule({
-    imports: [ArtemisSharedModule, FeatureToggleModule, ClipboardModule, ArtemisMarkdownModule],
+    imports: [SharedModule, FeatureToggleModule, ClipboardModule, ArtemisMarkdownModule],
     entryComponents: [ConfirmAutofocusModalComponent],
     declarations: [
         ButtonComponent,

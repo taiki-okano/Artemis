@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisModelingEditorModule } from 'app/exercises/modeling/shared/modeling-editor.module';
 import { ArtemisProgrammingExerciseInstructionsRenderModule } from 'app/exercises/programming/shared/instructions-render/programming-exercise-instructions-render.module';
 import { ExpandableSectionComponent } from './expandable-section/expandable-section.component';
@@ -16,7 +16,7 @@ import { ArtemisMarkdownModule } from 'app/shared/markdown.module';
     imports: [
         CommonModule,
         NgbModule,
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisModelingEditorModule,
         ArtemisProgrammingExerciseInstructionsRenderModule,
         ArtemisAssessmentSharedModule,

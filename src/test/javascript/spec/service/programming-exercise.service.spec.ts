@@ -13,7 +13,7 @@ import { routes } from 'app/exercises/programming/manage/programming-exercise-ma
 import { RouterTestingModule } from '@angular/router/testing';
 import { ArtemisTestModule } from '../test.module';
 import { FormsModule } from '@angular/forms';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisProgrammingExerciseManagementModule } from 'app/exercises/programming/manage/programming-exercise-management.module';
 import * as moment from 'moment';
@@ -38,7 +38,7 @@ describe('ProgrammingExercise Service', () => {
                 RouterTestingModule.withRoutes(routes),
                 ArtemisTestModule,
                 FormsModule,
-                ArtemisSharedModule,
+                SharedModule,
                 ArtemisSharedComponentModule,
                 ArtemisProgrammingExerciseManagementModule,
             ],

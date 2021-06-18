@@ -50,9 +50,9 @@ export class CodeEditorAceComponent implements AfterViewInit, OnChanges, OnDestr
         this.setAnnotations(annotations);
     }
     @Input()
-    readonly commitState: CommitState;
+    commitState: CommitState;
     @Input()
-    readonly editorState: EditorState;
+    editorState: EditorState;
     @Input()
     isTutorAssessment = false;
     @Input()

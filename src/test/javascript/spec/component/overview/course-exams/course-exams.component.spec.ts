@@ -11,7 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CourseExamsComponent } from 'app/overview/course-exams/course-exams.component';
 import { Exam } from 'app/entities/exam.model';
 import { ArtemisTestModule } from '../../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import * as moment from 'moment';
 
 chai.use(sinonChai);
@@ -33,7 +33,7 @@ describe('CourseExamsComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule, RouterTestingModule.withRoutes([])],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule, RouterTestingModule.withRoutes([])],
             providers: [
                 {
                     provide: ActivatedRoute,

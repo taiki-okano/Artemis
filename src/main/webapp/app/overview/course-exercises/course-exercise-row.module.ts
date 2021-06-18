@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CourseExerciseRowComponent } from 'app/overview/course-exercises/course-exercise-row.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisSharedPipesModule } from 'app/shared/pipes/shared-pipes.module';
 import { ArtemisCoursesRoutingModule } from 'app/overview/courses-routing.module';
@@ -12,7 +12,7 @@ import { OrionModule } from 'app/shared/orion/orion.module';
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisSharedComponentModule,
         MomentModule,
         ArtemisSharedPipesModule,

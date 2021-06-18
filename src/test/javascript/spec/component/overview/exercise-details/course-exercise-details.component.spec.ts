@@ -43,7 +43,7 @@ import { OrionFilterDirective } from 'app/shared/orion/orion-filter.directive';
 import { ArtemisTimeAgoPipe } from 'app/shared/pipes/artemis-time-ago.pipe';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { HtmlForMarkdownPipe } from 'app/shared/pipes/html-for-markdown.pipe';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import * as chai from 'chai';
 import { cloneDeep } from 'lodash';
 import * as moment from 'moment';
@@ -95,7 +95,7 @@ describe('CourseExerciseDetailsComponent', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [ArtemisSharedModule],
+            imports: [SharedModule],
             declarations: [
                 CourseExerciseDetailsComponent,
                 MockPipe(ArtemisTranslatePipe),

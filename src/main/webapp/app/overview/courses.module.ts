@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { ChartsModule } from 'ng2-charts';
 import { ClipboardModule } from 'ngx-clipboard';
 import { MomentModule } from 'ngx-moment';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSidePanelModule } from 'app/shared/side-panel/side-panel.module';
 import { CourseLectureRowComponent } from 'app/overview/course-lectures/course-lecture-row.component';
 import { OrionModule } from 'app/shared/orion/orion.module';
@@ -37,7 +37,7 @@ import { ArtemisExerciseScoresChartModule } from 'app/overview/visualizations/ex
         ArtemisExerciseScoresChartModule,
         ArtemisExerciseButtonsModule,
         ArtemisCourseExerciseRowModule,
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisSharedComponentModule,
         ChartsModule,
         ClipboardModule,

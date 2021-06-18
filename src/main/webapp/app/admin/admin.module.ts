@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { adminState } from './admin.route';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { FormDateTimePickerModule } from 'app/shared/date-time-picker/date-time-picker.module';
 import { AdminFeatureToggleComponent } from 'app/admin/features/admin-feature-toggle.component';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
@@ -33,7 +33,7 @@ const ENTITY_STATES = [...adminState];
 @NgModule({
     imports: [
         RouterModule.forChild(ENTITY_STATES),
-        ArtemisSharedModule,
+        SharedModule,
         FormDateTimePickerModule,
         TagInputModule,
         NgxDatatableModule,

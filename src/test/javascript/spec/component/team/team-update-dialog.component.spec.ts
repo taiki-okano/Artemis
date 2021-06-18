@@ -10,7 +10,7 @@ import { By } from '@angular/platform-browser';
 import { JhiEventManager, NgJhipsterModule } from 'ng-jhipster';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisTeamModule } from 'app/exercises/shared/team/team.module';
 import { mockEmptyTeam, mockExercise, mockNonTeamStudents, mockTeam, MockTeamService, mockTeamStudents } from '../../helpers/mocks/service/mock-team.service';
@@ -31,7 +31,7 @@ describe('TeamUpdateDialogComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, FormsModule, NgJhipsterModule, NgbModule, ArtemisSharedModule, ArtemisSharedComponentModule, ArtemisTeamModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, FormsModule, NgJhipsterModule, NgbModule, SharedModule, ArtemisSharedComponentModule, ArtemisTeamModule],
             declarations: [],
             providers: [
                 JhiEventManager,

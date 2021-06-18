@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { DataTableComponent } from './data-table.component';
 
 @NgModule({
-    imports: [ArtemisSharedModule, NgxDatatableModule],
+    imports: [SharedModule, NgxDatatableModule],
     declarations: [DataTableComponent],
     exports: [DataTableComponent],
 })

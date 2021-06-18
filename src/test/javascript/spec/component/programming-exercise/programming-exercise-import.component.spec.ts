@@ -13,7 +13,7 @@ import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.mo
 import { FeatureToggleService } from 'app/shared/feature-toggle/feature-toggle.service';
 import { MockFeatureToggleService } from '../../helpers/mocks/service/mock-feature-toggle.service';
 import { ProgrammingExerciseImportComponent } from 'app/exercises/programming/manage/programming-exercise-import.component';
-import { ArtemisSharedCommonModule } from 'app/shared/shared-common.module';
+import { SharedCommonModule } from 'app/shared/shared-common.module';
 import { ProgrammingExercise, ProgrammingLanguage } from 'app/entities/programming-exercise.model';
 import { SearchResult } from 'app/shared/table/pageable-table';
 import { ButtonComponent } from 'app/shared/components/button.component';
@@ -38,7 +38,7 @@ describe('ProgrammingExerciseImportComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedCommonModule, FeatureToggleModule, ArtemisSharedPipesModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedCommonModule, FeatureToggleModule, ArtemisSharedPipesModule],
             declarations: [ProgrammingExerciseImportComponent, ButtonComponent, MockPipe(ArtemisTranslatePipe)],
             providers: [
                 DifferencePipe,

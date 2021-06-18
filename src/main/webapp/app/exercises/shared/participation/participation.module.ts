@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisProgrammingExerciseActionsModule } from 'app/exercises/programming/shared/actions/programming-exercise-actions.module';
 import { ArtemisParticipationSubmissionModule } from 'app/exercises/shared/participation-submission/participation-submission.module';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
@@ -14,7 +14,7 @@ import { ArtemisTeamModule } from 'app/exercises/shared/team/team.module';
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisParticipationRoutingModule,
         ArtemisExerciseScoresModule,
         ArtemisProgrammingExerciseActionsModule,

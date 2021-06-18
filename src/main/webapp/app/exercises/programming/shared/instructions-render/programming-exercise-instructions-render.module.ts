@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisResultModule } from 'app/exercises/shared/result/result.module';
 import { ProgrammingExerciseInstructionComponent } from 'app/exercises/programming/shared/instructions-render/programming-exercise-instruction.component';
 import { ProgrammingExerciseInstructionStepWizardComponent } from 'app/exercises/programming/shared/instructions-render/step-wizard/programming-exercise-instruction-step-wizard.component';
@@ -8,7 +8,7 @@ import { ProgrammingExerciseInstructionTaskStatusComponent } from 'app/exercises
 import { ArtemisMarkdownModule } from 'app/shared/markdown.module';
 
 @NgModule({
-    imports: [ArtemisSharedModule, ArtemisResultModule, ArtemisMarkdownModule],
+    imports: [SharedModule, ArtemisResultModule, ArtemisMarkdownModule],
     declarations: [ProgrammingExerciseInstructionComponent, ProgrammingExerciseInstructionStepWizardComponent, ProgrammingExerciseInstructionTaskStatusComponent],
     exports: [ProgrammingExerciseInstructionComponent],
     entryComponents: [ProgrammingExerciseInstructionTaskStatusComponent],

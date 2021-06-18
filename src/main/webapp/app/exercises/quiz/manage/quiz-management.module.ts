@@ -7,7 +7,7 @@ import { AceEditorModule } from 'ng2-ace-editor';
 import { ArtemisMarkdownEditorModule } from 'app/shared/markdown-editor/markdown-editor.module';
 import { DndModule } from 'ng2-dnd';
 import { QuizScoringInfoModalComponent } from './quiz-scoring-info-modal/quiz-scoring-info-modal.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisQuizStatisticModule } from 'app/exercises/quiz/manage/statistics/quiz-statistic.module';
 import { ArtemisApollonDiagramsModule } from 'app/exercises/quiz/manage/apollon-diagrams/apollon-diagram.module';
 import { quizManagementRoute } from 'app/exercises/quiz/manage/quiz-management.route';
@@ -34,7 +34,7 @@ const ENTITY_STATES = [...quizManagementRoute];
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         RouterModule.forChild(ENTITY_STATES),
         DndModule.forRoot(),
         AngularFittextModule,

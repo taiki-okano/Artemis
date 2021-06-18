@@ -6,7 +6,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { TreeviewModule } from 'ngx-treeview';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ActivatedRoute } from '@angular/router';
 import { FormDateTimePickerModule } from 'app/shared/date-time-picker/date-time-picker.module';
 import { By } from '@angular/platform-browser';
@@ -81,7 +81,7 @@ describe('LectureAttachmentsComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, TreeviewModule.forRoot(), RouterTestingModule.withRoutes([]), ArtemisSharedModule, FormDateTimePickerModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, TreeviewModule.forRoot(), RouterTestingModule.withRoutes([]), SharedModule, FormDateTimePickerModule],
             declarations: [LectureAttachmentsComponent, MockPipe(HtmlForMarkdownPipe)],
             providers: [
                 {

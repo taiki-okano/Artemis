@@ -9,7 +9,7 @@ import * as sinonChai from 'sinon-chai';
 import { ArtemisTestModule } from '../../test.module';
 import { MockCacheableImageService } from '../../helpers/mocks/service/mock-cacheable-image.service';
 import { triggerChanges } from '../../helpers/utils/general.utils';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { UpdatingResultComponent } from 'app/exercises/shared/result/updating-result.component';
 import { CachingStrategy, ImageLoadingStatus, SecuredImageComponent } from 'app/shared/image/secured-image.component';
 import { CacheableImageService } from 'app/shared/image/cacheable-image.service';
@@ -39,7 +39,7 @@ describe('SecuredImageComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule],
             declarations: [UpdatingResultComponent, MockComponent(ResultComponent)],
             providers: [{ provide: CacheableImageService, useClass: MockCacheableImageService }],
         })

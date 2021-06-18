@@ -27,7 +27,7 @@ import { triggerChanges } from '../../helpers/utils/general.utils';
 import { LocalStorageService } from 'ngx-webstorage';
 import { Participation } from 'app/entities/participation/participation.model';
 import { ExerciseHintService, IExerciseHintService } from 'app/exercises/shared/exercise-hint/manage/exercise-hint.service';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ResultService } from 'app/exercises/shared/result/result.service';
 import { RepositoryFileService } from 'app/exercises/shared/result/repository.service';
 import { ProgrammingExerciseParticipationService } from 'app/exercises/programming/manage/services/programming-exercise-participation.service';
@@ -67,7 +67,7 @@ describe('ProgrammingExerciseInstructionComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule, NgbModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule, NgbModule],
             declarations: [
                 ProgrammingExerciseInstructionComponent,
                 ProgrammingExerciseInstructionStepWizardComponent,

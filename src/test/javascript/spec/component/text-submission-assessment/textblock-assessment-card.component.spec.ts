@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { TextblockAssessmentCardComponent } from 'app/exercises/text/assess/textblock-assessment-card/textblock-assessment-card.component';
 import { TextblockFeedbackEditorComponent } from 'app/exercises/text/assess/textblock-feedback-editor/textblock-feedback-editor.component';
 import { TextBlockRef } from 'app/entities/text-block-ref.model';
@@ -18,7 +18,7 @@ describe('TextblockAssessmentCardComponent', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, TranslateModule.forRoot(), ArtemisConfirmIconModule],
+            imports: [ArtemisTestModule, SharedModule, TranslateModule.forRoot(), ArtemisConfirmIconModule],
             declarations: [TextblockAssessmentCardComponent, TextblockFeedbackEditorComponent, AssessmentCorrectionRoundBadgeComponent],
         })
             .overrideModule(ArtemisTestModule, {

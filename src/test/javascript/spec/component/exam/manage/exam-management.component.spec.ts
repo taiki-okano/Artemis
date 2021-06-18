@@ -16,7 +16,7 @@ import { ExamManagementComponent } from 'app/exam/manage/exam-management.compone
 import { Exam } from 'app/entities/exam.model';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { examManagementRoute } from 'app/exam/manage/exam-management.route';
 import { SortService } from 'app/shared/service/sort.service';
@@ -45,7 +45,7 @@ describe('Exam Management Component', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, RouterTestingModule.withRoutes([examManagementRoute[0]])],
+            imports: [ArtemisTestModule, SharedModule, RouterTestingModule.withRoutes([examManagementRoute[0]])],
             declarations: [ExamManagementComponent],
             providers: [
                 { provide: SessionStorageService, useClass: MockSyncStorage },

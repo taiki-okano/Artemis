@@ -6,12 +6,12 @@ import { InstructorCourseDashboardComponent } from './instructor-course-dashboar
 import { MomentModule } from 'ngx-moment';
 import { ClipboardModule } from 'ngx-clipboard';
 import { ArtemisTutorLeaderboardModule } from 'app/shared/dashboards/tutor-leaderboard/tutor-leaderboard.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 
 const ENTITY_STATES = instructorCourseDashboardRoute;
 
 @NgModule({
-    imports: [ArtemisSharedModule, MomentModule, ClipboardModule, RouterModule.forChild(ENTITY_STATES), ChartsModule, ArtemisTutorLeaderboardModule],
+    imports: [SharedModule, MomentModule, ClipboardModule, RouterModule.forChild(ENTITY_STATES), ChartsModule, ArtemisTutorLeaderboardModule],
     declarations: [InstructorCourseDashboardComponent],
 })
 export class ArtemisInstructorCourseStatsDashboardModule {}

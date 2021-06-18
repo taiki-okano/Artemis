@@ -7,7 +7,7 @@ import { AnswerPostComponent } from 'app/overview/postings/answer-post/answer-po
 import { AnswerPost } from 'app/entities/metis/answer-post.model';
 import { User } from 'app/core/user/user.model';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { MockActivatedRouteWithSubjects } from '../../helpers/mocks/activated-route/mock-activated-route-with-subjects';
 import { PostingsButtonComponent } from 'app/overview/postings/postings-button/postings-button.component';
 import { MockDirective } from 'ng-mocks';
@@ -45,7 +45,7 @@ describe('AnswerPostComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule],
             declarations: [AnswerPostComponent, MockDirective(PostingsButtonComponent)],
             providers: [{ provide: ActivatedRoute, useClass: MockActivatedRouteWithSubjects }],
         })

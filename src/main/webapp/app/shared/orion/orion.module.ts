@@ -8,7 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { OrionFilterDirective } from './orion-filter.directive';
 import { OrionBuildAndTestService } from 'app/shared/orion/orion-build-and-test.service';
 import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 
 export function initOrionConnector(connector: OrionConnectorService) {
     return () => OrionConnectorService.initConnector(connector);
@@ -17,7 +17,7 @@ export function initOrionConnector(connector: OrionConnectorService) {
 @NgModule({
     declarations: [OrionButtonComponent, ModalConfirmAutofocusComponent, OrionFilterDirective],
     entryComponents: [ModalConfirmAutofocusComponent],
-    imports: [CommonModule, ArtemisSharedModule, MomentModule, TranslateModule, FeatureToggleModule],
+    imports: [CommonModule, SharedModule, MomentModule, TranslateModule, FeatureToggleModule],
     exports: [OrionButtonComponent, OrionFilterDirective],
     providers: [{ provide: APP_INITIALIZER, useFactory: initOrionConnector, deps: [OrionConnectorService], multi: true }, OrionBuildAndTestService],
 })

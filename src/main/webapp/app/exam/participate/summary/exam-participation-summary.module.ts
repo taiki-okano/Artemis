@@ -6,8 +6,8 @@ import { ModelingExamSummaryComponent } from 'app/exam/participate/summary/exerc
 import { FileUploadExamSummaryComponent } from 'app/exam/participate/summary/exercises/file-upload-exam-summary/file-upload-exam-summary.component';
 import { TextExamSummaryComponent } from 'app/exam/participate/summary/exercises/text-exam-summary/text-exam-summary.component';
 import { QuizExamSummaryComponent } from 'app/exam/participate/summary/exercises/quiz-exam-summary/quiz-exam-summary.component';
-import { ArtemisSharedCommonModule } from 'app/shared/shared-common.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedCommonModule } from 'app/shared/shared-common.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisQuizQuestionTypesModule } from 'app/exercises/quiz/shared/questions/artemis-quiz-question-types.module';
 import { ArtemisModelingEditorModule } from 'app/exercises/modeling/shared/modeling-editor.module';
 import { ArtemisFullscreenModule } from 'app/shared/fullscreen/fullscreen.module';
@@ -24,8 +24,8 @@ import { ArtemisMarkdownModule } from 'app/shared/markdown.module';
 @NgModule({
     imports: [
         RouterModule,
-        ArtemisSharedCommonModule,
-        ArtemisSharedModule,
+        SharedCommonModule,
+        SharedModule,
         ArtemisQuizQuestionTypesModule,
         ArtemisModelingEditorModule,
         ArtemisFullscreenModule,

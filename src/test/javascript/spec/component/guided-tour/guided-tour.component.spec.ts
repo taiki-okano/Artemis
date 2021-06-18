@@ -16,7 +16,7 @@ import { GuidedTourComponent } from 'app/guided-tour/guided-tour.component';
 import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
 import { Orientation, OverlayPosition, ResetParticipation } from 'app/guided-tour/guided-tour.constants';
 import { DeviceDetectorService } from 'ngx-device-detector';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { By } from '@angular/platform-browser';
 import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
 import { Authority } from 'app/shared/constants/authority.constants';
@@ -67,7 +67,7 @@ describe('GuidedTourComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 RouterTestingModule.withRoutes([
                     {
                         path: 'courses',

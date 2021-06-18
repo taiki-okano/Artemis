@@ -7,7 +7,7 @@ import { MockAccountService } from '../../../helpers/mocks/service/mock-account.
 import { CourseExamDetailComponent } from 'app/overview/course-exams/course-exam-detail/course-exam-detail.component';
 import { Exam } from 'app/entities/exam.model';
 import { ArtemisTestModule } from '../../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import * as moment from 'moment';
 
 chai.use(sinonChai);
@@ -28,7 +28,7 @@ describe('CourseExamDetailComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule],
             providers: [{ provide: AccountService, useClass: MockAccountService }],
             declarations: [CourseExamDetailComponent],
         })

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { MomentModule } from 'ngx-moment';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ProgrammingExerciseInstructorTriggerBuildButtonComponent } from 'app/exercises/programming/shared/actions/programming-exercise-instructor-trigger-build-button.component';
 import { ProgrammingExerciseStudentTriggerBuildButtonComponent } from 'app/exercises/programming/shared/actions/programming-exercise-student-trigger-build-button.component';
 import { ProgrammingExerciseInstructorSubmissionStateComponent } from 'app/exercises/programming/shared/actions/programming-exercise-instructor-submission-state.component';
@@ -13,7 +13,7 @@ import { ArtemisSharedComponentModule } from 'app/shared/components/shared-compo
 import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.module';
 
 @NgModule({
-    imports: [ArtemisSharedModule, MomentModule, ArtemisSharedComponentModule, FeatureToggleModule],
+    imports: [SharedModule, MomentModule, ArtemisSharedComponentModule, FeatureToggleModule],
     declarations: [
         ProgrammingExerciseInstructorTriggerBuildButtonComponent,
         ProgrammingExerciseStudentTriggerBuildButtonComponent,

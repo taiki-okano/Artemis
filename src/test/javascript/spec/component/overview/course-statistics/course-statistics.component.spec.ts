@@ -9,7 +9,7 @@ import { TreeviewModule } from 'ngx-treeview';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { MockComponent } from 'ng-mocks';
 import { ArtemisTestModule } from '../../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ActivatedRoute } from '@angular/router';
 import { By } from '@angular/platform-browser';
@@ -203,7 +203,7 @@ describe('CourseStatisticsComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, TreeviewModule.forRoot(), RouterTestingModule.withRoutes([]), ArtemisSharedModule, ChartsModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, TreeviewModule.forRoot(), RouterTestingModule.withRoutes([]), SharedModule, ChartsModule],
             declarations: [CourseStatisticsComponent, MockComponent(CourseLearningGoalsComponent), MockComponent(ExerciseScoresChartComponent)],
             providers: [
                 {

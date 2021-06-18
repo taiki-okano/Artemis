@@ -19,7 +19,7 @@ import { By } from '@angular/platform-browser';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { MockComplaintService } from '../../helpers/mocks/service/mock-complaint.service';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import * as moment from 'moment';
 import * as sinon from 'sinon';
@@ -71,7 +71,7 @@ describe('Component Tests', () => {
                 imports: [
                     ArtemisTestModule,
                     TranslateModule.forRoot(),
-                    MockModule(ArtemisSharedModule),
+                    MockModule(SharedModule),
                     MockModule(ArtemisResultModule),
                     MockModule(ArtemisSharedComponentModule),
                     ModelingAssessmentModule,

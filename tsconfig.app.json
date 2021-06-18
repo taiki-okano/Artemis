@@ -1,8 +1,9 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "./src/main/webapp/app",
-        "types": ["node"]
+        "outDir": "./build/resources/main/static/app",
+        "types": []
     },
-    "files": ["src/main/webapp/app/app.main.ts"]
+    "files": ["src/main/webapp/main.ts", "src/main/webapp/polyfills.ts"],
+    "include": ["src/main/webapp/**/*.d.ts"]
 }

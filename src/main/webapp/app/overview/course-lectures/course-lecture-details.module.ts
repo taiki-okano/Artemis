@@ -1,4 +1,4 @@
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisSharedPipesModule } from 'app/shared/pipes/shared-pipes.module';
 import { MomentModule } from 'ngx-moment';
@@ -32,7 +32,7 @@ const routes: Routes = [
 @NgModule({
     imports: [
         RouterModule.forChild(routes),
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisSharedComponentModule,
         MomentModule,
         ArtemisSharedPipesModule,

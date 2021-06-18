@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { ProgrammingExerciseUpdateComponent } from 'app/exercises/programming/manage/update/programming-exercise-update.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ProgrammingExercisePlansAndRepositoriesPreviewComponent } from 'app/exercises/programming/manage/update/programming-exercise-plans-and-repositories-preview.component';
 import { ArtemisTeamConfigFormGroupModule } from 'app/exercises/shared/team-config-form-group/team-config-form-group.module';
@@ -19,7 +19,7 @@ import { RemoveAuxiliaryRepositoryButtonComponent } from 'app/exercises/programm
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisSharedComponentModule,
         ArtemisTeamConfigFormGroupModule,
         ArtemisIncludedInOverallScorePickerModule,

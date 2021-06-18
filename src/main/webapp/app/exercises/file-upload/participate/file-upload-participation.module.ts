@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisFileUploadParticipationRoutingModule } from './file-upload-participation.route';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisResultModule } from 'app/exercises/shared/result/result.module';
@@ -12,7 +12,7 @@ import { ArtemisMarkdownModule } from 'app/shared/markdown.module';
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisSharedComponentModule,
         ArtemisResultModule,
         ArtemisComplaintsModule,

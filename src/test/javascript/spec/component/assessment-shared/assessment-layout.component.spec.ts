@@ -8,7 +8,7 @@ import { ArtemisAssessmentSharedModule } from 'app/assessment/assessment-shared.
 import { AssessmentHeaderComponent } from 'app/assessment/assessment-header/assessment-header.component';
 import { AssessmentComplaintAlertComponent } from 'app/assessment/assessment-complaint-alert/assessment-complaint-alert.component';
 import { ComplaintsForTutorComponent } from 'app/complaints/complaints-for-tutor/complaints-for-tutor.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { Complaint } from 'app/entities/complaint.model';
 import { AlertComponent } from 'app/shared/alert/alert.component';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -19,7 +19,7 @@ describe('AssessmentLayoutComponent', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule, ArtemisAssessmentSharedModule, RouterTestingModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule, ArtemisAssessmentSharedModule, RouterTestingModule],
             declarations: [],
             providers: [JhiLanguageHelper],
         }).compileComponents();

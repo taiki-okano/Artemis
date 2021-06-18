@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { TranslateService } from '@ngx-translate/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisTestModule } from '../test.module';
 import { SERVER_API_URL } from 'app/app.constants';
 import { GuidedTour } from 'app/guided-tour/guided-tour.model';
@@ -94,7 +94,7 @@ describe('GuidedTourService', () => {
 
         beforeEach(() => {
             TestBed.configureTestingModule({
-                imports: [ArtemisTestModule, ArtemisSharedModule, HttpClientTestingModule],
+                imports: [ArtemisTestModule, SharedModule, HttpClientTestingModule],
                 providers: [
                     { provide: DeviceDetectorService },
                     { provide: LocalStorageService, useClass: MockSyncStorage },
@@ -149,7 +149,7 @@ describe('GuidedTourService', () => {
             TestBed.configureTestingModule({
                 imports: [
                     ArtemisTestModule,
-                    ArtemisSharedModule,
+                    SharedModule,
                     RouterTestingModule.withRoutes([
                         {
                             path: 'courses',

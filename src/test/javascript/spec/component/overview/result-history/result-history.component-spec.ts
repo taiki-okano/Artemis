@@ -3,7 +3,7 @@ import { Result } from 'app/entities/result.model';
 import * as sinonChai from 'sinon-chai';
 import { ResultHistoryComponent } from 'app/overview/result-history/result-history.component';
 import { MockModule } from 'ng-mocks';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 
@@ -19,7 +19,7 @@ describe('ResultHistoryComponent', () => {
         result = new Result();
 
         return TestBed.configureTestingModule({
-            imports: [MockModule(ArtemisSharedModule)],
+            imports: [MockModule(SharedModule)],
             declarations: [ResultHistoryComponent],
         })
             .compileComponents()

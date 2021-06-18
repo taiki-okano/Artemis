@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { TextblockFeedbackEditorComponent } from 'app/exercises/text/assess/textblock-feedback-editor/textblock-feedback-editor.component';
 import { Feedback, FeedbackType } from 'app/entities/feedback.model';
 import { TextBlock } from 'app/entities/text-block.model';
@@ -21,7 +21,7 @@ describe('TextblockFeedbackEditorComponent', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, TranslateModule.forRoot(), ArtemisConfirmIconModule],
+            imports: [ArtemisTestModule, SharedModule, TranslateModule.forRoot(), ArtemisConfirmIconModule],
             declarations: [TextblockFeedbackEditorComponent, AssessmentCorrectionRoundBadgeComponent],
         })
             .overrideModule(ArtemisTestModule, {

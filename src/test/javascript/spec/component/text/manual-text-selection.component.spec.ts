@@ -3,7 +3,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisConfirmIconModule } from 'app/shared/confirm-icon/confirm-icon.module';
 import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
 import { MockComponent } from 'ng-mocks';
@@ -21,7 +21,7 @@ describe('ManualTextSelectionComponent', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, ArtemisConfirmIconModule],
+            imports: [ArtemisTestModule, SharedModule, ArtemisConfirmIconModule],
             declarations: [ManualTextSelectionComponent],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
         })

@@ -7,7 +7,7 @@ import { SinonStub, stub } from 'sinon';
 import { ArtemisTestModule } from '../../test.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockComponent, MockPipe } from 'ng-mocks';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ActivatedRoute, convertToParamMap, RouterModule, UrlSegment } from '@angular/router';
 import { of } from 'rxjs';
 import { TutorParticipationGraphComponent } from 'app/shared/dashboards/tutor-participation-graph/tutor-participation-graph.component';
@@ -123,7 +123,7 @@ describe('AssessmentDashboardInformationComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, ArtemisSharedComponentModule, RouterModule, TranslateModule.forRoot(), ArtemisAssessmentSharedModule],
+            imports: [ArtemisTestModule, SharedModule, ArtemisSharedComponentModule, RouterModule, TranslateModule.forRoot(), ArtemisAssessmentSharedModule],
             declarations: [
                 AssessmentDashboardComponent,
                 MockComponent(TutorLeaderboardComponent),

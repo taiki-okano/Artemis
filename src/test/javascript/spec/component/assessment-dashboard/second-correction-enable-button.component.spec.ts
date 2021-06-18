@@ -3,7 +3,7 @@ import { JhiLanguageHelper } from 'app/core/language/language.helper';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
@@ -23,7 +23,7 @@ describe('SecondCorrectionEnableButtonComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, TranslateModule.forRoot()],
+            imports: [ArtemisTestModule, SharedModule, TranslateModule.forRoot()],
             declarations: [SecondCorrectionEnableButtonComponent],
             providers: [
                 JhiLanguageHelper,

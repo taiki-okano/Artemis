@@ -12,7 +12,7 @@ import { ArtemisTestModule } from '../../test.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockComponent } from 'ng-mocks';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FileUploadAssessmentComponent } from 'app/exercises/file-upload/assess/file-upload-assessment.component';
 import { DebugElement } from '@angular/core';
@@ -82,7 +82,7 @@ describe('FileUploadAssessmentComponent', () => {
         return TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 RouterTestingModule.withRoutes([routes[0]]),
                 ArtemisAssessmentSharedModule,
                 ModelingAssessmentModule,

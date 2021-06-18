@@ -17,7 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockProgrammingExerciseGradingService } from '../../helpers/mocks/service/mock-programming-exercise-grading.service';
 import { ProgrammingExerciseTestCase, Visibility } from 'app/entities/programming-exercise-test-case.model';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisProgrammingExerciseGradingModule } from 'app/exercises/programming/manage/grading/programming-exercise-grading.module';
 import { expectElementToBeEnabled, getElement } from '../../helpers/utils/general.utils';
 import { ProgrammingExerciseWebsocketService } from 'app/exercises/programming/manage/services/programming-exercise-websocket.service';
@@ -188,7 +188,7 @@ describe('ProgrammingExerciseConfigureGradingComponent', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule, ArtemisProgrammingExerciseGradingModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule, ArtemisProgrammingExerciseGradingModule],
             providers: [
                 JhiAlertService,
                 { provide: ProgrammingExerciseService, useClass: MockProgrammingExerciseService },

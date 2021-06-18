@@ -18,7 +18,7 @@ import { TextEditorService } from 'app/exercises/text/participate/text-editor.se
 import { ArtemisMarkdownService } from 'app/shared/markdown.service';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { HtmlForMarkdownPipe } from 'app/shared/pipes/html-for-markdown.pipe';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import * as chai from 'chai';
 import { JhiAlertService } from 'ng-jhipster';
 import { MockComponent, MockModule, MockPipe, MockProvider } from 'ng-mocks';
@@ -44,7 +44,7 @@ describe('TextExamSubmissionComponent', () => {
                 MockModule(NgbModule),
                 MockModule(FormsModule),
                 MockModule(FontAwesomeModule),
-                MockModule(ArtemisSharedModule),
+                MockModule(SharedModule),
             ],
             declarations: [TextExamSubmissionComponent, MockPipe(ArtemisTranslatePipe), MockPipe(HtmlForMarkdownPipe), MockComponent(IncludedInScoreBadgeComponent)],
             providers: [MockProvider(TextEditorService), MockProvider(JhiAlertService), MockProvider(TranslateService), MockProvider(ArtemisMarkdownService)],

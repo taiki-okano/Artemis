@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { ComplaintService } from 'app/complaints/complaint.service';
@@ -28,7 +28,7 @@ describe('ListOfComplaintsComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [ArtemisSharedModule, TranslateModule.forRoot(), ArtemisTestModule, RouterTestingModule.withRoutes([])],
+            imports: [SharedModule, TranslateModule.forRoot(), ArtemisTestModule, RouterTestingModule.withRoutes([])],
             declarations: [ListOfComplaintsComponent],
             providers: [
                 {

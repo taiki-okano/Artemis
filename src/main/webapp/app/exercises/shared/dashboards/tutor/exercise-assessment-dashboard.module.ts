@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { exerciseAssessmentDashboardRoute } from './exercise-assessment-dashboard.route';
 import { ExerciseAssessmentDashboardComponent } from './exercise-assessment-dashboard.component';
 import { MomentModule } from 'ngx-moment';
@@ -25,7 +25,7 @@ const ENTITY_STATES = [...exerciseAssessmentDashboardRoute];
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisResultModule,
         MomentModule,
         ClipboardModule,

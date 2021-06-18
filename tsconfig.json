@@ -1,5 +1,9 @@
 {
     "compilerOptions": {
+        "baseUrl": "src/main/webapp/",
+        "outDir": "./build/resources/main/static/",
+        "forceConsistentCasingInFileNames": true,
+        "strict": false,
         "allowJs": false,
         "target": "es2017",
         "module": "es2020",
@@ -10,7 +14,6 @@
         "declaration": false,
         "experimentalDecorators": true,
         "removeComments": true,
-        "strict": false,
         "noImplicitReturns": false,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
@@ -19,29 +22,14 @@
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "allowSyntheticDefaultImports":true,
-        "outDir": "build/resources/main/static/app",
-        "forceConsistentCasingInFileNames": true,
         "lib": ["es2018", "dom"],
-        "typeRoots": [
-            "node_modules/@types"
-        ],
-        "baseUrl": "./",
-        "paths": {
-            "app/*": ["src/main/webapp/app/*"]
-        },
         "importHelpers": true
     },
     "angularCompilerOptions": {
-        "genDir": "build/resources/main/aot",
-        "skipMetadataEmit" : true,
         "fullTemplateTypeCheck": true,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true,
         "strictTemplates": true,
         "preserveWhitespaces": true
-    },
-    "include": [
-        "src/main/webapp/app"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+    }
 }

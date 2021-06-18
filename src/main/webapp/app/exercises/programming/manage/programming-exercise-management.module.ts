@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisProgrammingExerciseManagementRoutingModule } from 'app/exercises/programming/manage/programming-exercise-management-routing.module';
 import { ProgrammingExerciseUtilsModule } from 'app/exercises/programming/shared/utils/programming-exercise-utils.module';
 import { ProgrammingExerciseDetailComponent } from 'app/exercises/programming/manage/programming-exercise-detail.component';
@@ -25,7 +25,7 @@ import { ProgrammingExerciseInstructorExerciseDownloadComponent } from '../share
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ProgrammingExerciseUtilsModule,
         ArtemisSharedComponentModule,
         ArtemisResultModule,

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { MomentModule } from 'ngx-moment';
 import { ExerciseScoresComponent } from './exercise-scores.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -19,7 +19,7 @@ import { ExerciseScoresExportButtonComponent } from 'app/exercises/shared/exerci
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         MomentModule,
         ArtemisExerciseScoresRoutingModule,
         NgbModule,

@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { MockComponent } from 'ng-mocks';
 import { ProgrammingExerciseLifecycleComponent } from 'app/exercises/programming/shared/lifecycle/programming-exercise-lifecycle.component';
 import { HelpIconComponent } from 'app/shared/components/help-icon.component';
@@ -24,7 +24,7 @@ describe('ProgrammingExerciseTestSchedulePickerComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule],
             declarations: [ProgrammingExerciseLifecycleComponent, MockComponent(ProgrammingExerciseTestScheduleDatePickerComponent), MockComponent(HelpIconComponent)],
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })

@@ -11,7 +11,7 @@ import * as chai from 'chai';
 import { fileUploadExercise, MockFileUploadExerciseService } from '../../helpers/mocks/service/mock-file-upload-exercise.service';
 import { JhiLanguageHelper } from 'app/core/language/language.helper';
 import { JhiAlertService } from 'ng-jhipster';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { ArtemisAssessmentSharedModule } from 'app/assessment/assessment-shared.module';
@@ -73,7 +73,7 @@ describe('FileUploadExercise Management Detail Component', () => {
         TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 ArtemisAssessmentSharedModule,
                 RouterTestingModule,
                 TranslateModule.forRoot(),

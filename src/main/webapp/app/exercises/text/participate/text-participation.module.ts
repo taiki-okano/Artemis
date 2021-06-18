@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MomentModule } from 'ngx-moment';
 import { textEditorRoute } from 'app/exercises/text/participate/text-editor.route';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisResultModule } from 'app/exercises/shared/result/result.module';
 import { ArtemisComplaintsModule } from 'app/complaints/complaints.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
@@ -19,7 +19,7 @@ const ENTITY_STATES = [...textEditorRoute];
 @NgModule({
     imports: [
         MomentModule,
-        ArtemisSharedModule,
+        SharedModule,
         RouterModule.forChild(ENTITY_STATES),
         ArtemisResultModule,
         ArtemisComplaintsModule,

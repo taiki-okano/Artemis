@@ -8,7 +8,7 @@ import { ArtemisColorSelectorModule } from 'app/shared/color-selector/color-sele
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { MomentModule } from 'ngx-moment';
 import { TagInputModule } from 'ngx-chips';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { CourseManagementExercisesComponent } from 'app/course/manage/course-management-exercises.component';
 import { CourseDetailComponent } from 'app/course/manage/detail/course-detail.component';
 import { CourseUpdateComponent } from 'app/course/manage/course-update.component';
@@ -53,7 +53,7 @@ import { CourseDetailBarChartComponent } from 'app/course/manage/detail/course-d
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         RouterModule.forChild(courseManagementState),
         FormDateTimePickerModule,
         ReactiveFormsModule,

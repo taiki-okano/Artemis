@@ -16,7 +16,7 @@ import { CodeEditorBuildOutputComponent } from 'app/exercises/programming/shared
 import { Participation } from 'app/entities/participation/participation.model';
 import { BuildLogEntryArray } from 'app/entities/build-log.model';
 import { CodeEditorBuildLogService } from 'app/exercises/programming/shared/code-editor/service/code-editor-repository.service';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ResultService } from 'app/exercises/shared/result/result.service';
 import { MockResultService } from '../../helpers/mocks/service/mock-result.service';
 import { MockCodeEditorBuildLogService } from '../../helpers/mocks/service/mock-code-editor-build-log.service';
@@ -93,7 +93,7 @@ describe('CodeEditorBuildOutputComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, AceEditorModule, ArtemisSharedModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, AceEditorModule, SharedModule],
             declarations: [CodeEditorBuildOutputComponent],
             providers: [
                 { provide: ResultService, useClass: MockResultService },

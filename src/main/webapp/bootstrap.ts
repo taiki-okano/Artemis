@@ -1,9 +1,13 @@
-import './polyfills';
+import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { ProdConfig } from './core/config/prod.config';
-import { ArtemisAppModule } from './app.module';
 
-ProdConfig();
+import { DEBUG_INFO_ENABLED } from './app/app.constants';
+import { ArtemisAppModule } from './app/app.module';
+
+// disable debug data on prod profile to improve performance
+if (!DEBUG_INFO_ENABLED) {
+    enableProdMode();
+}
 
 if (module['hot']) {
     module['hot'].accept();

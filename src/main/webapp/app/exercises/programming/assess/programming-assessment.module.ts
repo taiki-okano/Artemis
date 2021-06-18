@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { FormDateTimePickerModule } from 'app/shared/date-time-picker/date-time-picker.module';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +21,7 @@ import { ArtemisProgrammingAssessmentDashboardModule } from 'app/exercises/progr
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisSharedComponentModule,
         FormDateTimePickerModule,
         FormsModule,

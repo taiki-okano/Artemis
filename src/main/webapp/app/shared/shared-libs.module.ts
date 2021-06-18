@@ -10,4 +10,4 @@ import { ChartsModule } from 'ng2-charts';
 @NgModule({
     exports: [FormsModule, CommonModule, NgbModule, NgJhipsterModule, FontAwesomeModule, ReactiveFormsModule, TranslateModule, ChartsModule],
 })
-export class ArtemisSharedLibsModule {}
+export class SharedLibsModule {}

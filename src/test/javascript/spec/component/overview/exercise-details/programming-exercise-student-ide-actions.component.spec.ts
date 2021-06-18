@@ -9,7 +9,7 @@ import { SinonSpy, SinonStub, spy, stub } from 'sinon';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { MockComponent } from 'ng-mocks';
 import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.module';
 import { FeatureToggleService } from 'app/shared/feature-toggle/feature-toggle.service';
@@ -52,7 +52,7 @@ describe('ProgrammingExerciseStudentIdeActionsComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, TranslateModule.forRoot(), NgbModule, OrionModule, ArtemisSharedModule, FeatureToggleModule],
+            imports: [ArtemisTestModule, TranslateModule.forRoot(), NgbModule, OrionModule, SharedModule, FeatureToggleModule],
             declarations: [ProgrammingExerciseStudentIdeActionsComponent, MockComponent(ExerciseActionButtonComponent)],
             providers: [
                 { provide: OrionBuildAndTestService, useClass: MockIdeBuildAndTestService },

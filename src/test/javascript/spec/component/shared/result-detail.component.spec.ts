@@ -3,7 +3,7 @@ import { DebugElement } from '@angular/core';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { SinonStub, spy, stub } from 'sinon';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
@@ -148,7 +148,7 @@ describe('ResultDetailComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, ArtemisResultModule],
+            imports: [ArtemisTestModule, SharedModule, ArtemisResultModule],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
         })
             .compileComponents()

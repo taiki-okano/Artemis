@@ -17,7 +17,7 @@ import { UMLModel } from '@ls1intum/apollon';
 import { Text } from '@ls1intum/apollon/lib/utils/svg/text';
 import { ModelingEditorComponent } from 'app/exercises/modeling/shared/modeling-editor.component';
 import * as testClassDiagram from '../../util/modeling/test-models/class-diagram.json';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
 import { ArtemisModelingEditorModule } from 'app/exercises/modeling/shared/modeling-editor.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
@@ -43,7 +43,7 @@ describe('ModelingEditorComponent Component', () => {
         diagram.jsonRepresentation = JSON.stringify(testClassDiagram);
 
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, ArtemisTestModule, ArtemisSharedModule, ArtemisModelingEditorModule],
+            imports: [HttpClientTestingModule, ArtemisTestModule, SharedModule, ArtemisModelingEditorModule],
             declarations: [],
             providers: [
                 JhiAlertService,

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { LearningGoalFormComponent } from './learning-goal-form/learning-goal-form.component';
 import { CreateLearningGoalComponent } from './create-learning-goal/create-learning-goal.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { EditLearningGoalComponent } from './edit-learning-goal/edit-learning-goal.component';
@@ -13,7 +13,7 @@ import { LearningGoalsPopoverComponent } from './learning-goals-popover/learning
 import { LearningGoalCourseDetailModalComponent } from './learning-goal-course-detail-modal/learning-goal-course-detail-modal.component';
 
 @NgModule({
-    imports: [ArtemisSharedModule, ReactiveFormsModule, ArtemisSharedComponentModule, RouterModule],
+    imports: [SharedModule, ReactiveFormsModule, ArtemisSharedComponentModule, RouterModule],
     declarations: [
         LearningGoalFormComponent,
         CreateLearningGoalComponent,

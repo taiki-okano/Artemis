@@ -8,7 +8,7 @@ import { ArtemisSharedComponentModule } from 'app/shared/components/shared-compo
 import { TeamUpdateButtonComponent } from 'app/exercises/shared/team/team-update-dialog/team-update-button.component';
 import { TeamUpdateDialogComponent } from 'app/exercises/shared/team/team-update-dialog/team-update-dialog.component';
 import { TeamStudentSearchComponent } from 'app/exercises/shared/team/team-student-search/team-student-search.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { TeamStudentsListComponent } from 'app/exercises/shared/team/team-students-list/team-students-list.component';
 import { TeamStudentsOnlineListComponent } from 'app/exercises/shared/team/team-students-online-list/team-students-online-list.component';
 import { TeamComponent } from 'app/exercises/shared/team/team.component';
@@ -28,7 +28,7 @@ const ENTITY_STATES = [...teamRoute];
 @NgModule({
     imports: [
         RouterModule.forChild(ENTITY_STATES),
-        ArtemisSharedModule,
+        SharedModule,
         NgxDatatableModule,
         ArtemisDataTableModule,
         ArtemisSharedComponentModule,

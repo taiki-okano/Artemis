@@ -7,7 +7,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { TranslateService } from '@ngx-translate/core';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
 import { GuidedTourComponent } from 'app/guided-tour/guided-tour.component';
 import { MockAccountService } from '../../helpers/mocks/service/mock-account.service';
@@ -25,7 +25,7 @@ import { NotificationSidebarComponent } from 'app/shared/notification/notificati
 import { User } from 'app/core/user/user.model';
 import { MockHasAnyAuthorityDirective } from '../../helpers/mocks/directive/mock-has-any-authority.directive';
 import { ArtemisSharedPipesModule } from 'app/shared/pipes/shared-pipes.module';
-import { ArtemisSharedCommonModule } from 'app/shared/shared-common.module';
+import { SharedCommonModule } from 'app/shared/shared-common.module';
 import { CourseCardComponent } from 'app/overview/course-card.component';
 import { Course } from 'app/entities/course.model';
 import { ARTEMIS_DEFAULT_COLOR } from 'app/app.constants';
@@ -57,10 +57,10 @@ describe('Overview Component', () => {
             TestBed.configureTestingModule({
                 imports: [
                     ArtemisCoursesModule,
-                    ArtemisSharedCommonModule,
+                    SharedCommonModule,
                     ArtemisSharedPipesModule,
                     ArtemisTestModule,
-                    ArtemisSharedModule,
+                    SharedModule,
                     TranslateTestingModule,
                     RouterTestingModule.withRoutes([
                         {

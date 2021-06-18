@@ -13,7 +13,7 @@ import { MockTextEditorService } from '../../helpers/mocks/service/mock-text-edi
 import * as sinonChai from 'sinon-chai';
 import { TextEditorService } from 'app/exercises/text/participate/text-editor.service';
 import { BehaviorSubject } from 'rxjs';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
@@ -74,7 +74,7 @@ describe('TextEditorComponent', () => {
             imports: [
                 TranslateModule.forRoot(),
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 ArtemisTeamModule,
                 ArtemisTeamSubmissionSyncModule,
                 ArtemisHeaderExercisePageWithDetailsModule,

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RatingListComponent } from 'app/exercises/shared/rating/rating-list/rating-list.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisTestModule } from '../../test.module';
 import { RatingService } from 'app/exercises/shared/rating/rating.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,7 +27,7 @@ describe('RatingListComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [ArtemisSharedModule, TranslateModule.forRoot(), ArtemisTestModule, RouterTestingModule.withRoutes([]), StarRatingComponent],
+            imports: [SharedModule, TranslateModule.forRoot(), ArtemisTestModule, RouterTestingModule.withRoutes([]), StarRatingComponent],
             declarations: [RatingListComponent, TranslatePipeMock],
             providers: [
                 {

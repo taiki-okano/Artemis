@@ -15,7 +15,7 @@ import { ArtemisTextExerciseModule } from 'app/exercises/text/manage/text-exerci
 import { ArtemisFileUploadExerciseManagementModule } from 'app/exercises/file-upload/manage/file-upload-exercise-management.module';
 import { ArtemisProgrammingExerciseManagementModule } from 'app/exercises/programming/manage/programming-exercise-management.module';
 import { ArtemisQuizManagementModule } from 'app/exercises/quiz/manage/quiz-management.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisDataTableModule } from 'app/shared/data-table/data-table.module';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { FormDateTimePickerModule } from 'app/shared/date-time-picker/date-time-picker.module';
@@ -55,7 +55,7 @@ const ENTITY_STATES = [...examManagementState];
         RouterModule.forChild(ENTITY_STATES),
         ArtemisTextExerciseModule,
         ArtemisExamScoresModule,
-        ArtemisSharedModule,
+        SharedModule,
         FormDateTimePickerModule,
         ArtemisSharedComponentModule,
         ArtemisMarkdownEditorModule,

@@ -158,6 +158,8 @@ dependencies {
     implementation "com.offbytwo.jenkins:jenkins-client:0.3.8"
     implementation "org.gitlab4j:gitlab4j-api:4.16.0"
 
+    implementation "com.google.code.gson:gson:2.8.7"
+
     implementation files("libs/jplag-3.0.0.jar")
     implementation files("libs/athene-protobuf-client-0.0.1.jar")
 
@@ -179,10 +181,7 @@ dependencies {
 
     implementation "org.springdoc:springdoc-openapi-ui:1.5.9"
 
-    // import JHipster dependencies BOM
-    implementation platform("io.github.jhipster:jhipster-dependencies:${jhipster_dependencies_version}" )
-
-    implementation "io.github.jhipster:jhipster-framework"
+    implementation "tech.jhipster:jhipster-framework:${jhipster_dependencies_version}"
     implementation "org.springframework.boot:spring-boot-starter-cache:${spring_boot_version}"
     implementation "io.micrometer:micrometer-registry-prometheus:1.7.0"
     implementation "net.logstash.logback:logstash-logback-encoder:6.6"
@@ -289,7 +288,7 @@ task cleanResources(type: Delete) {
 }
 
 task executeTests (type: Exec) {
-    commandLine "./gradlew", "test", "-x", "webpack"
+    commandLine "./gradlew", "test"
 }
 
 // Taken from here: https://stackoverflow.com/questions/3963708/gradle-how-to-display-test-results-in-the-console-in-real-time
@@ -328,7 +327,7 @@ task stage(dependsOn: "bootWar") {
 node {
     download = true
     version = "${node_version}"
-    yarnVersion = "${yarn_version}"
+    npmVersion = "${npm_version}"
 }
 
 // Command to execute the JavaDoc checkstyle verification ./gradlew checkstyleMain
@@ -340,11 +339,11 @@ checkstyle {
 }
 
 task executeCheckstyle (type: Exec) {
-    commandLine "./gradlew", "checkstyleMain", "-x", "yarn", "-x", "webpack"
+    commandLine "./gradlew", "checkstyleMain"
 }
 
 task buildJarForDocker (type: Exec) {
-    commandLine "./gradlew", "build", "-x", "webpack", "-x", "test", "-x", "jacocoTestCoverageVerification"
+    commandLine "./gradlew", "build", "-x", "test", "-x", "jacocoTestCoverageVerification"
 }
 
 def isNonStable = { String version ->
@@ -376,13 +375,13 @@ tasks.named("dependencyUpdates").configure {
 // Available commands:
 //
 // 1) Build production:                             ./gradlew -Pprod -Pwar clean bootWar
-// 2) Execute tests with coverage report:           ./gradlew executeTests jacocoTestReport -x yarn -x webpack
-// 2a) Execute tests without coverage report:       ./gradlew executeTests -x yarn -x webpack
+// 2) Execute tests with coverage report:           ./gradlew executeTests jacocoTestReport
+// 2a) Execute tests without coverage report:       ./gradlew executeTests
 // 2b) Run a single test:                           ./gradlew test --tests ExamIntegrationTest or ./gradlew test --tests ExamIntegrationTest.testGetExamScore
-// 3) Check Java code format:                       ./gradlew spotlessCheck -x yarn -x webpack
-// 4) Apply Java code formatter:                    ./gradlew spotlessApply -x yarn -x webpack
+// 3) Check Java code format:                       ./gradlew spotlessCheck
+// 4) Apply Java code formatter:                    ./gradlew spotlessApply
 // 5) Find dependency updates:                      ./gradlew dependencyUpdates -Drevision=release
-// 6) Check JavaDoc:                                ./gradlew checkstyleMain -x yarn -x webpack
+// 6) Check JavaDoc:                                ./gradlew checkstyleMain
 // 7) Generate Liquibase diff:                      ./gradlew liquibaseDiffChangelog
 // 8) Clear Liquibase checksums:                    ./gradlew liquibaseClearChecksums
 // 9) Verify code coverage (after tests):           ./gradlew jacocoTestCoverageVerification

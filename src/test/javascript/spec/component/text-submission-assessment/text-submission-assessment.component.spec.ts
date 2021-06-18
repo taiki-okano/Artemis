@@ -8,7 +8,7 @@ import { stub } from 'sinon';
 import { HttpResponse } from '@angular/common/http';
 import { AssessmentLayoutComponent } from 'app/assessment/assessment-layout/assessment-layout.component';
 import { AssessmentInstructionsModule } from 'app/assessment/assessment-instructions/assessment-instructions.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { TextAssessmentAreaComponent } from 'app/exercises/text/assess/text-assessment-area/text-assessment-area.component';
 import { MockComponent } from 'ng-mocks';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -122,7 +122,7 @@ describe('TextSubmissionAssessmentComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 ArtemisAssessmentSharedModule,
                 AssessmentInstructionsModule,
                 TranslateModule.forRoot(),

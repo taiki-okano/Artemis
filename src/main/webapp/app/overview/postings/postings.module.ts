@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSidePanelModule } from 'app/shared/side-panel/side-panel.module';
 import { ArtemisConfirmIconModule } from 'app/shared/confirm-icon/confirm-icon.module';
 import { PostingsComponent } from 'app/overview/postings/postings.component';
@@ -21,7 +21,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes), ArtemisSharedModule, ArtemisSidePanelModule, ArtemisConfirmIconModule, ArtemisMarkdownModule, ArtemisMarkdownEditorModule],
+    imports: [RouterModule.forChild(routes), SharedModule, ArtemisSidePanelModule, ArtemisConfirmIconModule, ArtemisMarkdownModule, ArtemisMarkdownEditorModule],
     declarations: [PostingsComponent, PostRowComponent, PostComponent, AnswerPostComponent, PostVotesComponent, PostingsButtonComponent],
     exports: [PostingsComponent, PostingsButtonComponent],
 })

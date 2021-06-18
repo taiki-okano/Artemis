@@ -1,4 +1,4 @@
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { LectureUnitManagementComponent } from 'app/lecture/lecture-unit/lecture-unit-management/lecture-unit-management.component';
 import { NgModule } from '@angular/core';
@@ -24,7 +24,7 @@ import { ArtemisLectureUnitsModule } from 'app/overview/course-lectures/lecture-
 @NgModule({
     imports: [
         ArtemisMarkdownEditorModule,
-        ArtemisSharedModule,
+        SharedModule,
         ReactiveFormsModule,
         ArtemisSharedComponentModule,
         RouterModule.forChild([]),

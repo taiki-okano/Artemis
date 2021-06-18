@@ -11,7 +11,7 @@ import { MockComponent } from 'ng-mocks';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TextFeedbackConflictsComponent } from 'app/exercises/text/assess/conflicts/text-feedback-conflicts.component';
 import { TextAssessmentService } from 'app/exercises/text/assess/text-assessment.service';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { AssessmentInstructionsModule } from 'app/assessment/assessment-instructions/assessment-instructions.module';
 import { ArtemisConfirmIconModule } from 'app/shared/confirm-icon/confirm-icon.module';
 import { TextSharedModule } from 'app/exercises/text/shared/text-shared.module';
@@ -153,7 +153,7 @@ describe('TextFeedbackConflictsComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 ArtemisAssessmentSharedModule,
                 AssessmentInstructionsModule,
                 TranslateModule.forRoot(),

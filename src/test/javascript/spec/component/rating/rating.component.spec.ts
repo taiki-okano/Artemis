@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RatingComponent } from 'app/exercises/shared/rating/rating.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisTestModule } from '../../test.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
@@ -33,7 +33,7 @@ describe('RatingComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, StarratingModule],
+            imports: [ArtemisTestModule, SharedModule, StarratingModule],
             declarations: [RatingComponent],
             providers: [
                 { provide: RatingService, useClass: MockRatingService },

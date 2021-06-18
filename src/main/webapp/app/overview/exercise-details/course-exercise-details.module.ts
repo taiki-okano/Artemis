@@ -5,7 +5,7 @@ import { NgModule } from '@angular/core';
 import { ChartsModule } from 'ng2-charts';
 import { ClipboardModule } from 'ngx-clipboard';
 import { MomentModule } from 'ngx-moment';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisSidePanelModule } from 'app/shared/side-panel/side-panel.module';
 import { OrionModule } from 'app/shared/orion/orion.module';
 import { FeatureToggleModule } from 'app/shared/feature-toggle/feature-toggle.module';
@@ -46,7 +46,7 @@ const routes: Routes = [
     imports: [
         ArtemisExerciseButtonsModule,
         ArtemisCourseExerciseRowModule,
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisSharedComponentModule,
         ChartsModule,
         ClipboardModule,

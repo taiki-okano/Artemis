@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { ArtemisCodeEditorModule } from 'app/exercises/programming/shared/code-editor/code-editor.module';
 import { ArtemisProgrammingParticipationRoutingModule } from 'app/exercises/programming/participate/programming-participation-routing.module';
 import { CodeEditorStudentContainerComponent } from 'app/exercises/programming/participate/code-editor-student-container.component';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ArtemisProgrammingExerciseActionsModule } from 'app/exercises/programming/shared/actions/programming-exercise-actions.module';
 import { ArtemisResultModule } from 'app/exercises/shared/result/result.module';
 import { ArtemisExerciseHintParticipationModule } from 'app/exercises/shared/exercise-hint/participate/exercise-hint-participation.module';
@@ -12,7 +12,7 @@ import { ArtemisHeaderExercisePageWithDetailsModule } from 'app/exercises/shared
 
 @NgModule({
     imports: [
-        ArtemisSharedModule,
+        SharedModule,
         ArtemisProgrammingParticipationRoutingModule,
         ArtemisCodeEditorModule,
         ArtemisProgrammingExerciseActionsModule,

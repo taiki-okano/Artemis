@@ -87,13 +87,13 @@ out/
 /build/
 
 ######################
-# NPM
+# NPM / Yarn
 ######################
-package-lock.json
 .npm/
 .cache/
 .config/
 .yarnrc
+yarn.lock
 
 ######################
 # Package Files

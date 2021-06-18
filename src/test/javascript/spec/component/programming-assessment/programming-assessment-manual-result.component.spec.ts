@@ -12,7 +12,7 @@ import { ArtemisTestModule } from '../../test.module';
 import { ParticipationWebsocketService } from 'app/overview/participation-websocket.service';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockParticipationWebsocketService } from '../../helpers/mocks/service/mock-participation-websocket.service';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { BuildLogService } from 'app/exercises/programming/shared/service/build-log.service';
 import { FormDateTimePickerModule } from 'app/shared/date-time-picker/date-time-picker.module';
 import { User } from 'app/core/user/user.model';
@@ -145,7 +145,7 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
             imports: [
                 TranslateModule.forRoot(),
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 NgbModule,
                 FormDateTimePickerModule,
                 FormsModule,

@@ -8,7 +8,7 @@ import { Post } from 'app/entities/metis/post.model';
 import { PostForOverview } from 'app/course/course-posts/course-posts.component';
 import { User } from 'app/core/user/user.model';
 import { ArtemisTestModule } from '../../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -62,7 +62,7 @@ describe('CoursePostsComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule],
             declarations: [CoursePostsComponent],
         })
             .overrideTemplate(CoursePostsComponent, '')

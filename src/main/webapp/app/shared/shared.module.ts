@@ -16,8 +16,8 @@ import { ArtemisDurationFromSecondsPipe } from 'app/shared/pipes/artemis-duratio
 import { ArtemisTimeAgoPipe } from 'app/shared/pipes/artemis-time-ago.pipe';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { ArtemisSharedPipesModule } from 'app/shared/pipes/shared-pipes.module';
-import { ArtemisSharedCommonModule } from 'app/shared/shared-common.module';
-import { ArtemisSharedLibsModule } from 'app/shared/shared-libs.module';
+import { SharedCommonModule } from 'app/shared/shared-common.module';
+import { SharedLibsModule } from 'app/shared/shared-libs.module';
 import { CustomMaxDirective } from 'app/shared/validators/custom-max-validator.directive';
 import { CustomMinDirective } from 'app/shared/validators/custom-min-validator.directive';
 import { OrganizationSelectorComponent } from './organization-selector/organization-selector.component';
@@ -33,7 +33,7 @@ import { RouterModule } from '@angular/router';
 import { ExerciseDetailStatisticsComponent } from 'app/exercises/shared/statistics/exercise-detail-statistics.component';
 
 @NgModule({
-    imports: [ArtemisSharedLibsModule, ArtemisSharedCommonModule, ArtemisSharedPipesModule, RouterModule],
+    imports: [SharedLibsModule, SharedCommonModule, ArtemisSharedPipesModule, RouterModule],
     declarations: [
         ArtemisDatePipe,
         CircularProgressBarComponent,
@@ -64,14 +64,14 @@ import { ExerciseDetailStatisticsComponent } from 'app/exercises/shared/statisti
     exports: [
         ArtemisDatePipe,
         ArtemisDurationFromSecondsPipe,
-        ArtemisSharedLibsModule,
+        SharedLibsModule,
         CircularProgressBarComponent,
         FindLanguageFromKeyPipe,
         AlertComponent,
         AlertErrorComponent,
         AdditionalFeedbackComponent,
         HasAnyAuthorityDirective,
-        ArtemisSharedCommonModule,
+        SharedCommonModule,
         ArtemisSharedPipesModule,
         SecuredImageComponent,
         DeleteButtonDirective,
@@ -94,4 +94,4 @@ import { ExerciseDetailStatisticsComponent } from 'app/exercises/shared/statisti
     ],
     providers: [ArtemisDatePipe, TranslatePipe],
 })
-export class ArtemisSharedModule {}
+export class SharedModule {}

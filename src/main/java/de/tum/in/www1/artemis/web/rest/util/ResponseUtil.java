@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public final class ResponseUtil implements io.github.jhipster.web.util.ResponseUtil {
+public final class ResponseUtil implements tech.jhipster.web.util.ResponseUtil {
 
     // TODO: This is always null because spring does not allow static field injection
     @Value("${jhipster.clientApp.name}")

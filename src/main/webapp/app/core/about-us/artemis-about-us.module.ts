@@ -3,7 +3,7 @@ import { AboutUsComponent } from 'app/core/about-us/about-us.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 
 @NgModule({
     declarations: [AboutUsComponent],
@@ -20,7 +20,7 @@ import { ArtemisSharedModule } from 'app/shared/shared.module';
         ]),
         TranslateModule,
         CommonModule,
-        ArtemisSharedModule,
+        SharedModule,
     ],
 })
 export class ArtemisAboutUsModule {}

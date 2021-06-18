@@ -3,7 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { AssessmentComplaintAlertComponent } from 'app/assessment/assessment-complaint-alert/assessment-complaint-alert.component';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { Complaint, ComplaintType } from 'app/entities/complaint.model';
 
 describe('AssessmentComplaintAlertComponent', () => {
@@ -12,7 +12,7 @@ describe('AssessmentComplaintAlertComponent', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule],
             declarations: [AssessmentComplaintAlertComponent],
         }).compileComponents();
     }));

@@ -9,7 +9,7 @@ import { ArtemisTestModule } from '../../test.module';
 import { MockActivatedRouteWithSubjects } from '../../helpers/mocks/activated-route/mock-activated-route-with-subjects';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockComponent } from 'ng-mocks';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MockRouter } from '../../helpers/mocks/mock-router';
 import { of, throwError } from 'rxjs';
@@ -190,7 +190,7 @@ describe('ExerciseAssessmentDashboardComponent', () => {
         return TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
-                ArtemisSharedModule,
+                SharedModule,
                 ArtemisSharedComponentModule,
                 ArtemisProgrammingAssessmentModule,
                 ArtemisProgrammingExerciseInstructionsRenderModule,

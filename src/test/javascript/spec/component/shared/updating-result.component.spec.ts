@@ -11,7 +11,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { ParticipationWebsocketService } from 'app/overview/participation-websocket.service';
 import { MockAccountService } from '../../helpers/mocks/service/mock-account.service';
 import { ProgrammingSubmissionService, ProgrammingSubmissionState } from 'app/exercises/programming/participate/programming-submission.service';
@@ -55,7 +55,7 @@ describe('UpdatingResultComponent', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule, MomentModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule, MomentModule],
             declarations: [UpdatingResultComponent, ResultComponent],
             providers: [
                 JhiLanguageHelper,

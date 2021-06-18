@@ -9,7 +9,7 @@ import { DebugElement } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { ComplaintsComponent } from 'app/complaints/complaints.component';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { Exercise } from 'app/entities/exercise.model';
 
 const expect = chai.expect;
@@ -21,7 +21,7 @@ describe('ComplaintsComponent', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisSharedModule, MomentModule],
+            imports: [TranslateModule.forRoot(), ArtemisTestModule, SharedModule, MomentModule],
             declarations: [ComplaintsComponent],
             providers: [
                 {

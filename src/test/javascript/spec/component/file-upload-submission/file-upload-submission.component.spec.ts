@@ -29,7 +29,7 @@ import { stub } from 'sinon';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import * as moment from 'moment';
 import { of } from 'rxjs';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { FileUploaderService } from 'app/shared/http/file-uploader.service';
 import { StudentParticipation } from 'app/entities/participation/student-participation.model';
 import { Result } from 'app/entities/result.model';
@@ -61,7 +61,7 @@ describe('FileUploadSubmissionComponent', () => {
                 ArtemisTestModule,
                 NgxDatatableModule,
                 ArtemisResultModule,
-                ArtemisSharedModule,
+                SharedModule,
                 MomentModule,
                 ArtemisComplaintsModule,
                 TranslateModule.forRoot(),

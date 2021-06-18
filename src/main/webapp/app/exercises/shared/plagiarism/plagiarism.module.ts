@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ArtemisModelingEditorModule } from 'app/exercises/modeling/shared/modeling-editor.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
 import { PlagiarismDetailsComponent } from 'app/exercises/shared/plagiarism/plagiarism-details/plagiarism-details.component';
 import { PlagiarismHeaderComponent } from 'app/exercises/shared/plagiarism/plagiarism-header/plagiarism-header.component';
 import { PlagiarismInspectorComponent } from 'app/exercises/shared/plagiarism/plagiarism-inspector/plagiarism-inspector.component';
@@ -15,7 +15,7 @@ import { SplitPaneHeaderComponent } from './plagiarism-split-view/split-pane-hea
 import { PlagiarismRunDetailsComponent } from './plagiarism-run-details/plagiarism-run-details.component';
 
 @NgModule({
-    imports: [ArtemisSharedModule, ArtemisModelingEditorModule, FormsModule, RouterModule, TranslateModule],
+    imports: [SharedModule, ArtemisModelingEditorModule, FormsModule, RouterModule, TranslateModule],
     declarations: [
         PlagiarismDetailsComponent,
         PlagiarismHeaderComponent,
