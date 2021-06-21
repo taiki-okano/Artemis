@@ -18,6 +18,7 @@ import { TextSubmission } from 'app/entities/text-submission.model';
 import { TextBlock } from 'app/entities/text-block.model';
 import { TextAssessmentAreaComponent } from 'app/exercises/text/assess/text-assessment-area/text-assessment-area.component';
 import { AssessmentCorrectionRoundBadgeComponent } from 'app/assessment/assessment-detail/assessment-correction-round-badge/assessment-correction-round-badge.component';
+import { ArtemisGradingInstructionLinkIconModule } from 'app/shared/grading-instruction-link-icon/grading-instruction-link-icon.module';
 
 describe('ManualTextblockSelectionComponent', () => {
     let component: ManualTextblockSelectionComponent;
@@ -66,7 +67,7 @@ describe('ManualTextblockSelectionComponent', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, SharedModule, ArtemisConfirmIconModule, TextSharedModule],
+            imports: [ArtemisTestModule, SharedModule, ArtemisConfirmIconModule, TextSharedModule, ArtemisGradingInstructionLinkIconModule],
             declarations: [
                 TextblockAssessmentCardComponent,
                 TextblockFeedbackEditorComponent,
