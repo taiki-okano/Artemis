@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import de.tum.in.www1.artemis.domain.Course;
 import de.tum.in.www1.artemis.domain.ProgrammingExercise;
 import de.tum.in.www1.artemis.domain.User;
+import de.tum.in.www1.artemis.exception.VersionControlException;
 import de.tum.in.www1.artemis.repository.ProgrammingExerciseRepository;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.service.connectors.VcsUserManagementService;
@@ -48,7 +49,7 @@ public class GitLabUserManagementService implements VcsUserManagementService {
     }
 
     @Override
-    public void createVcsUser(User user) {
+    public void createVcsUser(User user) throws VersionControlException {
         final int gitlabUserId = getUserIdCreateIfNotExists(user);
         // Add user to existing exercises
         addUserToGroups(gitlabUserId, user.getGroups());
@@ -61,6 +62,8 @@ public class GitLabUserManagementService implements VcsUserManagementService {
             if (gitlabUser == null) {
                 return;
             }
+
+            updateUserActivationState(user, gitlabUser.getId());
 
             addUserToGroups(gitlabUser.getId(), addedGroups);
 
@@ -100,6 +103,21 @@ public class GitLabUserManagementService implements VcsUserManagementService {
 
         String password = shouldUpdatePassword ? passwordService.decryptPassword(user) : null;
         return userApi.updateUser(gitlabUser, password);
+    }
+
+    /**
+     * Updates the activation state of the Gitlab account based on the Artemis account.
+     * We
+     * @param user The Artemis user
+     * @param gitlabUserId the id of the GitLab user that is mapped to the Artemis user
+     */
+    private void updateUserActivationState(User user, int gitlabUserId) throws GitLabApiException {
+        if (user.getActivated()) {
+            gitlabApi.getUserApi().unblockUser(gitlabUserId);
+        }
+        else {
+            gitlabApi.getUserApi().blockUser(gitlabUserId);
+        }
     }
 
     @Override
@@ -260,6 +278,30 @@ public class GitLabUserManagementService implements VcsUserManagementService {
         }
     }
 
+    @Override
+    public void deactivateUser(String login) throws VersionControlException {
+        try {
+            final int userId = getUserId(login);
+            // We block the user instead of deactivating because a deactivated account
+            // is activated automatically when the user logs into Gitlab.
+            gitlabApi.getUserApi().blockUser(userId);
+        }
+        catch (GitLabApiException e) {
+            throw new GitLabException(String.format("Cannot block user %s from GitLab!", login), e);
+        }
+    }
+
+    @Override
+    public void activateUser(String login) throws VersionControlException {
+        try {
+            final int userId = getUserId(login);
+            gitlabApi.getUserApi().unblockUser(userId);
+        }
+        catch (GitLabApiException e) {
+            throw new GitLabException(String.format("Cannot unblock user %s from GitLab!", login), e);
+        }
+    }
+
     /**
      * Gets the Gitlab user id of the Artemis user. Creates
      * a new Gitlab user if it doesn't exist and returns the
@@ -289,7 +331,7 @@ public class GitLabUserManagementService implements VcsUserManagementService {
      * @param gitlabUserId the user id of the Gitlab user
      * @param groups the new groups
      */
-    private void addUserToGroups(int gitlabUserId, Set<String> groups) throws GitLabException {
+    private void addUserToGroups(int gitlabUserId, Set<String> groups) {
         if (groups == null || groups.isEmpty()) {
             return;
         }
@@ -298,9 +340,7 @@ public class GitLabUserManagementService implements VcsUserManagementService {
         for (var exercise : exercises) {
             Course course = exercise.getCourseViaExerciseGroupOrCourseMember();
             Optional<AccessLevel> accessLevel = getAccessLevelFromUserGroups(groups, course);
-            if (accessLevel.isPresent()) {
-                addUserToGroup(exercise.getProjectKey(), gitlabUserId, accessLevel.get());
-            }
+            accessLevel.ifPresent(level -> addUserToGroup(exercise.getProjectKey(), gitlabUserId, level));
         }
     }
 
@@ -334,36 +374,11 @@ public class GitLabUserManagementService implements VcsUserManagementService {
                 log.warn("Member already exists for group {}", groupName);
                 return;
             }
+            else if (e.getHttpStatus() == 404) {
+                log.warn("Group not found {}", groupName);
+                return;
+            }
             throw new GitLabException(String.format("Error adding new user [%d] to group [%s]", gitlabUserId, groupName), e);
-        }
-    }
-
-    /**
-     * Removes or updates the user to or from the groups.
-     *
-     * @param gitlabUserId the Gitlab user id
-     * @param userGroups groups that the user belongs to
-     * @param groupsToRemove groups where the user should be removed from
-     * @throws GitLabApiException if an error occurred while updating the user
-     */
-    private void removeOrUpdateUserFromGroups(int gitlabUserId, Set<String> userGroups, Set<String> groupsToRemove) throws GitLabApiException {
-        if (groupsToRemove == null || groupsToRemove.isEmpty()) {
-            return;
-        }
-
-        // Gitlab groups are identified by the project key of the programming exercise
-        var exercises = programmingExerciseRepository.findAllByInstructorOrEditorOrTAGroupNameIn(groupsToRemove);
-        for (var exercise : exercises) {
-            Course course = exercise.getCourseViaExerciseGroupOrCourseMember();
-            Optional<AccessLevel> accessLevel = getAccessLevelFromUserGroups(userGroups, course);
-            // Do not remove the user from the group and only update it's access level
-            var shouldUpdateGroupAccess = accessLevel.isPresent();
-            if (shouldUpdateGroupAccess) {
-                gitlabApi.getGroupApi().updateMember(exercise.getProjectKey(), gitlabUserId, accessLevel.get());
-            }
-            else {
-                removeUserFromGroup(gitlabUserId, exercise.getProjectKey());
-            }
         }
     }
 
@@ -391,6 +406,34 @@ public class GitLabUserManagementService implements VcsUserManagementService {
         }
         else {
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Removes or updates the user to or from the groups.
+     *
+     * @param gitlabUserId the Gitlab user id
+     * @param userGroups groups that the user belongs to
+     * @param groupsToRemove groups where the user should be removed from
+     */
+    private void removeOrUpdateUserFromGroups(int gitlabUserId, Set<String> userGroups, Set<String> groupsToRemove) throws GitLabApiException {
+        if (groupsToRemove == null || groupsToRemove.isEmpty()) {
+            return;
+        }
+
+        // Gitlab groups are identified by the project key of the programming exercise
+        var exercises = programmingExerciseRepository.findAllByInstructorOrEditorOrTAGroupNameIn(groupsToRemove);
+        for (var exercise : exercises) {
+            Course course = exercise.getCourseViaExerciseGroupOrCourseMember();
+            Optional<AccessLevel> accessLevel = getAccessLevelFromUserGroups(userGroups, course);
+            // Do not remove the user from the group and only update it's access level
+            var shouldUpdateGroupAccess = accessLevel.isPresent();
+            if (shouldUpdateGroupAccess) {
+                gitlabApi.getGroupApi().updateMember(exercise.getProjectKey(), gitlabUserId, accessLevel.get());
+            }
+            else {
+                removeUserFromGroup(gitlabUserId, exercise.getProjectKey());
+            }
         }
     }
 

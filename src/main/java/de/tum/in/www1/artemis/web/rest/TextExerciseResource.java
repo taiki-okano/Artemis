@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -50,6 +51,9 @@ public class TextExerciseResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
+    @Value("${artemis.submission-export-path}")
+    private String submissionExportPath;
+
     private final FeedbackRepository feedbackRepository;
 
     private final TextBlockRepository textBlockRepository;
@@ -90,13 +94,17 @@ public class TextExerciseResource {
 
     private final CourseRepository courseRepository;
 
+    private final FileService fileService;
+
+    private final static int EXPORTED_SUBMISSIONS_DELETION_DELAY_IN_MINUTES = 30;
+
     public TextExerciseResource(TextExerciseRepository textExerciseRepository, TextExerciseService textExerciseService, FeedbackRepository feedbackRepository,
             PlagiarismResultRepository plagiarismResultRepository, UserRepository userRepository, AuthorizationCheckService authCheckService, CourseService courseService,
             StudentParticipationRepository studentParticipationRepository, ResultRepository resultRepository, GroupNotificationService groupNotificationService,
             TextExerciseImportService textExerciseImportService, TextSubmissionExportService textSubmissionExportService, ExampleSubmissionRepository exampleSubmissionRepository,
             ExerciseService exerciseService, GradingCriterionRepository gradingCriterionRepository, TextBlockRepository textBlockRepository,
             ExerciseGroupRepository exerciseGroupRepository, InstanceMessageSendService instanceMessageSendService, TextPlagiarismDetectionService textPlagiarismDetectionService,
-            CourseRepository courseRepository) {
+            CourseRepository courseRepository, FileService fileService) {
         this.feedbackRepository = feedbackRepository;
         this.plagiarismResultRepository = plagiarismResultRepository;
         this.textBlockRepository = textBlockRepository;
@@ -117,6 +125,7 @@ public class TextExerciseResource {
         this.instanceMessageSendService = instanceMessageSendService;
         this.textPlagiarismDetectionService = textPlagiarismDetectionService;
         this.courseRepository = courseRepository;
+        this.fileService = fileService;
     }
 
     /**
@@ -138,8 +147,8 @@ public class TextExerciseResource {
         if (textExercise.getTitle() == null) {
             throw new BadRequestAlertException("A new textExercise needs a title", ENTITY_NAME, "missingtitle");
         }
-
-        exerciseService.validateScoreSettings(textExercise);
+        // validates general settings: points, dates
+        exerciseService.validateGeneralSettings(textExercise);
 
         if (textExercise.getDueDate() == null && textExercise.getAssessmentDueDate() != null) {
             throw new BadRequestAlertException("If you set an assessmentDueDate, then you need to add also a dueDate", ENTITY_NAME, "dueDate");
@@ -188,8 +197,8 @@ public class TextExerciseResource {
             return createTextExercise(textExercise);
         }
 
-        // Validate score settings
-        exerciseService.validateScoreSettings(textExercise);
+        // validates general settings: points, dates
+        exerciseService.validateGeneralSettings(textExercise);
 
         // Valid exercises have set either a course or an exerciseGroup
         textExercise.checkCourseAndExerciseGroupExclusivity(ENTITY_NAME);
@@ -293,6 +302,12 @@ public class TextExerciseResource {
 
         Set<ExampleSubmission> exampleSubmissions = this.exampleSubmissionRepository.findAllWithResultByExerciseId(exerciseId);
         List<GradingCriterion> gradingCriteria = gradingCriterionRepository.findByExerciseIdWithEagerGradingCriteria(exerciseId);
+
+        List<Feedback> feedbackList = feedbackRepository.findFeedbackByStructuredGradingInstructionId(gradingCriteria);
+
+        if (!feedbackList.isEmpty()) {
+            textExercise.setGradingInstructionFeedbackUsed(true);
+        }
         textExercise.setGradingCriteria(gradingCriteria);
         textExercise.setExampleSubmissions(exampleSubmissions);
 
@@ -515,7 +530,10 @@ public class TextExerciseResource {
         }
 
         try {
-            Optional<File> zipFile = textSubmissionExportService.exportStudentSubmissions(exerciseId, submissionExportOptions);
+            Path outputDir = Path.of(fileService.getUniquePathString(submissionExportPath));
+            Optional<File> zipFile = textSubmissionExportService.exportStudentSubmissions(exerciseId, submissionExportOptions, outputDir, new ArrayList<>(), new ArrayList<>());
+            // Assume user finished download after the given delay
+            fileService.scheduleForDirectoryDeletion(outputDir, EXPORTED_SUBMISSIONS_DELETION_DELAY_IN_MINUTES);
 
             if (zipFile.isEmpty()) {
                 return ResponseEntity.badRequest()

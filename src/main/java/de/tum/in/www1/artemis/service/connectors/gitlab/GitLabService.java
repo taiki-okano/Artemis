@@ -313,14 +313,21 @@ public class GitLabService extends AbstractVersionControlService {
     public void createProjectForExercise(ProgrammingExercise programmingExercise) throws VersionControlException {
         createGitlabGroupForExercise(programmingExercise);
 
-        final var tutors = userRepository.getTutors(programmingExercise.getCourseViaExerciseGroupOrCourseMember());
-        addUsersToExerciseGroup(tutors, programmingExercise, REPORTER);
+        final Course course = programmingExercise.getCourseViaExerciseGroupOrCourseMember();
 
-        final var editors = userRepository.getEditors(programmingExercise.getCourseViaExerciseGroupOrCourseMember());
+        final var instructors = userRepository.getInstructors(course);
+        addUsersToExerciseGroup(instructors, programmingExercise, OWNER);
+
+        // Get editors that are not instructors at the same time
+        final var editors = userRepository.findAllInGroupContainingAndNotIn(course.getEditorGroupName(), new HashSet<>(instructors));
         addUsersToExerciseGroup(editors, programmingExercise, MAINTAINER);
 
-        final var instructors = userRepository.getInstructors(programmingExercise.getCourseViaExerciseGroupOrCourseMember());
-        addUsersToExerciseGroup(instructors, programmingExercise, OWNER);
+        // Get teaching assistants that are not instructors nor editors
+        final HashSet<User> instructorsAndEditors = new HashSet<>();
+        instructorsAndEditors.addAll(instructors);
+        instructorsAndEditors.addAll(editors);
+        final var tutors = userRepository.findAllInGroupContainingAndNotIn(course.getTeachingAssistantGroupName(), instructorsAndEditors);
+        addUsersToExerciseGroup(tutors, programmingExercise, REPORTER);
     }
 
     /**
@@ -360,8 +367,10 @@ public class GitLabService extends AbstractVersionControlService {
                 final var userId = gitLabUserManagementService.getUserId(user.getLogin());
                 gitLabUserManagementService.addUserToGroupsOfExercises(userId, List.of(exercise), accessLevel);
             }
-            catch (GitLabException ignored) {
-                // ignore the exception and continue with the next user, one non existing user or issue here should not prevent the creation of the whole programming exercise
+            catch (GitLabException e) {
+                // ignore the exception and continue with the next user, one non existing user or issue here should not
+                // prevent the creation of the whole programming exercise
+                log.warn("Skipped adding user {} to groups of exercise {}: {}", user.getLogin(), exercise, e.getMessage());
             }
         }
     }

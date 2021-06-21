@@ -124,6 +124,9 @@ export class CourseUpdateComponent implements OnInit {
                 onlineCourse: new FormControl(this.course.onlineCourse),
                 complaintsEnabled: new FormControl(this.complaintsEnabled),
                 requestMoreFeedbackEnabled: new FormControl(this.requestMoreFeedbackEnabled),
+                maxPoints: new FormControl(this.course.maxPoints, {
+                    validators: [Validators.min(1)],
+                }),
                 maxComplaints: new FormControl(this.course.maxComplaints, {
                     validators: [Validators.required, Validators.min(0)],
                 }),
@@ -136,7 +139,7 @@ export class CourseUpdateComponent implements OnInit {
                 maxRequestMoreFeedbackTimeDays: new FormControl(this.course.maxRequestMoreFeedbackTimeDays, {
                     validators: [Validators.required, Validators.min(0)],
                 }),
-                studentQuestionsEnabled: new FormControl(this.course.studentQuestionsEnabled),
+                postsEnabled: new FormControl(this.course.postsEnabled),
                 registrationEnabled: new FormControl(this.course.registrationEnabled),
                 registrationConfirmationMessage: new FormControl(this.course.registrationConfirmationMessage, {
                     validators: [Validators.maxLength(2000)],
@@ -213,22 +216,22 @@ export class CourseUpdateComponent implements OnInit {
 
     /**
      * @function set course icon
-     * @param $event {object} Event object which contains the uploaded file
+     * @param event {object} Event object which contains the uploaded file
      */
-    setCourseImage($event: any): void {
-        this.imageChangedEvent = $event;
-        if ($event.target.files.length) {
-            const fileList: FileList = $event.target.files;
+    setCourseImage(event: any): void {
+        this.imageChangedEvent = event;
+        if (event.target.files.length) {
+            const fileList: FileList = event.target.files;
             this.courseImageFile = fileList[0];
             this.courseImageFileName = this.courseImageFile['name'];
         }
     }
 
     /**
-     * @param $event
+     * @param event
      */
-    imageCropped($event: ImageCroppedEvent) {
-        this.croppedImage = $event.base64;
+    imageCropped(event: ImageCroppedEvent) {
+        this.croppedImage = event.base64;
     }
 
     imageLoaded() {

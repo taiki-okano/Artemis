@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import de.tum.in.www1.artemis.domain.Course;
+import de.tum.in.www1.artemis.domain.Feedback;
 import de.tum.in.www1.artemis.domain.FileUploadExercise;
 import de.tum.in.www1.artemis.domain.GradingCriterion;
 import de.tum.in.www1.artemis.domain.enumeration.IncludedInOverallScore;
@@ -27,6 +28,12 @@ public class FileUploadExerciseIntegrationTest extends AbstractSpringIntegration
 
     @Autowired
     private ExerciseRepository exerciseRepo;
+
+    @Autowired
+    private FeedbackRepository feedbackRepository;
+
+    @Autowired
+    private GradingCriterionRepository gradingCriterionRepository;
 
     @Autowired
     private FileUploadExerciseRepository fileUploadExerciseRepository;
@@ -251,6 +258,22 @@ public class FileUploadExerciseIntegrationTest extends AbstractSpringIntegration
     }
 
     @Test
+    @WithMockUser(username = "tutor1", roles = "TA")
+    public void testGetFileUploadExercise_setGradingInstructionFeedbackUsed() throws Exception {
+        Course course = database.addCourseWithThreeFileUploadExercise();
+        FileUploadExercise fileUploadExercise = database.findFileUploadExerciseWithTitle(course.getExercises(), "released");
+        gradingCriteria = database.addGradingInstructionsToExercise(fileUploadExercise);
+        gradingCriterionRepository.saveAll(gradingCriteria);
+        Feedback feedback = new Feedback();
+        feedback.setGradingInstruction(gradingCriteria.get(0).getStructuredGradingInstructions().get(0));
+        feedbackRepository.save(feedback);
+
+        FileUploadExercise receivedFileUploadExercise = request.get("/api/file-upload-exercises/" + fileUploadExercise.getId(), HttpStatus.OK, FileUploadExercise.class);
+
+        assertThat(receivedFileUploadExercise.isGradingInstructionFeedbackUsed()).isTrue();
+    }
+
+    @Test
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void deleteFileUploadExercise_asInstructor() throws Exception {
         Course course = database.addCourseWithThreeFileUploadExercise();
@@ -305,6 +328,7 @@ public class FileUploadExerciseIntegrationTest extends AbstractSpringIntegration
         Course course = database.addCourseWithThreeFileUploadExercise();
         FileUploadExercise fileUploadExercise = database.findFileUploadExerciseWithTitle(course.getExercises(), "released");
         fileUploadExercise.setDueDate(ZonedDateTime.now().plusDays(10));
+        fileUploadExercise.setAssessmentDueDate(ZonedDateTime.now().plusDays(11));
 
         FileUploadExercise receivedFileUploadExercise = request.putWithResponseBody("/api/file-upload-exercises/" + fileUploadExercise.getId() + "?notificationText=notification",
                 fileUploadExercise, FileUploadExercise.class, HttpStatus.OK);
@@ -320,6 +344,7 @@ public class FileUploadExerciseIntegrationTest extends AbstractSpringIntegration
         Course course = database.addCourseWithThreeFileUploadExercise();
         FileUploadExercise fileUploadExercise = database.findFileUploadExerciseWithTitle(course.getExercises(), "released");
         fileUploadExercise.setDueDate(ZonedDateTime.now().plusDays(10));
+        fileUploadExercise.setAssessmentDueDate(ZonedDateTime.now().plusDays(11));
         course.setInstructorGroupName("new-instructor-group-name");
         courseRepo.save(course);
         FileUploadExercise receivedFileUploadExercise = request.putWithResponseBody("/api/file-upload-exercises/" + fileUploadExercise.getId(), fileUploadExercise,

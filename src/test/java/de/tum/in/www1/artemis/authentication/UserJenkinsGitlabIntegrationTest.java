@@ -1,6 +1,11 @@
 package de.tum.in.www1.artemis.authentication;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
+
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -16,8 +21,10 @@ import de.tum.in.www1.artemis.AbstractSpringIntegrationJenkinsGitlabTest;
 import de.tum.in.www1.artemis.domain.Course;
 import de.tum.in.www1.artemis.domain.ProgrammingExercise;
 import de.tum.in.www1.artemis.domain.User;
+import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.service.connectors.gitlab.GitLabUserManagementService;
 import de.tum.in.www1.artemis.service.connectors.jenkins.JenkinsUserManagementService;
+import de.tum.in.www1.artemis.util.ModelFactory;
 import de.tum.in.www1.artemis.util.UserTestService;
 import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
 
@@ -292,7 +299,7 @@ public class UserJenkinsGitlabIntegrationTest extends AbstractSpringIntegrationJ
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void createUserWithGroupsAlreadyExistsInGitlab() throws Exception {
         Course course = database.addEmptyCourse();
-        ProgrammingExercise programmingExericse = database.addProgrammingExerciseToCourse(course, false);
+        ProgrammingExercise programmingExercise = database.addProgrammingExerciseToCourse(course, false);
 
         User newUser = userTestService.student;
         newUser.setId(null);
@@ -300,7 +307,7 @@ public class UserJenkinsGitlabIntegrationTest extends AbstractSpringIntegrationJ
         newUser.setEmail("foobar@tum.com");
         newUser.setGroups(Set.of("tutor", "instructor"));
 
-        gitlabRequestMockProvider.mockAddUserToGroupsUserExists(newUser, programmingExericse.getProjectKey());
+        gitlabRequestMockProvider.mockAddUserToGroupsUserExists(newUser, programmingExercise.getProjectKey());
         jenkinsRequestMockProvider.mockCreateUser(newUser, false, false, false);
         request.post("/api/users", new ManagedUserVM(newUser), HttpStatus.CREATED);
     }
@@ -331,5 +338,66 @@ public class UserJenkinsGitlabIntegrationTest extends AbstractSpringIntegrationJ
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void updateUserLogin() throws Exception {
         userTestService.updateUserLogin();
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void shouldFailIfCannotUpdateActivatedUserInGitlab() throws Exception {
+        String oldLogin = userTestService.student.getLogin();
+        User user = userTestService.student;
+        user.setLogin("new-login");
+
+        jenkinsRequestMockProvider.mockUpdateUserAndGroups(oldLogin, user, user.getGroups(), Set.of(), true);
+        gitlabRequestMockProvider.mockUpdateVcsUserFailToActivate(oldLogin, user);
+        request.put("/api/users", new ManagedUserVM(user, "some-new-password"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void shouldFailIfCannotUpdateDeactivatedUserInGitlab() throws Exception {
+        // create unactivated user in repo
+        User user = ModelFactory.generateActivatedUser("ab123cd");
+        user.setActivated(false);
+        user.setActivationKey("testActivationKey");
+
+        // Register the user
+        ManagedUserVM userVM = new ManagedUserVM(user);
+        userVM.setPassword("password");
+        gitlabRequestMockProvider.mockCreateVcsUser(user, false);
+        gitlabRequestMockProvider.mockDeactivateUser(user.getLogin(), false);
+        request.postWithoutLocation("/api/register", userVM, HttpStatus.CREATED, null);
+
+        Optional<User> registeredUser = userTestService.getUserRepository().findOneWithGroupsAndAuthoritiesByLogin(user.getLogin());
+        assertThat(registeredUser).isPresent();
+
+        // Update user and assert
+        String oldLogin = user.getLogin();
+        user = registeredUser.get();
+        user.setLogin("some-new-login");
+
+        jenkinsRequestMockProvider.mockUpdateUserAndGroups(oldLogin, user, user.getGroups(), Set.of(), true);
+        gitlabRequestMockProvider.mockUpdateVcsUserFailToActivate(oldLogin, user);
+        request.put("/api/users", new ManagedUserVM(user, "some-new-password"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void shouldBlockUserInGitlabIfAccountNotActivated() throws Exception {
+        var oldLogin = userTestService.student.getLogin();
+        User user = userTestService.student;
+        user.setLogin("new-login");
+        user.setActivated(false);
+
+        jenkinsRequestMockProvider.mockUpdateUserAndGroups(oldLogin, user, user.getGroups(), Set.of(), true);
+        gitlabRequestMockProvider.mockUpdateVcsUser(oldLogin, user, Set.of(), user.getGroups(), true);
+
+        request.put("/api/users", new ManagedUserVM(user, user.getPassword()), HttpStatus.OK);
+
+        UserRepository userRepository = userTestService.getUserRepository();
+        final var userInDB = userRepository.findById(user.getId());
+        assertThat(userInDB).isPresent();
+        assertThat(userInDB.get().getLogin()).isEqualTo(user.getLogin());
+
+        verify(gitlabRequestMockProvider.getMockedUserApi()).blockUser(anyInt());
     }
 }

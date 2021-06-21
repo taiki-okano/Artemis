@@ -364,6 +364,7 @@ public class GitlabRequestMockProvider {
     public void mockUpdateVcsUser(String login, de.tum.in.www1.artemis.domain.User user, Set<String> removedGroups, Set<String> addedGroups, boolean shouldSynchronizePassword)
             throws GitLabApiException {
         mockUpdateBasicUserInformation(login, user, shouldSynchronizePassword);
+        mockUpdateUserActivationState(user, false);
 
         // Add as member to new groups
         if (addedGroups != null && !addedGroups.isEmpty()) {
@@ -393,6 +394,11 @@ public class GitlabRequestMockProvider {
                 }
             }
         }
+    }
+
+    public void mockUpdateVcsUserFailToActivate(String login, de.tum.in.www1.artemis.domain.User user) throws GitLabApiException {
+        mockUpdateBasicUserInformation(login, user, true);
+        mockUpdateUserActivationState(user, true);
     }
 
     public void mockUpdateBasicUserInformation(String login, de.tum.in.www1.artemis.domain.User user, boolean shouldUpdatePassword) throws GitLabApiException {
@@ -516,10 +522,6 @@ public class GitlabRequestMockProvider {
 
         mockUpdateOldGroupMembers(programmingExercises, oldUsers, updatedCourse);
         mockSetPermissionsForNewGroupMembers(programmingExercises, newUsers, updatedCourse);
-    }
-
-    public void mockFailToSetPermiisionsForNetGroupMembers() {
-
     }
 
     private void mockUpdateOldGroupMembers(List<ProgrammingExercise> programmingExercises, Set<de.tum.in.www1.artemis.domain.User> oldUsers, Course updatedCourse)
@@ -653,6 +655,48 @@ public class GitlabRequestMockProvider {
             final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
             doReturn(new Member()).when(projectApi).updateMember(repositoryPath, 1, GUEST);
         }
+    }
+
+    public void mockDeactivateUser(String userLogin, boolean shouldFail) throws GitLabApiException {
+        mockGetUserId(userLogin, true, false);
+        mockBlockUser(shouldFail);
+    }
+
+    public void mockActivateUser(String userLogin, boolean shouldFail) throws GitLabApiException {
+        mockGetUserId(userLogin, true, false);
+        mockUnblockUser(shouldFail);
+    }
+
+    public UserApi mockUpdateUserActivationState(de.tum.in.www1.artemis.domain.User user, boolean shouldFail) throws GitLabApiException {
+        if (user.getActivated()) {
+            mockUnblockUser(shouldFail);
+        }
+        else {
+            mockBlockUser(shouldFail);
+        }
+        return userApi;
+    }
+
+    public void mockBlockUser(boolean shouldFail) throws GitLabApiException {
+        if (shouldFail) {
+            doThrow(new GitLabApiException("Internal Error", 500)).when(userApi).blockUser(anyInt());
+        }
+        else {
+            doNothing().when(userApi).blockUser(anyInt());
+        }
+    }
+
+    public void mockUnblockUser(boolean shouldFail) throws GitLabApiException {
+        if (shouldFail) {
+            doThrow(new GitLabApiException("Internal Error", 500)).when(userApi).unblockUser(anyInt());
+        }
+        else {
+            doNothing().when(userApi).blockUser(anyInt());
+        }
+    }
+
+    public UserApi getMockedUserApi() {
+        return userApi;
     }
 
     public void mockCreateGitlabGroupForExercise(ProgrammingExercise exercise, boolean groupExists, boolean shouldFail) throws GitLabApiException {

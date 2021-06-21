@@ -56,12 +56,23 @@ export class ExerciseService {
     validateDate(exercise: Exercise) {
         exercise.dueDateError = exercise.releaseDate && exercise.dueDate ? !exercise.dueDate.isAfter(exercise.releaseDate) : false;
 
-        exercise.assessmentDueDateError =
-            exercise.assessmentDueDate && exercise.releaseDate
-                ? !exercise.assessmentDueDate.isAfter(exercise.releaseDate)
-                : exercise.assessmentDueDate && exercise.dueDate
-                ? !exercise.assessmentDueDate.isAfter(exercise.dueDate)
-                : false;
+        if (exercise.releaseDate && exercise.assessmentDueDate) {
+            if (exercise.dueDate) {
+                exercise.assessmentDueDateError = exercise.assessmentDueDate.isBefore(exercise.dueDate) || exercise.assessmentDueDate.isBefore(exercise.releaseDate);
+                return;
+            } else {
+                exercise.assessmentDueDateError = true;
+                return;
+            }
+        }
+
+        if (exercise.assessmentDueDate) {
+            if (exercise.dueDate) {
+                exercise.assessmentDueDateError = !exercise.assessmentDueDate.isAfter(exercise.dueDate);
+            } else {
+                exercise.assessmentDueDateError = true;
+            }
+        }
     }
 
     /**
@@ -120,8 +131,8 @@ export class ExerciseService {
                         if (res.body.exerciseHints === undefined) {
                             res.body.exerciseHints = [];
                         }
-                        if (res.body.studentQuestions === undefined) {
-                            res.body.studentQuestions = [];
+                        if (res.body.posts === undefined) {
+                            res.body.posts = [];
                         }
                     }
                     return res;
@@ -131,12 +142,10 @@ export class ExerciseService {
     }
 
     getUpcomingExercises(): Observable<EntityArrayResponseType> {
-        return this.http
-            .get<Exercise[]>(`${this.resourceUrl}/upcoming`, { observe: 'response' })
-            .pipe(
-                map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)),
-                map((res: EntityArrayResponseType) => this.convertExerciseCategoryArrayFromServer(res)),
-            );
+        return this.http.get<Exercise[]>(`${this.resourceUrl}/upcoming`, { observe: 'response' }).pipe(
+            map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)),
+            map((res: EntityArrayResponseType) => this.convertExerciseCategoryArrayFromServer(res)),
+        );
     }
 
     /**
@@ -354,12 +363,10 @@ export class ExerciseService {
      * @param { number } exerciseId - Id of exercise to retreive
      */
     getForTutors(exerciseId: number): Observable<HttpResponse<Exercise>> {
-        return this.http
-            .get<Exercise>(`${this.resourceUrl}/${exerciseId}/for-assessment-dashboard`, { observe: 'response' })
-            .pipe(
-                map((res: EntityResponseType) => this.convertDateFromServer(res)),
-                map((res: EntityResponseType) => this.convertExerciseCategoriesFromServer(res)),
-            );
+        return this.http.get<Exercise>(`${this.resourceUrl}/${exerciseId}/for-assessment-dashboard`, { observe: 'response' }).pipe(
+            map((res: EntityResponseType) => this.convertDateFromServer(res)),
+            map((res: EntityResponseType) => this.convertExerciseCategoriesFromServer(res)),
+        );
     }
 
     /**
