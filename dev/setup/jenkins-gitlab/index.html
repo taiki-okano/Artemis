@@ -271,33 +271,44 @@ Server and Gitlab as <strong>Version Control</strong> Server, you have to config
 the file <code class="docutils literal notranslate"><span class="pre">application-prod.yml</span></code> (Production Server) or
 <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code> (Local Development) accordingly. Please note
 that all values in <code class="docutils literal notranslate"><span class="pre">&lt;..&gt;</span></code> have to be configured properly. These values
-will be explained below in the corresponding sections.</p>
+will be explained below in the corresponding sections. If you want to set up a local environment, copy the values
+below into your <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> file (the latter is recommended), and follow the <a class="reference external" href="#gitlab-server-quickstart">Gitlab Server Quickstart</a> guide.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">artemis</span><span class="p">:</span>
-    <span class="nt">repo-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos/</span>
-    <span class="nt">repo-download-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos-download/</span>
-    <span class="nt">encryption-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis-encrypt</span>     <span class="c1"># arbitrary password for encrypting database values</span>
-    <span class="nt">user-management</span><span class="p">:</span>
-        <span class="nt">use-external</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
-        <span class="nt">internal-admin</span><span class="p">:</span>
-             <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
-             <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
-    <span class="nt">version-control</span><span class="p">:</span>
-        <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;https://gitlab-url&gt;</span>
-        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;gitlab-admin-user&gt;</span>
-        <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;gitlab-admin-password&gt;</span>
-        <span class="nt">token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;token&gt;</span>
-        <span class="nt">ci-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;ci-token&gt;</span>
-        <span class="nt">ssh-private-key-folder-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;ssh-private-key-folder-path&gt;</span>
-        <span class="nt">ssh-private-key-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;ssh-private-key-password&gt;</span>
-    <span class="nt">continuous-integration</span><span class="p">:</span>
-        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;jenkins-admin-user&gt;</span>
-        <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;jenkins-admin-password&gt;</span>
-        <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;https://jenkins-url&gt;</span>
-        <span class="nt">empty-commit-necessary</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
-        <span class="nt">secret-push-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;secret push token&gt;</span>
-        <span class="nt">vcs-credentials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;vcs-credentials&gt;</span>
-        <span class="nt">artemis-authentication-token-key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;artemis-authentication-token-key&gt;</span>
-        <span class="nt">artemis-authentication-token-value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;artemis-authentication-token-value&gt;</span>
+ <span class="nt">course-archives-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./exports/courses</span>
+ <span class="nt">repo-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos</span>
+ <span class="nt">repo-download-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos-download</span>
+ <span class="nt">encryption-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
+ <span class="nt">user-management</span><span class="p">:</span>
+     <span class="nt">use-external</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+     <span class="nt">internal-admin</span><span class="p">:</span>
+         <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
+         <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
+     <span class="nt">accept-terms</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+     <span class="nt">login</span><span class="p">:</span>
+         <span class="nt">account-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">TUM</span>
+ <span class="nt">version-control</span><span class="p">:</span>
+     <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost:8081</span>
+     <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+     <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.gitlab.admin.password&gt;</span> <span class="c1"># created in Gitlab Server Quickstart step 2</span>
+     <span class="nt">token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.gitlab.token&gt;</span> <span class="c1"># generated in Gitlab Server Quickstart steps 4 and 5</span>
+     <span class="nt">ci-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.ci.token&gt;</span> <span class="c1"># generated in Jenkins Server Quickstart step 8</span>
+ <span class="nt">continuous-integration</span><span class="p">:</span>
+     <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
+     <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
+     <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost:8082</span>
+     <span class="nt">empty-commit-necessary</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+     <span class="nt">secret-push-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.secret.push.token&gt;</span> <span class="c1"># generated in Jenkins Server Quickstart step 8</span>
+     <span class="nt">vcs-credentials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_gitlab_admin_credentials</span>
+     <span class="nt">artemis-authentication-token-key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_notification_plugin_token</span>
+     <span class="nt">artemis-authentication-token-value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
+     <span class="nt">build-timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30</span>
+ <span class="nt">git</span><span class="p">:</span>
+     <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Artemis</span>
+     <span class="nt">email</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis.in@tum.de</span>
+ <span class="nt">jenkins</span><span class="p">:</span>
+     <span class="nt">internal-urls</span><span class="p">:</span>
+         <span class="nt">ci-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://jenkins:8080</span>
+         <span class="nt">vcs-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://gitlab:80</span>
 </pre></div>
 </div>
 <p>In addition, you have to start Artemis with the profiles <code class="docutils literal notranslate"><span class="pre">gitlab</span></code> and
@@ -386,7 +397,7 @@ Copy this token into the <code class="docutils literal notranslate"><span class=
 </div>
 </li>
 <li><dl class="simple">
-<dt>You’re done! Follow the <a class="reference external" href="#automated-jenkins-server-setup">Automated Jenkins Server Setup</a> section for configuring Jenkins.</dt><dd><p>There you can skip steps 4 and 5.</p>
+<dt>You’re done! Follow the <a class="reference external" href="#automated-jenkins-server-setup">Automated Jenkins Server Setup</a> section for configuring Jenkins.</dt><dd><p>There you can skip steps 4, 5, and 10.</p>
 </dd>
 </dl>
 </li>
