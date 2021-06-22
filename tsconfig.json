@@ -26,10 +26,10 @@
         "importHelpers": true
     },
     "angularCompilerOptions": {
-        "fullTemplateTypeCheck": true,
-        "strictInjectionParameters": true,
-        "strictInputAccessModifiers": true,
-        "strictTemplates": true,
+        "fullTemplateTypeCheck": false,
+        "strictInjectionParameters": false,
+        "strictInputAccessModifiers": false,
+        "strictTemplates": false,
         "preserveWhitespaces": true
     }
 }

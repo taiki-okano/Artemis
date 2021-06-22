@@ -4,8 +4,8 @@
     <option name="SPRING_BOOT_MAIN_CLASS" value="de.tum.in.www1.artemis.ArtemisApp" />
     <option name="ACTIVE_PROFILES" value="dev,bamboo,bitbucket,jira,artemis,scheduling,local" />
     <option name="VM_PARAMETERS" value="--illegal-access=warn" />
-    <option name="ALTERNATIVE_JRE_PATH" />
-    <option name="SHORTEN_COMMAND_LINE" value="NONE" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="SHORTEN_COMMAND_LINE" value="MANIFEST" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

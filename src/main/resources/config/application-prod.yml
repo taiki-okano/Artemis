@@ -18,6 +18,7 @@ management:
         export:
             prometheus:
                 enabled: false
+                step: 60
 
 spring:
     devtools:
