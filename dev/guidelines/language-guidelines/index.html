@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Inclusive, Diversity-Sensitive, and Appreciative Language &mdash; Artemis  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="System Design" href="../../system-design/" />
+    <link rel="prev" title="Code Review" href="../code-review/" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../" class="icon icon-home" alt="Documentation Home"> Artemis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/exercises/">Exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/exam_mode/">Exam Mode</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributor Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../setup/">Setup Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Coding and design guidelines</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../server/">Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../client/">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../database/">Database Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code-review/">Code Review</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Inclusive, Diversity-Sensitive, and Appreciative Language</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#motivation">Motivation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#english-language">English language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#german-language">German language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sources-and-further-material">Sources and further material</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../system-design/">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use-local-user-management/">Using local user management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../saml2-shibboleth/">Shibboleth/SAML2 Login &amp; Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guided-tour/">Guided Tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testservers/">Test Servers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/">Builds and Dependency Management</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administration Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/registration/">User Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/accessRights/">Access Rights</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../">Artemis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../">Coding and design guidelines</a> &raquo;</li>
+        
+      <li>Inclusive, Diversity-Sensitive, and Appreciative Language</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/ls1intum/Artemis/blob/develop/docs/dev/guidelines/language-guidelines.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="inclusive-diversity-sensitive-and-appreciative-language">
+<h1>Inclusive, Diversity-Sensitive, and Appreciative Language<a class="headerlink" href="#inclusive-diversity-sensitive-and-appreciative-language" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
+<p>Inclusive, diversity-sensitive language is important because language influences our thoughts and assessments of reality
+and actively contributes to equality.
+It is our responsibility to design software that is aware of diverse users, contributors, and developers.
+We therefore provide guidelines for inclusive, diversity-sensitive, and appreciative language used for code, documentation, and user interaction.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page is not meant to be an exhaustive reference.
+It rather describes some general guidelines and illustrates some best practices to follow.</p>
+</div>
+</div>
+<div class="section" id="english-language">
+<h2>English language<a class="headerlink" href="#english-language" title="Permalink to this headline">¶</a></h2>
+<p>The English language is used for code, documentation, user interaction.</p>
+<p><strong>Best practices</strong></p>
+<ul class="simple">
+<li><p><strong>Avoid using terms that have social history</strong>:  Terms that can have historical significance or impact in regards to race, ethnicity, national origin, gender, age, mental and physical ability, sexual orientation, socioeconomic status, religion, and educational background.</p></li>
+<li><p><strong>Avoid using idioms and jargons</strong>:  These can exclude people who don’t have particular specialized knowledge, and many idioms don’t translate from country to country.  Additionally, these sometimes have origins in negative stereotypes.</p></li>
+<li><p><strong>Write inclusive examples</strong>:  Try to avoid using examples in the documentation that are culturally specific to a particular country, and be sure to use diverse names.</p></li>
+</ul>
+<p><strong>Examples</strong> - Common terms and recommendations for replacements:</p>
+<p><strong>Socially-charged language</strong>: Language that has historical or social roots, often assuming one classification as dominant over another.</p>
+<ul class="simple">
+<li><p>Master, slave → primary/main, secondary/replica</p></li>
+<li><p>Owner, master → lead, manager, expert</p></li>
+<li><p>Blacklist → deny list, exclusion list, block list, banned list</p></li>
+<li><p>Whitelist → allow list, inclusion list, safe list</p></li>
+<li><p>Native feature → core feature, built-in feature</p></li>
+<li><p>Culture fit → values fit</p></li>
+</ul>
+<p><strong>Gendered language</strong>: Language that either assumes the gender of the users and developers, or that makes assumptions of gender.</p>
+<ul class="simple">
+<li><p>Man hours → labor hours, work hours</p></li>
+<li><p>Manpower → labor, workforce</p></li>
+<li><p>Guys (referring to a group) → folks, people, engineers/artists</p></li>
+<li><p>Middleman → middle person, mediator, liaison</p></li>
+<li><p>Gendered pronouns (he/him/his, she/her/hers) → they, them, theirs</p></li>
+</ul>
+</div>
+<div class="section" id="german-language">
+<h2>German language<a class="headerlink" href="#german-language" title="Permalink to this headline">¶</a></h2>
+<p>The German language is mainly used for user interaction.</p>
+<p><strong>Best practices</strong> (written in German for demonstration purposes)</p>
+<ul class="simple">
+<li><p><strong>Nutze neutrale Formulierungen</strong>: Wenn möglich ist es empfehlenswert, neutrale Formulierungen zu finden. Neben passiven Formen, wie z.B. Studierende, können auch aktive mit „Mensch“ bzw. „Person“ etc. verwendet werden. Das spart „der/die“ und inkludiert alle Menschen unabhängig davon, welche Eigenschaften/Kategorien diese Personen sonst noch mitbringen.</p></li>
+<li><p><strong>Beschreibe Handlungen (aktiv oder passiv)</strong>:</p>
+<ul>
+<li><p>„Automatisch generierte Ergebnisse werden am Ende des Bearbeitungszeitraums erstellt“. Statt „Die Studenten/Studentinnen erhalten am Ende des Bearbeitungszeitraums ein automisch generiertes Ergebnis.“)</p></li>
+<li><p>„Die Anmeldung für die Klausur ist bis zum 15.12.2020 möglich”. Statt „Jeder muss sich bis zum 15.12.2020 für die Klausur anmelden.“</p></li>
+</ul>
+</li>
+<li><p><strong>Sprich Personen direkt an</strong>:</p>
+<ul>
+<li><p>„Bitte melde dich bis zum 15.12.20 für die Lehrveranstaltung an“. Statt „Jeder muss sich bis zum 15.12.2020 für die Lehrveranstaltung anmelden.“</p></li>
+</ul>
+</li>
+<li><p><strong>Rücke die Organisation in den Vordergrund</strong>:</p>
+<ul>
+<li><p>„das Lehrstuhlpersonal“, „Beschäftigte des Lehrstuhls“, statt „die Lehrstuhlmitarbeiter/ die Lehrstuhlmitarbeiterinnen“</p></li>
+<li><p>„das Organisationsteam“, statt „die Organisatoren, die Organisatorinnen“</p></li>
+</ul>
+</li>
+<li><p><strong>Verwende die neutrale Pluralform</strong>:</p>
+<ul>
+<li><p>„die Studierenden“, statt „die Studenten/ die Studentinnen“</p></li>
+<li><p>„die Lehrenden“, statt „die Dozenten/ die Dozentinnen“</p></li>
+</ul>
+</li>
+<li><p><strong>Verwende die neutralen Pronomina</strong>:</p>
+<ul>
+<li><p>„niemand“, statt „keiner“</p></li>
+<li><p>„alle die“, statt “jeder”</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Examples</strong> - Terms replaced in the Artemis user interface</p>
+<ul class="simple">
+<li><p>Student / Studenten → Studierende (Plural), Studierende:r (Singular)</p></li>
+<li><p>Dozent, Instruktor → Lehrende (Plural), Lehrkraft (Singular)</p></li>
+<li><p>Studentenabgaben → Abgaben von Studierenden</p></li>
+<li><p>Benutzerkonto → Konto</p></li>
+<li><p>Benutzer → Benutzer:in / Konto</p></li>
+<li><p>Benutzername → Login</p></li>
+<li><p>Tutor / Tutoren → Tutor:innen (Plural), Tutor:in (Singular)</p></li>
+<li><p>Prüfer → Bewertet von</p></li>
+<li><p>Editoren → Editor:innen</p></li>
+</ul>
+</div>
+<div class="section" id="sources-and-further-material">
+<h2>Sources and further material<a class="headerlink" href="#sources-and-further-material" title="Permalink to this headline">¶</a></h2>
+<p>The following sources were used when creating these guidelines.
+They provide detailed information on this topic and therefore can and should serve as further orientation.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.aswf.io/blog/inclusive-language/">Inclusive Language in Technology, Academy Software Foundation</a></p></li>
+<li><p><a class="reference external" href="https://developers.google.com/style/inclusive-documentation/">Google Developer Documentation Style Guide</a></p></li>
+<li><p><a class="reference external" href="https://www.duden.de/sprachwissen/sprachratgeber/Geschlechtergerechter-Sprachgebrauch/">Geschlechtergerechter Sprachgebrauch, Duden</a></p></li>
+<li><p><a class="reference external" href="https://www.chancengleichheit.tum.de/links-downloads/gendergerechte-sprache-und-bildliche-darstellung/">Gendergerechte Sprache und bildliche Darstellung, Stabsstelle Chancengleichheit, Technische Universität München</a></p></li>
+<li><p><a class="reference external" href="https://www.mw.tum.de/fuer-mw-personal/chancengleichheit-und-vielfalt/sprachleitfaden/">Ein Leitfaden für inklusive, vielfaltssensible und wertschätzende Sprache, Fakultät für Maschinenwesen, Technische Universität München</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../system-design/" class="btn btn-neutral float-right" title="System Design" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../code-review/" class="btn btn-neutral float-left" title="Code Review" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
