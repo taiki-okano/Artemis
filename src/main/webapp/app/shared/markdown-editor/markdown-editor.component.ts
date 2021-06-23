@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ContentChild, ElementRef, EventEmitter, Input, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
-import { AceEditorComponent } from 'ng2-ace-editor';
+import { AceEditorComponent } from 'ngx-ace-editor-wrapper';
 import 'brace/theme/chrome';
 import 'brace/mode/markdown';
 import 'brace/mode/latex';

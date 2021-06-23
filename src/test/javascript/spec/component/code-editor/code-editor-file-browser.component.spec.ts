@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { DebugElement } from '@angular/core';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { AceEditorModule } from 'ng2-ace-editor';
+import { AceEditorModule } from 'ngx-ace-editor-wrapper';
 import { TreeviewItem, TreeviewModule } from 'ngx-treeview';
 import { SinonStub, spy, stub } from 'sinon';
 import { of, Subject } from 'rxjs';

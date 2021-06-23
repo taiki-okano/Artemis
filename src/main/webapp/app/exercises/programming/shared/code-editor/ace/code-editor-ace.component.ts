@@ -14,7 +14,7 @@ import 'brace/mode/kotlin';
 import 'brace/mode/assembly_x86';
 import 'brace/mode/vhdl';
 import 'brace/theme/dreamweaver';
-import { AceEditorComponent } from 'ng2-ace-editor';
+import { AceEditorComponent } from 'ngx-ace-editor-wrapper';
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ViewEncapsulation } from '@angular/core';
 import { fromEvent, of, Subscription } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
