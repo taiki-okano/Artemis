@@ -61,7 +61,8 @@
                     "assessors": "Reviewers",
                     "action": "Assessment Actions",
                     "assessmentFirst": "Correction Round 1",
-                    "assessmentSecond": "Correction Round 2"
+                    "assessmentSecond": "Correction Round 2",
+                    "complaintAssessment": "Complaints"
                 },
                 "minutes": "minutes",
                 "actions": {

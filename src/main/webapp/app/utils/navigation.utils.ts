@@ -62,7 +62,7 @@ export const getLinkToSubmissionAssessment = (
     exerciseId: number,
     submissionId: number | 'new',
     examId: number,
-    exerciseGroupId: number,
+    exerciseGroupId?: number,
     resultId?: number,
 ): string[] => {
     if (examId > 0) {
@@ -72,7 +72,7 @@ export const getLinkToSubmissionAssessment = (
             'exams',
             examId.toString(),
             'exercise-groups',
-            exerciseGroupId.toString(),
+            exerciseGroupId!.toString(),
             exerciseType + '-exercises',
             exerciseId.toString(),
             'submissions',

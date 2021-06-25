@@ -33,6 +33,9 @@ export abstract class Submission implements BaseEntity {
     // results is initialized by the value the server returns
     public results?: Result[];
 
+    // true if the submission contains a result which has a complaint
+    public hasComplaint?: boolean;
+
     public participation?: Participation;
 
     // Helper Attributes

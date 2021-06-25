@@ -20,6 +20,8 @@ import { ArtemisResultModule } from 'app/exercises/shared/result/result.module';
 import { ArtemisComplaintsForTutorModule } from 'app/complaints/complaints-for-tutor/complaints-for-tutor.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisGradingInstructionLinkIconModule } from 'app/shared/grading-instruction-link-icon/grading-instruction-link-icon.module';
+import {SubmissionDashboardTableComponent} from "app/exercises/shared/assess/submission-dashboard-table.component";
+import {SubmissionDashboardTableModule} from "app/exercises/shared/assess/submission-dashboard-table.module";
 
 const ENTITY_STATES = [...textSubmissionAssessmentRoutes];
 
@@ -36,6 +38,7 @@ const ENTITY_STATES = [...textSubmissionAssessmentRoutes];
         ArtemisConfirmIconModule,
         TextSharedModule,
         ArtemisGradingInstructionLinkIconModule,
+        SubmissionDashboardTableModule,
     ],
     declarations: [
         TextSubmissionAssessmentComponent,

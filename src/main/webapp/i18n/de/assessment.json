@@ -61,7 +61,8 @@
                     "assessors": "Bewertet von",
                     "action": "Bewertungsaktionen",
                     "assessmentFirst": "Korrekturrunde 1",
-                    "assessmentSecond": "Korrekturrunde 2"
+                    "assessmentSecond": "Korrekturrunde 2",
+                    "complaintAssessment": "Beschwerden"
                 },
                 "minutes": "Minuten",
                 "actions": {

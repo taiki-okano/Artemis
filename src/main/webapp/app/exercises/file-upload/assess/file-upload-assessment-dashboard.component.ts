@@ -82,7 +82,7 @@ export class FileUploadAssessmentDashboardComponent implements OnInit {
      * @return Resolved Promise if Submission list contains at least one submission. Rejected Promise if Submission list is empty.
      * @throws Error if exercise id is of other type.
      */
-    private getSubmissions(): Promise<void> {
+    getSubmissions(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.fileUploadSubmissionService
                 .getFileUploadSubmissionsForExerciseByCorrectionRound(this.exercise.id!, { submittedOnly: true })
