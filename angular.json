@@ -48,6 +48,7 @@
   },
   "defaultProject": "artemis",
   "cli": {
+    "analytics": false,
     "packageManager": "yarn"
   },
   "schematics": {

@@ -8,7 +8,7 @@ import { ArtemisResultModule } from 'app/exercises/shared/result/result.module';
 import { ModelingAssessmentModule } from 'app/exercises/modeling/assess/modeling-assessment.module';
 import { AssessmentInstructionsModule } from 'app/assessment/assessment-instructions/assessment-instructions.module';
 import { ArtemisMarkdownModule } from 'app/shared/markdown.module';
-import {SubmissionDashboardTableModule} from "app/exercises/shared/assess/submission-dashboard-table.module";
+import {ArtemisSharedComponentModule} from "app/shared/components/shared-component.module";
 
 @NgModule({
     imports: [
@@ -19,7 +19,7 @@ import {SubmissionDashboardTableModule} from "app/exercises/shared/assess/submis
         ModelingAssessmentModule,
         AssessmentInstructionsModule,
         ArtemisMarkdownModule,
-        SubmissionDashboardTableModule,
+        ArtemisSharedComponentModule,
     ],
     declarations: [FileUploadAssessmentComponent, FileUploadAssessmentDashboardComponent],
 })

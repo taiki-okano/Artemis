@@ -31,7 +31,7 @@ import { ExerciseStatisticsComponent } from 'app/exercises/shared/statistics/exe
 import { DoughnutChartComponent } from 'app/exercises/shared/statistics/doughnut-chart.component';
 import { RouterModule } from '@angular/router';
 import { ExerciseDetailStatisticsComponent } from 'app/exercises/shared/statistics/exercise-detail-statistics.component';
-import {SubmissionDashboardTableComponent} from "app/exercises/shared/assess/submission-dashboard-table.component";
+import {ArtemisResultModule} from "app/exercises/shared/result/result.module";
 
 @NgModule({
     imports: [ArtemisSharedLibsModule, ArtemisSharedCommonModule, ArtemisSharedPipesModule, RouterModule],
