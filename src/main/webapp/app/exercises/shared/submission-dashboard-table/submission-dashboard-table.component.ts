@@ -10,10 +10,7 @@ import { ProgrammingAssessmentManualResultService } from 'app/exercises/programm
 import { ModelingAssessmentService } from 'app/exercises/modeling/assess/modeling-assessment.service';
 import { TextAssessmentService } from 'app/exercises/text/assess/text-assessment.service';
 import { SortService } from 'app/shared/service/sort.service';
-import {FileUploadSubmission} from "app/entities/file-upload-submission.model";
-import {TextSubmission} from "app/entities/text-submission.model";
-import {ModelingSubmission} from "app/entities/modeling-submission.model";
-import {ProgrammingSubmission} from "app/entities/programming-submission.model";
+import {ResultComponent} from "app/exercises/shared/result/result.component";
 
 @Component({
     selector: 'jhi-submission-dashboard-table',
@@ -36,7 +33,6 @@ export class SubmissionDashboardTableComponent implements OnInit {
     predicate = 'id';
     reverse = false;
     examMode: boolean;
-
     baseAssessmentRoute: string;
     baseSubmissionsRoute: string;
     @Output() onCancelConfirm = new EventEmitter();

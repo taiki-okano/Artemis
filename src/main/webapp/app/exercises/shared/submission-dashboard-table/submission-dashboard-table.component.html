@@ -83,13 +83,13 @@
                     <!-- TODO: make consistent, the exam mode appends /submissions, the course mode does not -->
                     <a
                         *ngIf="exercise.isAtLeastInstructor && !examId"
-                        [routerLink]="baseSubmissionsRoute + submission.participation!.id + '/submissions'"
+                        routerlink="baseSubmissionsRoute + submission.participation!.id + '/submissions'"
                     >
                         {{ submission.participation!.submissions!.length }}
                     </a>
                     <a
                         *ngIf="exercise.isAtLeastInstructor && !!examId"
-                        [routerLink]="baseSubmissionsRoute + submission.participation!.id!"
+                        routerlink="baseSubmissionsRoute + submission.participation!.id!"
                     >
                         {{ submission.participation!.submissions!.length }}
                     </a>
@@ -129,7 +129,7 @@
                     <!-- exercise of a course -->
                     <span *ngIf="exercise.course && submission">
                         <a *ngIf="!submission.latestResult" [class.disabled]="busy"
-                           [routerLink]="baseAssessmentRoute + submission.id + '/assessment'"
+                           routerlink="baseAssessmentRoute + submission.id + '/assessment'"
                            class="btn btn-success btn-sm mb-1">
                             <fa-icon [fixedWidth]="true"
                                      [icon]="'folder-open'"></fa-icon>&nbsp;
@@ -137,7 +137,7 @@
                         </a>
 
                         <a *ngIf="submission.latestResult" [class.disabled]="busy"
-                           [routerLink]="baseAssessmentRoute + submission.id + '/assessment'"
+                           routerLink="baseAssessmentRoute + submission.id + '/assessment'"
                            class="btn btn-primary btn-sm mb-1">
                             <fa-icon [fixedWidth]="true"
                                      [icon]="'folder-open'"></fa-icon>&nbsp;
@@ -152,8 +152,8 @@
                             <a
                                 *ngIf="submission.results[correctionRound].completionDate"
                                 [class.disabled]="busy"
-                                [queryParams]="{ 'correction-round': correctionRound }"
-                                [routerLink]="baseAssessmentRoute + submission.id + '/assessment'"
+                                queryParams="{ 'correction-round': correctionRound }"
+                                routerlink="baseAssessmentRoute + submission.id + '/assessment'"
                                 class="btn btn-primary btn-sm mb-1"
                             >
                                 <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>&nbsp;
@@ -167,8 +167,8 @@
                                 <div class="btn-group-vertical me-1 mb-10">
                                     <a
                                         [class.disabled]="busy"
-                                        [queryParams]="{ 'correction-round': correctionRound }"
-                                        [routerLink]="baseAssessmentRoute + submission.id + '/assessment'"
+                                        queryParams="{ 'correction-round': correctionRound }"
+                                        routerlink="baseAssessmentRoute + submission.id + '/assessment'"
                                         class="btn btn-warning btn-sm mb-1"
                                     >
                                         <fa-icon [fixedWidth]="true" [icon]="'edit'"></fa-icon>&nbsp;
@@ -197,8 +197,8 @@
                                 (!submission.latestResult || submission.latestResult!.completionDate)
                             "
                             [class.disabled]="busy"
-                            [queryParams]="{ 'correction-round': submission.results ? submission.results.length : 0 }"
-                            [routerLink]="baseAssessmentRoute + submission.id + '/assessment'"
+                            queryParams="{ 'correction-round': submission.results ? submission.results.length : 0 }"
+                            routerlink="baseAssessmentRoute + submission.id + '/assessment'"
                             class="btn btn-success btn-sm mb-1"
                         >
                             <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>
@@ -213,8 +213,8 @@
                 <a
                     *ngIf="submission.results && submission.hasComplaint"
                     [class.disabled]="busy"
-                    [queryParams]="{ 'correction-round': submission.results.length }"
-                    [routerLink]="baseAssessmentRoute + submission.id + '/assessment'"
+                    queryParams="{ 'correction-round': submission.results.length }"
+                    routerlink="baseAssessmentRoute + submission.id + '/assessment'"
                     class="btn btn-primary btn-sm mb-1"
                 >
                 <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>&nbsp;
