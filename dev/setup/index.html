@@ -416,14 +416,14 @@ When you import the project into IntelliJ the run configurations will also be im
 <p>The recommended way is to run the server and the client separated. This provides fast rebuilds of the server and hot module replacement in the client.</p>
 <ul class="simple">
 <li><p><strong>Artemis (Server):</strong> The server will be started separated from the client. The startup time decreases significantly.</p></li>
-<li><p><strong>Artemis (Client):</strong> Will execute <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">start</span></code>. The client will be available at <a class="reference external" href="http://localhost:9000/">http://localhost:9000/</a> with hot module replacement enabled (also see <a class="reference external" href="setup.rst#client-setup">Client Setup</a>).</p></li>
+<li><p><strong>Artemis (Client):</strong> Will execute <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">start</span></code>. The client will be available at <a class="reference external" href="http://localhost:9000/">http://localhost:9000/</a> with hot module replacement enabled (also see <a class="reference external" href="#client-setup">Client Setup</a>).</p></li>
 </ul>
 <div class="section" id="other-run-debug-configurations">
 <h4>Other run / debug configurations<a class="headerlink" href="#other-run-debug-configurations" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p><strong>Artemis (Server &amp; Client):</strong> Will start the server and the client. The client will be available at <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a> with hot module replacement disabled.</p></li>
 <li><p><strong>Artemis (Server, Jenkins &amp; Gitlab):</strong> The server will be started separated from the client with the profiles <code class="docutils literal notranslate"><span class="pre">dev,jenkins,gitlab,artemis</span></code> instead of <code class="docutils literal notranslate"><span class="pre">dev,bamboo,bitbucket,jira,artemis</span></code>.</p></li>
-<li><p><strong>Artemis (Server, Athene):</strong> The server will be started separated from the client with <code class="docutils literal notranslate"><span class="pre">athene</span></code> profile enabled (see <a class="reference external" href="setup.rst#athene-service">Athene Service</a>).</p></li>
+<li><p><strong>Artemis (Server, Athene):</strong> The server will be started separated from the client with <code class="docutils literal notranslate"><span class="pre">athene</span></code> profile enabled (see <a class="reference external" href="#athene-service">Athene Service</a>).</p></li>
 </ul>
 </div>
 </div>
@@ -504,8 +504,7 @@ run configuration that will be delivered with this repository:</p>
 <h3>Using the command line<a class="headerlink" href="#using-the-command-line" title="Permalink to this headline">¶</a></h3>
 <p>You should be able to run the following
 command to install development tools and dependencies. You will only
-need to run this command when dependencies change in
-<a class="reference external" href="package.json">package.json</a>.</p>
+need to run this command when dependencies change in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yarn</span> <span class="n">install</span>
 </pre></div>
 </div>
