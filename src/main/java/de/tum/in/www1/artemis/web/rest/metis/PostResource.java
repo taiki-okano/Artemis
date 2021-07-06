@@ -5,6 +5,7 @@ import static de.tum.in.www1.artemis.web.rest.util.ResponseUtil.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -165,8 +166,10 @@ public class PostResource {
         Integer newVotes = post.getVotes() + voteChange;
         post.setVotes(newVotes);
         Post result = postRepository.save(post);
-        // Protect Sample Solution, Grading Instructions, etc.
-        result.getExercise().filterSensitiveInformation();
+        if (result.getExercise() != null) {
+            // Protect Sample Solution, Grading Instructions, etc.
+            result.getExercise().filterSensitiveInformation();
+        }
         return ResponseEntity.ok().body(result);
     }
 
@@ -212,7 +215,7 @@ public class PostResource {
             authorizationCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.STUDENT, lecture.getCourse(), user);
             List<Post> posts = postRepository.findPostsByLecture_Id(lectureId);
             // Protect Sample Solution, Grading Instructions, etc.
-            posts.forEach(post -> post.getExercise().filterSensitiveInformation());
+            posts.stream().map(Post::getExercise).filter(Objects::nonNull).forEach(Exercise::filterSensitiveInformation);
             return new ResponseEntity<>(posts, null, HttpStatus.OK);
         }
         else {
@@ -233,7 +236,7 @@ public class PostResource {
         authorizationCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.TEACHING_ASSISTANT, course, null);
         List<Post> posts = postRepository.findPostsForCourse(courseId);
         // Protect Sample Solution, Grading Instructions, etc.
-        posts.forEach(post -> post.getExercise().filterSensitiveInformation());
+        posts.stream().map(Post::getExercise).filter(Objects::nonNull).forEach(Exercise::filterSensitiveInformation);
         return new ResponseEntity<>(posts, null, HttpStatus.OK);
     }
 
@@ -267,8 +270,6 @@ public class PostResource {
         mayUpdateOrDeletePostElseThrow(post, user);
         log.info("Post deleted by " + user.getLogin() + ". Post: " + post.getContent() + " for " + entity);
         postRepository.deleteById(postId);
-        // Protect Sample Solution, Grading Instructions, etc.
-        post.getExercise().filterSensitiveInformation();
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, postId.toString())).build();
 
     }
