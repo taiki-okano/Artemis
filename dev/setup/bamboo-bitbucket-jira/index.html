@@ -204,14 +204,14 @@
 based on Bamboo, Bitbucket and Jira.</p>
 <div class="line-block">
 <div class="line">Please note that this setup will create a deployment that is very
-similiar to the one used in production but has one difference:</div>
+similar to the one used in production but has one difference:</div>
 <div class="line">In production, the builds are performed within Docker containers that
 are created by Bamboo (or its build agents). As we run Bamboo in a
 Docker container in this setup, creating new Docker containers within
 that container is not recommended (e.g. see <a class="reference external" href="https://itnext.io/docker-in-docker-521958d34efd">this
 article</a>). There
 are some solution where one can pass the Docker socket to the Bamboo
-container, but none of these approachs work quite well here as Bamboo
+container, but none of these approaches work quite well here as Bamboo
 uses mounted directories that cause issues.</div>
 </div>
 <p>Therefore, a check is included within the BambooBuildPlanService that
@@ -262,7 +262,7 @@ To use the Swift Dockerfile, change the following:</p>
 docker networks
 <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">Pool</span> <span class="pre">overlaps</span> <span class="pre">with</span> <span class="pre">other</span> <span class="pre">one</span> <span class="pre">on</span> <span class="pre">this</span> <span class="pre">address</span> <span class="pre">space</span></code>. Use the
 command <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">network</span> <span class="pre">prune</span></code> to resolve this issue.</p>
-<p>Make also sure that docker has enough memory (~ 6GB). To adapt it, go to <code class="docutils literal notranslate"><span class="pre">Preferecences</span> <span class="pre">-&gt;</span> <span class="pre">Resources</span></code></p>
+<p>Also make sure that docker has enough memory (~ 6GB). To adapt it, go to <code class="docutils literal notranslate"><span class="pre">Preferences</span> <span class="pre">-&gt;</span> <span class="pre">Resources</span></code></p>
 </div>
 <div class="section" id="configure-bamboo-bitbucket-and-jira">
 <h2><a class="toc-backref" href="#id8">Configure Bamboo, Bitbucket and Jira</a><a class="headerlink" href="#configure-bamboo-bitbucket-and-jira" title="Permalink to this headline">¶</a></h2>
@@ -298,8 +298,8 @@ Follow the additional steps for Jira and Bitbucket.</p>
 <li><p>Execute the shell script <code class="docutils literal notranslate"><span class="pre">atlassian-setup.sh</span></code> in the
 <code class="docutils literal notranslate"><span class="pre">src/main/docker</span></code> directory (e.g. with
 <code class="docutils literal notranslate"><span class="pre">src/main/docker/./atlassian-setup.sh</span></code>). This script creates
-groups, users ([STRIKEOUT:and adds them to the created groups] NOT
-YET) and disabled application links between the 3 applications. Make sure that <a class="reference external" href="https://www.howtoinstall.me/ubuntu/18-04/xdg-utils/">xdg-utils</a> is installed before running the script.</p></li>
+groups, users and disabled application links between the 3 applications.
+Make sure that <a class="reference external" href="https://www.howtoinstall.me/ubuntu/18-04/xdg-utils/">xdg-utils</a> is installed before running the script.</p></li>
 <li><p>Enable the created <a class="reference external" href="https://confluence.atlassian.com/doc/linking-to-another-application-360677690.html">application
 links</a>
 between all 3 application (OAuth Impersonate). The links should open automatically after the shell script
@@ -351,7 +351,7 @@ manually assign the users into their respective group in Jira. In our
 test setup, users 1-5 are students, 6-10 are tutors, 11-15 are
 editors and 16-20 are instructors. The usernames are artemis_test_user_{1-20}
 and the password is again the username. When you create a course in artemis
-you have to manually choose the created groups (students, tutors, editors
+you have to manually choose the created groups (students, tutors, editors,
 instructors).</p></li>
 <li><p>Use the <a class="reference external" href="https://confluence.atlassian.com/adminjiraserver/allowing-connections-to-jira-for-user-management-938847045.html">user directories in
 Jira</a>
@@ -386,7 +386,7 @@ as the secret. The value of this variable should be then stored in
 <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code> as the value of
 <code class="docutils literal notranslate"><span class="pre">artemis-authentication-token-value</span></code>.</p></li>
 <li><p>Download the
-<a class="reference external" href="https://github.com/ls1intum/bamboo-server-notification-plugin/releases">bamboo-server-notifaction-plugin</a>
+<a class="reference external" href="https://github.com/ls1intum/bamboo-server-notification-plugin/releases">bamboo-server-notification-plugin</a>
 and add it to bamboo. Go to Bamboo → Manage apps → Upload app → select
 the downloaded .jar file → Upload</p></li>
 <li><p>Add Maven and JDK:</p>
@@ -403,7 +403,7 @@ as JDK label → insert <code class="docutils literal notranslate"><span class="
 <blockquote>
 <div><p>While username and password can still be used as a fallback, this option is already marked as deprecated and will
 be removed in the future.</p>
-<p>9.1 Personal access token for Bamboo.</p>
+<p>10.1 Personal access token for Bamboo.</p>
 <blockquote>
 <div><ul>
 <li><p>Log in as the admin user and go to Bamboo -&gt; Profile (top right corner) -&gt; Personal access tokens -&gt; Create token</p>
@@ -423,7 +423,7 @@ be removed in the future.</p>
 </pre></div>
 </div>
 </div></blockquote>
-<p>9.2 Personal access token for Bitbucket.</p>
+<p>10.2 Personal access token for Bitbucket.</p>
 <blockquote>
 <div><ul>
 <li><p>Log in as the admin user and go to Bitbucket -&gt; View Profile (top right corner) -&gt; Manage account -&gt; Personal access tokens -&gt; Create token</p>
@@ -468,7 +468,7 @@ If the token is also not present, the username + password will be used as fallba
 <p>You first have to create a SSH key (locally), e.g. using <code class="docutils literal notranslate"><span class="pre">ssh-keygen</span></code> (more information on how to create a SSH key can be found e.g. at <a class="reference external" href="https://www.ssh.com/ssh/keygen/">ssh.com</a> or at <a class="reference external" href="https://confluence.atlassian.com/bitbucketserver076/creating-ssh-keys-1026534841.html">atlassian.com</a>).</p>
 <p>The list of supported ciphers can be found at <a class="reference external" href="https://github.com/apache/mina-sshd">Apache Mina</a>.</p>
 <p>It is recommended to use a password to secure the private key, but it is not mandatory.</p>
-<p>Please note that the private key file <strong>must</strong> be named <code class="docutils literal notranslate"><span class="pre">ìd_rsa</span></code>, <code class="docutils literal notranslate"><span class="pre">id_dsa</span></code>, <code class="docutils literal notranslate"><span class="pre">id_ecdsa</span></code> or <code class="docutils literal notranslate"><span class="pre">id_ed25519</span></code>, depending on the ciphers used.</p>
+<p>Please note that the private key file <strong>must</strong> be named <code class="docutils literal notranslate"><span class="pre">id_rsa</span></code>, <code class="docutils literal notranslate"><span class="pre">id_dsa</span></code>, <code class="docutils literal notranslate"><span class="pre">id_ecdsa</span></code> or <code class="docutils literal notranslate"><span class="pre">id_ed25519</span></code>, depending on the ciphers used.</p>
 <p>You now have to extract the public key and add it to Bitbucket.
 Open the public key file (usually called <code class="docutils literal notranslate"><span class="pre">id_rsa.pub</span></code> (when using RSA)) and copy it’s content (you can also use <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">id_rsa.pub</span></code> to show the public key).</p>
 <p>Navigate to <code class="docutils literal notranslate"><span class="pre">BITBUCKET-URL/plugins/servlet/ssh/account/keys</span></code> and add the SSH key by pasting the content of the public key.</p>
@@ -497,7 +497,7 @@ Open the public key file (usually called <code class="docutils literal notransla
 <span class="nt">version-control</span><span class="p">:</span>
     <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost:7990</span>
     <span class="nt">user</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;bitbucket-admin-user&gt;</span>
-    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;bitbuckt-admin-password&gt;</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;bitbucket-admin-password&gt;</span>
     <span class="nt">token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;bitbucket-admin-token&gt;</span>
     <span class="nt">ssh-private-key-folder-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;ssh-private-key-folder-path&gt;</span>
     <span class="nt">ssh-private-key-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;ssh-private-key-password&gt;</span>

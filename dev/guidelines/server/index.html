@@ -520,8 +520,8 @@ The following example makes the call only accessible to ADMIN and INSTRUCTOR use
 </pre></div>
 </div>
 <p>Artemis distinguishes between six different roles: ADMIN, INSTRUCTOR, EDITOR, TA (teaching assistant), USER and ANONYMOUS.
-Each of the roles has the all the access rights of the roles following it, e.g. ANONOYMOUS has almost no rights, while ADMIN users can access every page.</p>
-<p>If a user passess the <code class="docutils literal notranslate"><span class="pre">PreAuthorize</span></code> check, the access to individual resources like courses and exercises still has to be checked. (A user can be a teaching assistant in one course, but only a student in another, for example.)
+Each of the roles has the all the access rights of the roles following it, e.g. ANONYMOUS has almost no rights, while ADMIN users can access every page.</p>
+<p>If a user passes the <code class="docutils literal notranslate"><span class="pre">PreAuthorize</span></code> check, the access to individual resources like courses and exercises still has to be checked. (A user can be a teaching assistant in one course, but only a student in another, for example.)
 However, do not fetch the user from the database yourself (unless you need to re-use the user object), but only hand a role to the <code class="docutils literal notranslate"><span class="pre">AuthorizationCheckService</span></code>:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="c1">// If we pass &#39;null&#39; instead of a user here, the service will fetch the user object</span>
 <span class="c1">// and check if the user has at least the given role and access to the resource</span>
