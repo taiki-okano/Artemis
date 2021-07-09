@@ -202,6 +202,7 @@ export class StatisticsGraphComponent implements OnChanges {
 
     private createCharts() {
         this.barChartOptions = {
+            maintainAspectRatio: false,
             layout: {
                 padding: {
                     top: 20,

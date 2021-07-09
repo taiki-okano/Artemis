@@ -73,6 +73,7 @@ export class ExamScoresAverageScoresGraphComponent implements OnInit {
     private createCharts() {
         const self = this;
         this.barChartOptions = {
+            maintainAspectRatio: false,
             layout: {
                 padding: {
                     left: 130,

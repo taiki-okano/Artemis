@@ -1,11 +1,11 @@
 <div class="row">
-    <div class="col-md-2 d-flex">
-        <div class="row flex-grow-1">
-            <h3 class="col-md-8 d-flex">{{ chartName }}</h3>
-            <fa-icon [icon]="'arrow-left'" size="3x" class="col-md-4 d-flex justify-content-end align-items-center" role="button" (click)="switchTimeSpan(LEFT)"></fa-icon>
-        </div>
+    <div class="col">
+        <h3 class="d-flex">{{ chartName }}</h3>
     </div>
-    <div class="col-md-9">
+    <div class="col justify-content-end align-items-center">
+        <fa-icon [icon]="'arrow-left'" size="3x" role="button" (click)="switchTimeSpan(LEFT)"></fa-icon>
+    </div>
+    <div class="col-md-9 offset-md-2">
         <canvas
             baseChart
             height="250"
@@ -17,6 +17,8 @@
             [chartType]="barChartType"
         ></canvas>
     </div>
-    <fa-icon [icon]="'arrow-right'" size="3x" class="col-md-1 d-flex justify-content-start align-items-center" role="button" (click)="switchTimeSpan(RIGHT)"></fa-icon>
+    <div class="col-md-1 d-flex justify-content-start align-items-center">
+        <fa-icon [icon]="'arrow-right'" size="3x" role="button" (click)="switchTimeSpan(RIGHT)"></fa-icon>
+    </div>
 </div>
 <h4 class="col-md-9 offset-md-2 text-center mt-3 mb-5">{{ chartTime }}</h4>
