@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -18,6 +19,8 @@ import org.gitlab4j.api.ProjectApi;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -94,14 +97,21 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
         assertThat(health.getException()).isNotNull();
     }
 
+    @ParameterizedTest(name = "{displayName} [{index}] {argumentsWithNames}")
+    @ValueSource(strings = { "master", "main", "someOtherName" })
+    public void testGetDefaultBranch(String defaultBranch) throws IOException, GitLabApiException {
+        VcsRepositoryUrl repoURL = new VcsRepositoryUrl("http://some.test.url/scm/PROJECTNAME/REPONAME-exercise.git");
+        gitlabRequestMockProvider.mockGetDefaultBranch(defaultBranch, repoURL);
+        String actualDefaultBranch = versionControlService.getDefaultBranchOfRepository(repoURL);
+        assertThat(actualDefaultBranch).isEqualTo(defaultBranch);
+    }
+
     @Test
     @WithMockUser(username = "student1")
     public void testInvalidCloneRepoUrlThrowsException() {
         ReflectionTestUtils.setField(versionControlService, "gitlabServerUrl", null);
 
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.getCloneRepositoryUrl(null, null);
-        });
+        Exception exception = assertThrows(GitLabException.class, () -> versionControlService.getCloneRepositoryUrl(null, null));
 
         ReflectionTestUtils.setField(versionControlService, "gitlabServerUrl", gitlabServerUrl);
 
@@ -131,9 +141,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
         User user = ModelFactory.generateActivatedUser("userLogin");
 
         gitlabRequestMockProvider.mockAddMemberToRepositoryUserExists(repositoryPath, user.getLogin(), true);
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.addMemberToRepository(repositoryUrl, user);
-        });
+        Exception exception = assertThrows(GitLabException.class, () -> versionControlService.addMemberToRepository(repositoryUrl, user));
 
         String expectedMessage = "Unable to set permissions for user " + user.getLogin() + ". Trying to set permission " + DEVELOPER;
         assertThat(exception.getMessage()).isEqualTo(expectedMessage);
@@ -163,10 +171,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
         User user = ModelFactory.generateActivatedUser("userLogin");
 
         gitlabRequestMockProvider.mockAddMemberToRepository(repositoryPath, user.getLogin(), true);
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.addMemberToRepository(repositoryUrl, user);
-
-        });
+        Exception exception = assertThrows(GitLabException.class, () -> versionControlService.addMemberToRepository(repositoryUrl, user));
 
         String expectedMessage = "Error while trying to add user to repository: " + user.getLogin() + " to repo " + repositoryUrl;
         assertThat(exception.getMessage()).isEqualTo(expectedMessage);
@@ -193,10 +198,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
         var exercise = database.addTemplateParticipationForProgrammingExercise(optionalExercise.get());
 
         gitlabRequestMockProvider.mockCreateRepository(exercise, "repo-name", true);
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.createRepository(exercise.getProjectKey(), "repo-name", exercise.getProjectKey());
-
-        });
+        Exception exception = assertThrows(GitLabException.class, () -> versionControlService.createRepository(exercise.getProjectKey(), "repo-name", exercise.getProjectKey()));
 
         String expectedMessage = "Error creating new repository " + "repo-name";
         assertThat(exception.getMessage()).isEqualTo(expectedMessage);
@@ -211,9 +213,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
         var exercise = database.addTemplateParticipationForProgrammingExercise(optionalExercise.get());
 
         gitlabRequestMockProvider.mockCreateGitlabGroupForExercise(exercise, false, true);
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.createProjectForExercise(exercise);
-        });
+        Exception exception = assertThrows(GitLabException.class, () -> versionControlService.createProjectForExercise(exercise));
 
         String expectedMessage = "Unable to create new group for course ";
         assertThat(exception.getMessage()).startsWith(expectedMessage);
@@ -271,9 +271,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
 
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook(true);
         var finalOptionalExercise = optionalExercise;
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.addWebHooksForExercise(finalOptionalExercise.get());
-        });
+        Exception exception = assertThrows(GitLabException.class, () -> versionControlService.addWebHooksForExercise(finalOptionalExercise.get()));
 
         String expectedMessage = "Unable to add webhook for ";
         assertThat(exception.getMessage()).startsWith(expectedMessage);
@@ -288,9 +286,7 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
         User user = ModelFactory.generateActivatedUser("userLogin");
 
         gitlabRequestMockProvider.mockRemoveMemberFromRepository(repositoryPath, user.getLogin(), true);
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.removeMemberFromRepository(repositoryUrl, user);
-        });
+        Exception exception = assertThrows(GitLabException.class, () -> versionControlService.removeMemberFromRepository(repositoryUrl, user));
 
         String expectedMessage = "Error while trying to remove user from repository: " + user.getLogin() + " from repo " + repositoryUrl;
         assertThat(exception.getMessage()).isEqualTo(expectedMessage);
@@ -341,9 +337,8 @@ public class GitlabServiceTest extends AbstractSpringIntegrationJenkinsGitlabTes
         User user = ModelFactory.generateActivatedUser("edx_userLogin");
 
         gitlabRequestMockProvider.mockGetUserId(user.getLogin(), true, true);
-        Exception exception = assertThrows(GitLabException.class, () -> {
-            versionControlService.configureRepository(exercise, exercise.getVcsTestRepositoryUrl(), Set.of(user), false);
-        });
+        Exception exception = assertThrows(GitLabException.class,
+                () -> versionControlService.configureRepository(exercise, exercise.getVcsTestRepositoryUrl(), Set.of(user), false));
 
         String expectedMessage = "Unable to fetch user ID for " + user.getLogin();
         assertThat(exception.getMessage()).isEqualTo(expectedMessage);

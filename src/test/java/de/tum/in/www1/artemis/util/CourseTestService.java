@@ -321,8 +321,7 @@ public class CourseTestService {
                 mockDelegate.mockDeleteGroupInUserManagement(course.getInstructorGroupName());
             }
             for (Exercise exercise : course.getExercises()) {
-                if (exercise instanceof ProgrammingExercise) {
-                    final var programmingExercise = (ProgrammingExercise) exercise;
+                if (exercise instanceof final ProgrammingExercise programmingExercise) {
                     final String projectKey = programmingExercise.getProjectKey();
                     final var templateRepoName = programmingExercise.generateRepositoryName(RepositoryType.TEMPLATE);
                     final var solutionRepoName = programmingExercise.generateRepositoryName(RepositoryType.SOLUTION);
@@ -391,6 +390,12 @@ public class CourseTestService {
         request.put("/api/courses", course, HttpStatus.CREATED);
         List<Course> repoContent = courseRepo.findAll();
         assertThat(repoContent.size()).as("Course got stored").isEqualTo(1);
+    }
+
+    // Test
+    public void testUpdateCourseWithoutIdAsInstructor() throws Exception {
+        Course course = ModelFactory.generateCourse(null, null, null, new HashSet<>());
+        request.put("/api/courses", course, HttpStatus.FORBIDDEN);
     }
 
     // Test
@@ -541,13 +546,11 @@ public class CourseTestService {
                     Submission submission = participation.getSubmissions().iterator().next();
                     if (submission != null) {
                         // Test that the correct text submission was filtered.
-                        if (submission instanceof TextSubmission) {
-                            TextSubmission textSubmission = (TextSubmission) submission;
+                        if (submission instanceof TextSubmission textSubmission) {
                             assertThat(textSubmission.getText()).as("Correct text submission").isEqualTo("text");
                         }
                         // Test that the correct modeling submission was filtered.
-                        if (submission instanceof ModelingSubmission) {
-                            ModelingSubmission modelingSubmission = (ModelingSubmission) submission;
+                        else if (submission instanceof ModelingSubmission modelingSubmission) {
                             assertThat(modelingSubmission.getModel()).as("Correct modeling submission").isEqualTo("model1");
                         }
                     }
@@ -582,13 +585,11 @@ public class CourseTestService {
                     Submission submission = participation.getSubmissions().iterator().next();
                     if (submission != null) {
                         // Test that the correct text submission was filtered.
-                        if (submission instanceof TextSubmission) {
-                            TextSubmission textSubmission = (TextSubmission) submission;
+                        if (submission instanceof TextSubmission textSubmission) {
                             assertThat(textSubmission.getText()).as("Correct text submission").isEqualTo("text");
                         }
                         // Test that the correct modeling submission was filtered.
-                        if (submission instanceof ModelingSubmission) {
-                            ModelingSubmission modelingSubmission = (ModelingSubmission) submission;
+                        else if (submission instanceof ModelingSubmission modelingSubmission) {
                             assertThat(modelingSubmission.getModel()).as("Correct modeling submission").isEqualTo("model1");
                         }
                     }

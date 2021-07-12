@@ -1,11 +1,13 @@
+import * as sinon from 'sinon';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ArtemisTestModule } from '../../test.module';
 import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { TextblockFeedbackEditorComponent } from 'app/exercises/text/assess/textblock-feedback-editor/textblock-feedback-editor.component';
 import { Feedback, FeedbackType } from 'app/entities/feedback.model';
-import { TextBlock } from 'app/entities/text-block.model';
+import { TextBlock, TextBlockType } from 'app/entities/text-block.model';
 import { ArtemisConfirmIconModule } from 'app/shared/confirm-icon/confirm-icon.module';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MockComponent, MockProvider } from 'ng-mocks';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { GradingInstruction } from 'app/exercises/shared/structured-grading-criterion/grading-instruction.model';
@@ -13,6 +15,11 @@ import { FeedbackConflict } from 'app/entities/feedback-conflict';
 import { AssessmentCorrectionRoundBadgeComponent } from 'app/assessment/assessment-detail/assessment-correction-round-badge/assessment-correction-round-badge.component';
 import { ArtemisGradingInstructionLinkIconModule } from 'app/shared/grading-instruction-link-icon/grading-instruction-link-icon.module';
 import { ChangeDetectorRef } from '@angular/core';
+import { MockNgbModalService } from '../../helpers/mocks/service/mock-ngb-modal.service';
+import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
+import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
+import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
+import { TextAssessmentEventType } from 'app/entities/text-assesment-event.model';
 
 describe('TextblockFeedbackEditorComponent', () => {
     let component: TextblockFeedbackEditorComponent;
@@ -25,7 +32,13 @@ describe('TextblockFeedbackEditorComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, ArtemisSharedModule, TranslateModule.forRoot(), ArtemisConfirmIconModule, ArtemisGradingInstructionLinkIconModule],
             declarations: [TextblockFeedbackEditorComponent, AssessmentCorrectionRoundBadgeComponent],
-            providers: [MockProvider(ChangeDetectorRef)],
+            providers: [
+                MockProvider(ChangeDetectorRef),
+                { provide: NgbModal, useClass: MockNgbModalService },
+                { provide: SessionStorageService, useClass: MockSyncStorage },
+                { provide: TranslateService, useClass: MockTranslateService },
+                { provide: LocalStorageService, useClass: MockSyncStorage },
+            ],
         })
             .overrideModule(ArtemisTestModule, {
                 remove: {
@@ -168,6 +181,24 @@ describe('TextblockFeedbackEditorComponent', () => {
         expect(text).toBeFalsy();
     });
 
+    it('should show view origin icon when there is an automatic feedback label', () => {
+        component.feedback.type = FeedbackType.AUTOMATIC;
+        fixture.detectChanges();
+
+        const searchOriginIcon = compiled.querySelector('fa-icon[ng-reflect-icon="search"]');
+        expect(searchOriginIcon).toBeTruthy();
+    });
+
+    it('should open modal when open origin of feedback function is called', () => {
+        const modalService: NgbModal = TestBed.inject(NgbModal);
+        const content = {};
+        const modalServiceSpy = sinon.spy(modalService, 'open');
+
+        component.openOriginOfFeedbackModal(content).then(() => {
+            expect(modalServiceSpy).toHaveBeenCalledTimes(1);
+        });
+    });
+
     it('should show link icon when feedback is associated with grading instruction', () => {
         component.feedback.gradingInstruction = new GradingInstruction();
         fixture.detectChanges();
@@ -180,5 +211,32 @@ describe('TextblockFeedbackEditorComponent', () => {
         fixture.detectChanges();
         const linkIcon = compiled.querySelector('.form-group jhi-grading-instruction-link-icon');
         expect(linkIcon).toBeFalsy();
+    });
+
+    it('should send assessment event on conflict button click', () => {
+        component.feedback.type = FeedbackType.AUTOMATIC;
+        component.textBlock.type = TextBlockType.AUTOMATIC;
+        const sendAssessmentEvent = spyOn<any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
+        component.onConflictClicked(1);
+        fixture.detectChanges();
+        expect(sendAssessmentEvent).toHaveBeenCalledWith(TextAssessmentEventType.CLICK_TO_RESOLVE_CONFLICT, FeedbackType.AUTOMATIC, TextBlockType.AUTOMATIC);
+    });
+
+    it('should send assessment event on dismiss button click', () => {
+        component.feedback.type = FeedbackType.MANUAL;
+        component.textBlock.type = TextBlockType.MANUAL;
+        const sendAssessmentEvent = spyOn<any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
+        component.dismiss();
+        fixture.detectChanges();
+        expect(sendAssessmentEvent).toHaveBeenCalledWith(TextAssessmentEventType.DELETE_FEEDBACK, FeedbackType.MANUAL, TextBlockType.MANUAL);
+    });
+
+    it('should send assessment event on hovering over warning', () => {
+        component.feedback.type = FeedbackType.MANUAL;
+        component.textBlock.type = TextBlockType.AUTOMATIC;
+        const sendAssessmentEvent = spyOn<any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
+        component.mouseEnteredWarningLabel();
+        fixture.detectChanges();
+        expect(sendAssessmentEvent).toHaveBeenCalledWith(TextAssessmentEventType.HOVER_OVER_IMPACT_WARNING, FeedbackType.MANUAL, TextBlockType.AUTOMATIC);
     });
 });

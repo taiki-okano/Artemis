@@ -83,6 +83,7 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         gitlabRequestMockProvider.mockCreateRepository(exercise, exerciseRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exercise, testRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exercise, solutionRepoName, false);
+        gitlabRequestMockProvider.mockGetDefaultBranch("master", exercise.getVcsTemplateRepositoryUrl());
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
         jenkinsRequestMockProvider.mockCreateProjectForExercise(exercise, failToCreateCiProject);
         jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, TEMPLATE.getName());
@@ -127,6 +128,7 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTemplateRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetSolutionRepoName, false);
         gitlabRequestMockProvider.mockCreateRepository(exerciseToBeImported, targetTestsRepoName, false);
+        gitlabRequestMockProvider.mockGetDefaultBranch("master", exerciseToBeImported.getVcsTemplateRepositoryUrl());
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook(false);
@@ -198,6 +200,8 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         // Step 2b)
         jenkinsRequestMockProvider.mockConfigureBuildPlan(exercise, username);
         // Note: Step 2c) is not needed in the Jenkins setup
+
+        gitlabRequestMockProvider.mockGetDefaultBranch("master", exercise.getVcsTemplateRepositoryUrl());
     }
 
     @Override
@@ -220,10 +224,17 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
     }
 
     @Override
-    public void mockRepositoryWritePermissions(Team team, User newStudent, ProgrammingExercise exercise, HttpStatus status) throws Exception {
+    public void mockRepositoryWritePermissionsForTeam(Team team, User newStudent, ProgrammingExercise exercise, HttpStatus status) throws Exception {
         final var repositorySlug = (exercise.getProjectKey() + "-" + team.getParticipantIdentifier()).toLowerCase();
         final var repositoryPath = exercise.getProjectKey() + "/" + repositorySlug;
         gitlabRequestMockProvider.mockAddMemberToRepository(repositoryPath, newStudent.getLogin(), !status.is2xxSuccessful());
+    }
+
+    @Override
+    public void mockRepositoryWritePermissionsForStudent(User student, ProgrammingExercise exercise, HttpStatus status) throws Exception {
+        final var repositorySlug = (exercise.getProjectKey() + "-" + student.getParticipantIdentifier()).toLowerCase();
+        final var repositoryPath = exercise.getProjectKey() + "/" + repositorySlug;
+        gitlabRequestMockProvider.mockAddMemberToRepository(repositoryPath, student.getLogin(), !status.is2xxSuccessful());
     }
 
     @Override
@@ -423,6 +434,11 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
     @Override
     public void mockConfigureRepository(ProgrammingExercise exercise, String participantIdentifier, Set<User> students, boolean ltiUserExists) throws Exception {
         gitlabRequestMockProvider.mockConfigureRepository(exercise, participantIdentifier, students, ltiUserExists);
+    }
+
+    @Override
+    public void mockDefaultBranch(ProgrammingExercise programmingExercise) throws GitLabApiException {
+        gitlabRequestMockProvider.mockGetDefaultBranch("master", programmingExercise.getVcsTemplateRepositoryUrl());
     }
 
     @Override

@@ -15,8 +15,10 @@ import { TextSubmission } from 'app/entities/text-submission.model';
 import { FeedbackConflict } from 'app/entities/feedback-conflict';
 import { getLatestSubmissionResult, getSubmissionResultByCorrectionRound, getSubmissionResultById, setLatestSubmissionResult, Submission } from 'app/entities/submission.model';
 import { Participation } from 'app/entities/participation/participation.model';
+import { TextAssessmentEvent } from 'app/entities/text-assesment-event.model';
 
 type EntityResponseType = HttpResponse<Result>;
+type EntityResponseEventType = HttpResponse<TextAssessmentEvent>;
 type TextAssessmentDTO = { feedbacks: Feedback[]; textBlocks: TextBlock[] };
 
 @Injectable({
@@ -37,7 +39,7 @@ export class TextAssessmentService {
     public save(participationId: number, resultId: number, feedbacks: Feedback[], textBlocks: TextBlock[]): Observable<EntityResponseType> {
         const body = TextAssessmentService.prepareFeedbacksAndTextblocksForRequest(feedbacks, textBlocks);
         return this.http
-            .put<Result>(`${this.resourceUrl}/participations/${participationId}/results/${resultId}/assessment`, body, { observe: 'response' })
+            .put<Result>(`${this.resourceUrl}/participations/${participationId}/results/${resultId}/text-assessment`, body, { observe: 'response' })
             .pipe(map((res: EntityResponseType) => TextAssessmentService.convertResponse(res)));
     }
 
@@ -53,6 +55,17 @@ export class TextAssessmentService {
         return this.http
             .post<Result>(`${this.resourceUrl}/participations/${participationId}/results/${resultId}/submit-text-assessment`, body, { observe: 'response' })
             .pipe(map((res: EntityResponseType) => TextAssessmentService.convertResponse(res)));
+    }
+
+    /**
+     * Submits an assessment event to the artemis analytics for text exercises.
+     * @param assessmentEvent an event of type {TextAssessmentEvent}
+     */
+    public submitTextAssessmentEvent(assessmentEvent: TextAssessmentEvent): Observable<EntityResponseEventType> {
+        const body = Object.assign({}, assessmentEvent);
+        return this.http
+            .post<TextAssessmentEvent>(`${this.resourceUrl}/text-assessment-event/add-event`, body, { observe: 'response' })
+            .pipe(map((res: EntityResponseEventType) => Object.assign({}, res)));
     }
 
     /**
@@ -95,15 +108,16 @@ export class TextAssessmentService {
 
     /**
      * Deletes an assessment.
+     * @param participationId id of the participation, to which the assessment and the submission belong to
      * @param submissionId id of the submission, to which the assessment belongs to
      * @param resultId     id of the result which is deleted
      */
-    deleteAssessment(submissionId: number, resultId: number): Observable<void> {
-        return this.http.delete<void>(`${this.resourceUrl}/text-submissions/${submissionId}/delete/${resultId}`);
+    deleteAssessment(participationId: number, submissionId: number, resultId: number): Observable<void> {
+        return this.http.delete<void>(`${this.resourceUrl}/participations/${participationId}/text-submissions/${submissionId}/results/${resultId}`);
     }
 
     /**
-     * Get all feedback items for a submission.
+     * @param participationId id of the participation the submission belongs to
      * @param submissionId id of the submission for which the feedback items should be retrieved of type {number}
      * @param correctionRound
      * @param resultId instructors can results by id
