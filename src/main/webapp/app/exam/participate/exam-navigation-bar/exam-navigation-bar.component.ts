@@ -56,7 +56,7 @@ export class ExamNavigationBarComponent implements OnInit {
         });
 
         const timingEntries = window.performance.getEntriesByType('navigation') as [PerformanceNavigationTiming];
-        const isReload = timingEntries.some((entry) => entry.type === 'reload');
+        const isReload = timingEntries.some((entry) => entry.name === window.location.href && entry.type === 'reload');
         if (!isReload) {
             return;
         }
