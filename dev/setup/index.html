@@ -108,6 +108,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#run-the-server-with-the-command-line-gradle-wrapper">Run the server with the command line (Gradle wrapper)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-text-assessment-analytics-service">Configure Text Assessment Analytics Service:</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#client-setup">Client Setup</a><ul>
@@ -483,6 +484,29 @@ sure to pass the active profiles to the <code class="docutils literal notranslat
 <p>As an alternative, you might want to use Jenkins and Gitlab with an
 internal user management in Artemis, then you would use the profiles:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dev</span><span class="p">,</span><span class="n">jenkins</span><span class="p">,</span><span class="n">gitlab</span><span class="p">,</span><span class="n">artemis</span><span class="p">,</span><span class="n">scheduling</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configure-text-assessment-analytics-service">
+<h3>Configure Text Assessment Analytics Service:<a class="headerlink" href="#configure-text-assessment-analytics-service" title="Permalink to this headline">¶</a></h3>
+<p>Text Assessment Analytics is an internal analytics service used to gather data regarding the features of the text assessment process. Certain assessment events are tracked:</p>
+<ol class="arabic simple">
+<li><p>Adding new feedback on a manually selected block</p></li>
+<li><p>Adding new feedback on an automatically selected block</p></li>
+<li><p>Deleting a feedback</p></li>
+<li><p>Clicking to resolve feedback conflicts</p></li>
+<li><p>Clicking to view origin submission of automatically generated feedback</p></li>
+<li><p>Hovering over the text assessment feedback impact warning</p></li>
+<li><p>Editing/Discarding an automatically generated feedback</p></li>
+<li><p>Clicking the Submit button when assessing a text submission</p></li>
+<li><p>Clicking the Assess Next button when assessing a text submission</p></li>
+</ol>
+<p>These events are tracked by attaching a POST call to the respective DOM elements on the client side.
+The POST call accesses the <strong>TextAssessmentEventResource</strong> which then adds the events in its respective table.
+This feature is disabled by default. We can enable it by modifying the configuration in the file:
+<code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code> like so:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">info</span><span class="p">:</span>
+   <span class="nt">text-assessment-analytics-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 </div>
