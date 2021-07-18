@@ -61,11 +61,13 @@ export class ExamNavigationBarComponent implements OnInit {
             return;
         }
 
+        console.log('IS RELOADED');
+
         // If exam is reloaded, update the isSynced variable for out of sync submissions.
         this.exercises
             .filter((exercise) => exercise.type === ExerciseType.PROGRAMMING && exercise.studentParticipations)
             .forEach((exercise) => {
-                let domain: DomainChange = [DomainType.PARTICIPATION, exercise.studentParticipations![0]];
+                const domain: DomainChange = [DomainType.PARTICIPATION, exercise.studentParticipations![0]];
                 this.conflictService.setDomain(domain);
                 this.repositoryService.setDomain(domain);
 
