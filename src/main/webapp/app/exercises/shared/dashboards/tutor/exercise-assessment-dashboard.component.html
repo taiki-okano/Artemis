@@ -102,7 +102,7 @@
                 </div>
             </jhi-side-panel>
 
-            <div class="me-2" style="display: block; float: right">
+            <div *ngIf="!isExamMode" class="me-2" style="display: block; float: right">
                 <div>
                     <div class="square bg-success" style="display: inline-block"></div>
                     <span>{{ 'artemisApp.exerciseAssessmentDashboard.stats.intime' | artemisTranslate }}</span>
