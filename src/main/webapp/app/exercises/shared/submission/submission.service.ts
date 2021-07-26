@@ -11,6 +11,7 @@ import { TextSubmission } from 'app/entities/text-submission.model';
 import { Feedback } from 'app/entities/feedback.model';
 import { Complaint } from 'app/entities/complaint.model';
 import { ComplaintResponseService } from 'app/complaints/complaint-response.service';
+import {ExerciseType} from "app/entities/exercise.model";
 
 export type EntityResponseType = HttpResponse<Submission>;
 export type EntityArrayResponseType = HttpResponse<Submission[]>;
@@ -61,6 +62,25 @@ export class SubmissionService {
         return this.http
             .get<SubmissionWithComplaintDTO[]>(`api/exercises/${exerciseId}/submissions-with-complaints`, { observe: 'response' })
             .pipe(map((res) => this.convertDTOsFromServer(res)));
+    }
+
+    /**
+     *
+     * @param exerciseId
+     * @param exerciseType the type of the exercise of which the submissions are fetched
+     * @param req requestparameter
+     */
+    getSubmissionsForExercise(exerciseId: number, exerciseType: ExerciseType, req: { submittedOnly?: boolean; assessedByTutor?: boolean }, correctionRound = 0,
+    ): Observable<HttpResponse<Submission[]>> {
+        switch (exercise.type)
+        const url = `api/exercises/${exerciseId}/text-submissions`;
+        let params = createRequestOption(req);
+        if (correctionRound !== 0) {
+            params = params.set('correction-round', correctionRound.toString());
+        }
+        return this.http
+            .get<TextSubmission[]>(url, { observe: 'response', params })
+            .pipe(map((res: HttpResponse<TextSubmission[]>) => this.convertArrayResponse(res)));
     }
 
     protected convertDTOsFromServer(res: HttpResponse<SubmissionWithComplaintDTO[]>) {
@@ -136,7 +156,7 @@ export class SubmissionService {
             .get<TextSubmission[]>(`api/exercises/${exerciseId}/test-run-submissions`, {
                 observe: 'response',
             })
-            .pipe(map((res: HttpResponse<TextSubmission[]>) => this.convertArrayResponse(res)));
+            .pipe(map((res: HttpResponse<[]>) => this.convertArrayResponse(res)));
     }
 
     private convertArrayResponse(res: HttpResponse<Submission[]>): HttpResponse<Submission[]> {
