@@ -1,5 +1,5 @@
 import * as ace from 'brace';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { JhiLanguageHelper } from 'app/core/language/language.helper';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -172,7 +172,8 @@ describe('ExerciseAssessmentDashboardComponent', () => {
         numberOfAssessmentsOfCorrectionRounds,
         numberOfLockedAssessmentByOtherTutorsOfCorrectionRound,
     } as StatsForDashboard;
-
+    let downloadSubmissionInOrion: any;
+    let navigateStub: any;
     const submissionWithComplaintDTO = {
         submission: {
             id: 23,
@@ -184,10 +185,9 @@ describe('ExerciseAssessmentDashboardComponent', () => {
     } as SubmissionWithComplaintDTO;
     const lockLimitErrorResponse = new HttpErrorResponse({ error: { errorKey: 'lockedSubmissionsLimitReached' } });
     const router = new MockRouter();
-    const navigateSpy = sinon.spy(router, 'navigate');
     const orionConnectorService = new MockOrionConnectorService();
 
-    beforeEach(async () => {
+    beforeAll(() => {
         return TestBed.configureTestingModule({
             imports: [
                 ArtemisTestModule,
@@ -230,7 +230,6 @@ describe('ExerciseAssessmentDashboardComponent', () => {
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(ExerciseAssessmentDashboardComponent);
-                comp = fixture.componentInstance;
 
                 modelingSubmissionService = TestBed.inject(ModelingSubmissionService);
                 textSubmissionService = TestBed.inject(TextSubmissionService);
@@ -239,45 +238,56 @@ describe('ExerciseAssessmentDashboardComponent', () => {
                 programmingSubmissionService = TestBed.inject(ProgrammingSubmissionService);
 
                 tutorParticipationService = TestBed.inject(TutorParticipationService);
-
-                exerciseServiceGetForTutorsStub = stub(exerciseService, 'getForTutors');
-                exerciseServiceGetStatsForTutorsStub = stub(exerciseService, 'getStatsForTutors');
-
-                exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: modelingExercise, headers: new HttpHeaders() })));
-                exerciseServiceGetStatsForTutorsStub.returns(of(new HttpResponse({ body: stats, headers: new HttpHeaders() })));
-
                 guidedTourService = TestBed.inject(GuidedTourService);
-
-                comp.exerciseId = modelingExercise.id!;
-
-                modelingSubmissionStubWithoutAssessment = stub(modelingSubmissionService, 'getModelingSubmissionForExerciseForCorrectionRoundWithoutAssessment');
-                modelingSubmissionStubWithAssessment = stub(modelingSubmissionService, 'getModelingSubmissionsForExerciseByCorrectionRound');
-
-                textSubmissionStubWithoutAssessment = stub(textSubmissionService, 'getTextSubmissionForExerciseForCorrectionRoundWithoutAssessment');
-                textSubmissionStubWithAssessment = stub(textSubmissionService, 'getTextSubmissionsForExerciseByCorrectionRound');
-
-                fileUploadSubmissionStubWithAssessment = stub(fileUploadSubmissionService, 'getFileUploadSubmissionsForExerciseByCorrectionRound');
-                fileUploadSubmissionStubWithoutAssessment = stub(fileUploadSubmissionService, 'getFileUploadSubmissionForExerciseForCorrectionRoundWithoutAssessment');
-
-                programmingSubmissionStubWithoutAssessment = stub(programmingSubmissionService, 'getProgrammingSubmissionForExerciseForCorrectionRoundWithoutAssessment');
-                programmingSubmissionStubWithAssessment = stub(programmingSubmissionService, 'getProgrammingSubmissionsForExerciseByCorrectionRound');
-
-                textSubmissionStubWithoutAssessment.returns(of(textSubmission));
-                textSubmissionStubWithAssessment.returns(of(textSubmissionAssessed));
-
-                fileUploadSubmissionStubWithAssessment.returns(of(fileUploadSubmissionAssessed));
-                fileUploadSubmissionStubWithoutAssessment.returns(of(fileUploadSubmission));
-
-                programmingSubmissionStubWithAssessment.returns(of(programmingSubmissionAssessed));
-                programmingSubmissionStubWithoutAssessment.returns(of(programmingSubmission));
-
-                modelingSubmissionStubWithAssessment.returns(of(new HttpResponse({ body: [modelingSubmissionAssessed], headers: new HttpHeaders() })));
-                modelingSubmissionStubWithoutAssessment.returns(of(modelingSubmission));
-                comp.submissionsWithComplaints = [submissionWithComplaintDTO];
             });
     });
 
+    beforeEach(() => {
+        navigateStub = stub(router, 'navigate'); // sinon.spy(router, 'navigate');
+
+        comp = fixture.componentInstance;
+
+        downloadSubmissionInOrion = spy(programmingSubmissionService, 'downloadSubmissionInOrion');
+
+        comp.exerciseId = modelingExercise.id!;
+        exerciseServiceGetForTutorsStub = stub(exerciseService, 'getForTutors');
+        exerciseServiceGetStatsForTutorsStub = stub(exerciseService, 'getStatsForTutors');
+
+        modelingSubmissionStubWithoutAssessment = stub(modelingSubmissionService, 'getModelingSubmissionForExerciseForCorrectionRoundWithoutAssessment');
+        modelingSubmissionStubWithAssessment = stub(modelingSubmissionService, 'getModelingSubmissionsForExerciseByCorrectionRound');
+
+        textSubmissionStubWithoutAssessment = stub(textSubmissionService, 'getTextSubmissionForExerciseForCorrectionRoundWithoutAssessment');
+        textSubmissionStubWithAssessment = stub(textSubmissionService, 'getTextSubmissionsForExerciseByCorrectionRound');
+
+        fileUploadSubmissionStubWithAssessment = stub(fileUploadSubmissionService, 'getFileUploadSubmissionsForExerciseByCorrectionRound');
+        fileUploadSubmissionStubWithoutAssessment = stub(fileUploadSubmissionService, 'getFileUploadSubmissionForExerciseForCorrectionRoundWithoutAssessment');
+
+        programmingSubmissionStubWithoutAssessment = stub(programmingSubmissionService, 'getProgrammingSubmissionForExerciseForCorrectionRoundWithoutAssessment');
+        programmingSubmissionStubWithAssessment = stub(programmingSubmissionService, 'getProgrammingSubmissionsForExerciseByCorrectionRound');
+
+        exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: modelingExercise, headers: new HttpHeaders() })));
+        exerciseServiceGetStatsForTutorsStub.returns(of(new HttpResponse({ body: stats, headers: new HttpHeaders() })));
+
+        textSubmissionStubWithoutAssessment.returns(of(textSubmission));
+        textSubmissionStubWithAssessment.returns(of(textSubmissionAssessed));
+
+        fileUploadSubmissionStubWithAssessment.returns(of(fileUploadSubmissionAssessed));
+        fileUploadSubmissionStubWithoutAssessment.returns(of(fileUploadSubmission));
+
+        programmingSubmissionStubWithAssessment.returns(of(programmingSubmissionAssessed));
+        programmingSubmissionStubWithoutAssessment.returns(of(programmingSubmission));
+
+        modelingSubmissionStubWithAssessment.returns(of(new HttpResponse({ body: [modelingSubmissionAssessed], headers: new HttpHeaders() })));
+        modelingSubmissionStubWithoutAssessment.returns(of(modelingSubmission));
+        comp.submissionsWithComplaints = [submissionWithComplaintDTO];
+        comp.exam = undefined;
+        // comp.tutorParticipation = undefined;
+    });
+
     afterEach(() => {
+        navigateStub.restore();
+
+        downloadSubmissionInOrion.restore();
         modelingSubmissionStubWithoutAssessment.restore();
         modelingSubmissionStubWithAssessment.restore();
 
@@ -292,6 +302,21 @@ describe('ExerciseAssessmentDashboardComponent', () => {
 
         exerciseServiceGetForTutorsStub.restore();
         exerciseServiceGetStatsForTutorsStub.restore();
+
+        fixture.destroy();
+    });
+    it('should not set unassessedSubmission if lock limit is reached', () => {
+        modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
+        modelingSubmissionStubWithAssessment.returns(of(new HttpResponse({ body: [], headers: new HttpHeaders() })));
+
+        comp.loadAll();
+
+        expect(modelingSubmissionStubWithoutAssessment).to.have.been.calledTwice;
+        sinon.assert.calledWith(modelingSubmissionStubWithoutAssessment.getCall(0), modelingExercise.id, undefined, 0);
+        sinon.assert.calledWith(modelingSubmissionStubWithoutAssessment.getCall(1), modelingExercise.id, undefined, 1);
+        expect(comp.unassessedSubmissionByCorrectionRound?.get(1)).to.be.undefined;
+        expect(comp.submissionLockLimitReached).to.be.true;
+        expect(comp.submissionsByCorrectionRound?.get(1)!.length).to.equal(0);
     });
 
     it('should set unassessedSubmission if lock limit is not reached', () => {
@@ -310,20 +335,6 @@ describe('ExerciseAssessmentDashboardComponent', () => {
         expect(comp.unassessedSubmissionByCorrectionRound?.get(0)?.latestResult).to.equal(undefined);
         expect(comp.submissionLockLimitReached).to.be.false;
         expect(comp.submissionsByCorrectionRound?.get(0)!.length).to.equal(0);
-    });
-
-    it('should not set unassessedSubmission if lock limit is reached', () => {
-        modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
-        modelingSubmissionStubWithAssessment.returns(of(new HttpResponse({ body: [], headers: new HttpHeaders() })));
-
-        comp.loadAll();
-
-        expect(modelingSubmissionStubWithoutAssessment).to.have.been.calledTwice;
-        sinon.assert.calledWith(modelingSubmissionStubWithoutAssessment.getCall(0), modelingExercise.id, undefined, 0);
-        sinon.assert.calledWith(modelingSubmissionStubWithoutAssessment.getCall(1), modelingExercise.id, undefined, 1);
-        expect(comp.unassessedSubmissionByCorrectionRound?.get(1)).to.be.undefined;
-        expect(comp.submissionLockLimitReached).to.be.true;
-        expect(comp.submissionsByCorrectionRound?.get(1)!.length).to.equal(0);
     });
 
     it('should have correct percentages calculated', () => {
@@ -377,85 +388,85 @@ describe('ExerciseAssessmentDashboardComponent', () => {
         const tutorParticipation = { id: 1, status: TutorParticipationStatus.REVIEWED_INSTRUCTIONS };
         tutorParticipationServiceCreateStub.returns(of(new HttpResponse({ body: tutorParticipation, headers: new HttpHeaders() })));
 
-        expect(comp.tutorParticipation).to.equal(undefined);
+        // expect(comp.tutorParticipation).to.equal(undefined);
         comp.readInstruction();
 
         expect(comp.tutorParticipation).to.equal(tutorParticipation);
         expect(comp.tutorParticipationStatus).to.equal(TutorParticipationStatus.REVIEWED_INSTRUCTIONS);
     });
 
-    describe('test calls for all exercise types', () => {
-        it('fileuploadSubmission', () => {
-            modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
-            modelingSubmissionStubWithAssessment.returns(of(new HttpResponse({ body: [], headers: new HttpHeaders() })));
+    // describe('test calls for all exercise types', () => {
+    it('fileuploadSubmission', () => {
+        modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
+        modelingSubmissionStubWithAssessment.returns(of(new HttpResponse({ body: [], headers: new HttpHeaders() })));
 
-            exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: fileUploadExercise, headers: new HttpHeaders() })));
+        exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: fileUploadExercise, headers: new HttpHeaders() })));
 
-            comp.loadAll();
+        comp.loadAll();
 
-            expect(fileUploadSubmissionStubWithAssessment).to.have.been.called;
-            expect(fileUploadSubmissionStubWithoutAssessment).to.have.been.called;
-        });
-
-        it('textSubmission', () => {
-            modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
-
-            exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: textExercise, headers: new HttpHeaders() })));
-
-            comp.loadAll();
-
-            expect(textSubmissionStubWithoutAssessment).to.have.been.called;
-            expect(textSubmissionStubWithAssessment).to.have.been.called;
-        });
-
-        it('programmingSubmission', () => {
-            modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
-
-            exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: programmingExercise, headers: new HttpHeaders() })));
-
-            comp.loadAll();
-
-            expect(programmingSubmissionStubWithAssessment).to.have.been.called;
-            expect(programmingSubmissionStubWithoutAssessment).to.have.been.called;
-        });
+        expect(fileUploadSubmissionStubWithAssessment).to.have.been.called;
+        expect(fileUploadSubmissionStubWithoutAssessment).to.have.been.called;
     });
 
+    it('textSubmission', () => {
+        modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
+
+        exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: textExercise, headers: new HttpHeaders() })));
+
+        comp.loadAll();
+
+        expect(textSubmissionStubWithoutAssessment).to.have.been.called;
+        expect(textSubmissionStubWithAssessment).to.have.been.called;
+    });
+
+    it('programmingSubmission', () => {
+        modelingSubmissionStubWithoutAssessment.returns(throwError(lockLimitErrorResponse));
+
+        exerciseServiceGetForTutorsStub.returns(of(new HttpResponse({ body: programmingExercise, headers: new HttpHeaders() })));
+
+        comp.loadAll();
+
+        expect(programmingSubmissionStubWithAssessment).to.have.been.called;
+        expect(programmingSubmissionStubWithoutAssessment).to.have.been.called;
+    });
     it('should viewComplaint', () => {
         const openAssessmentEditor = stub(comp, 'openAssessmentEditor');
         comp.viewComplaint(complaint);
         expect(openAssessmentEditor).to.have.been.called;
     });
 
-    describe('openExampleSubmission', () => {
+    it('should not openExampleSubmission', () => {
         const courseId = 4;
-
-        it('should not openExampleSubmission', () => {
-            navigateSpy.resetHistory();
-            const submission = { id: 8 };
-            comp.openExampleSubmission(submission!.id);
-            expect(navigateSpy).to.have.not.been.called;
-        });
-
-        it('should openExampleSubmission', () => {
-            comp.exercise = exercise;
-            comp.exercise.type = ExerciseType.PROGRAMMING;
-            comp.courseId = 4;
-            comp.exercise = exercise;
-            const submission = { id: 8 };
-            comp.openExampleSubmission(submission!.id, true, true);
-            expect(navigateSpy).to.have.been.calledWith([`/course-management/${courseId}/${exercise.type}-exercises/${exercise.id}/example-submissions/${submission.id}`]);
-        });
+        navigateStub.resetHistory();
+        const submission = { id: 8 };
+        comp.exercise.type = undefined;
+        comp.openExampleSubmission(submission!.id);
+        expect(navigateStub).to.have.not.been.called;
     });
 
+    it('should openExampleSubmission', () => {
+        const courseId = 4;
+        comp.exercise = exercise;
+        comp.exercise.type = ExerciseType.PROGRAMMING;
+        comp.courseId = 4;
+        comp.exercise = exercise;
+        const submission = { id: 8 };
+        comp.openExampleSubmission(submission!.id, true, true);
+
+        expect(navigateStub).to.have.been.calledWith([`/course-management/${courseId}/${exercise.type}-exercises/${exercise.id}/example-submissions/${submission.id}`]);
+    });
     describe('openAssessmentEditor', () => {
         it('should not openExampleSubmission', () => {
-            navigateSpy.resetHistory();
+            navigateStub.restore();
             const submission = { id: 8 };
             comp.openAssessmentEditor(submission);
-            expect(navigateSpy).to.have.not.been.called;
+            expect(navigateStub).to.have.not.been.called;
         });
 
+        // this and the next test only run through whne ran in isolation.
         it('should openExampleSubmission with modelingExercise', () => {
+            navigateStub.resetHistory();
+
             comp.exercise = exercise;
             comp.exercise.type = ExerciseType.MODELING;
             comp.courseId = 4;
@@ -473,7 +484,7 @@ describe('ExerciseAssessmentDashboardComponent', () => {
                 submission.id.toString(),
                 'assessment',
             ];
-            expect(navigateSpy).to.have.been.calledWith(expectedUrl, { queryParams: { 'correction-round': 0 } });
+            expect(navigateStub).to.have.been.calledWith(expectedUrl, { queryParams: { 'correction-round': 0 } });
         });
 
         it('should openExampleSubmission with programmingExercise', () => {
@@ -493,41 +504,35 @@ describe('ExerciseAssessmentDashboardComponent', () => {
                 'assessment',
             ];
             comp.openAssessmentEditor(submission);
-            expect(navigateSpy).to.have.been.calledWith(expectedUrl);
+            expect(navigateStub).to.have.been.calledWith(expectedUrl);
             comp.isTestRun = true;
             comp.openAssessmentEditor(submission);
-            expect(navigateSpy).to.have.been.calledWith(expectedUrl);
+            expect(navigateStub).to.have.been.calledWith(expectedUrl);
         });
     });
 
-    describe('Orion functions', () => {
-        it('assessExercise should call connector', () => {
-            const assessExerciseSpy = spy(orionConnectorService, 'assessExercise');
+    it('assessExercise should call connector', () => {
+        const assessExerciseSpy = spy(orionConnectorService, 'assessExercise');
 
-            comp.exercise = programmingExercise;
-            comp.openAssessmentInOrion();
+        comp.exercise = programmingExercise;
+        comp.openAssessmentInOrion();
 
-            expect(assessExerciseSpy).to.have.been.calledOnceWithExactly(programmingExercise);
-        });
-        it('download new submission should call service', () => {
-            const downloadSubmissionInOrion = spy(programmingSubmissionService, 'downloadSubmissionInOrion');
+        expect(assessExerciseSpy).to.have.been.calledOnceWithExactly(programmingExercise);
+    });
+    it('download new submission should call service', () => {
+        comp.exerciseId = programmingExercise.id!;
+        programmingSubmissionStubWithoutAssessment.returns(of(programmingSubmission));
 
-            comp.exerciseId = programmingExercise.id!;
-            programmingSubmissionStubWithoutAssessment.returns(of(programmingSubmission));
+        comp.downloadSubmissionInOrion('new', 0);
 
-            comp.downloadSubmissionInOrion('new', 0);
+        expect(programmingSubmissionStubWithoutAssessment).to.have.been.calledOnceWithExactly(programmingExercise.id, true, 0);
+        expect(downloadSubmissionInOrion).to.have.been.calledOnceWithExactly(programmingExercise.id, programmingSubmission.id, 0);
+    });
+    it('download submission number should call service', () => {
+        comp.exerciseId = programmingExercise.id!;
 
-            expect(programmingSubmissionStubWithoutAssessment).to.have.been.calledOnceWithExactly(programmingExercise.id, true, 0);
-            expect(downloadSubmissionInOrion).to.have.been.calledOnceWithExactly(programmingExercise.id, programmingSubmission.id, 0);
-        });
-        it('download submission number should call service', () => {
-            const downloadSubmissionInOrion = spy(programmingSubmissionService, 'downloadSubmissionInOrion');
+        comp.downloadSubmissionInOrion(programmingSubmission, 0);
 
-            comp.exerciseId = programmingExercise.id!;
-
-            comp.downloadSubmissionInOrion(programmingSubmission, 0);
-
-            expect(downloadSubmissionInOrion).to.have.been.calledOnceWithExactly(programmingExercise.id, programmingSubmission.id, 0);
-        });
+        expect(downloadSubmissionInOrion).to.have.been.calledOnceWithExactly(programmingExercise.id, programmingSubmission.id, 0);
     });
 });

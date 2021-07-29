@@ -243,6 +243,8 @@ describe('ProgrammingExerciseConfigureGradingComponent', () => {
             });
     }));
 
+    beforeEach(async(() => {}));
+
     afterEach(() => {
         notifyTestCasesSpy.restore();
         testCasesChangedStub.restore();

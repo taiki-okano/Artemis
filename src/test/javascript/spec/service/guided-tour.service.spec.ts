@@ -92,7 +92,7 @@ describe('GuidedTourService', () => {
         let httpMock: HttpTestingController;
         const expected = new GuidedTourSetting('guided_tour_key', 1, GuidedTourState.STARTED);
 
-        beforeEach(() => {
+        beforeAll(() => {
             TestBed.configureTestingModule({
                 imports: [ArtemisTestModule, ArtemisSharedModule, HttpClientTestingModule],
                 providers: [

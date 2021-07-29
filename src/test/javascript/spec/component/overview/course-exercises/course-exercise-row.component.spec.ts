@@ -40,7 +40,7 @@ describe('CourseExerciseRowComponent', () => {
     let getAllParticipationsStub: SinonStub;
     let participationWebsocketService: ParticipationWebsocketService;
 
-    beforeEach(() => {
+    beforeAll(() => {
         return TestBed.configureTestingModule({
             imports: [ArtemisTestModule, TranslateModule.forRoot(), NgbModule, ArtemisCoursesModule],
             providers: [
@@ -58,12 +58,14 @@ describe('CourseExerciseRowComponent', () => {
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(CourseExerciseRowComponent);
-                comp = fixture.componentInstance;
-                comp.course = { id: 123, isAtLeastInstructor: true } as Course;
                 debugElement = fixture.debugElement;
                 participationWebsocketService = debugElement.injector.get(ParticipationWebsocketService);
-                getAllParticipationsStub = stub(participationWebsocketService, 'getParticipationForExercise');
             });
+    });
+    beforeEach(() => {
+        comp = fixture.componentInstance;
+        comp.course = { id: 123, isAtLeastInstructor: true } as Course;
+        getAllParticipationsStub = stub(participationWebsocketService, 'getParticipationForExercise');
     });
 
     afterEach(() => {

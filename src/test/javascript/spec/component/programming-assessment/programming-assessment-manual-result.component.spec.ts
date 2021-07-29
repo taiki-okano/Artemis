@@ -140,7 +140,7 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
     const fileContent = 'This is the content of a file';
     const templateFileSessionReturn: { [fileName: string]: string } = { 'folder/file1': fileContent };
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         return TestBed.configureTestingModule({
             imports: [
                 TranslateModule.forRoot(),
@@ -177,29 +177,30 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
                     return false;
                 };
                 fixture = TestBed.createComponent(CodeEditorTutorAssessmentContainerComponent);
-                comp = fixture.componentInstance;
-                debugElement = fixture.debugElement;
-                programmingAssessmentManualResultService = debugElement.injector.get(ProgrammingAssessmentManualResultService);
-                programmingSubmissionService = debugElement.injector.get(ProgrammingSubmissionService);
-                complaintService = debugElement.injector.get(ComplaintService);
-                accountService = debugElement.injector.get(AccountService);
-                programmingExerciseService = debugElement.injector.get(ProgrammingExerciseService);
-                repositoryFileService = debugElement.injector.get(CodeEditorRepositoryFileService);
-
-                updateAfterComplaintStub = stub(programmingAssessmentManualResultService, 'updateAfterComplaint').returns(of(afterComplaintResult));
-                lockAndGetProgrammingSubmissionParticipationStub = stub(programmingSubmissionService, 'lockAndGetProgrammingSubmissionParticipation').returns(
-                    of(submission).pipe(delay(100)),
-                );
-                findByResultIdStub = stub(complaintService, 'findByResultId').returns(of({ body: complaint } as HttpResponse<Complaint>));
-                getIdentityStub = stub(accountService, 'identity').returns(new Promise((promise) => promise(user)));
-                getProgrammingSubmissionForExerciseWithoutAssessmentStub = stub(
-                    programmingSubmissionService,
-                    'getProgrammingSubmissionForExerciseForCorrectionRoundWithoutAssessment',
-                ).returns(of(unassessedSubmission));
-
-                findWithParticipationsStub = stub(programmingExerciseService, 'findWithTemplateAndSolutionParticipation');
-                findWithParticipationsStub.returns(of({ body: exercise }));
             });
+    });
+    beforeEach(() => {
+        comp = fixture.componentInstance;
+        debugElement = fixture.debugElement;
+        programmingAssessmentManualResultService = debugElement.injector.get(ProgrammingAssessmentManualResultService);
+        programmingSubmissionService = debugElement.injector.get(ProgrammingSubmissionService);
+        complaintService = debugElement.injector.get(ComplaintService);
+        accountService = debugElement.injector.get(AccountService);
+        programmingExerciseService = debugElement.injector.get(ProgrammingExerciseService);
+        repositoryFileService = debugElement.injector.get(CodeEditorRepositoryFileService);
+
+        updateAfterComplaintStub = stub(programmingAssessmentManualResultService, 'updateAfterComplaint').returns(of(afterComplaintResult));
+        lockAndGetProgrammingSubmissionParticipationStub = stub(programmingSubmissionService, 'lockAndGetProgrammingSubmissionParticipation').returns(
+            of(submission).pipe(delay(100)),
+        );
+        findByResultIdStub = stub(complaintService, 'findByResultId').returns(of({ body: complaint } as HttpResponse<Complaint>));
+        getIdentityStub = stub(accountService, 'identity').returns(new Promise((promise) => promise(user)));
+        getProgrammingSubmissionForExerciseWithoutAssessmentStub = stub(
+            programmingSubmissionService,
+            'getProgrammingSubmissionForExerciseForCorrectionRoundWithoutAssessment',
+        ).returns(of(unassessedSubmission));
+        findWithParticipationsStub = stub(programmingExerciseService, 'findWithTemplateAndSolutionParticipation');
+        findWithParticipationsStub.returns(of({ body: exercise }));
     });
 
     afterEach(fakeAsync(() => {
