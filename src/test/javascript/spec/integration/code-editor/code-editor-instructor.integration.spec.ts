@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpResponse } from '@angular/common/http';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { TranslateModule } from '@ngx-translate/core';
@@ -60,9 +60,9 @@ const expect = chai.expect;
 describe('CodeEditorInstructorIntegration', () => {
     // needed to make sure ace is defined
     ace.acequire('ace/ext/modelist');
-    let container: CodeEditorInstructorAndEditorContainerComponent;
-    let containerFixture: ComponentFixture<CodeEditorInstructorAndEditorContainerComponent>;
-    let containerDebugElement: DebugElement;
+    let comp: CodeEditorInstructorAndEditorContainerComponent;
+    let fixture: ComponentFixture<CodeEditorInstructorAndEditorContainerComponent>;
+    let debugElement: DebugElement;
     let domainService: DomainService;
     let route: ActivatedRoute;
 
@@ -112,21 +112,21 @@ describe('CodeEditorInstructorIntegration', () => {
         })
             .compileComponents()
             .then(() => {
-                containerFixture = TestBed.createComponent(CodeEditorInstructorAndEditorContainerComponent);
-                container = containerFixture.componentInstance;
-                containerDebugElement = containerFixture.debugElement;
+                fixture = TestBed.createComponent(CodeEditorInstructorAndEditorContainerComponent);
+                comp = fixture.componentInstance;
+                debugElement = fixture.debugElement;
 
-                const codeEditorRepositoryService = containerDebugElement.injector.get(CodeEditorRepositoryService);
-                const codeEditorRepositoryFileService = containerDebugElement.injector.get(CodeEditorRepositoryFileService);
-                const participationWebsocketService = containerDebugElement.injector.get(ParticipationWebsocketService);
-                const resultService = containerDebugElement.injector.get(ResultService);
-                const buildLogService = containerDebugElement.injector.get(CodeEditorBuildLogService);
-                const programmingExerciseParticipationService = containerDebugElement.injector.get(ProgrammingExerciseParticipationService);
-                const programmingExerciseService = containerDebugElement.injector.get(ProgrammingExerciseService);
-                domainService = containerDebugElement.injector.get(DomainService);
-                route = containerDebugElement.injector.get(ActivatedRoute);
-                const exerciseHintService = containerDebugElement.injector.get(ExerciseHintService);
-                containerDebugElement.injector.get(Router);
+                const codeEditorRepositoryService = debugElement.injector.get(CodeEditorRepositoryService);
+                const codeEditorRepositoryFileService = debugElement.injector.get(CodeEditorRepositoryFileService);
+                const participationWebsocketService = debugElement.injector.get(ParticipationWebsocketService);
+                const resultService = debugElement.injector.get(ResultService);
+                const buildLogService = debugElement.injector.get(CodeEditorBuildLogService);
+                const programmingExerciseParticipationService = debugElement.injector.get(ProgrammingExerciseParticipationService);
+                const programmingExerciseService = debugElement.injector.get(ProgrammingExerciseService);
+                domainService = debugElement.injector.get(DomainService);
+                route = debugElement.injector.get(ActivatedRoute);
+                const exerciseHintService = debugElement.injector.get(ExerciseHintService);
+                debugElement.injector.get(Router);
 
                 checkIfRepositoryIsCleanSubject = new Subject<{ isClean: boolean }>();
                 getRepositoryContentSubject = new Subject<{ [fileName: string]: FileType }>();
@@ -180,12 +180,12 @@ describe('CodeEditorInstructorIntegration', () => {
         getRepositoryContentStub.returns(getRepositoryContentSubject);
     });
 
-    const initContainer = (exercise: ProgrammingExercise) => {
-        container.ngOnInit();
+    const initComponent = (exercise: ProgrammingExercise) => {
+        comp.ngOnInit();
         routeSubject.next({ exerciseId: 1 });
-        expect(container.codeEditorContainer).to.be.undefined;
+        expect(comp.codeEditorContainer).to.be.undefined;
         expect(findWithParticipationsStub).to.have.been.calledOnceWithExactly(exercise.id);
-        expect(container.loadingState).to.equal(container.LOADING_STATE.INITIALIZING);
+        expect(comp.loadingState).to.equal(comp.LOADING_STATE.INITIALIZING);
     };
 
     it('should load the exercise and select the template participation if no participation id is provided', () => {
@@ -209,40 +209,40 @@ describe('CodeEditorInstructorIntegration', () => {
         getFeedbackDetailsForResultStub.returns(of([]));
         const setDomainSpy = spy(domainService, 'setDomain');
         // @ts-ignore
-        (container.router as MockRouter).setUrl('code-editor-instructor/1');
-        initContainer(exercise);
+        (comp.router as MockRouter).setUrl('code-editor-instructor/1');
+        initComponent(exercise);
 
         findWithParticipationsSubject.next({ body: exercise });
 
         expect(getLatestResultWithFeedbacksStub).not.to.have.been.called;
         expect(setDomainSpy).to.have.been.calledOnce;
         expect(setDomainSpy).to.have.been.calledOnceWithExactly([DomainType.PARTICIPATION, exercise.templateParticipation]);
-        expect(container.exercise).to.deep.equal(exercise);
-        expect(container.selectedRepository).to.equal(container.REPOSITORY.TEMPLATE);
-        expect(container.selectedParticipation).to.deep.equal(container.selectedParticipation);
-        expect(container.loadingState).to.equal(container.LOADING_STATE.CLEAR);
-        expect(container.domainChangeSubscription).to.exist;
+        expect(comp.exercise).to.deep.equal(exercise);
+        expect(comp.selectedRepository).to.equal(comp.REPOSITORY.TEMPLATE);
+        expect(comp.selectedParticipation).to.deep.equal(comp.selectedParticipation);
+        expect(comp.loadingState).to.equal(comp.LOADING_STATE.CLEAR);
+        expect(comp.domainChangeSubscription).to.exist;
 
-        containerFixture.detectChanges();
-        expect(container.codeEditorContainer.grid).to.exist;
+        fixture.detectChanges();
+        expect(comp.codeEditorContainer.grid).to.exist;
 
         checkIfRepositoryIsCleanSubject.next({ isClean: true });
         getRepositoryContentSubject.next({ file: FileType.FILE, folder: FileType.FOLDER });
-        containerFixture.detectChanges();
+        fixture.detectChanges();
 
         // Submission could be built
         expect(getBuildLogsStub).to.not.have.been.called;
         // Once called by each build-output & instructions
         expect(getFeedbackDetailsForResultStub).to.have.been.calledTwice;
 
-        expect(container.codeEditorContainer.grid).to.exist;
-        expect(container.codeEditorContainer.fileBrowser).to.exist;
-        expect(container.codeEditorContainer.actions).to.exist;
-        expect(container.editableInstructions).to.exist;
-        expect(container.editableInstructions.participation.id).to.deep.equal(exercise.templateParticipation.id);
-        expect(container.resultComp).to.exist;
-        expect(container.codeEditorContainer.buildOutput).to.exist;
-        expect(container.editableInstructions.exerciseHints).to.deep.equal(exerciseHints);
+        expect(comp.codeEditorContainer.grid).to.exist;
+        expect(comp.codeEditorContainer.fileBrowser).to.exist;
+        expect(comp.codeEditorContainer.actions).to.exist;
+        expect(comp.editableInstructions).to.exist;
+        expect(comp.editableInstructions.participation.id).to.deep.equal(exercise.templateParticipation.id);
+        expect(comp.resultComp).to.exist;
+        expect(comp.codeEditorContainer.buildOutput).to.exist;
+        expect(comp.editableInstructions.exerciseHints).to.deep.equal(exerciseHints);
 
         // Called once by each build-output, instructions, result and twice by instructor-exercise-status (=templateParticipation,solutionParticipation) &
         expect(subscribeForLatestResultOfParticipationStub.callCount).to.equal(5);
@@ -255,16 +255,16 @@ describe('CodeEditorInstructorIntegration', () => {
     it('should go into error state when loading the exercise failed', () => {
         const exercise = { id: 1, studentParticipations: [{ id: 2 }], templateParticipation: { id: 3 }, solutionParticipation: { id: 4 } } as ProgrammingExercise;
         const setDomainSpy = spy(domainService, 'setDomain');
-        initContainer(exercise);
+        initComponent(exercise);
 
         findWithParticipationsSubject.error('fatal error');
 
         expect(setDomainSpy).to.not.have.been.called;
-        expect(container.loadingState).to.equal(container.LOADING_STATE.FETCHING_FAILED);
-        expect(container.selectedRepository).to.be.undefined;
+        expect(comp.loadingState).to.equal(comp.LOADING_STATE.FETCHING_FAILED);
+        expect(comp.selectedRepository).to.be.undefined;
 
-        containerFixture.detectChanges();
-        expect(container.codeEditorContainer).to.be.undefined;
+        fixture.detectChanges();
+        expect(comp.codeEditorContainer).to.be.undefined;
     });
 
     it('should load test repository if specified in url', () => {
@@ -278,36 +278,36 @@ describe('CodeEditorInstructorIntegration', () => {
         } as ProgrammingExercise;
         const setDomainSpy = spy(domainService, 'setDomain');
         // @ts-ignore
-        (container.router as MockRouter).setUrl('code-editor-instructor/1/test');
-        container.ngOnDestroy();
-        initContainer(exercise);
+        (comp.router as MockRouter).setUrl('code-editor-instructor/1/test');
+        comp.ngOnDestroy();
+        initComponent(exercise);
 
         findWithParticipationsSubject.next({ body: exercise });
 
         expect(setDomainSpy).to.have.been.calledOnceWithExactly([DomainType.TEST_REPOSITORY, exercise]);
-        expect(container.selectedParticipation).not.to.exist;
-        expect(container.selectedRepository).to.equal(container.REPOSITORY.TEST);
+        expect(comp.selectedParticipation).not.to.exist;
+        expect(comp.selectedRepository).to.equal(comp.REPOSITORY.TEST);
         expect(getBuildLogsStub).not.to.have.been.called;
         expect(getFeedbackDetailsForResultStub).not.to.have.been.called;
 
-        containerFixture.detectChanges();
+        fixture.detectChanges();
 
-        expect(container.codeEditorContainer).to.exist;
-        expect(container.editableInstructions).to.exist;
-        expect(container.editableInstructions.participation).to.deep.equal(exercise.templateParticipation);
-        expect(container.resultComp).not.to.exist;
-        expect(container.codeEditorContainer.buildOutput).not.to.exist;
+        expect(comp.codeEditorContainer).to.exist;
+        expect(comp.editableInstructions).to.exist;
+        expect(comp.editableInstructions.participation).to.deep.equal(exercise.templateParticipation);
+        expect(comp.resultComp).not.to.exist;
+        expect(comp.codeEditorContainer.buildOutput).not.to.exist;
     });
 
     const checkSolutionRepository = (exercise: ProgrammingExercise) => {
-        expect(container.selectedRepository).to.equal(container.REPOSITORY.SOLUTION);
-        expect(container.selectedParticipation).to.deep.equal(exercise.solutionParticipation);
-        expect(container.codeEditorContainer).to.exist;
-        expect(container.editableInstructions).to.exist;
-        expect(container.resultComp).to.exist;
-        expect(container.codeEditorContainer.buildOutput).to.exist;
-        expect(container.codeEditorContainer.buildOutput.participation).to.deep.equal(exercise.solutionParticipation);
-        expect(container.editableInstructions.participation).to.deep.equal(exercise.solutionParticipation);
+        expect(comp.selectedRepository).to.equal(comp.REPOSITORY.SOLUTION);
+        expect(comp.selectedParticipation).to.deep.equal(exercise.solutionParticipation);
+        expect(comp.codeEditorContainer).to.exist;
+        expect(comp.editableInstructions).to.exist;
+        expect(comp.resultComp).to.exist;
+        expect(comp.codeEditorContainer.buildOutput).to.exist;
+        expect(comp.codeEditorContainer.buildOutput.participation).to.deep.equal(exercise.solutionParticipation);
+        expect(comp.editableInstructions.participation).to.deep.equal(exercise.solutionParticipation);
     };
 
     it('should be able to switch between the repos and update the child components accordingly', () => {
@@ -326,28 +326,28 @@ describe('CodeEditorInstructorIntegration', () => {
 
         // Start with assignment repository
         // @ts-ignore
-        (container.router as MockRouter).setUrl('code-editor-instructor/1/2');
-        container.ngOnInit();
+        (comp.router as MockRouter).setUrl('code-editor-instructor/1/2');
+        comp.ngOnInit();
         routeSubject.next({ exerciseId: 1, participationId: 2 });
         findWithParticipationsSubject.next({ body: exercise });
 
-        containerFixture.detectChanges();
+        // fixture.detectChanges();
 
-        expect(container.selectedRepository).to.equal(container.REPOSITORY.ASSIGNMENT);
-        expect(container.selectedParticipation).to.deep.equal(exercise.studentParticipations[0]);
-        expect(container.codeEditorContainer).to.exist;
-        expect(container.editableInstructions).to.exist;
-        expect(container.resultComp).to.exist;
-        expect(container.codeEditorContainer.buildOutput).to.exist;
-        expect(container.codeEditorContainer.buildOutput.participation).to.deep.equal(exercise.studentParticipations[0]);
-        expect(container.editableInstructions.participation).to.deep.equal(exercise.studentParticipations[0]);
+        expect(comp.selectedRepository).to.equal(comp.REPOSITORY.ASSIGNMENT);
+        expect(comp.selectedParticipation).to.deep.equal(exercise.studentParticipations[0]);
+        expect(comp.codeEditorContainer).to.exist;
+        expect(comp.editableInstructions).to.exist;
+        expect(comp.resultComp).to.exist;
+        expect(comp.codeEditorContainer.buildOutput).to.exist;
+        expect(comp.codeEditorContainer.buildOutput.participation).to.deep.equal(exercise.studentParticipations[0]);
+        expect(comp.editableInstructions.participation).to.deep.equal(exercise.studentParticipations[0]);
 
         // New select solution repository
         // @ts-ignore
-        (container.router as MockRouter).setUrl('code-editor-instructor/1/4');
+        (comp.router as MockRouter).setUrl('code-editor-instructor/1/4');
         routeSubject.next({ exerciseId: 1, participationId: 4 });
 
-        containerFixture.detectChanges();
+        fixture.detectChanges();
 
         checkSolutionRepository(exercise);
 
@@ -373,12 +373,12 @@ describe('CodeEditorInstructorIntegration', () => {
 
         // Start with assignment repository
         // @ts-ignore
-        (container.router as MockRouter).setUrl('code-editor-instructor/1/3');
-        container.ngOnInit();
+        (comp.router as MockRouter).setUrl('code-editor-instructor/1/3');
+        comp.ngOnInit();
         routeSubject.next({ exerciseId: 1, participationId: 3 });
         findWithParticipationsSubject.next({ body: exercise });
 
-        containerFixture.detectChanges();
+        fixture.detectChanges();
 
         expect(setDomainSpy).to.have.been.calledOnce;
         expect(setDomainSpy).to.have.been.calledOnceWithExactly([DomainType.PARTICIPATION, exercise.solutionParticipation]);

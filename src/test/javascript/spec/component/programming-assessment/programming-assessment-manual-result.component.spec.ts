@@ -140,7 +140,7 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
     const fileContent = 'This is the content of a file';
     const templateFileSessionReturn: { [fileName: string]: string } = { 'folder/file1': fileContent };
 
-    beforeAll(async () => {
+    beforeEach(async () => {
         return TestBed.configureTestingModule({
             imports: [
                 TranslateModule.forRoot(),
@@ -160,16 +160,16 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
                 AccountService,
                 JhiAlertService,
                 ResultService,
-                { provide: ParticipationWebsocketService, useClass: MockParticipationWebsocketService },
-                { provide: RepositoryFileService, useClass: MockRepositoryFileService },
-                { provide: ExerciseHintService, useClass: MockExerciseHintService },
-                { provide: NgbModal, useClass: MockNgbModalService },
-                { provide: SessionStorageService, useClass: MockSyncStorage },
-                { provide: LocalStorageService, useClass: MockSyncStorage },
-                { provide: ActivatedRoute, useValue: route },
+                {provide: ParticipationWebsocketService, useClass: MockParticipationWebsocketService},
+                {provide: RepositoryFileService, useClass: MockRepositoryFileService},
+                {provide: ExerciseHintService, useClass: MockExerciseHintService},
+                {provide: NgbModal, useClass: MockNgbModalService},
+                {provide: SessionStorageService, useClass: MockSyncStorage},
+                {provide: LocalStorageService, useClass: MockSyncStorage},
+                {provide: ActivatedRoute, useValue: route},
             ],
         })
-            .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
+            .overrideModule(ArtemisTestModule, {set: {declarations: [], exports: []}})
             .compileComponents()
             .then(() => {
                 // Ignore console errors
@@ -177,9 +177,6 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
                     return false;
                 };
                 fixture = TestBed.createComponent(CodeEditorTutorAssessmentContainerComponent);
-            });
-    });
-    beforeEach(() => {
         comp = fixture.componentInstance;
         debugElement = fixture.debugElement;
         programmingAssessmentManualResultService = debugElement.injector.get(ProgrammingAssessmentManualResultService);
@@ -193,14 +190,15 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
         lockAndGetProgrammingSubmissionParticipationStub = stub(programmingSubmissionService, 'lockAndGetProgrammingSubmissionParticipation').returns(
             of(submission).pipe(delay(100)),
         );
-        findByResultIdStub = stub(complaintService, 'findByResultId').returns(of({ body: complaint } as HttpResponse<Complaint>));
+        findByResultIdStub = stub(complaintService, 'findByResultId').returns(of({body: complaint} as HttpResponse<Complaint>));
         getIdentityStub = stub(accountService, 'identity').returns(new Promise((promise) => promise(user)));
         getProgrammingSubmissionForExerciseWithoutAssessmentStub = stub(
             programmingSubmissionService,
             'getProgrammingSubmissionForExerciseForCorrectionRoundWithoutAssessment',
         ).returns(of(unassessedSubmission));
         findWithParticipationsStub = stub(programmingExerciseService, 'findWithTemplateAndSolutionParticipation');
-        findWithParticipationsStub.returns(of({ body: exercise }));
+        findWithParticipationsStub.returns(of({body: exercise}));
+    });
     });
 
     afterEach(fakeAsync(() => {

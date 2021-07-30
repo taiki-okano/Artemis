@@ -39,7 +39,7 @@ import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.s
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 
 describe('TextFeedbackConflictsComponent', () => {
-    let component: TextFeedbackConflictsComponent;
+    let comp: TextFeedbackConflictsComponent;
     let fixture: ComponentFixture<TextFeedbackConflictsComponent>;
     let textAssessmentService: TextAssessmentService;
     let router: Router;
@@ -194,18 +194,18 @@ describe('TextFeedbackConflictsComponent', () => {
         router = TestBed.inject(Router);
         spyOn(router, 'getCurrentNavigation').and.returnValues({ extras: { state: { submission: textSubmission } } } as any);
         fixture = TestBed.createComponent(TextFeedbackConflictsComponent);
-        component = fixture.componentInstance;
+        comp = fixture.componentInstance;
         fixture.detectChanges();
     });
 
     it('should create', () => {
-        expect(component).toBeTruthy();
+        expect(comp).toBeTruthy();
     });
 
     it('should set passed parameters correctly in constructor', () => {
-        expect(component.leftSubmission).toBe(textSubmission);
-        expect(component.leftFeedbackId).toBe(1);
-        expect(component.exercise).toBe(exercise);
+        expect(comp.leftSubmission).toBe(textSubmission);
+        expect(comp.leftFeedbackId).toBe(1);
+        expect(comp.exercise).toBe(exercise);
     });
 
     it('should use jhi-text-feedback-conflicts-header', () => {
@@ -214,16 +214,16 @@ describe('TextFeedbackConflictsComponent', () => {
     });
 
     it('should set conflicting submission correctly', () => {
-        component['setPropertiesFromServerResponse']([conflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission]);
         fixture.detectChanges();
-        expect(component.rightSubmission).toBe(conflictingSubmission);
-        expect(component.rightTotalScore).toBe(1.5);
-        expect(component.feedbackConflicts).toBe(textSubmission.latestResult!.feedbacks![0].conflictingTextAssessments!);
-        expect(component.rightTextBlockRefs[0].feedback).toBe(conflictingSubmission.latestResult!.feedbacks![0]);
+        expect(comp.rightSubmission).toBe(conflictingSubmission);
+        expect(comp.rightTotalScore).toBe(1.5);
+        expect(comp.feedbackConflicts).toBe(textSubmission.latestResult!.feedbacks![0].conflictingTextAssessments!);
+        expect(comp.rightTextBlockRefs[0].feedback).toBe(conflictingSubmission.latestResult!.feedbacks![0]);
     });
 
     it('should use jhi-text-assessment-area', () => {
-        component['setPropertiesFromServerResponse']([conflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission]);
         fixture.detectChanges();
         const textAssessmentAreaComponent = fixture.debugElement.query(By.directive(TextAssessmentAreaComponent));
         expect(textAssessmentAreaComponent).toBeTruthy();
@@ -231,10 +231,10 @@ describe('TextFeedbackConflictsComponent', () => {
 
     it('should solve conflict by overriding left submission', () => {
         textAssessmentService = fixture.debugElement.injector.get(TextAssessmentService);
-        component['setPropertiesFromServerResponse']([conflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission]);
         fixture.detectChanges();
 
-        expect(component.isOverrideDisabled).toBe(true);
+        expect(comp.isOverrideDisabled).toBe(true);
 
         const textAssessmentArea = fixture.debugElement.query(By.directive(TextAssessmentAreaComponent));
         const textAssessmentAreaComponent = textAssessmentArea.componentInstance as TextAssessmentAreaComponent;
@@ -243,83 +243,83 @@ describe('TextFeedbackConflictsComponent', () => {
         textBlockRef.feedback!.credits = 2;
         textAssessmentAreaComponent.textBlockRefsChangeEmit();
 
-        expect(component.leftTotalScore).toBe(2);
-        expect(component.isOverrideDisabled).toBe(false);
+        expect(comp.leftTotalScore).toBe(2);
+        expect(comp.isOverrideDisabled).toBe(false);
 
         spyOn(textAssessmentService, 'submit').and.returnValue(
             of(
                 new HttpResponse({
-                    body: component.leftSubmission!.latestResult,
+                    body: comp.leftSubmission!.latestResult,
                 }),
             ),
         );
-        component.overrideLeftSubmission();
+        comp.overrideLeftSubmission();
         expect(textAssessmentService.submit).toHaveBeenCalledWith(
             participation.id!,
             textSubmission.latestResult!.id!,
-            [component.leftTextBlockRefs[0].feedback!],
-            [component.leftTextBlockRefs[0].block!],
+            [comp.leftTextBlockRefs[0].feedback!],
+            [comp.leftTextBlockRefs[0].block!],
         );
     });
 
     it('should be able to select conflicting feedback', () => {
-        component['setPropertiesFromServerResponse']([conflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission]);
         fixture.detectChanges();
 
         const textBlockAssessmentAreas = fixture.debugElement.queryAll(By.directive(TextblockAssessmentCardComponent));
         textBlockAssessmentAreas.forEach((textBlockAssessmentCardArea) => {
             const textBlockAssessmentCardComponent = textBlockAssessmentCardArea.componentInstance as TextblockAssessmentCardComponent;
-            if (textBlockAssessmentCardComponent.textBlockRef === component.rightTextBlockRefs[0]) {
+            if (textBlockAssessmentCardComponent.textBlockRef === comp.rightTextBlockRefs[0]) {
                 textBlockAssessmentCardComponent.select();
             }
         });
 
-        expect(component.selectedRightFeedbackId).toBeTruthy();
-        expect(component.selectedRightFeedbackId).toBe(conflictingSubmission.latestResult!.feedbacks![0].id);
+        expect(comp.selectedRightFeedbackId).toBeTruthy();
+        expect(comp.selectedRightFeedbackId).toBe(conflictingSubmission.latestResult!.feedbacks![0].id);
     });
 
     it('should be able to un-select conflicting feedback', () => {
-        component['setPropertiesFromServerResponse']([conflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission]);
         fixture.detectChanges();
 
         const textBlockAssessmentAreas = fixture.debugElement.queryAll(By.directive(TextblockAssessmentCardComponent));
         textBlockAssessmentAreas.forEach((textBlockAssessmentCardArea) => {
             const textBlockAssessmentCardComponent = textBlockAssessmentCardArea.componentInstance as TextblockAssessmentCardComponent;
-            if (textBlockAssessmentCardComponent.textBlockRef === component.rightTextBlockRefs[0]) {
+            if (textBlockAssessmentCardComponent.textBlockRef === comp.rightTextBlockRefs[0]) {
                 textBlockAssessmentCardComponent.select();
                 fixture.detectChanges();
                 textBlockAssessmentCardComponent.select();
             }
         });
 
-        expect(component.selectedRightFeedbackId).toBeFalsy();
-        expect(component.selectedRightFeedbackId).toBe(undefined);
+        expect(comp.selectedRightFeedbackId).toBeFalsy();
+        expect(comp.selectedRightFeedbackId).toBe(undefined);
     });
 
     it('should not be able to select conflicting feedback for left submission', () => {
-        component['setPropertiesFromServerResponse']([conflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission]);
         fixture.detectChanges();
 
         const textBlockAssessmentAreas = fixture.debugElement.queryAll(By.directive(TextblockAssessmentCardComponent));
         textBlockAssessmentAreas.forEach((textBlockAssessmentCardArea) => {
             const textBlockAssessmentCardComponent = textBlockAssessmentCardArea.componentInstance as TextblockAssessmentCardComponent;
-            if (textBlockAssessmentCardComponent.textBlockRef === component.leftTextBlockRefs[0]) {
+            if (textBlockAssessmentCardComponent.textBlockRef === comp.leftTextBlockRefs[0]) {
                 spyOn(textBlockAssessmentCardComponent, 'didSelect');
                 textBlockAssessmentCardComponent.select();
                 expect(textBlockAssessmentCardComponent.didSelect).toHaveBeenCalledTimes(0);
             }
         });
 
-        expect(component.selectedRightFeedbackId).toBeFalsy();
-        expect(component.selectedRightFeedbackId).toBe(undefined);
+        expect(comp.selectedRightFeedbackId).toBeFalsy();
+        expect(comp.selectedRightFeedbackId).toBe(undefined);
     });
 
     it('should discard conflict', () => {
         textAssessmentService = fixture.debugElement.injector.get(TextAssessmentService);
-        component['setPropertiesFromServerResponse']([conflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission]);
         fixture.detectChanges();
 
-        component.didSelectConflictingFeedback(conflictingSubmission.latestResult!.feedbacks![0].id!);
+        comp.didSelectConflictingFeedback(conflictingSubmission.latestResult!.feedbacks![0].id!);
 
         const feedbackConflict = textSubmission.latestResult!.feedbacks![0].conflictingTextAssessments![0];
         feedbackConflict.conflict = false;
@@ -331,7 +331,7 @@ describe('TextFeedbackConflictsComponent', () => {
                 }),
             ),
         );
-        component.discardConflict();
+        comp.discardConflict();
         expect(textAssessmentService.solveFeedbackConflict).toHaveBeenCalledWith(exercise!.id!, feedbackConflict.id!);
     });
 
@@ -341,15 +341,15 @@ describe('TextFeedbackConflictsComponent', () => {
         secondConflictingSubmission.latestResult!.feedbacks![0].id! += 1;
         secondConflictingSubmission.latestResult!.id! += 1;
 
-        component['setPropertiesFromServerResponse']([conflictingSubmission, secondConflictingSubmission]);
+        comp['setPropertiesFromServerResponse']([conflictingSubmission, secondConflictingSubmission]);
         fixture.detectChanges();
 
         const textFeedbackConflictsHeader = fixture.debugElement.query(By.directive(TextFeedbackConflictsHeaderComponent));
         const textFeedbackConflictsHeaderComponent = textFeedbackConflictsHeader.componentInstance as TextFeedbackConflictsHeaderComponent;
         expect(textFeedbackConflictsHeaderComponent.numberOfConflicts).toBe(2);
         textFeedbackConflictsHeaderComponent.onNextConflict();
-        expect(component.rightSubmission).toBe(secondConflictingSubmission);
+        expect(comp.rightSubmission).toBe(secondConflictingSubmission);
         textFeedbackConflictsHeaderComponent.onPrevConflict();
-        expect(component.rightSubmission).toBe(conflictingSubmission);
+        expect(comp.rightSubmission).toBe(conflictingSubmission);
     });
 });
