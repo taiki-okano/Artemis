@@ -60,7 +60,7 @@ describe('TeamsImportDialogComponent', () => {
         comp.conflictingRegistrationNumbersSet = new Set();
     }
 
-    beforeEach(
+    beforeAll(
         waitForAsync(() => {
             TestBed.configureTestingModule({
                 imports: [ArtemisTestModule, FormsModule, MockModule(NgJhipsterModule)],
@@ -76,15 +76,17 @@ describe('TeamsImportDialogComponent', () => {
                     MockComponent(HelpIconComponent),
                 ],
                 providers: [MockProvider(TeamService)],
-            }).compileComponents();
+            }).compileComponents().then(()=> {
+                fixture = TestBed.createComponent(TeamsImportDialogComponent);
+                ngbActiveModal = TestBed.inject(NgbActiveModal);
+                alertService = TestBed.inject(JhiAlertService);
+                teamService = TestBed.inject(TeamService);
+            });
         }),
     );
     beforeEach(() => {
-        fixture = TestBed.createComponent(TeamsImportDialogComponent);
         comp = fixture.componentInstance;
-        ngbActiveModal = TestBed.inject(NgbActiveModal);
-        alertService = TestBed.inject(JhiAlertService);
-        teamService = TestBed.inject(TeamService);
+
     });
 
     describe('OnInit', () => {
@@ -497,7 +499,9 @@ describe('TeamsImportDialogComponent', () => {
         });
         it('should return false', () => {
             const importTeamsStub = stub(comp, 'importTeams');
+            const nextStub = stub(comp.dialogErrorSource, 'next');
             comp.purgeAndImportTeams();
+            expect(nextStub).to.have.been.called;
             expect(importTeamsStub).to.have.been.called;
             restore();
         });

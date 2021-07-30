@@ -52,7 +52,7 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
 
     studentsAppearInMultipleTeams = false;
 
-    private dialogErrorSource = new Subject<string>();
+    dialogErrorSource = new Subject<string>();
     dialogError$ = this.dialogErrorSource.asObservable();
 
     constructor(private teamService: TeamService, private activeModal: NgbActiveModal, private jhiAlertService: JhiAlertService) {}
