@@ -146,7 +146,7 @@
         "prettier": "2.3.2",
         "reflect-metadata": "0.1.13",
         "rimraf": "3.0.2",
-        "sass": "1.36.0",
+        "sass": "1.37.5",
         "sass-loader": "12.1.0",
         "simple-progress-webpack-plugin": "2.0.0",
         "sinon": "11.1.2",
