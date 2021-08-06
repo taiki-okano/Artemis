@@ -3,7 +3,6 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { ActivatedRoute, convertToParamMap, Params } from '@angular/router';
 import { StudentExamsComponent } from 'app/exam/manage/student-exams/student-exams.component';
-import { ArtemisDataTableModule } from 'app/shared/data-table/data-table.module';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { MockComponent, MockDirective, MockPipe, MockProvider, MockModule } from 'ng-mocks';
 import { StudentExamService } from 'app/exam/manage/student-exams/student-exam.service';
@@ -32,6 +31,7 @@ import { NgbModal, NgbModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { AccountService } from 'app/core/auth/account.service';
 import { MockAccountService } from '../../../../helpers/mocks/service/mock-account.service';
+import { DataTableComponent } from 'app/shared/data-table/data-table.component';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -81,11 +81,12 @@ describe('StudentExamsComponent', () => {
         studentExams = [studentExamOne, studentExamTwo];
 
         return TestBed.configureTestingModule({
-            imports: [RouterTestingModule.withRoutes([]), ArtemisDataTableModule, MockModule(NgbModule), NgxDatatableModule, FontAwesomeTestingModule, TranslateModule.forRoot()],
+            imports: [RouterTestingModule.withRoutes([]), MockModule(NgbModule), NgxDatatableModule, FontAwesomeTestingModule, TranslateModule.forRoot()],
             declarations: [
                 StudentExamsComponent,
                 MockComponent(StudentExamStatusComponent),
                 MockComponent(AlertComponent),
+                MockComponent(DataTableComponent),
                 MockPipe(ArtemisDurationFromSecondsPipe),
                 MockPipe(ArtemisDatePipe),
                 MockPipe(ArtemisTranslatePipe),
