@@ -18,7 +18,6 @@ import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { of } from 'rxjs';
 import * as sinon from 'sinon';
 import { MockRouter } from '../../../helpers/mocks/mock-router';
-import { MockLocalStorageService } from '../../../helpers/mocks/service/mock-local-storage.service';
 import { MockSyncStorage } from '../../../helpers/mocks/service/mock-sync-storage.service';
 import * as testClassDiagram from '../../../util/modeling/test-models/class-diagram.json';
 
@@ -66,7 +65,7 @@ describe('QuizExercise Generator', () => {
                 },
                 {
                     provide: LocalStorageService,
-                    useClass: MockLocalStorageService,
+                    useClass: MockSyncStorage,
                 },
                 { provide: Router, useClass: MockRouter },
             ],

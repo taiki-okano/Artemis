@@ -80,7 +80,7 @@ describe('ShortAnswerQuestionEditComponent', () => {
         fixture.detectChanges();
     });
 
-    afterEach(function () {
+    afterEach(() => {
         sinon.restore();
     });
 
@@ -336,8 +336,7 @@ describe('ShortAnswerQuestionEditComponent', () => {
         const node = {} as Node;
 
         const returnValue = {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            contains(other: Node | null): boolean {
+            contains(_: Node | null): boolean {
                 return true;
             },
         } as unknown as HTMLElement;
@@ -346,10 +345,8 @@ describe('ShortAnswerQuestionEditComponent', () => {
         const range = {
             cloneRange(): Range {
                 return {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    selectNodeContents(node1: Node) {},
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    setEnd(node2: Node, offset: number) {},
+                    selectNodeContents(_: Node) {},
+                    setEnd(_: Node, __: number) {},
                     cloneContents() {},
                 } as Range;
             },
@@ -367,8 +364,7 @@ describe('ShortAnswerQuestionEditComponent', () => {
                     },
                 },
             },
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            getRangeAt(index: number): Range {
+            getRangeAt(_: number): Range {
                 return range as Range;
             },
             toString() {
@@ -378,8 +374,7 @@ describe('ShortAnswerQuestionEditComponent', () => {
         stub(window, 'getSelection').returns(nodeValue);
 
         const returnHTMLDivElement = {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            appendChild(param: DocumentFragment) {
+            appendChild(_: DocumentFragment) {
                 return {} as DocumentFragment;
             },
             innerHTML: 'innerHTML',
@@ -388,8 +383,7 @@ describe('ShortAnswerQuestionEditComponent', () => {
 
         const markdownHelper = {
             length: 1,
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            substring(start: number, end?: number): string {
+            substring(_: number, __?: number): string {
                 return '';
             },
         } as String;

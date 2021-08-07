@@ -63,37 +63,35 @@ export class StudentExamsComponent implements OnInit {
     }
 
     private loadAll() {
-        this.paramSub = this.route.params.subscribe(() => {
-            this.isAdmin = this.accountService.isAdmin();
-            this.courseService.find(this.courseId).subscribe((courseResponse) => {
-                this.course = courseResponse.body!;
-            });
-            const studentExamObservable = this.studentExamService.findAllForExam(this.courseId, this.examId).pipe(
-                tap((res) => {
-                    this.setStudentExams(res.body);
-                    this.longestWorkingTime = Math.max.apply(
-                        null,
-                        this.studentExams.map((studentExam) => studentExam.workingTime),
-                    );
-                    this.calculateIsExamOver();
-                }),
-            );
+        this.isAdmin = this.accountService.isAdmin();
+        this.courseService.find(this.courseId).subscribe((courseResponse) => {
+            this.course = courseResponse.body!;
+        });
+        const studentExamObservable = this.studentExamService.findAllForExam(this.courseId, this.examId).pipe(
+            tap((res) => {
+                this.setStudentExams(res.body);
+                this.longestWorkingTime = Math.max.apply(
+                    null,
+                    this.studentExams.map((studentExam) => studentExam.workingTime),
+                );
+                this.calculateIsExamOver();
+            }),
+        );
 
-            const examObservable = this.examManagementService.find(this.courseId, this.examId, true).pipe(
-                tap((examResponse) => {
-                    this.exam = examResponse.body!;
-                    this.isExamStarted = this.exam.startDate ? this.exam.startDate.isBefore(moment()) : false;
-                    this.calculateIsExamOver();
-                }),
-            );
+        const examObservable = this.examManagementService.find(this.courseId, this.examId, true).pipe(
+            tap((examResponse) => {
+                this.exam = examResponse.body!;
+                this.isExamStarted = this.exam.startDate ? this.exam.startDate.isBefore(moment()) : false;
+                this.calculateIsExamOver();
+            }),
+        );
 
-            // Calculate hasStudentsWithoutExam only when both observables emitted
-            forkJoin(studentExamObservable, examObservable).subscribe(() => {
-                this.isLoading = false;
-                if (this.exam.registeredUsers) {
-                    this.hasStudentsWithoutExam = this.studentExams.length < this.exam.registeredUsers.length;
-                }
-            });
+        // Calculate hasStudentsWithoutExam only when both observables emitted
+        forkJoin(studentExamObservable, examObservable).subscribe(() => {
+            this.isLoading = false;
+            if (this.exam.registeredUsers) {
+                this.hasStudentsWithoutExam = this.studentExams.length < this.exam.registeredUsers.length;
+            }
         });
     }
 
@@ -222,9 +220,9 @@ export class StudentExamsComponent implements OnInit {
         );
     }
 
-    assessUnsubmittedExamModelingAndTextParticipations() {
+    assessUnsubmittedAndEmptyStudentExams() {
         this.isLoading = true;
-        this.examManagementService.assessUnsubmittedExamModelingAndTextParticipations(this.courseId, this.examId).subscribe(
+        this.examManagementService.assessUnsubmittedAndEmptyStudentExams(this.courseId, this.examId).subscribe(
             (res) => {
                 this.jhiAlertService.addAlert(
                     {
@@ -350,7 +348,7 @@ export class StudentExamsComponent implements OnInit {
         return studentExam.user?.login || '';
     };
 
-    private setStudentExams(studentExams: any): void {
+    private setStudentExams(studentExams: StudentExam[] | null): void {
         if (studentExams) {
             this.studentExams = studentExams;
         }

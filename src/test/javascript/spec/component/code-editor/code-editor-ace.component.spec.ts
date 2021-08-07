@@ -16,10 +16,10 @@ import { CodeEditorFileService } from 'app/exercises/programming/shared/code-edi
 import { CodeEditorAceComponent } from 'app/exercises/programming/shared/code-editor/ace/code-editor-ace.component';
 import { MockCodeEditorRepositoryFileService } from '../../helpers/mocks/service/mock-code-editor-repository-file.service';
 import { LocalStorageService } from 'ngx-webstorage';
-import { MockLocalStorageService } from '../../helpers/mocks/service/mock-local-storage.service';
 import { ArtemisProgrammingManualAssessmentModule } from 'app/exercises/programming/assess/programming-manual-assessment.module';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { MockPipe } from 'ng-mocks';
+import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -38,7 +38,7 @@ describe('CodeEditorAceComponent', () => {
             providers: [
                 CodeEditorFileService,
                 { provide: CodeEditorRepositoryFileService, useClass: MockCodeEditorRepositoryFileService },
-                { provide: LocalStorageService, useClass: MockLocalStorageService },
+                { provide: LocalStorageService, useClass: MockSyncStorage },
             ],
         })
             .compileComponents()

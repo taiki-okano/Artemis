@@ -26,6 +26,8 @@ module.exports = {
         },
     },
     preset: 'jest-preset-angular',
+    // for the config below, see https://github.com/facebook/jest/issues/11483
+    testRunner: 'jest-jasmine2',
     setupFilesAfterEnv: ['<rootDir>/src/test/javascript/jest.ts', 'jest-sinon'],
     modulePaths: ['<rootDir>/src/main/webapp/'],
     transformIgnorePatterns: [`/node_modules/(?!${esModules})`],

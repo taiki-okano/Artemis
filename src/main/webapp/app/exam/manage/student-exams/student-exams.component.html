@@ -57,7 +57,7 @@
         <button
             class="btn btn-primary mt-1"
             id="assessUnsubmittedExamModelingAndTextParticipationsButton"
-            (click)="assessUnsubmittedExamModelingAndTextParticipations()"
+            (click)="assessUnsubmittedAndEmptyStudentExams()"
             *ngIf="course?.isAtLeastInstructor"
             [disabled]="isLoading || !isExamOver"
         >

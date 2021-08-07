@@ -501,7 +501,7 @@ describe('Exam Management Service Tests', () => {
         const expected = 1;
 
         // WHEN
-        service.assessUnsubmittedExamModelingAndTextParticipations(course.id!, mockExam.id!).subscribe((res) => expect(res.body).to.equal(mockUnsubmittedExercises));
+        service.assessUnsubmittedAndEmptyStudentExams(course.id!, mockExam.id!).subscribe((res) => expect(res.body).to.equal(mockUnsubmittedExercises));
 
         // THEN
         const req = httpMock.expectOne({

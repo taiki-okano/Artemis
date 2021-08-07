@@ -13,7 +13,6 @@ import { PlagiarismSubmission } from 'app/exercises/shared/plagiarism/types/Plag
 import { ModelingSubmissionService } from 'app/exercises/modeling/participate/modeling-submission.service';
 import { ModelingSubmission } from 'app/entities/modeling-submission.model';
 import { SubmissionType } from 'app/entities/submission.model';
-import { MockLocalStorageService } from '../../helpers/mocks/service/mock-local-storage.service';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { SplitPaneHeaderComponent } from 'app/exercises/shared/plagiarism/plagiarism-split-view/split-pane-header/split-pane-header.component';
 
@@ -31,7 +30,7 @@ describe('Modeling Submission Viewer Component', () => {
             declarations: [ModelingSubmissionViewerComponent, SplitPaneHeaderComponent],
             providers: [
                 { provide: TranslateService, useClass: MockTranslateService },
-                { provide: LocalStorageService, useClass: MockLocalStorageService },
+                { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
             ],
         }).compileComponents();
