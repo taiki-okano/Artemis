@@ -33,12 +33,13 @@ public interface StudentParticipationRepository extends JpaRepository<StudentPar
 
     boolean existsByExerciseId(@Param("exerciseId") Long exerciseId);
 
+    // NOTE: we explicitly load all "eager" relationships here because we experienced an issue, where some elements were not correctly loaded before
     @Query("""
-            SELECT DISTINCT p FROM StudentParticipation p LEFT JOIN FETCH p.results r
+            SELECT DISTINCT p FROM StudentParticipation p LEFT JOIN FETCH p.results r LEFT JOIN FETCH p.team t LEFT JOIN FETCH t.students LEFT JOIN FETCH p.student
             WHERE p.exercise.course.id = :#{#courseId}
                 AND (r.rated IS NULL OR r.rated = true)
             """)
-    List<StudentParticipation> findByCourseIdWithEagerRatedResults(@Param("courseId") Long courseId);
+    List<StudentParticipation> findByCourseIdWithEagerRatedResultsTeamStudents(@Param("courseId") Long courseId);
 
     @Query("""
             SELECT DISTINCT p FROM StudentParticipation p
@@ -567,8 +568,8 @@ public interface StudentParticipationRepository extends JpaRepository<StudentPar
      * @param courseId the id of the course
      * @return list of participations belonging to course
      */
-    default List<StudentParticipation> findByCourseIdWithRelevantResult(Long courseId) {
-        List<StudentParticipation> participations = findByCourseIdWithEagerRatedResults(courseId);
+    default List<StudentParticipation> findByCourseIdWithRelevantResultWithTeamStudents(Long courseId) {
+        List<StudentParticipation> participations = findByCourseIdWithEagerRatedResultsTeamStudents(courseId);
         return filterParticipationsWithRelevantResults(participations, false);
     }
 

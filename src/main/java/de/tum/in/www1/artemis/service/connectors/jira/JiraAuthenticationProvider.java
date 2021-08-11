@@ -103,7 +103,7 @@ public class JiraAuthenticationProvider extends ArtemisAuthenticationProviderImp
         return getOrCreateUser(authentication, skipPasswordCheck);
     }
 
-    private User getOrCreateUser(Authentication authentication, Boolean skipPasswordCheck) {
+    private User getOrCreateUser(Authentication authentication, boolean skipPasswordCheck) {
         String username = authentication.getName().toLowerCase();
         String password = authentication.getCredentials().toString();
         ResponseEntity<JiraUserDTO> authenticationResponse = null;

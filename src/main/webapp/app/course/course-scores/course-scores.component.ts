@@ -27,7 +27,9 @@ export const USERNAME_KEY = 'Username';
 export const EMAIL_KEY = 'Email';
 export const REGISTRATION_NUMBER_KEY = 'Registration Number';
 export const OVERALL_COURSE_POINTS_KEY = 'Overall Course Points';
+export const OVERALL_COURSE_POINTS_NEW_KEY = 'Overall Course Points (new calculation)';
 export const OVERALL_COURSE_SCORE_KEY = 'Overall Course Score';
+export const OVERALL_COURSE_SCORE_NEW_KEY = 'Overall Course Score (new calculation)';
 export const POINTS_KEY = 'Points';
 export const SCORE_KEY = 'Score';
 export const GRADE_KEY = 'Grades';
@@ -187,7 +189,7 @@ export class CourseScoresComponent implements OnInit, OnDestroy {
     /**
      * This method compares the course scores computed on the client side with the ones on the server side
      * using the participations score table. In the future we might switch to the server side method, so we use
-     * this method to detect discrepancys.
+     * this method to detect discrepancies.
      * @param courseScoreDTOs the course scores sent from the server (new calculation method)
      */
     private compareNewCourseScoresCalculationWithOldCalculation(courseScoreDTOs: ScoresDTO[]) {
@@ -415,7 +417,7 @@ export class CourseScoresComponent implements OnInit, OnDestroy {
                     keys.push(exerciseTypeName + ' ' + SCORE_KEY);
                 }
             }
-            keys.push(OVERALL_COURSE_POINTS_KEY, OVERALL_COURSE_SCORE_KEY);
+            keys.push(OVERALL_COURSE_POINTS_KEY, OVERALL_COURSE_SCORE_KEY, OVERALL_COURSE_SCORE_NEW_KEY, OVERALL_COURSE_POINTS_NEW_KEY);
             if (this.course.presentationScore) {
                 keys.push(PRESENTATION_SCORE_KEY);
             }
@@ -452,6 +454,16 @@ export class CourseScoresComponent implements OnInit, OnDestroy {
                 const overallScore = round((student.overallPoints / this.maxNumberOfOverallPoints) * 100, 1);
                 rowData[OVERALL_COURSE_POINTS_KEY] = this.localeConversionService.toLocaleString(student.overallPoints);
                 rowData[OVERALL_COURSE_SCORE_KEY] = this.localeConversionService.toLocalePercentageString(overallScore);
+
+                const courseScoreDTO = this.studentIdToCourseScoreDTOs.get(student.user.id!);
+                if (courseScoreDTO) {
+                    rowData[OVERALL_COURSE_POINTS_NEW_KEY] = this.localeConversionService.toLocalePercentageString(courseScoreDTO!.pointsAchieved!);
+                    rowData[OVERALL_COURSE_SCORE_NEW_KEY] = this.localeConversionService.toLocalePercentageString(courseScoreDTO!.scoreAchieved!);
+                } else {
+                    rowData[OVERALL_COURSE_POINTS_NEW_KEY] = '-';
+                    rowData[OVERALL_COURSE_SCORE_NEW_KEY] = '-';
+                }
+
                 if (this.course.presentationScore) {
                     rowData[PRESENTATION_SCORE_KEY] = this.localeConversionService.toLocaleString(student.presentationScore);
                 }

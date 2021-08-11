@@ -301,7 +301,7 @@ public class ParticipationResource {
         log.debug("REST request to get all Participations for Course {}", courseId);
         Course course = courseRepository.findByIdElseThrow(courseId);
         authCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.INSTRUCTOR, course, null);
-        List<StudentParticipation> participations = studentParticipationRepository.findByCourseIdWithRelevantResult(courseId);
+        List<StudentParticipation> participations = studentParticipationRepository.findByCourseIdWithRelevantResultWithTeamStudents(courseId);
         int resultCount = 0;
         for (StudentParticipation participation : participations) {
             // make sure the registration number is explicitly shown in the client
