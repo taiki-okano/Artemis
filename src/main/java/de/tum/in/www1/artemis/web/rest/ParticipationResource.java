@@ -303,6 +303,10 @@ public class ParticipationResource {
         authCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.INSTRUCTOR, course, null);
         List<StudentParticipation> participations = studentParticipationRepository.findByCourseIdWithRelevantResultWithTeamStudents(courseId);
         int resultCount = 0;
+        int teamParticipations = 0;
+        int individualParticipations = 0;
+        Map<String, Integer> teams = new HashMap<>();
+        int studentsInTeams = 0;
         for (StudentParticipation participation : participations) {
             // make sure the registration number is explicitly shown in the client
             participation.getStudents().forEach(student -> student.setVisibleRegistrationNumber(student.getRegistrationNumber()));
@@ -342,9 +346,29 @@ public class ParticipationResource {
                 modelingExercise.setSampleSolutionExplanation(null);
             }
             resultCount += participation.getResults().size();
+            if (participation.getParticipant() instanceof Team team) {
+                teamParticipations++;
+                studentsInTeams += team.getStudents().size();
+                if (!teams.containsKey(team.getShortName())) {
+                    teams.put(team.getShortName(), 0);
+                }
+                int newValue = teams.get(team.getShortName()) + 1;
+                teams.put(team.getShortName(), newValue);
+            }
+            else if (participation.getParticipant() instanceof User) {
+                individualParticipations++;
+            }
         }
         long end = System.currentTimeMillis();
         log.info("Found {} particpations with {} results in {}ms", participations.size(), resultCount, end - start);
+        log.info("Found {} team participations with {} students in teams", teamParticipations, studentsInTeams);
+        if (teams.size() > 0) {
+            log.info("Found the following team participation distribution");
+            for (String teamShortName : teams.keySet()) {
+                log.info("      Found {} team participations for team {}", teams.get(teamShortName), teamShortName);
+            }
+        }
+        log.info("Found {} individual participations", individualParticipations);
         return ResponseEntity.ok().body(participations);
     }
 
