@@ -284,10 +284,10 @@ export class ModelingAssessmentComponent implements AfterViewInit, OnDestroy, On
         if (this.apollonEditor != undefined) {
             const model: UMLModel = this.apollonEditor!.model;
             for (const element of model.elements) {
-                element.assessmentNote = this.calculateNote(elementCountMap.get(element.id));
+                //element.assessmentNote = this.calculateNote(elementCountMap.get(element.id));
             }
             for (const relationship of model.relationships) {
-                relationship.assessmentNote = this.calculateNote(elementCountMap.get(relationship.id));
+                //relationship.assessmentNote = this.calculateNote(elementCountMap.get(relationship.id));
             }
             this.apollonEditor!.model = model;
         }
