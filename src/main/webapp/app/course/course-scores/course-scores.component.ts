@@ -236,6 +236,8 @@ export class CourseScoresComponent implements OnInit, OnDestroy {
 
     logErrorOnSentry(errorMessage: string) {
         Sentry.captureException(new Error(errorMessage));
+        // Note: this console.log is on purpose to simplify detecting issues in the calculation
+        console.log(errorMessage);
     }
 
     /**
@@ -417,7 +419,7 @@ export class CourseScoresComponent implements OnInit, OnDestroy {
                     keys.push(exerciseTypeName + ' ' + SCORE_KEY);
                 }
             }
-            keys.push(OVERALL_COURSE_POINTS_KEY, OVERALL_COURSE_SCORE_KEY, OVERALL_COURSE_SCORE_NEW_KEY, OVERALL_COURSE_POINTS_NEW_KEY);
+            keys.push(OVERALL_COURSE_POINTS_KEY, OVERALL_COURSE_SCORE_KEY, OVERALL_COURSE_POINTS_NEW_KEY, OVERALL_COURSE_SCORE_NEW_KEY);
             if (this.course.presentationScore) {
                 keys.push(PRESENTATION_SCORE_KEY);
             }
@@ -457,7 +459,7 @@ export class CourseScoresComponent implements OnInit, OnDestroy {
 
                 const courseScoreDTO = this.studentIdToCourseScoreDTOs.get(student.user.id!);
                 if (courseScoreDTO) {
-                    rowData[OVERALL_COURSE_POINTS_NEW_KEY] = this.localeConversionService.toLocalePercentageString(courseScoreDTO!.pointsAchieved!);
+                    rowData[OVERALL_COURSE_POINTS_NEW_KEY] = this.localeConversionService.toLocaleString(courseScoreDTO!.pointsAchieved!);
                     rowData[OVERALL_COURSE_SCORE_NEW_KEY] = this.localeConversionService.toLocalePercentageString(courseScoreDTO!.scoreAchieved!);
                 } else {
                     rowData[OVERALL_COURSE_POINTS_NEW_KEY] = '-';
