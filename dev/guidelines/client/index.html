@@ -102,16 +102,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#general-assumptions">5. General Assumptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#comments">6. Comments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#strings">7. Strings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#style">8. Style</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#testing">9. Testing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#preventing-memory-leaks">10. Preventing Memory Leaks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#buttons-and-links">8. Buttons and Links</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#style">9. Style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing">10. Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preventing-memory-leaks">11. Preventing Memory Leaks</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#what-are-memory-leaks">What are memory leaks?</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#what-are-common-reasons-for-memory-leaks">What are common reasons for memory leaks?</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#what-are-ways-to-identify-memory-leaks">What are ways to identify memory leaks?</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#defining-routes-and-breadcrumbs">11. Defining Routes and Breadcrumbs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#strict-template-check">12. Strict Template Check</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#defining-routes-and-breadcrumbs">12. Defining Routes and Breadcrumbs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strict-template-check">13. Strict Template Check</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#use-artemistranslatepipe-instead-of-translatepipe">Use ArtemisTranslatePipe instead of TranslatePipe</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#use-artemistimeagopipe-instead-of-timeagopipe">Use ArtemisTimeAgoPipe instead of TimeAgoPipe</a></li>
 </ul>
@@ -271,8 +272,16 @@
 <li><p>All strings visible to the user need to be localized (make an entry in the corresponding <code class="docutils literal notranslate"><span class="pre">*.json</span></code> file).</p></li>
 </ol>
 </div>
+<div class="section" id="buttons-and-links">
+<h2>8. Buttons and Links<a class="headerlink" href="#buttons-and-links" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Be aware that Buttons navigate only in the same tab while Links provide the option to use the context menu or a middle-click to open the page in a new tab. Therefore:</p></li>
+<li><p>Buttons are best used to trigger certain functionalities (e.g. <code class="docutils literal notranslate"><span class="pre">&lt;button</span> <span class="pre">(click)='deleteExercise(exercise)'&gt;...&lt;/button</span></code>)</p></li>
+<li><p>Links are best for navigating on Artemis (e.g. <code class="docutils literal notranslate"><span class="pre">&lt;a</span> <span class="pre">[routerLink]='getLinkForExerciseEditor(exercise)'</span> <span class="pre">[queryParams]='getQueryParamsForEditor(exercise)'&gt;...&lt;/a&gt;</span></code>)</p></li>
+</ol>
+</div>
 <div class="section" id="style">
-<h2>8. Style<a class="headerlink" href="#style" title="Permalink to this headline">¶</a></h2>
+<h2>9. Style<a class="headerlink" href="#style" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Use arrow functions over anonymous function expressions.</p></li>
 <li><dl class="simple">
@@ -305,7 +314,7 @@
 You can find the corresponding commands to invoked those tools in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
 </div>
 <div class="section" id="testing">
-<h2>9. Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<h2>10. Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
 <p><strong>If you are new to client testing, it is highly recommended that you work through the testing part of the angular tutorial:</strong> <a class="reference external" href="https://angular.io/guide/testing">https://angular.io/guide/testing</a></p>
 <p>We use Jest (<a class="reference external" href="https://jestjs.io/">https://jestjs.io/</a>) as our client testing framework.</p>
 <p>There are different tools available to support client testing. A common combination you can see in our codebase is:</p>
@@ -449,7 +458,7 @@ template changes have occurred.</p></li>
 </div></blockquote>
 </div>
 <div class="section" id="preventing-memory-leaks">
-<h2>10. Preventing Memory Leaks<a class="headerlink" href="#preventing-memory-leaks" title="Permalink to this headline">¶</a></h2>
+<h2>11. Preventing Memory Leaks<a class="headerlink" href="#preventing-memory-leaks" title="Permalink to this headline">¶</a></h2>
 <p>It is crucial that you try to prevent memory leaks in both your components and your tests.</p>
 <div class="section" id="what-are-memory-leaks">
 <h3>What are memory leaks?<a class="headerlink" href="#what-are-memory-leaks" title="Permalink to this headline">¶</a></h3>
@@ -508,7 +517,7 @@ RXJS subscriptions not being unsubscribed.</p>
 </div>
 </div>
 <div class="section" id="defining-routes-and-breadcrumbs">
-<h2>11. Defining Routes and Breadcrumbs<a class="headerlink" href="#defining-routes-and-breadcrumbs" title="Permalink to this headline">¶</a></h2>
+<h2>12. Defining Routes and Breadcrumbs<a class="headerlink" href="#defining-routes-and-breadcrumbs" title="Permalink to this headline">¶</a></h2>
 <p>The ideal schema for routes is that every variable in a path is preceded by a unique path segment: <code class="docutils literal notranslate"><span class="pre">\entityA\:entityIDA\entityB\:entityIDB</span></code></p>
 <p>For example, <code class="docutils literal notranslate"><span class="pre">\courses\:courseId\:exerciseId</span></code> is not a good path and should be written as <code class="docutils literal notranslate"><span class="pre">\courses\:courseId\exercises\:exerciseId</span></code>.
 Doubling textual segments like <code class="docutils literal notranslate"><span class="pre">\lectures\statistics\:lectureId</span></code> should be avoided and instead formulated as <code class="docutils literal notranslate"><span class="pre">\lectures\:lectureId\statistics</span></code>.</p>
@@ -539,7 +548,7 @@ Doubling textual segments like <code class="docutils literal notranslate"><span 
 </div>
 </div>
 <div class="section" id="strict-template-check">
-<h2>12. Strict Template Check<a class="headerlink" href="#strict-template-check" title="Permalink to this headline">¶</a></h2>
+<h2>13. Strict Template Check<a class="headerlink" href="#strict-template-check" title="Permalink to this headline">¶</a></h2>
 <p>To prevent errors for strict template rule in TypeScript, Artemis uses following approaches.</p>
 <div class="section" id="use-artemistranslatepipe-instead-of-translatepipe">
 <h3>Use ArtemisTranslatePipe instead of TranslatePipe<a class="headerlink" href="#use-artemistranslatepipe-instead-of-translatepipe" title="Permalink to this headline">¶</a></h3>
