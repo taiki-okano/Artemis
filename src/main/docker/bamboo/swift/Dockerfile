@@ -23,11 +23,12 @@ COPY --from=swift:latest /usr /usr
 # Install SwiftLint
 RUN apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
-    libxml2-dev
+    libxml2-dev \
+    libncurses5
 RUN git clone --branch master https://github.com/realm/SwiftLint.git && \
     cd SwiftLint && \
-    swift build --configuration release -Xswiftc -static-stdlib && \
-    mv $(swift build --configuration release -Xswiftc -static-stdlib --show-bin-path)/swiftlint /usr/bin && \
+    make && \
+    mv .build/x86_64-unknown-linux-gnu/release/swiftlint /usr/bin/ && \
     cd .. && \
     rm -rf SwiftLint
 
