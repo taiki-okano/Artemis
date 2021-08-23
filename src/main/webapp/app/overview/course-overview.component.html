@@ -26,16 +26,20 @@
         </div>
         <jhi-alert></jhi-alert>
         <div class="tab-bar tab-bar-course-overview">
-            <div *ngIf="course.exams && hasVisibleExams()" jhiOrionFilter [showInOrionWindow]="false" class="tab-item exams" routerLink="exams" routerLinkActive="active">
+            <div *ngIf="course.exams && hasVisibleExams()" jhiOrionFilter [showInOrionWindow]="false" class="tab-item exams" routerLinkActive="active">
+                <a class="stretched-link" [routerLink]="['/courses', course.id, 'exams']"></a>
                 <b jhiTranslate="artemisApp.courseOverview.menu.exams">Exams</b>
             </div>
-            <div class="tab-item exercises" routerLink="exercises" routerLinkActive="active">
+            <div class="tab-item exercises" routerLinkActive="active">
+                <a class="stretched-link" [routerLink]="['/courses', course.id, 'exercises']"></a>
                 <b jhiTranslate="artemisApp.courseOverview.menu.exercises">Exercise</b>
             </div>
-            <div *ngIf="course.lectures" jhiOrionFilter [showInOrionWindow]="false" class="tab-item lectures" routerLink="lectures" routerLinkActive="active">
+            <div *ngIf="course.lectures" jhiOrionFilter [showInOrionWindow]="false" class="tab-item lectures" routerLinkActive="active">
+                <a class="stretched-link" [routerLink]="['/courses', course.id, 'lectures']"></a>
                 <b jhiTranslate="artemisApp.courseOverview.menu.lectures">Lectures</b>
             </div>
-            <div jhiOrionFilter [showInOrionWindow]="false" class="guided-tour tab-item statistics" routerLink="statistics" routerLinkActive="active">
+            <div jhiOrionFilter [showInOrionWindow]="false" class="guided-tour tab-item statistics" routerLinkActive="active">
+                <a class="stretched-link" [routerLink]="['/courses', course.id, 'statistics']"></a>
                 <b jhiTranslate="artemisApp.courseOverview.menu.statistics">Statistics</b>
             </div>
             <button class="btn btn-primary btn-md ms-1" (click)="loadCourse(true)" [disabled]="refreshingCourse">

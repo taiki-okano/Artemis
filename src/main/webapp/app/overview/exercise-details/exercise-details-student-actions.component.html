@@ -2,7 +2,7 @@
 <div *ngIf="exercise.type === ExerciseType.QUIZ">
     <!-- ACTIONS START -->
     <div class="btn-group me-2">
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="redo"
             [buttonLabel]="'artemisApp.exerciseActions.practice' | artemisTranslate"
@@ -11,7 +11,7 @@
             [hideLabelMobile]="false"
             *ngIf="isPracticeModeAvailable()"
             [routerLink]="['/courses', courseId, 'quiz-exercises', exercise.id, 'practice']"
-        ></button>
+        ></a>
         <button
             jhi-exercise-action-button
             buttonIcon="play-circle"
@@ -68,7 +68,7 @@
             [smallButton]="smallButtons"
             (click)="startExercise()"
         ></button>
-        <button
+        <a
             jhi-exercise-action-button
             *ngIf="!!exercise.isAtLeastTutor"
             buttonIcon="signal"
@@ -77,7 +77,7 @@
             [buttonLoading]="!!exercise.loading"
             [smallButton]="smallButtons"
             routerLink="/course-management/{{ courseId }}/quiz-exercises/{{ exercise.id }}/quiz-point-statistic"
-        ></button>
+        ></a>
     </div>
     <!-- INFORMATION END -->
 </div>
@@ -87,7 +87,7 @@
 <div *ngIf="exercise.type === ExerciseType.MODELING">
     <!-- ACTION START -->
     <div class="btn-group me-2">
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="users"
             [buttonLabel]="'artemisApp.exerciseActions.viewTeam' | artemisTranslate"
@@ -95,8 +95,8 @@
             [smallButton]="smallButtons"
             [hideLabelMobile]="true"
             [routerLink]="['/courses', courseId, 'exercises', exercise.id, 'teams', assignedTeamId]"
-        ></button>
-        <button
+        ></a>
+        <a
             jhi-exercise-action-button
             buttonIcon="play-circle"
             [buttonLabel]="'artemisApp.exerciseActions.startExercise' | artemisTranslate"
@@ -105,8 +105,8 @@
             [hideLabelMobile]="false"
             *ngIf="participationStatusWrapper() === ParticipationStatus.UNINITIALIZED"
             (click)="startExercise()"
-        ></button>
-        <button
+        ></a>
+        <a
             jhi-exercise-action-button
             buttonIcon="folder-open"
             [buttonLabel]="'artemisApp.exerciseActions.openModelingEditor' | artemisTranslate"
@@ -115,13 +115,13 @@
             [hideLabelMobile]="false"
             *ngIf="exercise.studentParticipations && exercise.studentParticipations.length > 0 && exercise.studentParticipations[0].initializationState === 'INITIALIZED'"
             [routerLink]="['/courses', courseId, 'modeling-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-        ></button>
+        ></a>
     </div>
     <!-- ACTION END -->
     <!-- INFORMATION START -->
     <div class="btn-group" *ngIf="!actionsOnly">
         <div class="btn-group">
-            <button
+            <a
                 jhi-exercise-action-button
                 buttonIcon="folder-open"
                 [buttonLabel]="'artemisApp.exerciseActions.viewSubmissions' | artemisTranslate"
@@ -135,9 +135,9 @@
                     (!exercise.studentParticipations[0].results || exercise.studentParticipations[0].results.length === 0 || !showResult)
                 "
                 [routerLink]="['/courses', courseId, 'modeling-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-            ></button>
+            ></a>
             <!-- TODO improve the distinction, in particular if there are multiple submissions and results -->
-            <button
+            <a
                 jhi-exercise-action-button
                 buttonIcon="folder-open"
                 [buttonLabel]="'artemisApp.exerciseActions.viewResults' | artemisTranslate"
@@ -153,7 +153,7 @@
                     showResult
                 "
                 [routerLink]="['/courses', courseId, 'modeling-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-            ></button>
+            ></a>
         </div>
     </div>
     <!-- INFORMATION END -->
@@ -164,7 +164,7 @@
 <div *ngIf="exercise.type === ExerciseType.PROGRAMMING">
     <!-- ACTION START -->
     <div class="btn-group">
-        <button
+        <a
             class="view-team"
             jhi-exercise-action-button
             buttonIcon="users"
@@ -173,7 +173,7 @@
             [smallButton]="smallButtons"
             [hideLabelMobile]="true"
             [routerLink]="['/courses', courseId, 'exercises', exercise.id, 'teams', assignedTeamId]"
-        ></button>
+        ></a>
         <button
             class="start-exercise"
             jhi-exercise-action-button
@@ -190,7 +190,7 @@
         code editor button. We should think about refactoring the clone repo button into a own component -->
         <ng-container *ngIf="participationStatusWrapper() == ParticipationStatus.INITIALIZED && exercise.studentParticipations && exercise.studentParticipations.length > 0">
             <ng-container *jhiExtensionPoint="overrideCloneOnlineEditorButton; context: { exercise: exercise }">
-                <button
+                <a
                     jhi-exercise-action-button
                     buttonIcon="folder-open"
                     [jhiFeatureToggle]="FeatureToggle.PROGRAMMING_EXERCISES"
@@ -200,7 +200,7 @@
                     [hideLabelMobile]="false"
                     *ngIf="!examMode && isOnlineEditorAllowed()"
                     [routerLink]="['/courses', courseId, 'programming-exercises', exercise.id, 'code-editor', exercise.studentParticipations[0].id]"
-                ></button>
+                ></a>
                 <jhi-clone-repo-button
                     [loading]="!!exercise.loading"
                     [smallButtons]="smallButtons"
@@ -232,7 +232,7 @@
 <div *ngIf="exercise.type === ExerciseType.TEXT">
     <!-- ACTIONS START -->
     <div class="btn-group me-2">
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="users"
             [buttonLabel]="'artemisApp.exerciseActions.viewTeam' | artemisTranslate"
@@ -240,7 +240,7 @@
             [smallButton]="smallButtons"
             [hideLabelMobile]="true"
             [routerLink]="['/courses', courseId, 'exercises', exercise.id, 'teams', assignedTeamId]"
-        ></button>
+        ></a>
         <button
             class="start-exercise"
             jhi-exercise-action-button
@@ -252,7 +252,7 @@
             *ngIf="participationStatusWrapper() === ParticipationStatus.UNINITIALIZED"
             (click)="startExercise()"
         ></button>
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="folder-open"
             [buttonLabel]="'artemisApp.exerciseActions.openTextEditor' | artemisTranslate"
@@ -261,12 +261,12 @@
             [hideLabelMobile]="false"
             *ngIf="exercise.studentParticipations && exercise.studentParticipations.length > 0 && exercise.studentParticipations[0].initializationState === 'INITIALIZED'"
             [routerLink]="['/courses', courseId, 'text-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-        ></button>
+        ></a>
     </div>
     <!-- ACTIONS END -->
     <!-- INFORMATION START -->
     <div class="btn-group" *ngIf="!actionsOnly">
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="folder-open"
             [buttonLabel]="'artemisApp.exerciseActions.viewSubmissions' | artemisTranslate"
@@ -281,9 +281,9 @@
                 (!exercise.studentParticipations[0].results || exercise.studentParticipations[0].results.length === 0 || !showResult)
             "
             [routerLink]="['/courses', courseId, 'text-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-        ></button>
+        ></a>
         <!-- TODO improve the distinction, in particular if there are multiple submissions and results -->
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="folder-open"
             [buttonLabel]="'artemisApp.exerciseActions.viewResults' | artemisTranslate"
@@ -299,7 +299,7 @@
                 showResult
             "
             [routerLink]="['/courses', courseId, 'text-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-        ></button>
+        ></a>
     </div>
     <!-- INFORMATION END -->
 </div>
@@ -309,7 +309,7 @@
 <div *ngIf="exercise.type === ExerciseType.FILE_UPLOAD">
     <!-- ACTIONS START -->
     <div class="btn-group">
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="users"
             [buttonLabel]="'artemisApp.exerciseActions.viewTeam' | artemisTranslate"
@@ -317,7 +317,7 @@
             [smallButton]="smallButtons"
             [hideLabelMobile]="true"
             [routerLink]="['/courses', courseId, 'exercises', exercise.id, 'teams', assignedTeamId]"
-        ></button>
+        ></a>
         <button
             jhi-exercise-action-button
             buttonIcon="play-circle"
@@ -328,7 +328,7 @@
             [hideLabelMobile]="false"
             (click)="startExercise()"
         ></button>
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="folder-open"
             [buttonLabel]="'artemisApp.exerciseActions.uploadFile' | artemisTranslate"
@@ -337,12 +337,12 @@
             [hideLabelMobile]="false"
             *ngIf="exercise.studentParticipations && exercise.studentParticipations.length > 0 && exercise.studentParticipations[0].initializationState === 'INITIALIZED'"
             [routerLink]="['/courses', courseId, 'file-upload-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-        ></button>
+        ></a>
     </div>
     <!-- ACTIONS END-->
     <!-- INFORMATION START -->
     <div class="btn-group" *ngIf="!actionsOnly">
-        <button
+        <a
             jhi-exercise-action-button
             buttonIcon="folder-open"
             [buttonLabel]="'artemisApp.exerciseActions.viewSubmissions' | artemisTranslate"
@@ -357,8 +357,8 @@
                 (!exercise.studentParticipations[0].results || exercise.studentParticipations[0].results.length === 0 || !showResult)
             "
             [routerLink]="['/courses', courseId, 'file-upload-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-        ></button>
-        <button
+        ></a>
+        <a
             jhi-exercise-action-button
             buttonIcon="folder-open"
             [buttonLabel]="'artemisApp.exerciseActions.viewResults' | artemisTranslate"
@@ -374,7 +374,7 @@
                 showResult
             "
             [routerLink]="['/courses', courseId, 'file-upload-exercises', exercise.id, 'participate', exercise.studentParticipations[0].id]"
-        ></button>
+        ></a>
     </div>
     <!-- INFORMATION END -->
 </div>
