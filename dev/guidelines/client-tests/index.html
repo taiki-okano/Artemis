@@ -1,0 +1,503 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Client Tests &mdash; Artemis  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="Database Relationships" href="../database/" />
+    <link rel="prev" title="Client" href="../client/" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../" class="icon icon-home" alt="Documentation Home"> Artemis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/exercises/">Exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/exam_mode/">Exam Mode</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributor Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../setup/">Setup Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Coding and design guidelines</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../server/">Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../client/">Client</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Client Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../database/">Database Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code-review/">Code Review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../language-guidelines/">Inclusive, Diversity-Sensitive, and Appreciative Language</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../system-design/">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use-local-user-management/">Using local user management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../saml2-shibboleth/">Shibboleth/SAML2 Login &amp; Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guided-tour/">Guided Tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testservers/">Test Servers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/">Builds and Dependency Management</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administration Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/registration/">User Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/accessRights/">Access Rights</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../">Artemis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../">Coding and design guidelines</a> &raquo;</li>
+        
+      <li>Client Tests</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/ls1intum/Artemis/blob/develop/docs/dev/guidelines/client-tests.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="client-tests">
+<h1>Client Tests<a class="headerlink" href="#client-tests" title="Permalink to this headline">¶</a></h1>
+<p><strong>If you are new to client testing, it is highly recommended that you work through the</strong> <a class="reference external" href="https://angular.io/guide/testing">testing part</a> <strong>of the angular tutorial.</strong></p>
+<p>We use <a class="reference external" href="https://jestjs.io">Jest</a> as our client testing framework.</p>
+<p>There are different tools available to support client testing. A common combination you can see in our codebase is:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://sinonjs.org/">Sinon</a> for creating test spies, stubs and mocks</p></li>
+<li><p><a class="reference external" href="https://www.chaijs.com/">Chai</a> with <a class="reference external" href="https://github.com/domenic/sinon-chai">Sinon Chai</a> for assertions.</p></li>
+<li><p><a class="reference external" href="https://www.npmjs.com/package/ng-mocks/">NgMocks</a> for mocking the dependencies of an angular component.</p></li>
+</ul>
+<p>The most basic test looks similar to this:</p>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">chai</span> <span class="nx">from</span> <span class="s1">&#39;chai&#39;</span><span class="p">;</span>
+<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinonChai</span> <span class="nx">from</span> <span class="s1">&#39;sinon-chai&#39;</span><span class="p">;</span>
+<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinon</span> <span class="nx">from</span> <span class="s1">&#39;sinon&#39;</span><span class="p">;</span>
+<span class="kr">import</span> <span class="p">{</span> <span class="nx">ComponentFixture</span><span class="p">,</span> <span class="nx">TestBed</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@angular/core/testing&#39;</span><span class="p">;</span>
+
+<span class="nx">chai</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">sinonChai</span><span class="p">);</span>
+<span class="kr">const</span> <span class="nx">expect</span> <span class="o">=</span> <span class="nx">chai</span><span class="p">.</span><span class="nx">expect</span><span class="p">;</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;SomeComponent&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">someComponentFixture</span>: <span class="kt">ComponentFixture</span><span class="o">&lt;</span><span class="nx">SomeComponent</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="kd">let</span> <span class="nx">someComponent</span>: <span class="kt">SomeComponent</span><span class="p">;</span>
+
+    <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">TestBed</span><span class="p">.</span><span class="nx">configureTestingModule</span><span class="p">({</span>
+            <span class="nx">imports</span><span class="o">:</span> <span class="p">[],</span>
+            <span class="nx">declarations</span><span class="o">:</span> <span class="p">[</span>
+                <span class="nx">SomeComponent</span><span class="p">,</span>
+                <span class="nx">MockPipe</span><span class="p">(</span><span class="nx">SomePipeUsedInTemplate</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">SomeComponentUsedInTemplate</span><span class="p">),</span>
+                <span class="nx">MockDirective</span><span class="p">(</span><span class="nx">SomeDirectiveUsedInTemplate</span><span class="p">),</span>
+            <span class="p">],</span>
+            <span class="nx">providers</span><span class="o">:</span> <span class="p">[</span>
+                <span class="nx">MockProvider</span><span class="p">(</span><span class="nx">SomeServiceUsedInComponent</span><span class="p">),</span>
+            <span class="p">],</span>
+        <span class="p">})</span>
+            <span class="p">.</span><span class="nx">compileComponents</span><span class="p">()</span>
+            <span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="nx">someComponentFixture</span> <span class="o">=</span> <span class="nx">TestBed</span><span class="p">.</span><span class="nx">createComponent</span><span class="p">(</span><span class="nx">SomeComponent</span><span class="p">);</span>
+                <span class="nx">someComponent</span> <span class="o">=</span> <span class="nx">someComponentFixture</span><span class="p">.</span><span class="nx">componentInstance</span><span class="p">;</span>
+            <span class="p">});</span>
+    <span class="p">});</span>
+
+    <span class="nx">afterEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="nx">sinon</span><span class="p">.</span><span class="nx">restore</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should initialize&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">someComponentFixture</span><span class="p">.</span><span class="nx">detectChanges</span><span class="p">();</span>
+        <span class="nx">expect</span><span class="p">(</span><span class="nx">SomeComponent</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">be</span><span class="p">.</span><span class="nx">ok</span><span class="p">;</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Some guidelines:</p>
+<ol class="arabic simple">
+<li><p>A component should be tested in isolation without any dependencies if possible. Do not simply import the whole production module. Only import real dependencies if it is essential for the test
+that the real dependency is used. Instead, use mock pipes, mock directives and mock components that the component under test depends upon. A very useful technique is writing <a class="reference external" href="https://angular.io/guide/testing-components-scenarios#stubbing-unneeded-components">stubs for child components</a>.
+This has the benefit of being able to test the interaction with the child components.</p></li>
+</ol>
+<p>Example of a bad test practice:</p>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;ParticipationSubmissionComponent&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="p">...</span>
+
+    <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">TestBed</span><span class="p">.</span><span class="nx">configureTestingModule</span><span class="p">({</span>
+            <span class="nx">imports</span><span class="o">:</span> <span class="p">[</span><span class="nx">ArtemisTestModule</span><span class="p">,</span> <span class="nx">NgxDatatableModule</span><span class="p">,</span> <span class="nx">ArtemisResultModule</span><span class="p">,</span> <span class="nx">ArtemisSharedModule</span><span class="p">,</span> <span class="nx">TranslateModule</span><span class="p">.</span><span class="nx">forRoot</span><span class="p">(),</span> <span class="nx">RouterTestingModule</span><span class="p">,</span> <span class="nx">MomentModule</span><span class="p">],</span>
+            <span class="nx">declarations</span><span class="o">:</span> <span class="p">[</span>
+                <span class="nx">ParticipationSubmissionComponent</span><span class="p">,</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">UpdatingResultComponent</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">AssessmentDetailComponent</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">ComplaintsForTutorComponent</span><span class="p">),</span>
+            <span class="p">],</span>
+            <span class="nx">providers</span><span class="o">:</span> <span class="p">[</span>
+                <span class="p">...</span>
+            <span class="p">],</span>
+        <span class="p">})</span>
+            <span class="p">.</span><span class="nx">overrideModule</span><span class="p">(</span><span class="nx">ArtemisTestModule</span><span class="p">,</span> <span class="p">{</span> <span class="nx">set</span><span class="o">:</span> <span class="p">{</span> <span class="nx">declarations</span><span class="o">:</span> <span class="p">[],</span> <span class="nx">exports</span><span class="o">:</span> <span class="p">[]</span> <span class="p">}</span> <span class="p">})</span>
+            <span class="p">.</span><span class="nx">compileComponents</span><span class="p">()</span>
+            <span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="p">...</span>
+            <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Running time: 313.931s:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>PASS  src/test/javascript/spec/component/participation-submission/participation-submission.component.spec.ts (313.931 s, 625 MB heap size)
+</pre></div>
+</div>
+<p>Example of a good test practice:</p>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;ParticipationSubmissionComponent&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="p">...</span>
+
+    <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">TestBed</span><span class="p">.</span><span class="nx">configureTestingModule</span><span class="p">({</span>
+            <span class="nx">imports</span><span class="o">:</span> <span class="p">[</span><span class="nx">ArtemisTestModule</span><span class="p">,</span> <span class="nx">RouterTestingModule</span><span class="p">,</span> <span class="nx">NgxDatatableModule</span><span class="p">],</span>
+            <span class="nx">declarations</span><span class="o">:</span> <span class="p">[</span>
+                <span class="nx">ParticipationSubmissionComponent</span><span class="p">,</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">UpdatingResultComponent</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">AssessmentDetailComponent</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">ComplaintsForTutorComponent</span><span class="p">),</span>
+                <span class="nx">MockTranslateValuesDirective</span><span class="p">,</span>
+                <span class="nx">MockPipe</span><span class="p">(</span><span class="nx">ArtemisTranslatePipe</span><span class="p">),</span>
+                <span class="nx">MockPipe</span><span class="p">(</span><span class="nx">ArtemisDatePipe</span><span class="p">),</span>
+                <span class="nx">MockPipe</span><span class="p">(</span><span class="nx">ArtemisTimeAgoPipe</span><span class="p">),</span>
+                <span class="nx">MockDirective</span><span class="p">(</span><span class="nx">DeleteButtonDirective</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">AlertComponent</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">ResultComponent</span><span class="p">),</span>
+                <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">FaIconComponent</span><span class="p">),</span>
+            <span class="p">],</span>
+            <span class="nx">providers</span><span class="o">:</span> <span class="p">[</span>
+                <span class="p">...</span>
+            <span class="p">],</span>
+        <span class="p">})</span>
+            <span class="p">.</span><span class="nx">overrideModule</span><span class="p">(</span><span class="nx">ArtemisTestModule</span><span class="p">,</span> <span class="p">{</span> <span class="nx">set</span><span class="o">:</span> <span class="p">{</span> <span class="nx">declarations</span><span class="o">:</span> <span class="p">[],</span> <span class="nx">exports</span><span class="o">:</span> <span class="p">[]</span> <span class="p">}</span> <span class="p">})</span>
+            <span class="p">.</span><span class="nx">compileComponents</span><span class="p">()</span>
+            <span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="p">...</span>
+            <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Running time: 13.685s:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>PASS  src/test/javascript/spec/component/participation-submission/participation-submission.component.spec.ts (13.685 s, 535 MB heap size)
+</pre></div>
+</div>
+<p>Now the whole testing suite is running <strong>~25 times faster</strong>!</p>
+<p>Here are the improvements for the test above:</p>
+<ul class="simple">
+<li><p><strong>Removed</strong> production module imports:</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- ArtemisResultModule
+- ArtemisSharedModule
+- TranslateModule.forRoot()
+- MomentModule
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Mocked</strong> pipes, directives and components that are not supposed to be tested:</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+ MockTranslateValuesDirective
++ MockPipe(ArtemisTranslatePipe)
++ MockPipe(ArtemisDatePipe)
++ MockPipe(ArtemisTimeAgoPipe)
++ MockDirective(DeleteButtonDirective)
++ MockComponent(AlertComponent)
++ MockComponent(ResultComponent)
++ MockComponent(FaIconComponent)
+</pre></div>
+</div>
+<p>More examples on test speed improvement can be found in the <a class="reference external" href="https://github.com/ls1intum/Artemis/pull/3879/files">following PR</a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Services should be mocked if they simply return some data from the server. However, if the service has some form of logic included (for example converting dates to moments),
+and this logic is important for the component, do not mock the service methods, but mock the HTTP requests and responses from the API. This allows us to test the interaction
+of the component with the service and in addition test that the service logic works correctly. A good explanation can be found in the <a class="reference external" href="https://angular.io/guide/http#testing-http-requests">official angular documentation</a>.</p></li>
+</ul>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">HttpClientTestingModule</span><span class="p">,</span> <span class="nx">HttpTestingController</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@angular/common/http/testing&#39;</span><span class="p">;</span>
+<span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;SomeComponent&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nx">TestBed</span><span class="p">.</span><span class="nx">configureTestingModule</span><span class="p">({</span>
+          <span class="nx">imports</span><span class="o">:</span> <span class="p">[</span><span class="nx">HttpClientTestingModule</span><span class="p">],</span>
+      <span class="p">});</span>
+
+      <span class="p">...</span>
+      <span class="nx">httpMock</span> <span class="o">=</span> <span class="nx">injector</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">HttpTestingController</span><span class="p">);</span>
+  <span class="p">});</span>
+
+  <span class="nx">afterEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="p">...</span>
+      <span class="nx">httpMock</span><span class="p">.</span><span class="nx">verify</span><span class="p">();</span>
+      <span class="nx">sinon</span><span class="p">.</span><span class="nx">restore</span><span class="p">();</span>
+  <span class="p">});</span>
+
+  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should make get request&#39;</span><span class="p">,</span> <span class="nx">fakeAsync</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="kr">const</span> <span class="nx">returnedFromApi</span> <span class="o">=</span> <span class="p">{</span><span class="nx">some</span><span class="o">:</span> <span class="s1">&#39;data&#39;</span><span class="p">};</span>
+
+      <span class="nx">component</span><span class="p">.</span><span class="nx">callServiceMethod</span><span class="p">()</span>
+          <span class="p">.</span><span class="nx">subscribe</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">expect</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">body</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">(</span><span class="nx">returnedFromApi</span><span class="p">));</span>
+
+      <span class="kr">const</span> <span class="nx">req</span> <span class="o">=</span> <span class="nx">httpMock</span><span class="p">.</span><span class="nx">expectOne</span><span class="p">({</span> <span class="nx">method</span><span class="o">:</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;urlThatMethodCalls&#39;</span> <span class="p">});</span>
+      <span class="nx">req</span><span class="p">.</span><span class="nx">flush</span><span class="p">(</span><span class="nx">returnedFromApi</span><span class="p">);</span>
+      <span class="nx">tick</span><span class="p">();</span>
+  <span class="p">}));</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Do not use <code class="docutils literal notranslate"><span class="pre">NO_ERRORS_SCHEMA</span></code> (<a class="reference external" href="https://angular.io/guide/testing-components-scenarios#no_errors_schema">link</a>).
+This tells angular to ignore the attributes and unrecognized elements, prefer to use component stubs as mentioned above.</p></li>
+<li><p>Sinon uses sandboxes, which remove the need of keeping track of every fake created, which greatly simplifies cleanup and improves readability.
+Since <code class="docutils literal notranslate"><span class="pre">sinon&#64;5.0.0</span></code>, the sinon object is a default <a class="reference external" href="https://sinonjs.org/releases/latest/sandbox/">sandbox</a>, meaning one doesn’t need to do any setup work.
+Unless you have a very advanced setup or need a special configuration, you probably want to only use that one.
+In <code class="docutils literal notranslate"><span class="pre">afterEach</span></code> block one should add <code class="docutils literal notranslate"><span class="pre">sinon.restore()</span></code>, which restores all fakes created through sandbox.</p></li>
+<li><p>Make sure to have at least 80% line test coverage. Running <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">test</span> <span class="pre">--coverage</span></code> to create a coverage report. You can also simply run the tests in IntelliJ IDEA with coverage activated.</p></li>
+<li><p>It is preferable to test a component through the interaction of the user with the template. This decouples the test from the concrete implementation used in the component.
+For example if you have a component that loads and displays some data when the user clicks a button, you should query for that button, simulate a click and then assert that the data has been loaded and that the expected
+template changes have occurred.</p></li>
+</ol>
+<p>Here is an example of a test for <a class="reference external" href="https://github.com/ls1intum/Artemis/blob/master/src/test/javascript/spec/component/shared/exercise-update-warning.component.spec.ts#L38-L49">exercise-update-warning component</a></p>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should trigger saveExerciseWithoutReevaluation once&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kr">const</span> <span class="nx">emitSpy</span> <span class="o">=</span> <span class="nx">sinon</span><span class="p">.</span><span class="nx">spy</span><span class="p">(</span><span class="nx">comp</span><span class="p">.</span><span class="nx">confirmed</span><span class="p">,</span> <span class="s1">&#39;emit&#39;</span><span class="p">);</span>
+    <span class="kr">const</span> <span class="nx">saveExerciseWithoutReevaluation</span> <span class="o">=</span> <span class="nx">sinon</span><span class="p">.</span><span class="nx">spy</span><span class="p">(</span><span class="nx">comp</span><span class="p">,</span> <span class="s1">&#39;saveExerciseWithoutReevaluation&#39;</span><span class="p">);</span>
+
+    <span class="kr">const</span> <span class="nx">button</span> <span class="o">=</span> <span class="nx">fixture</span><span class="p">.</span><span class="nx">debugElement</span><span class="p">.</span><span class="nx">nativeElement</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;#save-button&#39;</span><span class="p">);</span>
+    <span class="nx">button</span><span class="p">.</span><span class="nx">click</span><span class="p">();</span>
+
+    <span class="nx">fixture</span><span class="p">.</span><span class="nx">detectChanges</span><span class="p">();</span>
+
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">saveExerciseWithoutReevaluation</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">have</span><span class="p">.</span><span class="nx">been</span><span class="p">.</span><span class="nx">calledOnce</span><span class="p">;</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">emitSpy</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">have</span><span class="p">.</span><span class="nx">been</span><span class="p">.</span><span class="nx">called</span><span class="p">;</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic simple" start="6">
+<li><p>Do not remove the template during tests by making use of <code class="docutils literal notranslate"><span class="pre">overrideTemplate()</span></code>. The template is a crucial part of a component and should not be removed during test. Do not do this:</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">chai</span> <span class="nx">from</span> <span class="s1">&#39;chai&#39;</span><span class="p">;</span>
+<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinonChai</span> <span class="nx">from</span> <span class="s1">&#39;sinon-chai&#39;</span><span class="p">;</span>
+<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinon</span> <span class="nx">from</span> <span class="s1">&#39;sinon&#39;</span><span class="p">;</span>
+
+<span class="nx">chai</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">sinonChai</span><span class="p">);</span>
+<span class="kr">const</span> <span class="nx">expect</span> <span class="o">=</span> <span class="nx">chai</span><span class="p">.</span><span class="nx">expect</span><span class="p">;</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;SomeComponent&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">someComponentFixture</span>: <span class="kt">ComponentFixture</span><span class="o">&lt;</span><span class="nx">SomeComponent</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="kd">let</span> <span class="nx">someComponent</span>: <span class="kt">SomeComponent</span><span class="p">;</span>
+
+    <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">TestBed</span><span class="p">.</span><span class="nx">configureTestingModule</span><span class="p">({</span>
+            <span class="nx">imports</span><span class="o">:</span> <span class="p">[],</span>
+            <span class="nx">declarations</span><span class="o">:</span> <span class="p">[</span>
+                <span class="nx">SomeComponent</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="nx">providers</span><span class="o">:</span> <span class="p">[</span>
+            <span class="p">],</span>
+        <span class="p">})</span>
+            <span class="p">.</span><span class="nx">overrideTemplate</span><span class="p">(</span><span class="nx">SomeComponent</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="c1">// DO NOT DO THIS</span>
+            <span class="p">.</span><span class="nx">compileComponents</span><span class="p">()</span>
+            <span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="nx">someComponentFixture</span> <span class="o">=</span> <span class="nx">TestBed</span><span class="p">.</span><span class="nx">createComponent</span><span class="p">(</span><span class="nx">SomeComponent</span><span class="p">);</span>
+                <span class="nx">someComponent</span> <span class="o">=</span> <span class="nx">someComponentFixture</span><span class="p">.</span><span class="nx">componentInstance</span><span class="p">;</span>
+            <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../database/" class="btn btn-neutral float-right" title="Database Relationships" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../client/" class="btn btn-neutral float-left" title="Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
