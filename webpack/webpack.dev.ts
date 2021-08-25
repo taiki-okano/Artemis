@@ -14,7 +14,6 @@ import { root } from './utils';
 module.exports = (options: any) => merge(commonConfig({ env: '"development"' }), {
     devtool: 'eval-source-map',
     devServer: {
-        contentBase: './build/resources/main/static/',
         proxy: [{
             context: [
                 '/',
@@ -27,7 +26,7 @@ module.exports = (options: any) => merge(commonConfig({ env: '"development"' }),
             context: [
                 '/websocket'
             ],
-            target: 'ws://127.0.0.1:8080',
+            target: 'ws://localhost:8080',
             ws: true
         }],
         stats: options.stats,
@@ -42,9 +41,10 @@ module.exports = (options: any) => merge(commonConfig({ env: '"development"' }),
         main: './src/main/webapp/app/app.main'
     },
     output: {
-        path: root('build/resources/main/static/'),
         filename: 'app/[name].bundle.js',
-        chunkFilename: 'app/[id].chunk.js'
+        chunkFilename: 'app/[id].chunk.js',
+        publicPath: '/build/resources/main/public',
+        path: path.resolve(__dirname, 'build')
     },
     module: {
         rules: [{

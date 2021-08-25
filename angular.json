@@ -11,7 +11,7 @@
           "build": {
               "builder": "@angular-devkit/build-angular:browser",
               "options": {
-                  "outputPath": "dist/artemis",
+                  "outputPath": "build/resources/main/static/",
                   "index": "src/main/webapp/index.html",
                   "main": "src/main/webapp/app/app.main.ts",
                   "polyfills": "src/main/webapp/app/polyfills.ts",
