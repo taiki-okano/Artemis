@@ -1,0 +1,576 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Setup Kubernetes and Kubernetes Deployment &mdash; Artemis  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../" class="icon icon-home" alt="Documentation Home"> Artemis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/exercises/">Exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/exam_mode/">Exam Mode</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributor Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../">Setup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guidelines/">Coding and design guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system-design/">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use-local-user-management/">Using local user management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../saml2-shibboleth/">Shibboleth/SAML2 Login &amp; Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guided-tour/">Guided Tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testservers/">Test Servers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/">Builds and Dependency Management</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administration Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/registration/">User Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/accessRights/">Access Rights</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../">Artemis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Setup Kubernetes and Kubernetes Deployment</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/ls1intum/Artemis/blob/develop/docs/dev/setup/kubernetes.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="setup-kubernetes-and-kubernetes-deployment">
+<h1>Setup Kubernetes and Kubernetes Deployment<a class="headerlink" href="#setup-kubernetes-and-kubernetes-deployment" title="Permalink to this headline">¶</a></h1>
+<p>This page describes how to set up an environment deployed in Kubernetes.</p>
+<p><strong>Prerequisites:</strong></p>
+<p>Follow the links to install the tools which will be needed to proceed with the Kubernetes cluster setup.</p>
+<ul>
+<li><dl class="simple">
+<dt><a class="reference external" href="https://docs.docker.com/get-docker/">Docker</a> - v20.10.7</dt><dd><p>Docker is a platform for developing, shipping and running applications.
+In our case, we will use it to build the images which we will deploy.
+It is also needed from k3d to create a cluster. The cluster nodes are deployed on Docker containers.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference external" href="https://hub.docker.com/signup">DockerHub Account</a></dt><dd><p>Docker Hub is a service provided by Docker for finding and sharing container images.
+Account in DockerHub is needed to push the Artemis image which will be used by the Kubernetes deployment.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><a class="reference external" href="https://k3d.io/#installation">k3d</a> - v4.4.7</dt><dd><p>k3d is a lightweight wrapper to run k3s which is a lightweight Kubernetes distribution in Docker.
+k3d makes it very easy to create k3s clusters especially for local deployment on Kubernetes.</p>
+<p>Windows users can use <code class="docutils literal notranslate"><span class="pre">choco</span></code> to install it. More details can be found in the link under <code class="docutils literal notranslate"><span class="pre">Other</span> <span class="pre">Installation</span> <span class="pre">Methods</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference external" href="https://kubernetes.io/docs/tasks/tools/#kubectl/">kubectl</a> - v1.21</dt><dd><p>kubectl is the Kubernetes command-line tool, which allows you to run commands against Kubernetes clusters.
+It can be used to deploy applications, inspect and manage cluster resources, and view logs.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference external" href="https://helm.sh/docs/intro/install/">helm</a> - v3.6.3</dt><dd><p>Helm is the package manager for Kubernetes. We will use it to install cert-manager and Rancher</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="contents local topic" id="content-of-this-document">
+<p class="topic-title">Content of this document</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#setup-kubernetes-cluster" id="id1">Setup Kubernetes Cluster</a></p></li>
+<li><p><a class="reference internal" href="#create-dockerhub-repository" id="id2">Create DockerHub Repository</a></p></li>
+<li><p><a class="reference internal" href="#configure-docker-id-username" id="id3">Configure Docker ID (username)</a></p></li>
+<li><p><a class="reference internal" href="#configure-artemis-resources" id="id4">Configure Artemis Resources</a></p></li>
+<li><p><a class="reference internal" href="#build-artemis" id="id5">Build Artemis</a></p></li>
+<li><p><a class="reference internal" href="#run-docker-build" id="id6">Run Docker Build</a></p></li>
+<li><p><a class="reference internal" href="#push-to-docker" id="id7">Push to Docker</a></p></li>
+<li><p><a class="reference internal" href="#configure-spring-profiles" id="id8">Configure Spring Profiles</a></p></li>
+<li><p><a class="reference internal" href="#deploy-kubernetes-resources" id="id9">Deploy Kubernetes Resources</a></p></li>
+<li><p><a class="reference internal" href="#add-edit-secrets" id="id10">Add/Edit Secrets</a></p></li>
+<li><p><a class="reference internal" href="#check-the-deployments-in-rancher" id="id11">Check the Deployments in Rancher</a></p></li>
+<li><p><a class="reference internal" href="#check-out-the-logs" id="id12">Check out the Logs</a></p></li>
+<li><p><a class="reference internal" href="#troubleshooting" id="id13">Troubleshooting</a></p></li>
+<li><p><a class="reference internal" href="#set-additional-environment-variables" id="id14">Set Additional Environment Variables</a></p></li>
+</ul>
+</div>
+<div class="section" id="setup-kubernetes-cluster">
+<h2><a class="toc-backref" href="#id1">Setup Kubernetes Cluster</a><a class="headerlink" href="#setup-kubernetes-cluster" title="Permalink to this headline">¶</a></h2>
+<p>To be able to deploy Artemis on Kubernetes, you need to set up a cluster. A cluster is a set of nodes that run containerized applications. Kubernetes clusters allow for applications to be more easily developed, moved and managed.</p>
+<p>With the following commands, you will set up one cluster with three agents as well as Rancher which is a platform for cluster management with an easy to use user interface.</p>
+<p><strong>IMPORTANT: Before you continue make sure Docker has been started.</strong></p>
+<ol class="arabic">
+<li><p>Set environment variables</p>
+<p>The CLUSTER_NAME, RANCHER_SERVER_HOSTNAME and KUBECONFIG_FILE environment variables need to be set so that they can be used in the next commands.
+If you don’t want to set environment variables you can replace their values in the commands. What you need to do is replace $CLUSTER_NAME with “k3d-rancher”, $RANCHER_SERVER_HOSTNAME with “rancher.localhost” and $KUBECONFIG_FILE with “k3d-rancher.yml”.</p>
+<p><strong>For MacOS/Linux</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">CLUSTER_NAME</span><span class="o">=</span><span class="s2">&quot;k3d-rancher&quot;</span>
+<span class="n">export</span> <span class="n">RANCHER_SERVER_HOSTNAME</span><span class="o">=</span><span class="s2">&quot;rancher.localhost&quot;</span>
+<span class="n">export</span> <span class="n">KUBECONFIG_FILE</span><span class="o">=</span><span class="s2">&quot;$CLUSTER_NAME.yaml&quot;</span>
+</pre></div>
+</div>
+<p><strong>For Windows</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$env:CLUSTER_NAME=&quot;k3d-rancher&quot;
+$env:RANCHER_SERVER_HOSTNAME=&quot;rancher.localhost&quot;
+$env:KUBECONFIG_FILE=&quot;${env:CLUSTER_NAME}.yaml&quot;
+</pre></div>
+</div>
+</li>
+<li><p>Create the cluster</p>
+<p>With the help of the commands block below you can create a cluster with one server and three agents at a total of four nodes. Your deployments will be distributed almost equally among the 4 nodes.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">k3d</span> <span class="pre">cluster</span> <span class="pre">list</span></code> you can see whether your cluster is created and how many of its nodes are running.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">nodes</span></code> you can see the status of each node of the newly created cluster.</p>
+<p>You should also write the cluster configuration into the KUBECONFIG_FILE. This configuration will be later needed when you are creating deployments.
+You can either set the path to the file as an environment variable or replace it with “&lt;path-to-kubeconfig-file&gt;” when needed.</p>
+<p><strong>For MacOS/Linux</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>k3d cluster create $CLUSTER_NAME --api-port 6550 --servers 1 --agents 3 --port 443:443@loadbalancer --wait
+k3d cluster list
+kubectl get nodes
+k3d kubeconfig get $CLUSTER_NAME &gt; $KUBECONFIG_FILE
+export KUBECONFIG=$KUBECONFIG_FILE
+</pre></div>
+</div>
+<p><strong>For Windows</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>k3d cluster create $env:CLUSTER_NAME --api-port 6550 --servers 1 --agents 3 --port 443:443@loadbalancer --wait
+k3d cluster list
+kubectl get nodes
+k3d kubeconfig get ${env:CLUSTER_NAME} &gt; $env:KUBECONFIG_FILE
+$env:KUBECONFIG=($env:KUBECONFIG_FILE)
+</pre></div>
+</div>
+</li>
+<li><p>Install cert-manager</p>
+<p>cert-manager is used to add certificates and certificate issuers as resource types in Kubernetes clusters.
+It simplifies the process of obtaining, renewing and using those certificates.
+It can issue certificates from a variety of supported sources, e.g. Let’s Encrypt, HashiCorp Vault, Venafi.</p>
+<p>In our case, it will issue self-signed certificates to our Kubernetes deployments to secure the communication between the different deployments.</p>
+<p>Before the installation, you need to add the Jetstack repository and update the local Helm chart repository cache.
+cert-manager has to be installed in a separate namespace called <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> so one should be created as well. After the installation, you can check the status of the installation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">repo</span> <span class="n">add</span> <span class="n">jetstack</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">charts</span><span class="o">.</span><span class="n">jetstack</span><span class="o">.</span><span class="n">io</span>
+<span class="n">helm</span> <span class="n">repo</span> <span class="n">update</span>
+<span class="n">kubectl</span> <span class="n">create</span> <span class="n">namespace</span> <span class="n">cert</span><span class="o">-</span><span class="n">manager</span>
+<span class="n">helm</span> <span class="n">install</span> <span class="n">cert</span><span class="o">-</span><span class="n">manager</span> <span class="n">jetstack</span><span class="o">/</span><span class="n">cert</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">namespace</span> <span class="n">cert</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">version</span> <span class="n">v1</span><span class="o">.</span><span class="mf">0.4</span> <span class="o">--</span><span class="nb">set</span> <span class="n">installCRDs</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="n">wait</span>
+<span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">cert</span><span class="o">-</span><span class="n">manager</span> <span class="n">rollout</span> <span class="n">status</span> <span class="n">deploy</span><span class="o">/</span><span class="n">cert</span><span class="o">-</span><span class="n">manager</span>
+</pre></div>
+</div>
+</li>
+<li><p>Install Rancher</p>
+<p>Rancher is a Kubernetes management tool that allows you to create and manage Kubernetes deployments more easily than with the CLI tools.</p>
+<p>You can install Rancher using Helm - the package manager for Kubernetes. It has to be installed in a namespace called <code class="docutils literal notranslate"><span class="pre">cattle-system</span></code> and we should create such a namespace before the installation itself.
+During the installation, we set the namespace and the hostname on which Rancher will be accessible.
+Then we can check the installation status.</p>
+<p><strong>For MacOS/Linux</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+helm repo update
+kubectl create namespace cattle-system
+helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=$RANCHER_SERVER_HOSTNAME --version 2.5.9 --wait
+kubectl -n cattle-system rollout status deploy/rancher
+</pre></div>
+</div>
+<p><strong>For Windows</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+helm repo update
+kubectl create namespace cattle-system
+helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=${env:RANCHER_SERVER_HOSTNAME} --version 2.5.9 --wait
+kubectl -n cattle-system rollout status deploy/rancher
+</pre></div>
+</div>
+</li>
+<li><p>Open Rancher and update the password</p></li>
+</ol>
+<p>Open Rancher on <a class="reference external" href="https://rancher.localhost/">https://rancher.localhost/</a>.</p>
+<p>You will be notified that the connection is not private. The reason for that is that the Rancher deployment uses a self-signed certificate by an unknown authority ‘dynamiclistener-ca’.
+It is used for secure communication between internal components. Since it’s your local environment this is not an issue and you can proceed to the website.
+If you can’t continue using the Chrome browser, you can try with another browser, e.g. Firefox.</p>
+<p>You will be prompted to set a password which later will be used to log in to Rancher. The password will often be used, so you shouldn’t forget it.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_password.png" src="../../../_images/rancher_password.png" />
+</div>
+<p>Then you should save the Rancher Server URL, please use the predefined name.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_url.png" src="../../../_images/rancher_url.png" />
+</div>
+<p>After saving, you will be redirected to the main page of Rancher, where you see your clusters. There will be one local cluster.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_cluster.png" src="../../../_images/rancher_cluster.png" />
+</div>
+<p>You can open the workloads using the menu, there will be no workloads deployed at the moment.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_nav_workloads.png" src="../../../_images/rancher_nav_workloads.png" />
+</div>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_empty_workloads.png" src="../../../_images/rancher_empty_workloads.png" />
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Create a new namespace in Rancher</p></li>
+</ol>
+<p>Namespaces are virtual clusters backed by the same physical cluster. Namespaces provide a scope for names. Names of resources need to be unique within a namespace, but not across namespaces.
+Usually, different namespaces are created to separate environments deployments e.g. development, staging, production.</p>
+<p>For our development purposes, we will create a namespace called artemis.
+It can be done easily using Rancher.</p>
+<ol class="loweralpha">
+<li><p>Navigate to Namespaces using the top menu of Rancher</p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">Namespace</span></code> to open the form for namespace creation</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_namespaces.png" src="../../../_images/rancher_namespaces.png" />
+</div>
+</li>
+<li><p>Put <code class="docutils literal notranslate"><span class="pre">artemis</span></code> as namespace’s name and select the <code class="docutils literal notranslate"><span class="pre">Create</span></code> button</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_create_namespace.png" src="../../../_images/rancher_create_namespace.png" />
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="create-dockerhub-repository">
+<h2><a class="toc-backref" href="#id2">Create DockerHub Repository</a><a class="headerlink" href="#create-dockerhub-repository" title="Permalink to this headline">¶</a></h2>
+<p>The Artemis image will be stored and managed in DockerHub. Kubernetes will pull it from there and deploy it afterwards.</p>
+<p>After you log in to your <a class="reference external" href="https://hub.docker.com/">DockerHub</a> account you can create as many public repositories as you want.
+To create a repository you need to select the <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">repository</span></code> button.</p>
+<p><strong>DockerHub:</strong></p>
+<div class="figure align-center">
+<img alt="../../../_images/dockerhub.png" src="../../../_images/dockerhub.png" />
+</div>
+<p>Then fill in the repository name with <code class="docutils literal notranslate"><span class="pre">artemis</span></code>. Then use the <code class="docutils literal notranslate"><span class="pre">Create</span></code> button to create your repository.</p>
+<div class="figure align-center">
+<img alt="../../../_images/dockerhub_create_repository.png" src="../../../_images/dockerhub_create_repository.png" />
+</div>
+</div>
+<div class="section" id="configure-docker-id-username">
+<h2><a class="toc-backref" href="#id3">Configure Docker ID (username)</a><a class="headerlink" href="#configure-docker-id-username" title="Permalink to this headline">¶</a></h2>
+<p>The username in DockerHub is called Docker ID. You need to set your Docker ID in the <code class="docutils literal notranslate"><span class="pre">artemis-deployment.yml</span></code> resource so that Kubernetes knows where to pull the image from.
+Open the <code class="docutils literal notranslate"><span class="pre">src/main/kubernetes/artemis/deployment/artemis-deployment.yml</span></code> file and edit</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span>
+   <span class="n">spec</span><span class="p">:</span>
+   <span class="n">containers</span><span class="p">:</span>
+      <span class="n">image</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">DockerId</span><span class="o">&gt;/</span><span class="n">artemis</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>and replace &lt;DockerId&gt; with your docker ID in DockerHub</p>
+<p>e.g. it will look like this:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span>
+   <span class="n">spec</span><span class="p">:</span>
+   <span class="n">containers</span><span class="p">:</span>
+      <span class="n">image</span><span class="p">:</span> <span class="n">mmehmed</span><span class="o">/</span><span class="n">artemis</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="configure-artemis-resources">
+<h2><a class="toc-backref" href="#id4">Configure Artemis Resources</a><a class="headerlink" href="#configure-artemis-resources" title="Permalink to this headline">¶</a></h2>
+<p>To run Artemis, you need to configure the Artemis’ User Management, Version Control and Continuous Integration. You can either run it with Jira, Bitbucket, Bamboo or Jenkins, Gitlab.
+Make sure to configure the <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code> file with the proper configuration for User Management, Version Control and Continuous Integration.</p>
+<p>You should skip setting the passwords and token since the Docker image that we are going to build is going to include those secrets. You can refer to chapter <code class="docutils literal notranslate"><span class="pre">Add/Edit</span> <span class="pre">Secrets</span></code> for setting those values.</p>
+<p>If you want to configure Artemis with <code class="docutils literal notranslate"><span class="pre">Bitbucket,</span> <span class="pre">Jira,</span> <span class="pre">Bamboo</span></code> you can set a connection to existing staging or production deployments.
+If you want to configure Artemis with local user management and no programming exercises continue with <code class="docutils literal notranslate"><span class="pre">Configure</span> <span class="pre">Local</span> <span class="pre">User</span> <span class="pre">Management</span></code>.</p>
+<div class="section" id="configure-local-user-management">
+<h3>Configure Local User Management<a class="headerlink" href="#configure-local-user-management" title="Permalink to this headline">¶</a></h3>
+<p>If you want to run with local user management and no programming exercises setup follow the steps:</p>
+<ol class="arabic">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code> file, and set use-external in the user-management section to false. If you have created an additional <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> file as it is described in the <cite>Setup documentation &lt;https://artemis-platform.readthedocs.io/en/latest/dev/setup/#server-setup&gt;</cite>, make sure to edit this one.</p>
+<p>Another possibility is to add the variable directly in <code class="docutils literal notranslate"><span class="pre">src/main/kubernetes/artemis/configmap/artemis-configmap.yml</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">:</span>
+   <span class="n">artemis</span><span class="o">.</span><span class="n">user</span><span class="o">-</span><span class="n">management</span><span class="o">.</span><span class="n">use</span><span class="o">-</span><span class="n">external</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Remove the jira profile from the <code class="docutils literal notranslate"><span class="pre">SPRING_PROFILES_ACTIVE</span></code> field in the ConfigMap found at <code class="docutils literal notranslate"><span class="pre">src/main/kubernetes/artemis/configmap/artemis-configmap.yml</span></code></p></li>
+</ol>
+<p>Now you can continue with the next step <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">Artemis</span></code></p>
+</div>
+</div>
+<div class="section" id="build-artemis">
+<h2><a class="toc-backref" href="#id5">Build Artemis</a><a class="headerlink" href="#build-artemis" title="Permalink to this headline">¶</a></h2>
+<p>Build the Artemis application war file using the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">gradlew</span> <span class="o">-</span><span class="n">Pprod</span> <span class="o">-</span><span class="n">Pwar</span> <span class="n">clean</span> <span class="n">bootWar</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-docker-build">
+<h2><a class="toc-backref" href="#id6">Run Docker Build</a><a class="headerlink" href="#run-docker-build" title="Permalink to this headline">¶</a></h2>
+<p>Run Docker build and prepare the Artemis image to be pushed in DockerHub using the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span>  <span class="o">-</span><span class="n">t</span> <span class="o">&lt;</span><span class="n">DockerId</span><span class="o">&gt;/</span><span class="n">artemis</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">Dockerfile</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>This will create the Docker image by copying the war file which was generated by the previous command.</p>
+</div>
+<div class="section" id="push-to-docker">
+<h2><a class="toc-backref" href="#id7">Push to Docker</a><a class="headerlink" href="#push-to-docker" title="Permalink to this headline">¶</a></h2>
+<p>Push the image to DockerHub from where it will be pulled during the deployment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">push</span> <span class="o">&lt;</span><span class="n">DockerId</span><span class="o">&gt;/</span><span class="n">artemis</span>
+</pre></div>
+</div>
+<p>In case that you get an “Access denied” error during the push, first execute</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">login</span>
+</pre></div>
+</div>
+<p>and then try again the <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">push</span></code> command.</p>
+</div>
+<div class="section" id="configure-spring-profiles">
+<h2><a class="toc-backref" href="#id8">Configure Spring Profiles</a><a class="headerlink" href="#configure-spring-profiles" title="Permalink to this headline">¶</a></h2>
+<p>ConfigMaps are used to store configuration data in key-value pairs.</p>
+<p>You can change the current Spring profiles used for running Artemis in the <code class="docutils literal notranslate"><span class="pre">src/main/kubernetes/artemis/configmap/artemis-configmap.yml</span></code> file by changing <code class="docutils literal notranslate"><span class="pre">SPRING_PROFILES_ACTIVE</span></code>.
+The current ones are set to use Bitbucket, Jira and Bamboo. If you want to use Jenkins and Gitlab please replace <code class="docutils literal notranslate"><span class="pre">bamboo,bitbucket,jira</span></code> with <code class="docutils literal notranslate"><span class="pre">jenkins,gitlab</span></code>.
+You can also change <code class="docutils literal notranslate"><span class="pre">prod</span></code> to <code class="docutils literal notranslate"><span class="pre">dev</span></code> if you want to run in development profile.</p>
+</div>
+<div class="section" id="deploy-kubernetes-resources">
+<h2><a class="toc-backref" href="#id9">Deploy Kubernetes Resources</a><a class="headerlink" href="#deploy-kubernetes-resources" title="Permalink to this headline">¶</a></h2>
+<p>Kustomization files declare the resources that will be deployed in one place and with their help we can do the deployment with only one command.</p>
+<p>Once you have your Artemis image pushed to Docker you can use the <code class="docutils literal notranslate"><span class="pre">kustomization.yml</span></code> file in <code class="docutils literal notranslate"><span class="pre">src/main/kubernetes</span></code> to deploy all the Kubernetes resources.
+You can do it by executing the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">k</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">artemis</span> <span class="o">--</span><span class="n">kubeconfig</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">kubeconfig</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>&lt;path-to-kubeconfig-file&gt; is the path where you created the KUBECONFIG_FILE.</p>
+<p>In the console, you will see that the resources are created. It will take a little bit of time when you are doing this for the first time. Be patient!</p>
+<div class="figure align-center">
+<img alt="../../../_images/kubectl_kustomization.png" src="../../../_images/kubectl_kustomization.png" />
+</div>
+</div>
+<div class="section" id="add-edit-secrets">
+<h2><a class="toc-backref" href="#id10">Add/Edit Secrets</a><a class="headerlink" href="#add-edit-secrets" title="Permalink to this headline">¶</a></h2>
+<p>Once you have deployed Artemis you need to add/edit the secrets so that it can run successfully.</p>
+<p>Open Rancher using <a class="reference external" href="https://rancher.localhost/">https://rancher.localhost/</a> and navigate to your cluster.</p>
+<p>Then navigate to <code class="docutils literal notranslate"><span class="pre">Secrets</span></code> like shown below:</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_secrets_menu.png" src="../../../_images/rancher_secrets_menu.png" />
+</div>
+<p>You will see list of all defined secret files</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_secrets_list.png" src="../../../_images/rancher_secrets_list.png" />
+</div>
+<p>Continue with <code class="docutils literal notranslate"><span class="pre">artemis-secrets</span></code> and you will see the values in the secret file. Then navigate to the edit page.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_secrets_edit.png" src="../../../_images/rancher_secrets_edit.png" />
+</div>
+<p>You can edit each secret you want or add more secrets. Once you select any value box the value itself will be shown and you can edit it.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_secrets_edit_page.png" src="../../../_images/rancher_secrets_edit_page.png" />
+</div>
+<p>After you are done you can save your changes and redeploy the Artemis workload.</p>
+</div>
+<div class="section" id="check-the-deployments-in-rancher">
+<h2><a class="toc-backref" href="#id11">Check the Deployments in Rancher</a><a class="headerlink" href="#check-the-deployments-in-rancher" title="Permalink to this headline">¶</a></h2>
+<p>Open Rancher using <a class="reference external" href="https://rancher.localhost/">https://rancher.localhost/</a> and navigate to your cluster.</p>
+<p>It may take some time but in the end, you should see that all the workloads have Active status. In case there is a problem with some workloads you can check the logs to see what the issue is.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_workloads.png" src="../../../_images/rancher_workloads.png" />
+</div>
+<p>You can open the Artemis application using the link <a class="reference external" href="https://artemis-app.artemis.rancher.localhost/">https://artemis-app.artemis.rancher.localhost/</a></p>
+<p>You will get the same “Connection is not private” issue as you did when opening <a class="reference external" href="https://rancher.localhost/">https://rancher.localhost/</a>. As said before this is because a self-signed certificate is used and it is safe to proceed.</p>
+<p>It takes several minutes for the application to start. If you get a “Bad Gateway” error it may happen that the application has not been started yet.
+Wait several minutes and if you still have this issue or another one you can check out the pod logs (described in the next chapter).</p>
+</div>
+<div class="section" id="check-out-the-logs">
+<h2><a class="toc-backref" href="#id12">Check out the Logs</a><a class="headerlink" href="#check-out-the-logs" title="Permalink to this headline">¶</a></h2>
+<p>Open the workload which logs you need to check. There is a list of pods. Open the menu for one of the pods and select <code class="docutils literal notranslate"><span class="pre">View</span> <span class="pre">Logs</span></code>. A pop-up with the logs will be opened.</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_logs.png" src="../../../_images/rancher_logs.png" />
+</div>
+</div>
+<div class="section" id="troubleshooting">
+<h2><a class="toc-backref" href="#id13">Troubleshooting</a><a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<p>If the Artemis application is successfully deployed but there is an error while trying to run the application, the reason is most likely related to the Artemis yml configuration files.
+One of the common errors is related to missing <code class="docutils literal notranslate"><span class="pre">server.url</span></code> variable. You can fix it by adding it as an environment variable to the Artemis deployment.</p>
+</div>
+<div class="section" id="set-additional-environment-variables">
+<h2><a class="toc-backref" href="#id14">Set Additional Environment Variables</a><a class="headerlink" href="#set-additional-environment-variables" title="Permalink to this headline">¶</a></h2>
+<p>This chapter explains how you can set environment variables for your deployment in case you need it.</p>
+<p>Open the Workloads view on Rancher</p>
+<div class="figure align-center">
+<img alt="../../../_images/rancher_workloads.png" src="../../../_images/rancher_workloads.png" />
+</div>
+<p>Enter the details page of the Artemis workload and then select Edit in the three-dot menu</p>
+<div class="figure align-center">
+<img alt="../../../_images/workload_edit.png" src="../../../_images/workload_edit.png" />
+</div>
+<p>Expand the <code class="docutils literal notranslate"><span class="pre">Environment</span> <span class="pre">Variables</span></code> menu. After pressing the <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">Variable</span></code> button two fields will appear where you can add the variable key and the value.</p>
+<div class="figure align-center">
+<img alt="../../../_images/workload_set_environment_variable.png" src="../../../_images/workload_set_environment_variable.png" />
+</div>
+<p>You can add as many variables as you want. Once you are done you can save your changes which will trigger the Redeploy of the application.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
