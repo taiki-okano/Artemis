@@ -311,7 +311,7 @@
 <li><p>Use 4 spaces per indentation.</p></li>
 </ol>
 <p>We use <code class="docutils literal notranslate"><span class="pre">prettier</span></code> to style code automatically and <code class="docutils literal notranslate"><span class="pre">eslint</span></code> to find additional issues.
-You can find the corresponding commands to invoked those tools in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
+You can find the corresponding commands to invoke those tools in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
 </div>
 <div class="section" id="preventing-memory-leaks">
 <h2>10. Preventing Memory Leaks<a class="headerlink" href="#preventing-memory-leaks" title="Permalink to this headline">¶</a></h2>
@@ -321,7 +321,7 @@ You can find the corresponding commands to invoked those tools in <code class="d
 <p>A very good explanation that you should definitely read to understand the problem: <a class="reference external" href="https://auth0.com/blog/four-types-of-leaks-in-your-javascript-code-and-how-to-get-rid-of-them/">https://auth0.com/blog/four-types-of-leaks-in-your-javascript-code-and-how-to-get-rid-of-them/</a></p>
 <p>In essence:</p>
 <ul class="simple">
-<li><p>JS is a garbage collected language</p></li>
+<li><p>JS is a garbage-collected language</p></li>
 <li><p>Modern garbage collectors improve on this algorithm in different ways, but the essence is the same: <strong>reachable pieces of memory are marked as such and the rest is considered garbage.</strong></p></li>
 <li><p>Unwanted references are references to pieces of memory that the developer knows he or she won’t be needing
 anymore but that for some reason are kept inside the tree of an active root. <strong>In the context of JavaScript, unwanted references are variables kept somewhere in the code that will not be used anymore and point to a piece of memory that could otherwise be freed.</strong></p></li>
