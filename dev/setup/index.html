@@ -247,14 +247,12 @@ scheme will be created / updated automatically at startup time of the
 server application. Alternatively, you can run the MySQL Database
 Server inside a Docker container using
 e.g. <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/mysql.yml</span> <span class="pre">up</span></code></p></li>
-<li><p><a class="reference external" href="https://nodejs.org">Node.js</a>: We use Node LTS (&gt;=14.15.0 &lt; 15) to compile
+<li><p><a class="reference external" href="https://nodejs.org/en/download">Node.js</a>: We use Node LTS (&gt;=14.17.0 &lt; 15) to compile
 and run the client Angular application. Depending on your system, you
 can install Node either from source or as a pre-packaged bundle.</p></li>
-<li><p><a class="reference external" href="https://classic.yarnpkg.com">Yarn</a>: We use Yarn (&gt;=1.22.4 &lt;2) to
-manage client side Node dependencies. Depending on your system, you
-can install Yarn either from source or as a pre-packaged bundle. To
-do so, please follow the instructions on the <a class="reference external" href="https://classic.yarnpkg.com/en/docs/install">Yarn installation
-page</a>.</p></li>
+<li><p><a class="reference external" href="https://nodejs.org/en/download">Npm</a>: We use Npm (&gt;=6.14.0) to
+manage client side Node dependencies. Npm is typically bundled with Node.js,
+but can also be installed <a href="#id2"><span class="problematic" id="id3">separately__</span></a>.</p></li>
 </ol>
 <div class="section" id="server-setup">
 <h2>Server Setup<a class="headerlink" href="#server-setup" title="Permalink to this headline">¶</a></h2>
@@ -417,7 +415,7 @@ When you import the project into IntelliJ the run configurations will also be im
 <p>The recommended way is to run the server and the client separated. This provides fast rebuilds of the server and hot module replacement in the client.</p>
 <ul class="simple">
 <li><p><strong>Artemis (Server):</strong> The server will be started separated from the client. The startup time decreases significantly.</p></li>
-<li><p><strong>Artemis (Client):</strong> Will execute <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">start</span></code>. The client will be available at <a class="reference external" href="http://localhost:9000/">http://localhost:9000/</a> with hot module replacement enabled (also see <a class="reference external" href="#client-setup">Client Setup</a>).</p></li>
+<li><p><strong>Artemis (Client):</strong> Will execute <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">serve</span></code>. The client will be available at <a class="reference external" href="http://localhost:9000/">http://localhost:9000/</a> with hot module replacement enabled (also see <a class="reference external" href="#client-setup">Client Setup</a>).</p></li>
 </ul>
 <div class="section" id="other-run-debug-configurations">
 <h4>Other run / debug configurations<a class="headerlink" href="#other-run-debug-configurations" title="Permalink to this headline">¶</a></h4>
@@ -513,7 +511,7 @@ This feature is disabled by default. We can enable it by modifying the configura
 </div>
 <div class="section" id="client-setup">
 <h2>Client Setup<a class="headerlink" href="#client-setup" title="Permalink to this headline">¶</a></h2>
-<p>You need to install Node and Yarn on your local machine.</p>
+<p>You need to install Node and Npm on your local machine.</p>
 <div class="section" id="using-intellij">
 <h3>Using IntelliJ<a class="headerlink" href="#using-intellij" title="Permalink to this headline">¶</a></h3>
 <p>If you are using <strong>IntelliJ</strong> you can use the pre-configured <code class="docutils literal notranslate"><span class="pre">Artemis</span> <span class="pre">(Client)</span></code>
@@ -529,12 +527,12 @@ run configuration that will be delivered with this repository:</p>
 <p>You should be able to run the following
 command to install development tools and dependencies. You will only
 need to run this command when dependencies change in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yarn</span> <span class="n">install</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>To start the client application in the browser, use the following
 command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yarn</span> <span class="n">start</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">run</span> <span class="n">serve</span>
 </pre></div>
 </div>
 <p>This compiles TypeScript code to JavaScript code, starts the hot module
@@ -545,9 +543,10 @@ and will start the client application in your browser on
 above in Server Setup) and if you have configured
 <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code> correctly, then you should be able to login
 with your TUM Online account.</p>
-<p>In case you encounter any problems regarding JavaScript heap memory leaks when executing <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">start</span></code> or any other scripts from <code class="docutils literal notranslate"><span class="pre">package.json</span></code>, you can change the memory limit parameter used in the <code class="docutils literal notranslate"><span class="pre">webpack-ts</span></code> script in <code class="docutils literal notranslate"><span class="pre">package.json</span></code> to the following:</p>
+<p>In case you encounter any problems regarding JavaScript heap memory leaks when executing <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">serve</span></code> or any other scripts from <code class="docutils literal notranslate"><span class="pre">package.json</span></code>,
+you can add a memory limit parameter used in the script in <code class="docutils literal notranslate"><span class="pre">package.json</span></code> to the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This local change in `package.json` should not be committed.</span>
-<span class="s2">&quot;webpack-ts&quot;</span><span class="p">:</span> <span class="s2">&quot;cross-env NODE_OPTIONS=--max_old_space_size=5120 TS_NODE_PROJECT=</span><span class="se">\&quot;</span><span class="s2">tsconfig.webpack.json</span><span class="se">\&quot;</span><span class="s2"> webpack&quot;</span> <span class="c1"># possible higher values are 6144, 7168, and 8192</span>
+<span class="o">--</span><span class="n">max_old_space_size</span><span class="o">=</span><span class="mi">5120</span> <span class="c1"># possible higher values are 6144, 7168, and 8192</span>
 </pre></div>
 </div>
 <p>Make sure to <strong>not commit this change</strong> in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
@@ -580,7 +579,7 @@ docker-compose:</p>
 <li><p>Run <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">up</span></code></p></li>
 <li><p>Go to <a class="reference external" href="http://localhost:9000">http://localhost:9000</a></p></li>
 </ol>
-<p>The client and the server will run in different containers. As yarn is
+<p>The client and the server will run in different containers. As Npm is
 used with its live reload mode to build and run the client, any change
 in the client’s codebase will trigger a rebuild automatically. In case
 of changes in the codebase of the server one has to restart the

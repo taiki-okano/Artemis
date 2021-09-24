@@ -193,7 +193,7 @@
 <p>The most basic test looks similar to this:</p>
 <blockquote>
 <div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">chai</span> <span class="nx">from</span> <span class="s1">&#39;chai&#39;</span><span class="p">;</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinonChai</span> <span class="nx">from</span> <span class="s1">&#39;sinon-chai&#39;</span><span class="p">;</span>
+<span class="kr">import</span> <span class="nx">sinonChai</span> <span class="nx">from</span> <span class="s1">&#39;sinon-chai&#39;</span><span class="p">;</span>
 <span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinon</span> <span class="nx">from</span> <span class="s1">&#39;sinon&#39;</span><span class="p">;</span>
 <span class="kr">import</span> <span class="p">{</span> <span class="nx">ComponentFixture</span><span class="p">,</span> <span class="nx">TestBed</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@angular/core/testing&#39;</span><span class="p">;</span>
 
@@ -249,7 +249,7 @@ This has the benefit of being able to test the interaction with the child compon
 
     <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nx">TestBed</span><span class="p">.</span><span class="nx">configureTestingModule</span><span class="p">({</span>
-            <span class="nx">imports</span><span class="o">:</span> <span class="p">[</span><span class="nx">ArtemisTestModule</span><span class="p">,</span> <span class="nx">NgxDatatableModule</span><span class="p">,</span> <span class="nx">ArtemisResultModule</span><span class="p">,</span> <span class="nx">ArtemisSharedModule</span><span class="p">,</span> <span class="nx">TranslateModule</span><span class="p">.</span><span class="nx">forRoot</span><span class="p">(),</span> <span class="nx">RouterTestingModule</span><span class="p">,</span> <span class="nx">MomentModule</span><span class="p">],</span>
+            <span class="nx">imports</span><span class="o">:</span> <span class="p">[</span><span class="nx">ArtemisTestModule</span><span class="p">,</span> <span class="nx">NgxDatatableModule</span><span class="p">,</span> <span class="nx">ArtemisResultModule</span><span class="p">,</span> <span class="nx">ArtemisSharedModule</span><span class="p">,</span> <span class="nx">TranslateModule</span><span class="p">.</span><span class="nx">forRoot</span><span class="p">(),</span> <span class="nx">RouterTestingModule</span><span class="p">],</span>
             <span class="nx">declarations</span><span class="o">:</span> <span class="p">[</span>
                 <span class="nx">ParticipationSubmissionComponent</span><span class="p">,</span>
                 <span class="nx">MockComponent</span><span class="p">(</span><span class="nx">UpdatingResultComponent</span><span class="p">),</span>
@@ -322,7 +322,6 @@ This has the benefit of being able to test the interaction with the child compon
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- ArtemisResultModule
 - ArtemisSharedModule
 - TranslateModule.forRoot()
-- MomentModule
 </pre></div>
 </div>
 <ul class="simple">
@@ -385,7 +384,7 @@ This tells angular to ignore the attributes and unrecognized elements, prefer to
 Since <code class="docutils literal notranslate"><span class="pre">sinon&#64;5.0.0</span></code>, the sinon object is a default <a class="reference external" href="https://sinonjs.org/releases/latest/sandbox/">sandbox</a>, meaning one doesn’t need to do any setup work.
 Unless you have a very advanced setup or need a special configuration, you probably want to only use that one.
 In <code class="docutils literal notranslate"><span class="pre">afterEach</span></code> block one should add <code class="docutils literal notranslate"><span class="pre">sinon.restore()</span></code>, which restores all fakes created through sandbox.</p></li>
-<li><p>Make sure to have at least 80% line test coverage. Running <code class="docutils literal notranslate"><span class="pre">yarn</span> <span class="pre">test</span> <span class="pre">--coverage</span></code> to create a coverage report. You can also simply run the tests in IntelliJ IDEA with coverage activated.</p></li>
+<li><p>Make sure to have at least 80% line test coverage. Running <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">test</span> <span class="pre">--coverage</span></code> to create a coverage report. You can also simply run the tests in IntelliJ IDEA with coverage activated.</p></li>
 <li><p>It is preferable to test a component through the interaction of the user with the template. This decouples the test from the concrete implementation used in the component.
 For example if you have a component that loads and displays some data when the user clicks a button, you should query for that button, simulate a click and then assert that the data has been loaded and that the expected
 template changes have occurred.</p></li>
@@ -412,7 +411,7 @@ template changes have occurred.</p></li>
 </ol>
 <blockquote>
 <div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">chai</span> <span class="nx">from</span> <span class="s1">&#39;chai&#39;</span><span class="p">;</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinonChai</span> <span class="nx">from</span> <span class="s1">&#39;sinon-chai&#39;</span><span class="p">;</span>
+<span class="kr">import</span> <span class="nx">sinonChai</span> <span class="nx">from</span> <span class="s1">&#39;sinon-chai&#39;</span><span class="p">;</span>
 <span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">sinon</span> <span class="nx">from</span> <span class="s1">&#39;sinon&#39;</span><span class="p">;</span>
 
 <span class="nx">chai</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">sinonChai</span><span class="p">);</span>
