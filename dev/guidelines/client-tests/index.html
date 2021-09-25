@@ -340,7 +340,7 @@ This has the benefit of being able to test the interaction with the child compon
 <p>More examples on test speed improvement can be found in the <a class="reference external" href="https://github.com/ls1intum/Artemis/pull/3879/files">following PR</a>.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Services should be mocked if they simply return some data from the server. However, if the service has some form of logic included (for example converting dates to moments),
+<li><p>Services should be mocked if they simply return some data from the server. However, if the service has some form of logic included (for example converting dates to datejs instances),
 and this logic is important for the component, do not mock the service methods, but mock the HTTP requests and responses from the API. This allows us to test the interaction
 of the component with the service and in addition test that the service logic works correctly. A good explanation can be found in the <a class="reference external" href="https://angular.io/guide/http#testing-http-requests">official angular documentation</a>.</p></li>
 </ul>
