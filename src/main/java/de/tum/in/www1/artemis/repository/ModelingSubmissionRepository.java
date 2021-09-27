@@ -1,10 +1,8 @@
 package de.tum.in.www1.artemis.repository;
 
-import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -96,4 +94,12 @@ public interface ModelingSubmissionRepository extends JpaRepository<ModelingSubm
     default ModelingSubmission findOneWithEagerResultAndFeedbackAndAssessorAndParticipationResults(Long submissionId) {
         return findWithResultsFeedbacksAssessorAndParticipationResultsById(submissionId).orElseThrow(() -> new EntityNotFoundException("Modeling Submission", submissionId));
     }
+
+    /**
+     * method to find orphan submissions
+     * Note: type is set to fetch explicitly to make this query faster
+     * @return all submissions without a parent participation and not used as example submissions
+     */
+    @EntityGraph(type = FETCH, attributePaths = "results")
+    Set<ModelingSubmission> findByParticipationIsNull();
 }

@@ -3,12 +3,16 @@ package de.tum.in.www1.artemis.service;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import de.tum.in.www1.artemis.domain.Result;
+import de.tum.in.www1.artemis.domain.Submission;
 import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
 import de.tum.in.www1.artemis.domain.enumeration.SubmissionType;
 import de.tum.in.www1.artemis.domain.participation.Participation;
@@ -17,9 +21,7 @@ import de.tum.in.www1.artemis.domain.quiz.QuizExercise;
 import de.tum.in.www1.artemis.domain.quiz.QuizSubmission;
 import de.tum.in.www1.artemis.domain.quiz.SubmittedAnswer;
 import de.tum.in.www1.artemis.exception.QuizSubmissionException;
-import de.tum.in.www1.artemis.repository.QuizExerciseRepository;
-import de.tum.in.www1.artemis.repository.QuizSubmissionRepository;
-import de.tum.in.www1.artemis.repository.ResultRepository;
+import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.service.scheduled.quiz.QuizScheduleService;
 import de.tum.in.www1.artemis.web.rest.errors.EntityNotFoundException;
 
@@ -29,6 +31,8 @@ public class QuizSubmissionService {
     private final Logger log = LoggerFactory.getLogger(QuizSubmissionService.class);
 
     private final QuizSubmissionRepository quizSubmissionRepository;
+
+    private final SubmissionRepository submissionRepository;
 
     private final ResultRepository resultRepository;
 
@@ -40,14 +44,42 @@ public class QuizSubmissionService {
 
     private final SubmissionVersionService submissionVersionService;
 
-    public QuizSubmissionService(QuizSubmissionRepository quizSubmissionRepository, QuizScheduleService quizScheduleService, ResultRepository resultRepository,
-            SubmissionVersionService submissionVersionService, QuizExerciseRepository quizExerciseRepository, ParticipationService participationService) {
+    private final ResultService resultService;
+
+    public QuizSubmissionService(QuizSubmissionRepository quizSubmissionRepository, SubmissionRepository submissionRepository, QuizScheduleService quizScheduleService,
+            ResultRepository resultRepository, SubmissionVersionService submissionVersionService, QuizExerciseRepository quizExerciseRepository,
+            ParticipationService participationService, ResultService resultService) {
         this.quizSubmissionRepository = quizSubmissionRepository;
+        this.submissionRepository = submissionRepository;
         this.resultRepository = resultRepository;
         this.quizScheduleService = quizScheduleService;
         this.submissionVersionService = submissionVersionService;
         this.quizExerciseRepository = quizExerciseRepository;
         this.participationService = participationService;
+        this.resultService = resultService;
+    }
+
+    /**
+     * Orphan submissions are those that are not example submissions and that are not connected to participations
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void deleteOrphanSubmissions() {
+        try {
+            // Filtering example submissions in Java is faster than in SQL because the column does not have an index
+            var orphanSubmission = this.quizSubmissionRepository.findByParticipationIsNull().stream().filter(submission -> submission.isExampleSubmission() != Boolean.TRUE)
+                    .collect(Collectors.toSet());
+            log.info("Found {} quiz submission orphans to delete", orphanSubmission.size());
+            for (Submission submission : orphanSubmission) {
+                log.info("Delete orphan quiz submission {} with all its results", submission.getId());
+                for (Result result : submission.getResults()) {
+                    resultService.deleteResultWithComplaint(result.getId());
+                }
+                submissionRepository.deleteById(submission.getId());
+            }
+        }
+        catch (Exception ex) {
+            log.error("Deleting orphans did not work", ex);
+        }
     }
 
     /**

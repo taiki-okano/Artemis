@@ -5,6 +5,8 @@ import static de.tum.in.www1.artemis.domain.enumeration.InitializationState.*;
 import java.time.ZonedDateTime;
 import java.util.*;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -90,6 +92,24 @@ public class ParticipationService {
         this.ratingRepository = ratingRepository;
         this.urlService = urlService;
         this.participantScoreRepository = participantScoreRepository;
+    }
+
+    /**
+     * Orphan submissions are those that are not example submissions and that are not connected to participations
+     */
+    @PostConstruct
+    public void deleteOrphanParticipations() {
+        try {
+            var orphanParticipations = this.studentParticipationRepository.findByExerciseIsNull();
+            log.info("Found {} participation orphans to delete", orphanParticipations.size());
+            for (StudentParticipation participation : orphanParticipations) {
+                log.info("Delete orphan participation {} with all its related content", participation.getId());
+                delete(participation.getId(), false, false);
+            }
+        }
+        catch (Exception ex) {
+            log.error("Deleting orphans did not work", ex);
+        }
     }
 
     /**
@@ -575,7 +595,7 @@ public class ParticipationService {
      */
     @Transactional // ok
     public void delete(Long participationId, boolean deleteBuildPlan, boolean deleteRepository) {
-        StudentParticipation participation = studentParticipationRepository.findWithEagerLegalSubmissionsResultsFeedbacksById(participationId).get();
+        StudentParticipation participation = studentParticipationRepository.findByIdElseThrow(participationId);
         log.info("Request to delete Participation : {}", participation);
 
         if (participation instanceof ProgrammingExerciseStudentParticipation programmingExerciseParticipation) {
@@ -605,8 +625,10 @@ public class ParticipationService {
         participation = (StudentParticipation) deleteResultsAndSubmissionsOfParticipation(participation.getId());
 
         Exercise exercise = participation.getExercise();
-        exercise.removeParticipation(participation);
-        exerciseRepository.save(exercise);
+        if (exercise != null) {
+            exercise.removeParticipation(participation);
+            exerciseRepository.save(exercise);
+        }
         studentParticipationRepository.delete(participation);
     }
 
@@ -619,7 +641,7 @@ public class ParticipationService {
     @Transactional // ok
     public Participation deleteResultsAndSubmissionsOfParticipation(Long participationId) {
         log.info("Request to delete all results and submissions of participation with id : {}", participationId);
-        Participation participation = participationRepository.getOneWithEagerSubmissionsAndResults(participationId);
+        Participation participation = participationRepository.findByIdWithSubmissionsAndResultsElseThrow(participationId);
         Set<Submission> submissions = participation.getSubmissions();
         List<Result> resultsToBeDeleted = new ArrayList<>();
 

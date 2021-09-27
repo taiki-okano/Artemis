@@ -1,9 +1,10 @@
 package de.tum.in.www1.artemis.repository;
 
-import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -91,4 +92,12 @@ public interface ProgrammingSubmissionRepository extends JpaRepository<Programmi
     default ProgrammingSubmission findByResultIdElseThrow(Long resultId) {
         return findByResultId(resultId).orElseThrow(() -> new EntityNotFoundException("Programming Submission for Result", resultId));
     }
+
+    /**
+     * method to find orphan submissions
+     * Note: type is set to fetch explicitly to make this query faster
+     * @return all submissions without a parent participation and not used as example submissions
+     */
+    @EntityGraph(type = FETCH, attributePaths = "results")
+    Set<ProgrammingSubmission> findByParticipationIsNull();
 }

@@ -4,17 +4,15 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.tum.in.www1.artemis.domain.Feedback;
-import de.tum.in.www1.artemis.domain.Result;
-import de.tum.in.www1.artemis.domain.User;
+import de.tum.in.www1.artemis.domain.*;
 import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
 import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseStudentParticipation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
@@ -33,8 +31,6 @@ public class ResultService {
 
     private final LtiService ltiService;
 
-    private final ObjectMapper objectMapper;
-
     private final WebsocketMessagingService websocketMessagingService;
 
     private final ComplaintResponseRepository complaintResponseRepository;
@@ -47,19 +43,36 @@ public class ResultService {
 
     private final ComplaintRepository complaintRepository;
 
-    public ResultService(UserRepository userRepository, ResultRepository resultRepository, LtiService ltiService, ObjectMapper objectMapper, FeedbackRepository feedbackRepository,
+    public ResultService(UserRepository userRepository, ResultRepository resultRepository, LtiService ltiService, FeedbackRepository feedbackRepository,
             WebsocketMessagingService websocketMessagingService, ComplaintResponseRepository complaintResponseRepository, SubmissionRepository submissionRepository,
             ComplaintRepository complaintRepository, RatingRepository ratingRepository) {
         this.userRepository = userRepository;
         this.resultRepository = resultRepository;
         this.ltiService = ltiService;
-        this.objectMapper = objectMapper;
         this.websocketMessagingService = websocketMessagingService;
         this.feedbackRepository = feedbackRepository;
         this.complaintResponseRepository = complaintResponseRepository;
         this.submissionRepository = submissionRepository;
         this.complaintRepository = complaintRepository;
         this.ratingRepository = ratingRepository;
+    }
+
+    /**
+     * Orphan submissions are those that are not example submissions and that are not connected to participations
+     */
+    @PostConstruct
+    public void deleteOrphanResults() {
+        try {
+            var orphanResults = this.resultRepository.findByParticipationIsNullAndSubmissionIsNull();
+            log.info("Found {} result orphans to delete", orphanResults.size());
+            for (Result result : orphanResults) {
+                log.info("Delete orphan result {} with all its related content", result.getId());
+                deleteResultWithComplaint(result.getId());
+            }
+        }
+        catch (Exception ex) {
+            log.error("Deleting orphans did not work", ex);
+        }
     }
 
     /**
@@ -133,7 +146,7 @@ public class ResultService {
     public Result createNewExampleResultForSubmissionWithExampleSubmission(long submissionId, boolean isProgrammingExerciseWithFeedback) {
         final var submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new EntityNotFoundException("No example submission with ID " + submissionId + " found!"));
-        if (!submission.isExampleSubmission()) {
+        if (submission.isExampleSubmission() != Boolean.TRUE) {
             throw new IllegalArgumentException("Submission is no example submission! Example results are not allowed!");
         }
 

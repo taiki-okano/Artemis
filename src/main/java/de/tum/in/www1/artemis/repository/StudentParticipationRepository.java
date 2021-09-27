@@ -1,6 +1,6 @@
 package de.tum.in.www1.artemis.repository;
 
-import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -736,4 +736,12 @@ public interface StudentParticipationRepository extends JpaRepository<StudentPar
         // 3rd: merge both into one list for further processing
         return Stream.concat(individualParticipations.stream(), teamParticipations.stream()).collect(Collectors.toList());
     }
+
+    /**
+     * method to find orphan student participations
+     * Note: type is set to fetch explicitly to make this query faster
+     * @return all student participations without a parent exercise
+     */
+    @EntityGraph(type = FETCH, attributePaths = "submissions")
+    Set<StudentParticipation> findByExerciseIsNull();
 }

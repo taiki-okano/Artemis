@@ -1,9 +1,10 @@
 package de.tum.in.www1.artemis.repository;
 
-import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -100,4 +101,12 @@ public interface TextSubmissionRepository extends JpaRepository<TextSubmission, 
     default TextSubmission findWithEagerResultsAndFeedbackAndTextBlocksByIdElseThrow(long submissionId) {
         return findWithEagerResultsAndFeedbackAndTextBlocksById(submissionId).orElseThrow(() -> new EntityNotFoundException("TextSubmission", submissionId));
     }
+
+    /**
+     * method to find orphan submissions
+     * Note: type is set to fetch explicitly to make this query faster
+     * @return all submissions without a parent participation and not used as example submissions
+     */
+    @EntityGraph(type = FETCH, attributePaths = "results")
+    Set<TextSubmission> findByParticipationIsNull();
 }

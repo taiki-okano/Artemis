@@ -1,7 +1,7 @@
 package de.tum.in.www1.artemis.repository;
 
 import static java.util.Arrays.asList;
-import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.*;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -521,8 +521,7 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
         double bonusPoints = Optional.ofNullable(exercise.getBonusPoints()).orElse(0.0);
 
         // Exam results and manual results of programming exercises and example submissions are always to rated
-        if (exercise.isExamExercise() || exercise instanceof ProgrammingExercise
-                || (result.getSubmission().isExampleSubmission() != null && result.getSubmission().isExampleSubmission())) {
+        if (exercise.isExamExercise() || exercise instanceof ProgrammingExercise || result.getSubmission().isExampleSubmission() == Boolean.TRUE) {
             result.setRated(true);
         }
         else {
@@ -659,4 +658,12 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
         }
         return results;
     }
+
+    /**
+     * method to find orphan results
+     * Note: type is set to fetch explicitly to make this query faster
+     * @return all results without a parent participation and without a parent submission
+     */
+    @EntityGraph(type = FETCH, attributePaths = "feedbacks")
+    Set<Result> findByParticipationIsNullAndSubmissionIsNull();
 }

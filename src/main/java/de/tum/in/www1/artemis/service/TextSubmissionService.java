@@ -7,9 +7,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,16 +36,42 @@ public class TextSubmissionService extends SubmissionService {
 
     private final SubmissionVersionService submissionVersionService;
 
+    private final ResultService resultService;
+
     public TextSubmissionService(TextSubmissionRepository textSubmissionRepository, SubmissionRepository submissionRepository,
             StudentParticipationRepository studentParticipationRepository, ParticipationService participationService, ResultRepository resultRepository,
             UserRepository userRepository, Optional<TextAssessmentQueueService> textAssessmentQueueService, AuthorizationCheckService authCheckService,
             SubmissionVersionService submissionVersionService, FeedbackRepository feedbackRepository, ExamDateService examDateService, CourseRepository courseRepository,
-            ParticipationRepository participationRepository, ComplaintRepository complaintRepository) {
+            ParticipationRepository participationRepository, ComplaintRepository complaintRepository, ResultService resultService) {
         super(submissionRepository, userRepository, authCheckService, resultRepository, studentParticipationRepository, participationService, feedbackRepository, examDateService,
                 courseRepository, participationRepository, complaintRepository);
         this.textSubmissionRepository = textSubmissionRepository;
         this.textAssessmentQueueService = textAssessmentQueueService;
         this.submissionVersionService = submissionVersionService;
+        this.resultService = resultService;
+    }
+
+    /**
+     * Orphan submissions are those that are not example submissions and that are not connected to participations
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void deleteOrphanSubmissions() {
+        try {
+            // Filtering example submissions in Java is faster than in SQL because the column does not have an index
+            var orphanSubmission = this.textSubmissionRepository.findByParticipationIsNull().stream().filter(submission -> submission.isExampleSubmission() != Boolean.TRUE)
+                    .collect(Collectors.toSet());
+            log.info("Found {} text submission orphans to delete", orphanSubmission.size());
+            for (Submission submission : orphanSubmission) {
+                log.info("Delete orphan text submission {} with all its results", submission.getId());
+                for (Result result : submission.getResults()) {
+                    resultService.deleteResultWithComplaint(result.getId());
+                }
+                submissionRepository.deleteById(submission.getId());
+            }
+        }
+        catch (Exception ex) {
+            log.error("Deleting orphans did not work", ex);
+        }
     }
 
     /**

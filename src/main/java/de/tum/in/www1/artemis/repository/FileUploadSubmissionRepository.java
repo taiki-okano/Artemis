@@ -1,8 +1,9 @@
 package de.tum.in.www1.artemis.repository;
 
-import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.*;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -79,4 +80,12 @@ public interface FileUploadSubmissionRepository extends JpaRepository<FileUpload
     default FileUploadSubmission findOne(Long submissionId) {
         return findById(submissionId).orElseThrow(() -> new EntityNotFoundException("File Upload Submission", submissionId));
     }
+
+    /**
+     * method to find orphan submissions
+     * Note: type is set to fetch explicitly to make this query faster
+     * @return all submissions without a parent participation and not used as example submissions
+     */
+    @EntityGraph(type = FETCH, attributePaths = "results")
+    Set<FileUploadSubmission> findByParticipationIsNull();
 }

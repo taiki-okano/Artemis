@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
@@ -80,6 +82,8 @@ public class ProgrammingSubmissionService extends SubmissionService {
 
     private final ProgrammingExerciseStudentParticipationRepository programmingExerciseStudentParticipationRepository;
 
+    private final ResultService resultService;
+
     public ProgrammingSubmissionService(ProgrammingSubmissionRepository programmingSubmissionRepository, ProgrammingExerciseRepository programmingExerciseRepository,
             GroupNotificationService groupNotificationService, SubmissionRepository submissionRepository, UserRepository userRepository, AuthorizationCheckService authCheckService,
             WebsocketMessagingService websocketMessagingService, Optional<VersionControlService> versionControlService, ResultRepository resultRepository,
@@ -87,7 +91,8 @@ public class ProgrammingSubmissionService extends SubmissionService {
             ProgrammingExerciseParticipationService programmingExerciseParticipationService, ExamSubmissionService examSubmissionService, GitService gitService,
             StudentParticipationRepository studentParticipationRepository, FeedbackRepository feedbackRepository, AuditEventRepository auditEventRepository,
             ExamDateService examDateService, CourseRepository courseRepository, ParticipationRepository participationRepository,
-            ProgrammingExerciseStudentParticipationRepository programmingExerciseStudentParticipationRepository, ComplaintRepository complaintRepository) {
+            ProgrammingExerciseStudentParticipationRepository programmingExerciseStudentParticipationRepository, ComplaintRepository complaintRepository,
+            ResultService resultService) {
         super(submissionRepository, userRepository, authCheckService, resultRepository, studentParticipationRepository, participationService, feedbackRepository, examDateService,
                 courseRepository, participationRepository, complaintRepository);
         this.programmingSubmissionRepository = programmingSubmissionRepository;
@@ -103,6 +108,30 @@ public class ProgrammingSubmissionService extends SubmissionService {
         this.resultRepository = resultRepository;
         this.auditEventRepository = auditEventRepository;
         this.programmingExerciseStudentParticipationRepository = programmingExerciseStudentParticipationRepository;
+        this.resultService = resultService;
+    }
+
+    /**
+     * Orphan submissions are those that are not example submissions and that are not connected to participations
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void deleteOrphanSubmissions() {
+        try {
+            // Filtering example submissions in Java is faster than in SQL because the column does not have an index
+            var orphanSubmission = this.programmingSubmissionRepository.findByParticipationIsNull().stream().filter(submission -> submission.isExampleSubmission() != Boolean.TRUE)
+                    .collect(Collectors.toSet());
+            log.info("Found {} programming submission orphans to delete", orphanSubmission.size());
+            for (Submission submission : orphanSubmission) {
+                log.info("Delete orphan programming submission {} with all its results", submission.getId());
+                for (Result result : submission.getResults()) {
+                    resultService.deleteResultWithComplaint(result.getId());
+                }
+                submissionRepository.deleteById(submission.getId());
+            }
+        }
+        catch (Exception ex) {
+            log.error("Deleting orphans did not work", ex);
+        }
     }
 
     /**
