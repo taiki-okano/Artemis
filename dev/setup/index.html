@@ -545,11 +545,17 @@ above in Server Setup) and if you have configured
 <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code> correctly, then you should be able to login
 with your TUM Online account.</p>
 <p>In case you encounter any problems regarding JavaScript heap memory leaks when executing <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">serve</span></code> or any other scripts from <code class="docutils literal notranslate"><span class="pre">package.json</span></code>,
-you can add a memory limit parameter used in the script in <code class="docutils literal notranslate"><span class="pre">package.json</span></code> to the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This local change in `package.json` should not be committed.</span>
-<span class="o">--</span><span class="n">max_old_space_size</span><span class="o">=</span><span class="mi">5120</span> <span class="c1"># possible higher values are 6144, 7168, and 8192</span>
+you can add a memory limit parameter (<code class="docutils literal notranslate"><span class="pre">--max_old_space_size=5120</span></code>) in the script.
+You can do it by changing the <strong>start</strong> script in <code class="docutils literal notranslate"><span class="pre">package.json</span></code> from:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;ng serve --hmr&quot;</span><span class="p">,</span>
 </pre></div>
 </div>
+<p>to</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;node --max_old_space_size=5120 ./node_modules/@angular/cli/bin/ng serve --hmr&quot;</span><span class="p">,</span>
+</pre></div>
+</div>
+<p>If you still face the issue, you can try to set a higher value than 5120. Possible values are 6144, 7168, and 8192.</p>
+<p>The same change could be applied to each <strong>ng</strong> command as in the example above.</p>
 <p>Make sure to <strong>not commit this change</strong> in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
 <p>For more information, review <a class="reference external" href="https://www.jhipster.tech/development/#working-with-angular">Working with
 Angular</a>.
