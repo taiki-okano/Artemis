@@ -96,6 +96,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#static-code-analysis-default-configuration">Static Code Analysis Default Configuration</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#java">Java</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c">C</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#online-editor">Online Editor</a><ul>
@@ -223,23 +224,24 @@
 <li><p><a class="reference internal" href="#static-code-analysis-default-configuration" id="id8">Static Code Analysis Default Configuration</a></p>
 <ul>
 <li><p><a class="reference internal" href="#java" id="id9">Java</a></p></li>
+<li><p><a class="reference internal" href="#c" id="id10">C</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#online-editor" id="id10">Online Editor</a></p>
+<li><p><a class="reference internal" href="#online-editor" id="id11">Online Editor</a></p>
 <ul>
-<li><p><a class="reference internal" href="#display-of-hidden-files" id="id11">Display of hidden files</a></p></li>
+<li><p><a class="reference internal" href="#display-of-hidden-files" id="id12">Display of hidden files</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#testing-with-artemis-java-test-sandbox" id="id12">Testing with Artemis Java Test Sandbox</a></p></li>
-<li><p><a class="reference internal" href="#best-practices-for-writing-test-cases" id="id13">Best practices for writing test cases</a></p>
+<li><p><a class="reference internal" href="#testing-with-artemis-java-test-sandbox" id="id13">Testing with Artemis Java Test Sandbox</a></p></li>
+<li><p><a class="reference internal" href="#best-practices-for-writing-test-cases" id="id14">Best practices for writing test cases</a></p>
 <ul>
-<li><p><a class="reference internal" href="#general-best-practices" id="id14">General best practices</a></p></li>
-<li><p><a class="reference internal" href="#java-best-practices" id="id15">Java best practices</a></p></li>
+<li><p><a class="reference internal" href="#general-best-practices" id="id15">General best practices</a></p></li>
+<li><p><a class="reference internal" href="#java-best-practices" id="id16">Java best practices</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#sending-feedback-back-to-artemis" id="id16">Sending Feedback back to Artemis</a></p>
+<li><p><a class="reference internal" href="#sending-feedback-back-to-artemis" id="id17">Sending Feedback back to Artemis</a></p>
 <ul>
-<li><p><a class="reference internal" href="#jenkins" id="id17">Jenkins</a></p></li>
+<li><p><a class="reference internal" href="#jenkins" id="id18">Jenkins</a></p></li>
 </ul>
 </li>
 </ul>
@@ -386,7 +388,7 @@ The table below provides an overview of the supported features:</p>
 </tr>
 <tr class="row-even"><td><p>C</p></td>
 <td><p>no</p></td>
-<td><p>no</p></td>
+<td><p>yes</p></td>
 <td><p>yes</p></td>
 <td><p>no</p></td>
 <td><p>no</p></td>
@@ -455,6 +457,10 @@ The table below provides an overview of the supported features:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Only some <code class="docutils literal notranslate"><span class="pre">templates</span></code> for <code class="docutils literal notranslate"><span class="pre">Bamboo</span></code> support <code class="docutils literal notranslate"><span class="pre">Sequential</span> <span class="pre">Test</span> <span class="pre">Runs</span></code> at the moment.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Static Code Analysis for <code class="docutils literal notranslate"><span class="pre">C</span></code> exercises is only supported for <code class="docutils literal notranslate"><span class="pre">Bamboo</span></code> at the moment.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -804,11 +810,20 @@ git clone <span class="s2">&quot;</span><span class="nv">$BASE</span><span class
 <td><p>SwiftLint</p></td>
 <td><p>.swiftlint.yml</p></td>
 </tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>Script</p></td>
+<td><p>GCC</p></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The Maven plugins for the Java static code analysis tools provide additional configuration options.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>GCC can be configured by passing the desired flags in the tasks. For more information, see <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gcc-11.1.0/gcc/Static-Analyzer-Options.html">GCC Documentation</a>.</p>
 </div>
 <ul class="simple">
 <li><p>The build plans use a special task/script for the execution of the tools</p></li>
@@ -922,20 +937,22 @@ Additionally, results of this test case are <em>not</em> considered in the stude
 </ul>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 16%" />
-<col style="width: 38%" />
-<col style="width: 25%" />
-<col style="width: 22%" />
+<col style="width: 13%" />
+<col style="width: 31%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"></th>
 <th class="head"></th>
-<th class="head" colspan="2"><p>Mapping</p></th>
+<th class="head" colspan="3"><p>Mapping</p></th>
 </tr>
 <tr class="row-even"><th class="head"><p>Category</p></th>
 <th class="head"><p>Description</p></th>
 <th class="head"><p>Java</p></th>
 <th class="head"><p>Swift</p></th>
+<th class="head"><p>C</p></th>
 </tr>
 </thead>
 <tbody>
@@ -944,6 +961,7 @@ Additionally, results of this test case are <em>not</em> considered in the stude
 and essential coding practices</p></td>
 <td><p>Spotbugs BAD_PRACTICE</p></td>
 <td rowspan="3"></td>
+<td rowspan="3"><p>GCC BadPractice</p></td>
 </tr>
 <tr class="row-even"><td><p>Spotbugs I18N</p></td>
 </tr>
@@ -954,6 +972,7 @@ and essential coding practices</p></td>
 and hard to maintain</p></td>
 <td><p>Spotbugs STYLE</p></td>
 <td rowspan="5"><p>Swiftlint (all rules)</p></td>
+<td rowspan="5"></td>
 </tr>
 <tr class="row-odd"><td><p>Checkstyle blocks</p></td>
 </tr>
@@ -968,6 +987,7 @@ and hard to maintain</p></td>
 code or threading errors</p></td>
 <td><p>Spotbugs CORRECTNESS</p></td>
 <td></td>
+<td rowspan="4"><p>GCC Memory</p></td>
 </tr>
 <tr class="row-even"><td><p>Spotbugs MT_CORRECTNESS</p></td>
 <td></td>
@@ -982,12 +1002,14 @@ code or threading errors</p></td>
 <td><p>Code clones</p></td>
 <td><p>PMD CPD</p></td>
 <td></td>
+<td></td>
 </tr>
 <tr class="row-even"><td rowspan="3"><p>Security</p></td>
 <td rowspan="3"><p>Vulnerable code, unchecked
 inputs and security flaws</p></td>
 <td><p>Spotbugs MALICIOUS_CODE</p></td>
 <td></td>
+<td rowspan="3"><p>GCC Security</p></td>
 </tr>
 <tr class="row-odd"><td><p>Spotbugs SECURITY</p></td>
 <td></td>
@@ -999,6 +1021,7 @@ inputs and security flaws</p></td>
 <td rowspan="2"><p>Inefficient code</p></td>
 <td><p>Spotbugs PERFORMANCE</p></td>
 <td></td>
+<td rowspan="2"></td>
 </tr>
 <tr class="row-even"><td><p>PMD Performance</p></td>
 <td></td>
@@ -1008,6 +1031,7 @@ inputs and security flaws</p></td>
 and object design</p></td>
 <td><p>Checkstyle design</p></td>
 <td></td>
+<td rowspan="2"></td>
 </tr>
 <tr class="row-even"><td><p>PMD Design</p></td>
 <td></td>
@@ -1017,6 +1041,7 @@ and object design</p></td>
 metrics or size limitations</p></td>
 <td><p>Checkstyle metrics</p></td>
 <td></td>
+<td rowspan="2"></td>
 </tr>
 <tr class="row-even"><td><p>Checkstyle sizes</p></td>
 <td></td>
@@ -1026,6 +1051,7 @@ metrics or size limitations</p></td>
 documentation</p></td>
 <td><p>Checkstyle javadoc</p></td>
 <td></td>
+<td rowspan="3"></td>
 </tr>
 <tr class="row-even"><td><p>Checkstyle annotation</p></td>
 <td></td>
@@ -1040,6 +1066,7 @@ imports, indentation, annotations,
 white spaces)</p></td>
 <td><p>Checkstyle imports</p></td>
 <td></td>
+<td rowspan="4"></td>
 </tr>
 <tr class="row-odd"><td><p>Checkstyle indentation</p></td>
 <td></td>
@@ -1054,6 +1081,7 @@ white spaces)</p></td>
 <td><p>Uncategorized rules</p></td>
 <td><p>Checkstyle miscellaneous</p></td>
 <td></td>
+<td><p>GCC Misc</p></td>
 </tr>
 </tbody>
 </table>
@@ -1061,6 +1089,10 @@ white spaces)</p></td>
 <div><div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For Swift, only the category Code Style can contain code quality issues currently. All other categories displayed on the grading page are dummies.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The GCC SCA option for C does not offer categories by default. The issues were categorized during parsing with respect to the <a class="reference internal" href="#c-sca-default-config"><span class="std std-ref">rules</span></a>.</p>
 </div>
 <ul class="simple">
 <li><p>On the left side of the page, instructors can configure the static code analysis categories.</p>
@@ -1528,9 +1560,83 @@ For a description of the various PMD CPD configuration parameters refer to the <
 </pre></div>
 </div>
 </div>
+<div class="section" id="c">
+<span id="c-sca-default-config"></span><h3><a class="toc-backref" href="#id10">C</a><a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h3>
+<p><strong>GCC</strong></p>
+<p>For a description of the rules/warnings refer to the <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gcc-11.1.0/gcc/Static-Analyzer-Options.html">GCC Documentation</a>.
+For readability reasons the rule/warning prefix <code class="docutils literal notranslate"><span class="pre">-Wanalyzer-</span></code> is omitted.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 59%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Category (Tool/Artemis)</p></th>
+<th class="head"><p>Rule</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td rowspan="4"><p>Memory Management
+/ Potential Bugs</p></td>
+<td><p>free-of-non-heap</p></td>
+</tr>
+<tr class="row-odd"><td><p>malloc-leak</p></td>
+</tr>
+<tr class="row-even"><td><p>file-leak</p></td>
+</tr>
+<tr class="row-odd"><td><p>mismatching-deallocation</p></td>
+</tr>
+<tr class="row-even"><td rowspan="8"><p>Undefined Behavior
+/ Potential Bugs</p></td>
+<td><p>double-free</p></td>
+</tr>
+<tr class="row-odd"><td><p>null-argument</p></td>
+</tr>
+<tr class="row-even"><td><p>use-after-free</p></td>
+</tr>
+<tr class="row-odd"><td><p>use-of-uninitialized-value</p></td>
+</tr>
+<tr class="row-even"><td><p>write-to-const</p></td>
+</tr>
+<tr class="row-odd"><td><p>write-to-string-literal</p></td>
+</tr>
+<tr class="row-even"><td><p>possible-null-argument</p></td>
+</tr>
+<tr class="row-odd"><td><p>possible-null-dereference</p></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p>Bad Practice/Bad Practice</p></td>
+<td><p>double-fclose</p></td>
+</tr>
+<tr class="row-odd"><td><p>too-complex</p></td>
+</tr>
+<tr class="row-even"><td><p>stale-setjmp-buffer</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><p>Security/Security</p></td>
+<td><p>exposure-through-output-file</p></td>
+</tr>
+<tr class="row-even"><td><p>unsafe-call-within-signal-handler</p></td>
+</tr>
+<tr class="row-odd"><td><p>use-of-pointer-in-stale-stack-frame</p></td>
+</tr>
+<tr class="row-even"><td><p>tainted-array-index</p></td>
+</tr>
+<tr class="row-odd"><td><p>Miscellaneous/Miscellaneous</p></td>
+<td><p>Rules not matching to above categories</p></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">GCC</span></code> output can still contain normal warnings and compilation errors. That will also be added to the <code class="docutils literal notranslate"><span class="pre">Miscellaneous</span></code> category.
+Usually it’s best to disable this category, as it contains errors not related to the SCA.
+Therefore, if the warning/error does not belong to first four above categories it is not an SCA issue as of <code class="docutils literal notranslate"><span class="pre">GCC</span> <span class="pre">11.1.0</span></code>.</p>
+</div>
+</div></blockquote>
+</div>
 </div>
 <div class="section" id="online-editor">
-<h2><a class="toc-backref" href="#id10">Online Editor</a><a class="headerlink" href="#online-editor" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">Online Editor</a><a class="headerlink" href="#online-editor" title="Permalink to this headline">¶</a></h2>
 <p>The following screenshot shows the online code editor with interactive
 and dynamic exercise instructions on the right side. Tasks and UML
 diagram elements are referenced by test cases and update their color
@@ -1543,14 +1649,14 @@ particularly helpful for programming beginners.</p>
 <p class="caption"><span class="caption-text">Online Editor</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <div class="section" id="display-of-hidden-files">
-<h3><a class="toc-backref" href="#id11">Display of hidden files</a><a class="headerlink" href="#display-of-hidden-files" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id12">Display of hidden files</a><a class="headerlink" href="#display-of-hidden-files" title="Permalink to this headline">¶</a></h3>
 <p>The online editor displays only visible files, to avoid showing for example <code class="docutils literal notranslate"><span class="pre">.git</span></code> and <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code> config files.
 This also means that other config files, like SwiftLint’s <code class="docutils literal notranslate"><span class="pre">.swiftlint.yml</span></code> file, are not shown. Those files currently
 can only be accessed via your own IDE.</p>
 </div>
 </div>
 <div class="section" id="testing-with-artemis-java-test-sandbox">
-<h2><a class="toc-backref" href="#id12">Testing with Artemis Java Test Sandbox</a><a class="headerlink" href="#testing-with-artemis-java-test-sandbox" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id13">Testing with Artemis Java Test Sandbox</a><a class="headerlink" href="#testing-with-artemis-java-test-sandbox" title="Permalink to this headline">¶</a></h2>
 <p>Artemis Java Test Sandbox <em>(abbr. AJTS)</em> is a JUnit 5 extension for easy and secure Java testing
 on Artemis.</p>
 <p>Its main features are</p>
@@ -1565,12 +1671,12 @@ or pointing to a possible location that caused an Exception</p></li>
 <p><strong>For more information see</strong> <a class="reference external" href="https://github.com/ls1intum/artemis-java-test-sandbox">AJTS GitHub</a></p>
 </div>
 <div class="section" id="best-practices-for-writing-test-cases">
-<h2><a class="toc-backref" href="#id13">Best practices for writing test cases</a><a class="headerlink" href="#best-practices-for-writing-test-cases" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id14">Best practices for writing test cases</a><a class="headerlink" href="#best-practices-for-writing-test-cases" title="Permalink to this headline">¶</a></h2>
 <p>The following sections describe best practices for writing test cases.
 The examples and explanations are specifically written for Java (using AJTS/JUnit5), but the practices can also be generalized
 for other programming languages.</p>
 <div class="section" id="general-best-practices">
-<h3><a class="toc-backref" href="#id14">General best practices</a><a class="headerlink" href="#general-best-practices" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id15">General best practices</a><a class="headerlink" href="#general-best-practices" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Write Meaningful Comments for your Tests</strong></p>
 <p>These comments should contain information about what is tested specifically, which task from the problem statement
@@ -1763,7 +1869,7 @@ cryptic fail message. A null check in the test case allows providing a more clea
 </ul>
 </div>
 <div class="section" id="java-best-practices">
-<h3><a class="toc-backref" href="#id15">Java best practices</a><a class="headerlink" href="#java-best-practices" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id16">Java best practices</a><a class="headerlink" href="#java-best-practices" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Use Constant String Attributes to Represent the Base Package</strong></p>
 <p>Some courses use long package identifiers like <code class="docutils literal notranslate"><span class="pre">de.tum.in.ase.pse</span></code>. When instantiating objects with reflections,
@@ -1939,11 +2045,11 @@ impossible to change the value during runtime.</p></li>
 </div>
 </div>
 <div class="section" id="sending-feedback-back-to-artemis">
-<h2><a class="toc-backref" href="#id16">Sending Feedback back to Artemis</a><a class="headerlink" href="#sending-feedback-back-to-artemis" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id17">Sending Feedback back to Artemis</a><a class="headerlink" href="#sending-feedback-back-to-artemis" title="Permalink to this headline">¶</a></h2>
 <p>Per default the results of all unit tests are extracted and sent back to Artemis without any further manual interaction needed.
 Only for some custom setups a semi-automatic approach might be necessary.</p>
 <div class="section" id="jenkins">
-<h3><a class="toc-backref" href="#id17">Jenkins</a><a class="headerlink" href="#jenkins" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id18">Jenkins</a><a class="headerlink" href="#jenkins" title="Permalink to this headline">¶</a></h3>
 <p>In the Jenkins CI-System the test case feedbacks are extracted from XML-Files in the JUnit format.
 The Jenkins plugins reads all such files from a folder <code class="docutils literal notranslate"><span class="pre">results</span></code> in the top level of the Jenkins workspace.
 The files resulting from the execution of regular executed unit tests are copied to this folder automatically.</p>

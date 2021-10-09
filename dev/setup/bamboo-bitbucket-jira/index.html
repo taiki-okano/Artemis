@@ -259,7 +259,8 @@ To use the Swift Dockerfile, change the following:</p>
 </div>
 </div></blockquote>
 <p>Execute the docker-compose file e.g. with
-<code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/atlassian.yml</span> <span class="pre">up</span> <span class="pre">-d</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/atlassian.yml</span> <span class="pre">up</span> <span class="pre">-d</span></code>.
+If you notice that the used image didn’t change, append the flag <code class="docutils literal notranslate"><span class="pre">--build</span></code>.</p>
 <p>Error Handling: It can happen that there is an overload with other
 docker networks
 <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">Pool</span> <span class="pre">overlaps</span> <span class="pre">with</span> <span class="pre">other</span> <span class="pre">one</span> <span class="pre">on</span> <span class="pre">this</span> <span class="pre">address</span> <span class="pre">space</span></code>. Use the
