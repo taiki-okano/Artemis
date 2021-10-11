@@ -523,6 +523,7 @@
 </div>
 </div></blockquote>
 </li>
+<li><p>When you press <img alt="refresh_files" src="../../../_images/refresh_files.png" /> all unsaved changes are overwritten in the online code editor. Your changes are auto-saved every 30 seconds by Artemis in the code editor.</p></li>
 <li><p>When you press <img alt="submit" src="../../../_images/submit.png" />, your changes are pushed to the version control (VC) server and a build is started on the continuous integration (CI) server. This is indicated by the results changing from <img alt="no_results_found" src="../../../_images/no_results_found.png" /> to <img alt="building_and_testing" src="../../../_images/building_and_testing.png" />. You need to first press <img alt="submit" src="../../../_images/submit.png" /> to get feedback on your submissions build status.</p>
 <blockquote>
 <div><div class="admonition warning">
@@ -581,6 +582,9 @@
 <p class="admonition-title">Warning</p>
 <p>Edit a programming exercise <strong>EITHER</strong> in the online editor <strong>OR</strong> in your local IDE! Otherwise, conflicts can occur that are hard to resolve.</p>
 </div>
+<p>If you work in the online code editor and a merge conflict occurs, the file browser will display the conflict state <img alt="conflict_state" src="../../../_images/conflict_state.png" />.
+You can use the <img alt="resolve_conflict" src="../../../_images/resolve_conflict.png" /> button, which is then displayed instead of the submit button, to resolve the conflict within the online code editor.
+This will reset your changes to the latest commit. Manual merging is not possible with the online code editor.</p>
 </div></blockquote>
 </li>
 </ul>
