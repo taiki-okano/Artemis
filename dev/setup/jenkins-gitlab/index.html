@@ -443,9 +443,8 @@ Gitlab uses for SSH to <code class="docutils literal notranslate"><span class="p
 </div>
 </li>
 <li><p>Wait a couple of minutes until the container is deployed and GitLab
-is set up, then open the instance in you browser and set a first
-admin password of your choosing. You can then login using the
-username <code class="docutils literal notranslate"><span class="pre">root</span></code> and your password.</p></li>
+is set up, then open the instance in you browser.
+You can get the initial password for the <code class="docutils literal notranslate"><span class="pre">root</span></code> user using <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">exec</span> <span class="pre">gitlab</span> <span class="pre">cat</span> <span class="pre">/etc/gitlab/initial_root_password</span></code>.</p></li>
 <li><p>We recommend to rename the <code class="docutils literal notranslate"><span class="pre">root</span></code> admin user to <code class="docutils literal notranslate"><span class="pre">artemis</span></code>. To rename
 the user, click on the image on the top right and select <code class="docutils literal notranslate"><span class="pre">Settings</span></code>.
 Now select <code class="docutils literal notranslate"><span class="pre">Account</span></code> on the left and change the username. Use the
