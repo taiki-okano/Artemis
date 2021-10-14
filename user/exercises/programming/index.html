@@ -440,7 +440,7 @@ The table below provides an overview of the supported features:</p>
 <td><p>no</p></td>
 <td><p>no</p></td>
 <td><p>no</p></td>
-<td><p>no</p></td>
+<td><p>yes</p></td>
 </tr>
 </tbody>
 </table>
@@ -740,6 +740,66 @@ git clone <span class="s2">&quot;</span><span class="nv">$BASE</span><span class
   rm -r <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/assignment/.git/&quot;</span>
 </pre></div>
 </div>
+</li>
+<li><p><strong>Notes for OCaml:</strong> The tests expect to be placed in a folder <strong>tests</strong> next to a folder <strong>assignment</strong> containing the submission to test and a folder <strong>solution</strong> with the solution repository.
+You can use the following script to conveniently checkout an exercise and create the right folder structure:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<span class="c1"># Arguments:</span>
+<span class="c1"># $1: exercise short name as specified on Artemis</span>
+<span class="c1"># $2: (optional) output folder name</span>
+<span class="c1">#</span>
+<span class="c1"># Note: you might want to adapt the `BASE` variable below according to your needs</span>
+
+<span class="c1"># shortname of the course to pick exercises from</span>
+<span class="nv">PREFIX</span><span class="o">=</span>
+
+<span class="k">if</span> <span class="o">[</span> -z <span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+  <span class="nb">echo</span> <span class="s2">&quot;No exercise short name supplied.&quot;</span>
+  <span class="nb">exit</span> <span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="c1"># full name of the exercise to load</span>
+<span class="nv">EXERCISE</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PREFIX$1</span><span class="s2">&quot;</span>
+
+<span class="k">if</span> <span class="o">[</span> -z <span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+  <span class="c1"># use the exercise name if no output folder name is specified</span>
+  <span class="nv">NAME</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span>
+<span class="k">else</span>
+  <span class="nv">NAME</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span>
+<span class="k">fi</span>
+
+<span class="c1"># default base URL to repositories; change this according to your needs</span>
+<span class="nv">BASE</span><span class="o">=</span><span class="s2">&quot;ssh://git@bitbucket.ase.in.tum.de:7999/</span><span class="nv">$EXERCISE</span><span class="s2">/</span><span class="nv">$EXERCISE</span><span class="s2">&quot;</span>
+
+<span class="c1"># clone the test repository</span>
+git clone <span class="s2">&quot;</span><span class="nv">$BASE</span><span class="s2">-tests.git&quot;</span> <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/tests&quot;</span>
+<span class="c1"># clone the template repository</span>
+git clone <span class="s2">&quot;</span><span class="nv">$BASE</span><span class="s2">-exercise.git&quot;</span> <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/template&quot;</span>
+<span class="c1"># clone the solution repository</span>
+git clone <span class="s2">&quot;</span><span class="nv">$BASE</span><span class="s2">-solution.git&quot;</span> <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/solution&quot;</span>
+
+<span class="c1"># hardlink the various assignment interfaces to ensure they stay in sync</span>
+<span class="c1"># the version in the solution repositiory is authoritive in case of conflict</span>
+rm <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/template/src/assignment.mli&quot;</span>
+rm <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/tests/assignment/assignment.mli&quot;</span>
+rm <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/tests/solution/solution.mli&quot;</span>
+ln <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/solution/src/assignment.mli&quot;</span> <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/template/src/assignment.mli&quot;</span>
+ln <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/solution/src/assignment.mli&quot;</span> <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/tests/assignment/assignment.mli&quot;</span>
+ln <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/solution/src/assignment.mli&quot;</span> <span class="s2">&quot;</span><span class="nv">$NAME</span><span class="s2">/tests/solution/solution.mli&quot;</span>
+</pre></div>
+</div>
+<p>To run the tests run the following script in either the solution or template folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<span class="nv">dir</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>realpath ./<span class="k">)</span><span class="s2">&quot;</span>
+
+<span class="nb">cd</span> .. <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
+rm ./assignment
+ln -s <span class="s2">&quot;</span><span class="nv">$dir</span><span class="s2">&quot;</span> ./assignment
+<span class="nb">cd</span> tests <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
+./run.sh
+</pre></div>
+</div>
+<p>It is possible to checkout additional student repositories next to the solution and template folder to run tests on them for manual grading.</p>
 </li>
 </ul>
 </li>
