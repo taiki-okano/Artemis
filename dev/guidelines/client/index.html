@@ -104,15 +104,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#comments">6. Comments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#strings">7. Strings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#buttons-and-links">8. Buttons and Links</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#style">9. Style</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#preventing-memory-leaks">10. Preventing Memory Leaks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icons-with-text">9. Icons with Text</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#style">10. Style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preventing-memory-leaks">11. Preventing Memory Leaks</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#what-are-memory-leaks">What are memory leaks?</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#what-are-common-reasons-for-memory-leaks">What are common reasons for memory leaks?</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#what-are-ways-to-identify-memory-leaks">What are ways to identify memory leaks?</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#defining-routes-and-breadcrumbs">11. Defining Routes and Breadcrumbs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#strict-template-check">12. Strict Template Check</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#defining-routes-and-breadcrumbs">12. Defining Routes and Breadcrumbs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strict-template-check">13. Strict Template Check</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#use-artemistranslatepipe-instead-of-translatepipe">Use ArtemisTranslatePipe instead of TranslatePipe</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#use-artemistimeagopipe-instead-of-timeagopipe">Use ArtemisTimeAgoPipe instead of TimeAgoPipe</a></li>
 </ul>
@@ -249,9 +250,7 @@
 </div>
 <div class="section" id="null-and-undefined">
 <h2>4. <code class="docutils literal notranslate"><span class="pre">null</span></code> and <code class="docutils literal notranslate"><span class="pre">undefined</span></code><a class="headerlink" href="#null-and-undefined" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li><p>Use <strong>undefined</strong>. Do not use null.</p></li>
-</ol>
+<p>Use <strong>undefined</strong>. Do not use null.</p>
 </div>
 <div class="section" id="general-assumptions">
 <h2>5. General Assumptions<a class="headerlink" href="#general-assumptions" title="Permalink to this headline">¶</a></h2>
@@ -262,9 +261,7 @@
 </div>
 <div class="section" id="comments">
 <h2>6. Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li><p>Use JSDoc style comments for functions, interfaces, enums, and classes.</p></li>
-</ol>
+<p>Use JSDoc style comments for functions, interfaces, enums, and classes.</p>
 </div>
 <div class="section" id="strings">
 <h2>7. Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h2>
@@ -281,8 +278,28 @@
 <li><p>Links are best for navigating on Artemis (e.g. <code class="docutils literal notranslate"><span class="pre">&lt;a</span> <span class="pre">[routerLink]='getLinkForExerciseEditor(exercise)'</span> <span class="pre">[queryParams]='getQueryParamsForEditor(exercise)'&gt;...&lt;/a&gt;</span></code>)</p></li>
 </ol>
 </div>
+<div class="section" id="icons-with-text">
+<h2>9. Icons with Text<a class="headerlink" href="#icons-with-text" title="Permalink to this headline">¶</a></h2>
+<p>If you use icons next to text (for example for a button or link), make sure that they are separated by a newline. HTML renders one or multiple newlines as a space.</p>
+<p>Do this:
+.. code-block:: html</p>
+<blockquote>
+<div><p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;
+&lt;span&gt;Text&lt;/span&gt;</p>
+</div></blockquote>
+<p>Don’t do one of these or any other combination of whitespaces:
+.. code-block:: html</p>
+<blockquote>
+<div><p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;&lt;span&gt;Text&lt;/span&gt;</p>
+<p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;&lt;span&gt; Text&lt;/span&gt;
+&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt; &lt;span&gt;Text&lt;/span&gt;</p>
+<p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;
+&lt;span&gt; Text&lt;/span&gt;</p>
+</div></blockquote>
+<p>Ignoring this will lead to inconsistent spacing between icons and text.</p>
+</div>
 <div class="section" id="style">
-<h2>9. Style<a class="headerlink" href="#style" title="Permalink to this headline">¶</a></h2>
+<h2>10. Style<a class="headerlink" href="#style" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Use arrow functions over anonymous function expressions.</p></li>
 <li><dl class="simple">
@@ -315,7 +332,7 @@
 You can find the corresponding commands to invoke those tools in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
 </div>
 <div class="section" id="preventing-memory-leaks">
-<h2>10. Preventing Memory Leaks<a class="headerlink" href="#preventing-memory-leaks" title="Permalink to this headline">¶</a></h2>
+<h2>11. Preventing Memory Leaks<a class="headerlink" href="#preventing-memory-leaks" title="Permalink to this headline">¶</a></h2>
 <p>It is crucial that you try to prevent memory leaks in both your components and your tests.</p>
 <div class="section" id="what-are-memory-leaks">
 <h3>What are memory leaks?<a class="headerlink" href="#what-are-memory-leaks" title="Permalink to this headline">¶</a></h3>
@@ -374,7 +391,7 @@ RXJS subscriptions not being unsubscribed.</p>
 </div>
 </div>
 <div class="section" id="defining-routes-and-breadcrumbs">
-<h2>11. Defining Routes and Breadcrumbs<a class="headerlink" href="#defining-routes-and-breadcrumbs" title="Permalink to this headline">¶</a></h2>
+<h2>12. Defining Routes and Breadcrumbs<a class="headerlink" href="#defining-routes-and-breadcrumbs" title="Permalink to this headline">¶</a></h2>
 <p>The ideal schema for routes is that every variable in a path is preceded by a unique path segment: <code class="docutils literal notranslate"><span class="pre">\entityA\:entityIDA\entityB\:entityIDB</span></code></p>
 <p>For example, <code class="docutils literal notranslate"><span class="pre">\courses\:courseId\:exerciseId</span></code> is not a good path and should be written as <code class="docutils literal notranslate"><span class="pre">\courses\:courseId\exercises\:exerciseId</span></code>.
 Doubling textual segments like <code class="docutils literal notranslate"><span class="pre">\lectures\statistics\:lectureId</span></code> should be avoided and instead formulated as <code class="docutils literal notranslate"><span class="pre">\lectures\:lectureId\statistics</span></code>.</p>
@@ -405,7 +422,7 @@ Doubling textual segments like <code class="docutils literal notranslate"><span 
 </div>
 </div>
 <div class="section" id="strict-template-check">
-<h2>12. Strict Template Check<a class="headerlink" href="#strict-template-check" title="Permalink to this headline">¶</a></h2>
+<h2>13. Strict Template Check<a class="headerlink" href="#strict-template-check" title="Permalink to this headline">¶</a></h2>
 <p>To prevent errors for strict template rule in TypeScript, Artemis uses following approaches.</p>
 <div class="section" id="use-artemistranslatepipe-instead-of-translatepipe">
 <h3>Use ArtemisTranslatePipe instead of TranslatePipe<a class="headerlink" href="#use-artemistranslatepipe-instead-of-translatepipe" title="Permalink to this headline">¶</a></h3>
@@ -416,7 +433,7 @@ Doubling textual segments like <code class="docutils literal notranslate"><span 
 <h3>Use ArtemisTimeAgoPipe instead of TimeAgoPipe<a class="headerlink" href="#use-artemistimeagopipe-instead-of-timeagopipe" title="Permalink to this headline">¶</a></h3>
 <p>Do not use <code class="docutils literal notranslate"><span class="pre">&lt;span</span> <span class="pre">[ngbTooltip]=&quot;submittedDate</span> <span class="pre">|</span> <span class="pre">artemisDate&quot;&gt;{{</span> <span class="pre">submittedDate</span> <span class="pre">|</span> <span class="pre">amTimeAgo</span> <span class="pre">}}&lt;/span&gt;</span></code></p>
 <p>Use <code class="docutils literal notranslate"><span class="pre">&lt;span</span> <span class="pre">[ngbTooltip]=&quot;submittedDate</span> <span class="pre">|</span> <span class="pre">artemisDate&quot;&gt;{{</span> <span class="pre">submittedDate</span> <span class="pre">|</span> <span class="pre">artemisTimeAgo</span> <span class="pre">}}&lt;/span&gt;</span></code></p>
-<p>Some parts of these guidelines are adapted from <a class="reference external" href="https://github.com/microsoft/TypeScript-wiki/blob/master/Coding-guidelines.md">https://github.com/microsoft/TypeScript-wiki/blob/master/Coding-guidelines.md</a></p>
+<p>Some parts of these guidelines are adapted from <a class="reference external" href="https://github.com/microsoft/TypeScript-wiki/blob/main/Coding-guidelines.md">https://github.com/microsoft/TypeScript-wiki/blob/main/Coding-guidelines.md</a></p>
 </div>
 </div>
 </div>
