@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -405,7 +406,16 @@ public class GitLabService extends AbstractVersionControlService {
     @Override
     public void createRepository(String projectKey, String repoName, String parentProjectKey) throws VersionControlException {
         try {
-            final var groupId = gitlab.getGroupApi().getGroup(projectKey).getId();
+            final var parentGroup = gitlab.getGroupApi().getGroup("hm-artemis");
+            System.out.println("Parent group has id " + parentGroup.getId());
+            var subgroups = gitlab.getGroupApi().getSubGroups(parentGroup.getId());
+            System.out.println("Parent group has subgroups: " + subgroups.size() + " " + subgroups.toString());
+
+            var group = subgroups.stream().filter(g -> g.getName().equals(projectKey)).collect(Collectors.toList()).get(0);
+            System.out.println("Group is " + group + " with group id " + group);
+
+            final var groupId = group.getId();
+            System.out.println("Group id is " + groupId);
             final var project = new Project().withPath(repoName.toLowerCase()).withName(repoName.toLowerCase()).withNamespaceId(groupId).withVisibility(Visibility.PRIVATE)
                     .withJobsEnabled(false).withSharedRunnersEnabled(false).withContainerRegistryEnabled(false);
             gitlab.getProjectApi().createProject(project);
