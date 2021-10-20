@@ -1,69 +1,33 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Server &mdash; Artemis  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="Client" href="../client/" />
     <link rel="prev" title="Coding and design guidelines" href="../" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
-            <a href="../../../" class="icon icon-home" alt="Documentation Home"> Artemis
-          
-
-          
+            <a href="../../../" class="icon icon-home"> Artemis
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search/" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -71,25 +35,14 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">User Guide</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../user/exercises/">Exercises</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user/exam_mode/">Exam Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user/orion/">Orion</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Contributor Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../setup/">Setup Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">Coding and design guidelines</a><ul class="current">
@@ -134,84 +87,42 @@
 <li class="toctree-l1"><a class="reference internal" href="../../testservers/">Test Servers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker/">Builds and Dependency Management</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Administration Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Administration Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../admin/registration/">User Registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../admin/accessRights/">Access Rights</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../">Artemis</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../../" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../">Coding and design guidelines</a> &raquo;</li>
-        
       <li>Server</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-            
-            
               <a href="https://github.com/ls1intum/Artemis/blob/develop/docs/dev/guidelines/server.rst" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <div class="section" id="server">
-<h1>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h1>
+<h1>Server<a class="headerlink" href="#server" title="Permalink to this headline"></a></h1>
 <p>WORK IN PROGRESS</p>
 <div class="section" id="folder-structure">
-<h2>0. Folder structure<a class="headerlink" href="#folder-structure" title="Permalink to this headline">¶</a></h2>
+<h2>0. Folder structure<a class="headerlink" href="#folder-structure" title="Permalink to this headline"></a></h2>
 <p>The main application is stored under <code class="docutils literal notranslate"><span class="pre">/src/main</span></code> and the main folders are:</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -259,23 +170,23 @@ To understand how to create new changelog file you can check existing changelog 
 </ul>
 </div>
 <div class="section" id="naming-convention">
-<h2>1. Naming convention<a class="headerlink" href="#naming-convention" title="Permalink to this headline">¶</a></h2>
+<h2>1. Naming convention<a class="headerlink" href="#naming-convention" title="Permalink to this headline"></a></h2>
 <p>All variables, methods and classes should use CamelCase style. The only difference: the first letter of any class should be capital. Most importantly use intention-revealing, pronounceable names.</p>
 </div>
 <div class="section" id="single-responsibility-principle">
-<h2>2. Single responsibility principle<a class="headerlink" href="#single-responsibility-principle" title="Permalink to this headline">¶</a></h2>
+<h2>2. Single responsibility principle<a class="headerlink" href="#single-responsibility-principle" title="Permalink to this headline"></a></h2>
 <p>One method should be responsible for only one action, it should do it well and do nothing else. Reduce coupling, if our method does two or three different things at a time then we should consider splitting the functionality.</p>
 </div>
 <div class="section" id="small-methods">
-<h2>3. Small methods<a class="headerlink" href="#small-methods" title="Permalink to this headline">¶</a></h2>
+<h2>3. Small methods<a class="headerlink" href="#small-methods" title="Permalink to this headline"></a></h2>
 <p>There is no standard pattern for method length among the developers. Someone can say 5, in some cases even 20 lines of code is okay. Just try to make methods as small as possible.</p>
 </div>
 <div class="section" id="duplication">
-<h2>4. Duplication<a class="headerlink" href="#duplication" title="Permalink to this headline">¶</a></h2>
+<h2>4. Duplication<a class="headerlink" href="#duplication" title="Permalink to this headline"></a></h2>
 <p>Avoid code duplication. If we cannot reuse a method elsewhere, then the method is probably bad and we should consider a better way to write this method. Use Abstraction to abstract common things in one place.</p>
 </div>
 <div class="section" id="variables-and-methods-declaration">
-<h2>5. Variables and methods declaration<a class="headerlink" href="#variables-and-methods-declaration" title="Permalink to this headline">¶</a></h2>
+<h2>5. Variables and methods declaration<a class="headerlink" href="#variables-and-methods-declaration" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Encapsulate the code you feel might change in future.</p></li>
 <li><p>Make variables and methods private by default and increase access step by step by changing them from a private to package-private or protected first and not public right away.</p></li>
@@ -294,7 +205,7 @@ To understand how to create new changelog file you can check existing changelog 
 </ul>
 </div>
 <div class="section" id="structure-your-code-correctly">
-<h2>6. Structure your code correctly<a class="headerlink" href="#structure-your-code-correctly" title="Permalink to this headline">¶</a></h2>
+<h2>6. Structure your code correctly<a class="headerlink" href="#structure-your-code-correctly" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Default packages are not allowed. It can cause particular problems for Spring Boot applications that use the <code class="docutils literal notranslate"><span class="pre">&#64;ComponentScan</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;EntityScan</span></code> or <code class="docutils literal notranslate"><span class="pre">&#64;SpringBootApplication</span></code> annotations since every class from every jar is read.</p></li>
 <li><p>All variables in the class should be declared at the top of the class.</p></li>
@@ -304,7 +215,7 @@ To understand how to create new changelog file you can check existing changelog 
 </ul>
 </div>
 <div class="section" id="database">
-<h2>7. Database<a class="headerlink" href="#database" title="Permalink to this headline">¶</a></h2>
+<h2>7. Database<a class="headerlink" href="#database" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Write performant queries that can also deal with more than 1000 objects in a reasonable time.</p></li>
 <li><p>Prefer one query that fetches additional data instead of many small queries, but don’t overdo it. A good rule of thumb is to query not more than 3 associations at the same time.</p></li>
@@ -315,15 +226,15 @@ To understand how to create new changelog file you can check existing changelog 
 </ul>
 </div>
 <div class="section" id="comments">
-<h2>8. Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h2>
+<h2>8. Comments<a class="headerlink" href="#comments" title="Permalink to this headline"></a></h2>
 <p>Only write comments for complicated algorithms, to help other developers better understand them. We should only add a comment, if our code is not self-explanatory.</p>
 </div>
 <div class="section" id="utility">
-<h2>9. Utility<a class="headerlink" href="#utility" title="Permalink to this headline">¶</a></h2>
+<h2>9. Utility<a class="headerlink" href="#utility" title="Permalink to this headline"></a></h2>
 <p>Utility methods can and should be placed in a class named for specific functionality, not “miscellaneous stuff related to project”. Most of the time, our static methods belong in a related class.</p>
 </div>
 <div class="section" id="auto-configuration">
-<h2>10. Auto configuration<a class="headerlink" href="#auto-configuration" title="Permalink to this headline">¶</a></h2>
+<h2>10. Auto configuration<a class="headerlink" href="#auto-configuration" title="Permalink to this headline"></a></h2>
 <p>Spring Boot favors Java-based configuration.
 Although it is possible to use Sprint Boot with XML sources, it is generally not recommended.
 You don’t have to put all your <code class="docutils literal notranslate"><span class="pre">&#64;Configuration</span></code> into a single class.
@@ -332,7 +243,7 @@ One of the flagship features of Spring Boot is its use of Auto-configuration. Th
 It gets activated when a particular jar file is detected on the classpath. The simplest way to make use of it is to rely on the Spring Boot Starters.</p>
 </div>
 <div class="section" id="keep-your-restcontrollers-clean-and-focused">
-<h2>11. Keep your <code class="docutils literal notranslate"><span class="pre">&#64;RestController</span></code>’s clean and focused<a class="headerlink" href="#keep-your-restcontrollers-clean-and-focused" title="Permalink to this headline">¶</a></h2>
+<h2>11. Keep your <code class="docutils literal notranslate"><span class="pre">&#64;RestController</span></code>’s clean and focused<a class="headerlink" href="#keep-your-restcontrollers-clean-and-focused" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>RestControllers should be stateless.</p></li>
 <li><p>RestControllers are by default singletons.</p></li>
@@ -387,7 +298,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 </ul>
 </div>
 <div class="section" id="dependency-injection">
-<h2>12. Dependency injection<a class="headerlink" href="#dependency-injection" title="Permalink to this headline">¶</a></h2>
+<h2>12. Dependency injection<a class="headerlink" href="#dependency-injection" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Some of you may argue with this, but by favoring constructor injection you can keep your business logic free from Spring. Not only is the &#64;Autowired annotation optional on constructors, you also get the benefit of being able to easily instantiate your bean without Spring.</p></li>
 <li><p>Use setter based DI only for optional dependencies.</p></li>
@@ -395,7 +306,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 </ul>
 </div>
 <div class="section" id="keep-it-simple-and-stupid">
-<h2>13. Keep it simple and stupid<a class="headerlink" href="#keep-it-simple-and-stupid" title="Permalink to this headline">¶</a></h2>
+<h2>13. Keep it simple and stupid<a class="headerlink" href="#keep-it-simple-and-stupid" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Don’t write complex code.</p></li>
 <li><p>Don’t write code when you are tired or in a bad mood.</p></li>
@@ -405,7 +316,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 </ul>
 </div>
 <div class="section" id="file-handling">
-<h2>14. File handling<a class="headerlink" href="#file-handling" title="Permalink to this headline">¶</a></h2>
+<h2>14. File handling<a class="headerlink" href="#file-handling" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Never use operating system (OS) specific file paths such as “test/test”. Always use OS independent paths.</p></li>
 <li><p>Do not deal with File.separator manually. Instead use the Paths.get(firstPart, secondPart, …) method which deals with separators automatically.</p></li>
@@ -413,7 +324,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 </ul>
 </div>
 <div class="section" id="general-best-practices">
-<h2>15. General best practices<a class="headerlink" href="#general-best-practices" title="Permalink to this headline">¶</a></h2>
+<h2>15. General best practices<a class="headerlink" href="#general-best-practices" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Always use the least possible access level, prefer using private over public access modifier (package-private or protected can be used as well).</p></li>
 <li><p>Previously we used transactions very randomly, now we want to avoid using <code class="docutils literal notranslate"><span class="pre">Transactional</span></code>. Transactions can kill performance, introduce locking issues and database concurrency problems, and add complexity to our application. Good read: <a class="reference external" href="https://codete.com/blog/5-common-spring-transactional-pitfalls/">https://codete.com/blog/5-common-spring-transactional-pitfalls/</a></p></li>
@@ -425,7 +336,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 </ul>
 </div>
 <div class="section" id="avoid-service-dependencies">
-<h2>16. Avoid service dependencies<a class="headerlink" href="#avoid-service-dependencies" title="Permalink to this headline">¶</a></h2>
+<h2>16. Avoid service dependencies<a class="headerlink" href="#avoid-service-dependencies" title="Permalink to this headline"></a></h2>
 <p>In order to achieve low coupling and high cohesion, services should have as few dependencies on other services as possible:</p>
 <ul class="simple">
 <li><p>Avoid cyclic and redirectional dependencies</p></li>
@@ -457,7 +368,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 </div>
 </div>
 <div class="section" id="proper-annotation-of-sql-query-parameters">
-<h2>17. Proper annotation of SQL query parameters<a class="headerlink" href="#proper-annotation-of-sql-query-parameters" title="Permalink to this headline">¶</a></h2>
+<h2>17. Proper annotation of SQL query parameters<a class="headerlink" href="#proper-annotation-of-sql-query-parameters" title="Permalink to this headline"></a></h2>
 <p>Query parameters for SQL must be annotated with <code class="docutils literal notranslate"><span class="pre">&#64;Param(&quot;variable&quot;)</span></code>!</p>
 <p>Do <strong>not</strong> write</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Query</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
@@ -480,7 +391,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 <p>The string name inside must match the name of the variable exactly!</p>
 </div>
 <div class="section" id="sql-statement-formatting">
-<h2>18. SQL statement formatting<a class="headerlink" href="#sql-statement-formatting" title="Permalink to this headline">¶</a></h2>
+<h2>18. SQL statement formatting<a class="headerlink" href="#sql-statement-formatting" title="Permalink to this headline"></a></h2>
 <p>We prefer to write SQL statements all in upper case. Split queries onto multiple lines using the Java Text Blocks notation (triple quotation mark):</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Query</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        SELECT r FROM Result r</span>
@@ -492,7 +403,7 @@ It gets activated when a particular jar file is detected on the classpath. The s
 </div>
 </div>
 <div class="section" id="avoid-the-usage-of-sub-queries">
-<h2>19. Avoid the usage of Sub-queries<a class="headerlink" href="#avoid-the-usage-of-sub-queries" title="Permalink to this headline">¶</a></h2>
+<h2>19. Avoid the usage of Sub-queries<a class="headerlink" href="#avoid-the-usage-of-sub-queries" title="Permalink to this headline"></a></h2>
 <p>SQL statements which do not contain sub-queries are preferable as they are more readable and have a better performance.
 So instead of:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Query</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
@@ -517,7 +428,7 @@ So instead of:</p>
 <p>Functionally both queries extract the same result set, but the first one is less efficient as the sub-query is calculated for each StudentParticipation.</p>
 </div>
 <div class="section" id="rest-endpoint-best-practices-for-authorization">
-<h2>20. REST endpoint best practices for authorization<a class="headerlink" href="#rest-endpoint-best-practices-for-authorization" title="Permalink to this headline">¶</a></h2>
+<h2>20. REST endpoint best practices for authorization<a class="headerlink" href="#rest-endpoint-best-practices-for-authorization" title="Permalink to this headline"></a></h2>
 <p>To prevent unauthorized access to resources Artemis employs a two-step system:</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">PreAuthorize</span></code> annotations are responsible for blocking users with wrong or missing authorization roles without querying the database.</p></li>
@@ -554,7 +465,7 @@ However, do not fetch the user from the database yourself (unless you need to re
 <p>The course repository call takes care of throwing a <code class="docutils literal notranslate"><span class="pre">404</span> <span class="pre">Not</span> <span class="pre">Found</span></code> exception if there exists no matching course. The <code class="docutils literal notranslate"><span class="pre">AuthorizationCheckService</span></code> throws a <code class="docutils literal notranslate"><span class="pre">403</span> <span class="pre">Forbidden</span></code> exception if the user with the given role is unauthorized. Afterwards delegate to a service or repository method. The code becomes much shorter, cleaner and more maintainable.</p>
 </div>
 <div class="section" id="assert-using-the-most-specific-overload-method">
-<h2>21. Assert using the most specific overload method<a class="headerlink" href="#assert-using-the-most-specific-overload-method" title="Permalink to this headline">¶</a></h2>
+<h2>21. Assert using the most specific overload method<a class="headerlink" href="#assert-using-the-most-specific-overload-method" title="Permalink to this headline"></a></h2>
 <p>When expecting results use <code class="docutils literal notranslate"><span class="pre">assertThat</span></code> for server tests. That call <strong>must</strong> be followed by another assertion statement like <code class="docutils literal notranslate"><span class="pre">isTrue()</span></code>. It is best practice to use more specific assertion statement rather than always expecting boolean values.</p>
 <p>For example, instead of</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">assertThat</span><span class="p">(</span><span class="n">submissionInDb</span><span class="p">.</span><span class="na">isPresent</span><span class="p">()).</span><span class="na">isTrue</span><span class="p">();</span>
@@ -575,7 +486,7 @@ However, do not fetch the user from the database yourself (unless you need to re
 <p>Some parts of these guidelines are adapted from <a class="reference external" href="https://medium.com/&#64;madhupathy/ultimate-clean-code-guide-for-java-spring-based-applications-4d4c9095cc2a">https://medium.com/&#64;madhupathy/ultimate-clean-code-guide-for-java-spring-based-applications-4d4c9095cc2a</a></p>
 </div>
 <div class="section" id="general-testing-tips">
-<h2>22. General Testing Tips<a class="headerlink" href="#general-testing-tips" title="Permalink to this headline">¶</a></h2>
+<h2>22. General Testing Tips<a class="headerlink" href="#general-testing-tips" title="Permalink to this headline"></a></h2>
 <p>Write meaningful comments for your tests.
 These comments should contain information about what is tested specifically.</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
@@ -614,7 +525,7 @@ This is the same reason why you should not name your variables int a, double b, 
 <p>If you want to write tests for Programming Exercises to test student’s submissions check out <a class="reference external" href="https://confluence.ase.in.tum.de/display/ArTEMiS/Best+Practices+for+writing+Java+Programming+Exercise+Tests+in+Artemis">this</a>.</p>
 </div>
 <div class="section" id="avoid-using-mockbean">
-<h2>23. Avoid using &#64;MockBean<a class="headerlink" href="#avoid-using-mockbean" title="Permalink to this headline">¶</a></h2>
+<h2>23. Avoid using &#64;MockBean<a class="headerlink" href="#avoid-using-mockbean" title="Permalink to this headline"></a></h2>
 <p>Do not use the <code class="docutils literal notranslate"><span class="pre">&#64;SpyBean</span></code> or <code class="docutils literal notranslate"><span class="pre">&#64;MockBean</span></code> annotation unless absolutely necessary, or possibly in an abstract Superclass. If you want to see why in more detail, take a look <a class="reference external" href="https://www.baeldung.com/spring-tests">here</a>.
 Basically, every time <code class="docutils literal notranslate"><span class="pre">&#64;MockBean</span></code> appears in a class, the ApplicationContext cache gets marked as dirty, hence the runner will clean the cache after the test-class is done and restarts the application context.
 This leads to a large overhead, which tends to make the tests take a lot more time.</p>
@@ -656,58 +567,33 @@ Now, instead of mocking the whole Service, we can just mock the static method, l
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../client/" class="btn btn-neutral float-right" title="Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="../" class="btn btn-neutral float-left" title="Coding and design guidelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../" class="btn btn-neutral float-left" title="Coding and design guidelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../client/" class="btn btn-neutral float-right" title="Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering
-
-    </p>
+    <p>&#169; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

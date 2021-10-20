@@ -1,69 +1,33 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Setup for Programming Exercises with Bamboo, Bitbucket and Jira &mdash; Artemis  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="Setup for Programming Exercises with Jenkins and GitLab" href="../jenkins-gitlab/" />
     <link rel="prev" title="Setup Guide" href="../" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
-            <a href="../../../" class="icon icon-home" alt="Documentation Home"> Artemis
-          
-
-          
+            <a href="../../../" class="icon icon-home"> Artemis
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search/" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -71,25 +35,14 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">User Guide</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../user/exercises/">Exercises</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user/exam_mode/">Exam Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user/orion/">Orion</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Contributor Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../">Setup Guide</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../#server-setup">Server Setup</a><ul class="current">
@@ -104,6 +57,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../distributed/">Multiple instances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../programming-exercises/">Adjustments for programming exercises</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../programming-exercises/#caching-example-for-maven">Caching example for Maven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kubernetes/">Kubernetes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../#run-the-server-via-a-service-configuration">Run the server via a service configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../#run-the-server-via-a-run-configuration-in-intellij">Run the server via a run configuration in IntelliJ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../#typical-problems-with-liquibase-checksums">Typical problems with Liquibase checksums</a></li>
@@ -127,81 +81,39 @@
 <li class="toctree-l1"><a class="reference internal" href="../../testservers/">Test Servers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker/">Builds and Dependency Management</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Administration Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Administration Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../admin/registration/">User Registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../admin/accessRights/">Access Rights</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../">Artemis</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../../" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../">Setup Guide</a> &raquo;</li>
-        
       <li>Setup for Programming Exercises with Bamboo, Bitbucket and Jira</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-            
-            
               <a href="https://github.com/ls1intum/Artemis/blob/develop/docs/dev/setup/bamboo-bitbucket-jira.rst" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <div class="section" id="setup-for-programming-exercises-with-bamboo-bitbucket-and-jira">
-<h1>Setup for Programming Exercises with Bamboo, Bitbucket and Jira<a class="headerlink" href="#setup-for-programming-exercises-with-bamboo-bitbucket-and-jira" title="Permalink to this headline">¶</a></h1>
+<h1>Setup for Programming Exercises with Bamboo, Bitbucket and Jira<a class="headerlink" href="#setup-for-programming-exercises-with-bamboo-bitbucket-and-jira" title="Permalink to this headline"></a></h1>
 <p>This page describes how to set up a programming exercise environment
 based on Bamboo, Bitbucket and Jira.</p>
 <div class="line-block">
@@ -234,7 +146,7 @@ setup is present.</p>
 </ul>
 </div>
 <div class="section" id="docker-compose">
-<h2><a class="toc-backref" href="#id7">Docker-Compose</a><a class="headerlink" href="#docker-compose" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id7">Docker-Compose</a><a class="headerlink" href="#docker-compose" title="Permalink to this headline"></a></h2>
 <p>Before you start the docker-compose, check if the bamboo version in the
 <code class="docutils literal notranslate"><span class="pre">build.gradle</span></code> (search for <code class="docutils literal notranslate"><span class="pre">com.atlassian.bamboo:bamboo-specs</span></code>) is
 equal to the bamboo version number in the Dockerfile of bamboo stored in
@@ -268,7 +180,7 @@ command <code class="docutils literal notranslate"><span class="pre">docker</spa
 <p>Also make sure that docker has enough memory (~ 6GB). To adapt it, go to <code class="docutils literal notranslate"><span class="pre">Preferences</span> <span class="pre">-&gt;</span> <span class="pre">Resources</span></code></p>
 </div>
 <div class="section" id="configure-bamboo-bitbucket-and-jira">
-<h2><a class="toc-backref" href="#id8">Configure Bamboo, Bitbucket and Jira</a><a class="headerlink" href="#configure-bamboo-bitbucket-and-jira" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id8">Configure Bamboo, Bitbucket and Jira</a><a class="headerlink" href="#configure-bamboo-bitbucket-and-jira" title="Permalink to this headline"></a></h2>
 <p>By default, the Jira instance is reachable under <code class="docutils literal notranslate"><span class="pre">localhost:8081</span></code>, the
 Bamboo instance under <code class="docutils literal notranslate"><span class="pre">localhost:8085</span></code> and the Bitbucket instance
 under <code class="docutils literal notranslate"><span class="pre">localhost:7990</span></code>.</p>
@@ -322,29 +234,29 @@ Bitbucket → Bamboo URl to</strong> <code class="docutils literal notranslate">
 <div><p><strong>Bamboo:</strong></p>
 <div class="figure align-center" id="id1">
 <img alt="../../../_images/bamboo_bitbucket_applicationLink.png" src="../../../_images/bamboo_bitbucket_applicationLink.png" />
-<p class="caption"><span class="caption-text">Bamboo → Bitbucket</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">Bamboo → Bitbucket</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </div>
 <div class="figure align-center" id="id2">
 <img alt="../../../_images/bamboo_jira_applicationLink.png" src="../../../_images/bamboo_jira_applicationLink.png" />
-<p class="caption"><span class="caption-text">Bamboo → Jira</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">Bamboo → Jira</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </div>
 <p><strong>Bitbucket:</strong></p>
 <div class="figure align-center" id="id3">
 <img alt="../../../_images/bitbucket_bamboo_applicationLink.png" src="../../../_images/bitbucket_bamboo_applicationLink.png" />
-<p class="caption"><span class="caption-text">Bitbucket → Bamboo</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">Bitbucket → Bamboo</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </div>
 <div class="figure align-center" id="id4">
 <img alt="../../../_images/bitbucket_jira_applicationLink.png" src="../../../_images/bitbucket_jira_applicationLink.png" />
-<p class="caption"><span class="caption-text">Bitbucket → Jira</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">Bitbucket → Jira</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </div>
 <p><strong>Jira:</strong></p>
 <div class="figure align-center" id="id5">
 <img alt="../../../_images/jira_bamboo_applicationLink.png" src="../../../_images/jira_bamboo_applicationLink.png" />
-<p class="caption"><span class="caption-text">Jira → Bamboo</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">Jira → Bamboo</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </div>
 <div class="figure align-center" id="id6">
 <img alt="../../../_images/jira_bitbucket_applicationLink.png" src="../../../_images/jira_bitbucket_applicationLink.png" />
-<p class="caption"><span class="caption-text">Jira → Bitbucket</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">Jira → Bitbucket</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </div>
 </div></blockquote>
 </div></blockquote>
@@ -481,7 +393,7 @@ Open the public key file (usually called <code class="docutils literal notransla
 </ol>
 </div>
 <div class="section" id="configure-artemis">
-<h2><a class="toc-backref" href="#id9">Configure Artemis</a><a class="headerlink" href="#configure-artemis" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id9">Configure Artemis</a><a class="headerlink" href="#configure-artemis" title="Permalink to this headline"></a></h2>
 <ol class="arabic">
 <li><p>Modify <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code></p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">repo-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos/</span>
@@ -534,29 +446,29 @@ e.g.:</p>
 <p>Please read <a class="reference internal" href="../"><span class="doc">Setup Guide</span></a> for more details.</p>
 </div>
 <div class="section" id="how-to-verify-the-connection-works">
-<h2><a class="toc-backref" href="#id10">How to verify the connection works?</a><a class="headerlink" href="#how-to-verify-the-connection-works" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id10">How to verify the connection works?</a><a class="headerlink" href="#how-to-verify-the-connection-works" title="Permalink to this headline"></a></h2>
 <div class="section" id="artemis-jira">
-<h3>Artemis → Jira<a class="headerlink" href="#artemis-jira" title="Permalink to this headline">¶</a></h3>
+<h3>Artemis → Jira<a class="headerlink" href="#artemis-jira" title="Permalink to this headline"></a></h3>
 <p>You can login to Artemis with the admin user you created in Jira</p>
 </div>
 <div class="section" id="artemis-bitbucket">
-<h3>Artemis → Bitbucket<a class="headerlink" href="#artemis-bitbucket" title="Permalink to this headline">¶</a></h3>
+<h3>Artemis → Bitbucket<a class="headerlink" href="#artemis-bitbucket" title="Permalink to this headline"></a></h3>
 <p>You can create a programming exercise</p>
 </div>
 <div class="section" id="artemis-bamboo">
-<h3>Artemis → Bamboo<a class="headerlink" href="#artemis-bamboo" title="Permalink to this headline">¶</a></h3>
+<h3>Artemis → Bamboo<a class="headerlink" href="#artemis-bamboo" title="Permalink to this headline"></a></h3>
 <p>You can create a programming exercise</p>
 </div>
 <div class="section" id="bitbucket-bamboo">
-<h3>Bitbucket → Bamboo<a class="headerlink" href="#bitbucket-bamboo" title="Permalink to this headline">¶</a></h3>
+<h3>Bitbucket → Bamboo<a class="headerlink" href="#bitbucket-bamboo" title="Permalink to this headline"></a></h3>
 <p>The build of the students repository gets started after pushing to it</p>
 </div>
 <div class="section" id="bitbucket-artemis">
-<h3>Bitbucket → Artemis<a class="headerlink" href="#bitbucket-artemis" title="Permalink to this headline">¶</a></h3>
+<h3>Bitbucket → Artemis<a class="headerlink" href="#bitbucket-artemis" title="Permalink to this headline"></a></h3>
 <p>When using the code editor, after clicking on <em>Submit</em>, the text <em>Building and testing…</em> should appear.</p>
 </div>
 <div class="section" id="bamboo-artemis">
-<h3>Bamboo → Artemis<a class="headerlink" href="#bamboo-artemis" title="Permalink to this headline">¶</a></h3>
+<h3>Bamboo → Artemis<a class="headerlink" href="#bamboo-artemis" title="Permalink to this headline"></a></h3>
 <p>The build result is displayed in the code editor.</p>
 </div>
 </div>
@@ -564,58 +476,33 @@ e.g.:</p>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../jenkins-gitlab/" class="btn btn-neutral float-right" title="Setup for Programming Exercises with Jenkins and GitLab" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="../" class="btn btn-neutral float-left" title="Setup Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../" class="btn btn-neutral float-left" title="Setup Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../jenkins-gitlab/" class="btn btn-neutral float-right" title="Setup for Programming Exercises with Jenkins and GitLab" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering
-
-    </p>
+    <p>&#169; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
