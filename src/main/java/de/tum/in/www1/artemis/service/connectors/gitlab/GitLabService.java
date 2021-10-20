@@ -406,12 +406,16 @@ public class GitLabService extends AbstractVersionControlService {
     @Override
     public void createRepository(String projectKey, String repoName, String parentProjectKey) throws VersionControlException {
         try {
+            System.out.println("projectKey: " + projectKey);
+            System.out.println("repoName: " + repoName);
+            System.out.println("parentProjectKey: " + parentProjectKey);
+
             final var parentGroup = gitlab.getGroupApi().getGroup("hm-artemis");
             System.out.println("Parent group has id " + parentGroup.getId());
             var subgroups = gitlab.getGroupApi().getSubGroups(parentGroup.getId());
             System.out.println("Parent group has subgroups: " + subgroups.size() + " " + subgroups.toString());
 
-            var group = subgroups.stream().filter(g -> g.getName().equals(projectKey)).collect(Collectors.toList()).get(0);
+            var group = subgroups.stream().filter(g -> g.getPath().equalsIgnoreCase(projectKey)).collect(Collectors.toList()).get(0);
             System.out.println("Group is " + group + " with group id " + group);
 
             final var groupId = group.getId();
