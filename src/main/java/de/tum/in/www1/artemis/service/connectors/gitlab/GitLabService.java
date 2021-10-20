@@ -363,9 +363,11 @@ public class GitLabService extends AbstractVersionControlService {
     private void createGitlabGroupForExercise(ProgrammingExercise programmingExercise) {
         final String exercisePath = programmingExercise.getProjectKey();
         final String exerciseName = exercisePath + " " + programmingExercise.getTitle();
-        final Group group = new Group().withPath(exercisePath).withName(exerciseName).withVisibility(Visibility.PRIVATE);
 
         try {
+            var parentGroup = gitlab.getGroupApi().getGroup("hm-artemis");
+            System.out.println("Parent group has id: " + parentGroup.getId());
+            final Group group = new Group().withPath(exercisePath).withName(exerciseName).withVisibility(Visibility.PRIVATE).withParentId(parentGroup.getId());
             gitlab.getGroupApi().addGroup(group);
         }
         catch (GitLabApiException e) {
