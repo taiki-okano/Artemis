@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Client Tests &mdash; Artemis  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/style.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -271,14 +271,13 @@ of the component with the service and in addition test that the service logic wo
 </div></blockquote>
 </div></blockquote>
 </li>
-<li><p>Try to make expectations as specific as possible. If you expect a specific result, compare to this result and do not compare to the absence of some arbitrary other value. This ensures that no faulty values you didn’t expect can sneak in the code base without the tests failing. For example <code class="code docutils literal notranslate"><span class="pre">toBe(5)</span></code> is better than <code class="code docutils literal notranslate"><span class="pre">not.toBeUndefined()</span></code>, which would also pass if the value wrongly changes to 6.</p></li>
-<li><p>Do not use <code class="docutils literal notranslate"><span class="pre">NO_ERRORS_SCHEMA</span></code> (<a class="reference external" href="https://angular.io/guide/testing-components-scenarios#no_errors_schema">link</a>). This tells angular to ignore the attributes and unrecognized elements, prefer to use component stubs as mentioned above.</p></li>
+<li><p>Do not use <code class="docutils literal notranslate"><span class="pre">NO_ERRORS_SCHEMA</span></code> (<a class="reference external" href="https://angular.io/guide/testing-components-scenarios#no_errors_schema">angular documentation</a>). This tells angular to ignore the attributes and unrecognized elements, prefer to use component stubs as mentioned above.</p></li>
 <li><p>Calling <cite>jest.restoreAllMocks()</cite> ensures that all mocks created with Jest get reset after each test. This is important if they get defined across multiple tests. This will only work if the mocks were created with <cite>jest.spyOn</cite>. Manually assigning <cite>jest.fn()</cite> should be avoided with this configuration.</p></li>
-<li><p>Make sure to have at least 80% line test coverage. Run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">test</span></code> to create a coverage report. You can also simply run the tests in IntelliJ IDEA with coverage activated.</p></li>
+<li><p>Make sure to have at least 80% line test coverage. Run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">test</span></code> to create a coverage report. You can also simply <a class="reference external" href="https://www.jetbrains.com/help/idea/running-test-with-coverage.html">run the tests in IntelliJ IDEA with coverage activated</a>.</p></li>
 <li><p>It is preferable to test a component through the interaction of the user with the template. This decouples the test from the concrete implementation used in the component.
-For example if you have a component that loads and displays some data when the user clicks a button, you should query for that button, simulate a click and then assert that the data has been loaded and that the expected template changes have occurred.</p></li>
-</ol>
-<p>Here is an example of a test for <a class="reference external" href="https://github.com/ls1intum/Artemis/blob/main/src/test/javascript/spec/component/shared/exercise-update-warning.component.spec.ts#L32-L43">exercise-update-warning component</a></p>
+For example, if you have a component that loads and displays some data when the user clicks a button, you should query for that button, simulate a click, and then assert that the data has been loaded and that the expected template changes have occurred.</p>
+<blockquote>
+<div><p>Here is an example of such a test for <a class="reference external" href="https://github.com/ls1intum/Artemis/blob/main/src/test/javascript/spec/component/shared/exercise-update-warning.component.spec.ts#L32-L43">exercise-update-warning component</a></p>
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should trigger saveExerciseWithoutReevaluation once&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
     <span class="kr">const</span> <span class="nx">emitSpy</span> <span class="o">=</span> <span class="nx">jest</span><span class="p">.</span><span class="nx">spyOn</span><span class="p">(</span><span class="nx">comp</span><span class="p">.</span><span class="nx">confirmed</span><span class="p">,</span> <span class="s1">&#39;emit&#39;</span><span class="p">);</span>
     <span class="kr">const</span> <span class="nx">saveExerciseWithoutReevaluationSpy</span> <span class="o">=</span> <span class="nx">jest</span><span class="p">.</span><span class="nx">spyOn</span><span class="p">(</span><span class="nx">comp</span><span class="p">,</span> <span class="s1">&#39;saveExerciseWithoutReevaluation&#39;</span><span class="p">);</span>
@@ -293,10 +292,11 @@ For example if you have a component that loads and displays some data when the u
 <span class="p">});</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="7">
-<li><p>Do not remove the template during tests by making use of <code class="docutils literal notranslate"><span class="pre">overrideTemplate()</span></code>. The template is a crucial part of a component and should not be removed during test. Do not do this:</p></li>
-</ol>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;SomeComponent&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</div></blockquote>
+</li>
+<li><p>Do not remove the template during tests by making use of <code class="docutils literal notranslate"><span class="pre">overrideTemplate()</span></code>. The template is a crucial part of a component and should not be removed during test. Do not do this:</p>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;SomeComponent&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
     <span class="kd">let</span> <span class="nx">someComponentFixture</span>: <span class="kt">ComponentFixture</span><span class="o">&lt;</span><span class="nx">SomeComponent</span><span class="o">&gt;</span><span class="p">;</span>
     <span class="kd">let</span> <span class="nx">someComponent</span>: <span class="kt">SomeComponent</span><span class="p">;</span>
 
@@ -319,13 +319,100 @@ For example if you have a component that loads and displays some data when the u
 <span class="p">});</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="8">
-<li><p>Name the variables properly for test doubles:</p></li>
-</ol>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">clearSpy</span> <span class="o">=</span> <span class="nx">jest</span><span class="p">.</span><span class="nx">spyOn</span><span class="p">(</span><span class="nx">someComponent</span><span class="p">,</span> <span class="s1">&#39;clear&#39;</span><span class="p">);</span>
+</div></blockquote>
+</li>
+<li><p>Name the variables properly for test doubles:</p>
+<blockquote>
+<div><div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">clearSpy</span> <span class="o">=</span> <span class="nx">jest</span><span class="p">.</span><span class="nx">spyOn</span><span class="p">(</span><span class="nx">someComponent</span><span class="p">,</span> <span class="s1">&#39;clear&#39;</span><span class="p">);</span>
 <span class="kr">const</span> <span class="nx">getNumberStub</span> <span class="o">=</span> <span class="nx">jest</span><span class="p">.</span><span class="nx">spyOn</span><span class="p">(</span><span class="nx">someComponent</span><span class="p">,</span> <span class="s1">&#39;getNumber&#39;</span><span class="p">).</span><span class="nx">mockReturnValue</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span> <span class="c1">// This always returns 42</span>
 </pre></div>
 </div>
+<ul class="simple">
+<li><p><cite>Spy</cite>: Doesn’t replace any functionality but records calls</p></li>
+<li><p><cite>Mock</cite>: Spy + returns a specific implementation for a certain input</p></li>
+<li><p><cite>Stub</cite>: Spy + returns a default implementation independent of the input parameters.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Try to make expectations as specific as possible. If you expect a specific result, compare to this result and do not compare to the absence of some arbitrary other value. This ensures that no faulty values you didn’t expect can sneak in the codebase without the tests failing. For example <code class="code docutils literal notranslate"><span class="pre">toBe(5)</span></code> is better than <code class="code docutils literal notranslate"><span class="pre">not.toBeUndefined()</span></code>, which would also pass if the value wrongly changes to 6.</p></li>
+<li><p>When expecting results use <code class="code docutils literal notranslate"><span class="pre">expect</span></code> for client tests. That call <strong>must</strong> be followed by another assertion statement like <code class="code docutils literal notranslate"><span class="pre">toBe(true)</span></code>. It is best practice to use more specific expect statements rather than always expecting boolean values. It is also recommended to extract as much as possible from the <cite>expect</cite> statement.</p>
+<blockquote>
+<div><p>For example, instead of</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">course</span> <span class="o">==</span> <span class="kc">undefined</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">courseList</span><span class="p">.</span><span class="nx">length</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>extract as much as possible:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">course</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">undefined</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">courseList</span><span class="p">).</span><span class="nx">toHaveLength</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>If you have minimized <code class="code docutils literal notranslate"><span class="pre">expect</span></code> and can choose between multiple verification functions providing the same functionality, choose the most generic one. This way we will use as few functions as possible. For example prefer <code class="code docutils literal notranslate"><span class="pre">toBe(true)</span></code> and <code class="code docutils literal notranslate"><span class="pre">toBe(false)</span></code> over <code class="code docutils literal notranslate"><span class="pre">toBeTrue()</span></code> and <code class="code docutils literal notranslate"><span class="pre">toBeFalse()</span></code>.</p></li>
+<li><p>Use <a class="reference external" href="https://jestjs.io/docs/expect">Jest</a> whenever possible. Use <a class="reference external" href="https://github.com/jest-community/jest-extended#api">Jest Extended</a> only if it shortens the expect statements considerably and makes it more readable.</p></li>
+<li><p>For situations described below, only use the uniform solution to keep the codebase as consistent as possible.</p></li>
+</ol>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Situation</p></th>
+<th class="head"><p>Solution</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Expecting a boolean value</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(true);</span></code></p>
+<p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(false);</span></code></p>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Two objects should be the same reference</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(object).toBe(referenceObject);</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>A CSS element should exist</p>
+<p>A CSS element should not exists</p>
+</td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(element).not.toBe(null);</span></code></p>
+<p><code class="code docutils literal notranslate"><span class="pre">expect(element).toBe(null);</span></code></p>
+</td>
+</tr>
+<tr class="row-odd"><td><p>A value should be undefined</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(undefined);</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>A value should be either null or undefined</p></td>
+<td><p>Use <code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(undefined);</span></code> for internal calls.</p>
+<p>If an external library uses null value, use
+<code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(null);</span></code> and if not avoidable
+<code class="code docutils literal notranslate"><span class="pre">expect(value).not.toBe(null);</span></code>.</p>
+<p><strong>Never use</strong> <code class="code docutils literal notranslate"><span class="pre">expect(value).not.toBeDefined()</span></code>
+or <code class="code docutils literal notranslate"><span class="pre">expect(value).toBeNil()</span></code> as they might not catch all
+failures under certain conditions.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p>A class object should be defined</p></td>
+<td><p>Always try to test for certain properties or entries.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">expect(classObject).toContainEntries([[key,</span> <span class="pre">value]]);</span></code></p>
+<p><code class="code docutils literal notranslate"><span class="pre">expect(classObject).toEqual(expectedClassObject);</span></code></p>
+<p><strong>Never use</strong> <code class="code docutils literal notranslate"><span class="pre">expect(value).toBeDefined()</span></code> as
+it might not catch all failures under certain conditions.</p>
+</td>
+</tr>
+<tr class="row-even"><td><p>A class object should not be undefined</p></td>
+<td><p>Try to test for a defined object as described above.</p></td>
+</tr>
+<tr class="row-odd"><td><p>A spy should not have been called</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(spy).not.toHaveBeenCalled();</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>A spy should have been called once</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(spy).toHaveBeenCalledTimes(1);</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
 </div>
 
 
