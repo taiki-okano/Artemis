@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="Quiz exercise" href="../quiz/" />
-    <link rel="prev" title="Exercises" href="../" /> 
+    <link rel="prev" title="General Information" href="../general/" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,6 +40,7 @@
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../">Exercises</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../general/">General Information</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Programming Exercise</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#setup">Setup</a><ul>
@@ -476,17 +477,24 @@ Refer to the <a class="reference internal" href="#programming-features"><span cl
 <div class="line"><br /></div>
 </div>
 <div class="figure align-center">
-<img alt="../../../_images/programming-options-timeline.png" src="../../../_images/programming-options-timeline.png" />
+<img alt="../../../_images/programming-options-timeline-manual.png" src="../../../_images/programming-options-timeline-manual.png" />
+</div>
+<div class="figure align-center">
+<img alt="../../../_images/programming-options-timeline-automatic.png" src="../../../_images/programming-options-timeline-automatic.png" />
 </div>
 <ul>
 <li><p><strong>Release Date:</strong> Release date of the exercise. Students will only be able to participate in the exercise after this date.</p></li>
 <li><p><strong>Automatic Tests:</strong> Every commit of a participant triggers the execution of the tests in the <strong>Test</strong> repository.
 Excluded are tests, which are specified to run after the due date. This is only possible if <strong>Run Tests once after Due Date</strong> has been activated.
 The tests that only run after the due date are chosen in the <a class="reference internal" href="#configure-grading"><span class="std std-ref">grading configuration</span></a>.</p></li>
-<li><p><strong>Due Date:</strong> The deadline for the exercise. Commits made after this date are not graded.</p>
+<li><p><strong>Due Date:</strong> The deadline for the exercise. Commits made after this date are not graded.</p></li>
+<li><dl class="simple">
+<dt><strong>Complaint on Automatic Assessment:</strong> This option allows students to write a complaint on the automatic assessment after the due date.</dt><dd><p>This option is only available if complaints are enabled in the course or the exercise is part of an exam.</p>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Students can still commit code and receive feedback after the exercise due date, if manual review is not activated.
+<p>Students can still commit code and receive feedback after the exercise due date, if manual review and complaints are not activated.
 The results for these submissions will not be rated.</p>
 </div>
 </li>
@@ -2046,7 +2054,7 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">false</
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../" class="btn btn-neutral float-left" title="Exercises" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../general/" class="btn btn-neutral float-left" title="General Information" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../quiz/" class="btn btn-neutral float-right" title="Quiz exercise" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
