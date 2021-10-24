@@ -80,7 +80,7 @@ public class UrlService {
             throw new VersionControlException("Repository URL is not a git URL! Can't get repository slug for " + url);
         }
         final var last = urlParts.length - 1;
-        return urlParts[last - 1] + "/" + urlParts[last].replace(".git", "");
+        return urlParts[last - 2] + "/" + urlParts[last - 1] + "/" + urlParts[last].replace(".git", "");
     }
 
     /**
