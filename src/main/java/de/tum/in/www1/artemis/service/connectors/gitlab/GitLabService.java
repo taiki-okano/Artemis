@@ -157,7 +157,7 @@ public class GitLabService extends AbstractVersionControlService {
     private String getPathIDFromRepositoryURL(VcsRepositoryUrl repositoryUrl) {
         final var namespaces = repositoryUrl.getURL().toString().split("/");
         final var last = namespaces.length - 1;
-        return namespaces[last - 1] + "/" + namespaces[last].replace(".git", "");
+        return namespaces[last - 2] + "/" + namespaces[last - 1] + "/" + namespaces[last].replace(".git", "");
     }
 
     /**
