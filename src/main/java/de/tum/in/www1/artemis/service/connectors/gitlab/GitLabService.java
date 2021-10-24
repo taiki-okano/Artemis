@@ -512,7 +512,7 @@ public class GitLabService extends AbstractVersionControlService {
     public final class GitLabRepositoryUrl extends VcsRepositoryUrl {
 
         public GitLabRepositoryUrl(String projectKey, String repositorySlug) {
-            final var path = projectKey + "/" + repositorySlug;
+            final var path = "hm-artemis/" + projectKey + "/" + repositorySlug;
             final var urlString = gitlabServerUrl + "/" + path + ".git";
 
             stringToURL(urlString);
