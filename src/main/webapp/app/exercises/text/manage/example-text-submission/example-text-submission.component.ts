@@ -24,7 +24,7 @@ import { StructuredGradingCriterionService } from 'app/exercises/shared/structur
 import { notUndefined } from 'app/shared/util/global.utils';
 import { AssessButtonStates, Context, State, SubmissionButtonStates, UIStates } from 'app/exercises/text/manage/example-text-submission/example-text-submission-state.model';
 import { filter } from 'rxjs/operators';
-import { FeedbackMarker, ExampleSubmissionAssessCommand } from 'app/exercises/shared/example-submission/example-submission-assess-command';
+import { ExampleSubmissionAssessCommand, FeedbackMarker } from 'app/exercises/shared/example-submission/example-submission-assess-command';
 import { getCourseFromExercise } from 'app/entities/exercise.model';
 
 @Component({
@@ -83,8 +83,8 @@ export class ExampleTextSubmissionComponent extends TextAssessmentBaseComponent 
     /**
      * Reads route params and loads the example submission on initialWithContext.
      */
-    async ngOnInit(): Promise<void> {
-        await super.ngOnInit();
+    ngOnInit() {
+        super.ngOnInit();
         // (+) converts string 'id' to a number
         this.exerciseId = Number(this.route.snapshot.paramMap.get('exerciseId'));
         const exampleSubmissionId = this.route.snapshot.paramMap.get('exampleSubmissionId');
@@ -115,19 +115,20 @@ export class ExampleTextSubmissionComponent extends TextAssessmentBaseComponent 
         }
         this.state.edit();
 
-        this.exampleSubmissionService.get(this.exampleSubmissionId).subscribe(async (exampleSubmissionResponse: HttpResponse<ExampleSubmission>) => {
+        this.exampleSubmissionService.get(this.exampleSubmissionId).subscribe((exampleSubmissionResponse: HttpResponse<ExampleSubmission>) => {
             this.exampleSubmission = exampleSubmissionResponse.body!;
             this.submission = this.exampleSubmission.submission as TextSubmission;
-            await this.fetchExampleResult();
-            if (this.toComplete) {
-                this.state = State.forCompletion(this);
-                this.textBlockRefs.forEach((ref) => delete ref.feedback);
-                this.validateFeedback();
-            } else if (this.result?.id) {
-                this.state = State.forExistingAssessmentWithContext(this);
-            }
-            // do this here to make sure  everythign is loaded before the guided tour step is loaded
-            this.guidedTourService.componentPageLoaded();
+            this.fetchExampleResult().then(() => {
+                if (this.toComplete) {
+                    this.state = State.forCompletion(this);
+                    this.textBlockRefs.forEach((ref) => delete ref.feedback);
+                    this.validateFeedback();
+                } else if (this.result?.id) {
+                    this.state = State.forExistingAssessmentWithContext(this);
+                }
+                // do this here to make sure everything is loaded before the guided tour step is loaded
+                this.guidedTourService.componentPageLoaded();
+            });
         });
     }
 
@@ -186,10 +187,12 @@ export class ExampleTextSubmissionComponent extends TextAssessmentBaseComponent 
         }, this.alertService.error);
     }
 
-    public async startAssessment(): Promise<void> {
-        await this.fetchExampleResult();
-        this.state.assess();
+    public startAssessment() {
+        this.fetchExampleResult().then(() => {
+            this.state.assess();
+        });
     }
+
     /**
      * Checks if the score boundaries have been respected and save the assessment.
      */

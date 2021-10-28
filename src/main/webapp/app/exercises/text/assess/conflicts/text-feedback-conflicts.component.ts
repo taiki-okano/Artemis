@@ -99,16 +99,16 @@ export class TextFeedbackConflictsComponent extends TextAssessmentBaseComponent 
             });
     }
 
-    async ngOnInit() {
-        await super.ngOnInit();
+    ngOnInit() {
+        super.ngOnInit();
         if (!this.leftSubmission) {
             const submissionId = Number(this.activatedRoute.snapshot.paramMap.get('submissionId'));
             const participationId = Number(this.activatedRoute.snapshot.paramMap.get('participationId'));
-            const participation = await lastValueFrom(this.assessmentsService.getFeedbackDataForExerciseSubmission(participationId, submissionId));
-
-            this.leftSubmission = participation!.submissions![0];
-            setLatestSubmissionResult(this.leftSubmission, getLatestSubmissionResult(this.leftSubmission));
-            this.exercise = participation!.exercise as TextExercise;
+            lastValueFrom(this.assessmentsService.getFeedbackDataForExerciseSubmission(participationId, submissionId)).then((participation) => {
+                this.leftSubmission = participation!.submissions![0];
+                setLatestSubmissionResult(this.leftSubmission, getLatestSubmissionResult(this.leftSubmission));
+                this.exercise = participation!.exercise as TextExercise;
+            });
         }
         this.activatedRoute.data.subscribe(({ conflictingTextSubmissions }) => this.setPropertiesFromServerResponse(conflictingTextSubmissions));
     }

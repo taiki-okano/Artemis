@@ -36,10 +36,11 @@ export abstract class TextAssessmentBaseComponent implements OnInit {
         protected structuredGradingCriterionService: StructuredGradingCriterionService,
     ) {}
 
-    async ngOnInit() {
+    ngOnInit() {
         // Used to check if the assessor is the current user
-        const identity = await this.accountService.identity();
-        this.userId = identity?.id;
+        this.accountService.identity().then((identity) => {
+            this.userId = identity?.id;
+        });
     }
 
     protected computeTotalScore(assessments: Feedback[]): number {

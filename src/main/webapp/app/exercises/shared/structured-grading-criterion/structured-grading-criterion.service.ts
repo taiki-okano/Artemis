@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Feedback } from 'app/entities/feedback.model';
 
+export interface StructuredGradingCriterionServiceInterface {
+    updateFeedbackWithStructuredGradingInstructionEvent: (feedback: Feedback, event: any) => void;
+    computeTotalScore: (assessments: Feedback[]) => number;
+    calculateScoreForGradingInstructions: (feedback: Feedback, score: number, gradingInstructions: any) => number;
+}
+
 @Injectable({ providedIn: 'root' })
-export class StructuredGradingCriterionService {
+export class StructuredGradingCriterionService implements StructuredGradingCriterionServiceInterface {
     /**
      * Connects the structured grading instructions with the feedback of a submission element
      * @param {Event} event - The drop event

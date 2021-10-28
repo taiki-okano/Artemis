@@ -27,6 +27,7 @@ export abstract class State {
         public readonly ui: UIStates,
         public readonly submissionEditButton: SubmissionButtonStates,
         public readonly assessButton: AssessButtonStates,
+        public readonly type: StateType,
     ) {}
 
     edit(): void {
@@ -44,13 +45,13 @@ export abstract class State {
 
 class NewState extends State {
     constructor(context: Context) {
-        super(context, UIStates.SUBMISSION, SubmissionButtonStates.NEW, AssessButtonStates.NONE);
+        super(context, UIStates.SUBMISSION, SubmissionButtonStates.NEW, AssessButtonStates.NONE, StateType.NEW);
     }
 }
 
 class EditState extends State {
     constructor(context: Context) {
-        super(context, UIStates.SUBMISSION, SubmissionButtonStates.UPDATE, AssessButtonStates.ASSESS);
+        super(context, UIStates.SUBMISSION, SubmissionButtonStates.UPDATE, AssessButtonStates.ASSESS, StateType.EDIT);
     }
 
     edit() {}
@@ -61,21 +62,29 @@ class EditState extends State {
 
 class NewAssessmentState extends State {
     constructor(context: Context) {
-        super(context, UIStates.ASSESSMENT, SubmissionButtonStates.EDIT, AssessButtonStates.CREATE);
+        super(context, UIStates.ASSESSMENT, SubmissionButtonStates.EDIT, AssessButtonStates.CREATE, StateType.NEW_ASSESSMENT);
     }
 }
 
 class AssessState extends State {
     constructor(context: Context) {
-        super(context, UIStates.ASSESSMENT, SubmissionButtonStates.EDIT, AssessButtonStates.UPDATE);
+        super(context, UIStates.ASSESSMENT, SubmissionButtonStates.EDIT, AssessButtonStates.UPDATE, StateType.ASSESS);
     }
     assess() {}
 }
 
 class CompletionState extends State {
     constructor(context: Context) {
-        super(context, UIStates.ASSESSMENT, SubmissionButtonStates.NONE, AssessButtonStates.NONE);
+        super(context, UIStates.ASSESSMENT, SubmissionButtonStates.NONE, AssessButtonStates.NONE, StateType.COMPLETION);
     }
     edit() {}
     assess() {}
+}
+
+export enum StateType {
+    NEW,
+    EDIT,
+    NEW_ASSESSMENT,
+    ASSESS,
+    COMPLETION,
 }

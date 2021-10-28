@@ -138,8 +138,8 @@ export class TextSubmissionAssessmentComponent extends TextAssessmentBaseCompone
     /**
      * Life cycle hook to indicate component creation is done
      */
-    async ngOnInit(): Promise<void> {
-        await super.ngOnInit();
+    ngOnInit() {
+        super.ngOnInit();
         this.route.queryParamMap.subscribe((queryParams) => {
             this.isTestRun = queryParams.get('testRun') === 'true';
             this.correctionRound = Number(queryParams.get('correction-round'));
