@@ -28,12 +28,12 @@ module.exports = {
         global: {
             // TODO: in the future, the following values should be increase to at least 80%
             statements: 77.0,
-            branches: 59.4,
+            branches: 59.8,
             functions: 67.9,
             lines: 76.5,
         },
     },
-    setupFilesAfterEnv: ['<rootDir>/src/test/javascript/spec/jest-test-setup.ts', 'jest-sinon'],
+    setupFilesAfterEnv: ['<rootDir>/src/test/javascript/spec/jest-test-setup.ts', 'jest-sinon', 'jest-extended/all'],
     transformIgnorePatterns: [`/node_modules/(?!${esModules})`],
     modulePathIgnorePatterns: [],
     testTimeout: 2000,

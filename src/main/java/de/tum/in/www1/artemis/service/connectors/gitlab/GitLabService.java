@@ -100,7 +100,7 @@ public class GitLabService extends AbstractVersionControlService {
 
     @Override
     public void addMemberToRepository(VcsRepositoryUrl repositoryUrl, User user) {
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         final var userId = gitLabUserManagementService.getUserId(user.getLogin());
 
         try {
@@ -125,7 +125,7 @@ public class GitLabService extends AbstractVersionControlService {
 
     @Override
     public void removeMemberFromRepository(VcsRepositoryUrl repositoryUrl, User user) {
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         final var userId = gitLabUserManagementService.getUserId(user.getLogin());
 
         try {
@@ -168,7 +168,7 @@ public class GitLabService extends AbstractVersionControlService {
      * @throws VersionControlException      If the communication with the VCS fails.
      */
     private void protectBranch(VcsRepositoryUrl repositoryUrl, String branch) {
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         // we have to first unprotect the branch in order to set the correct access level, this is the case, because the master branch is protected for maintainers by default
         // Unprotect the branch in 8 seconds first and then protect the branch in 12 seconds.
         // We do this to wait on any async calls to Gitlab and make sure that the branch really exists before protecting it.
@@ -198,7 +198,7 @@ public class GitLabService extends AbstractVersionControlService {
 
     @Override
     public void unprotectBranch(VcsRepositoryUrl repositoryUrl, String branch) throws VersionControlException {
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         // Unprotect the branch in 10 seconds. We do this to wait on any async calls to Gitlab and make sure that the branch really exists before unprotecting it.
         unprotectBranch(repositoryPath, branch, 10L, TimeUnit.SECONDS);
     }
@@ -258,7 +258,7 @@ public class GitLabService extends AbstractVersionControlService {
 
     @Override
     protected void addAuthenticatedWebHook(VcsRepositoryUrl repositoryUrl, String notificationUrl, String webHookName, String secretToken) {
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         final var hook = new ProjectHook().withPushEvents(true).withIssuesEvents(false).withMergeRequestsEvents(false).withWikiPageEvents(false);
 
         try {
@@ -284,7 +284,7 @@ public class GitLabService extends AbstractVersionControlService {
 
     @Override
     public void deleteRepository(VcsRepositoryUrl repositoryUrl) {
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         final var repositoryName = urlService.getRepositorySlugFromRepositoryUrl(repositoryUrl);
         try {
             gitlab.getProjectApi().deleteProject(repositoryPath);
@@ -307,7 +307,7 @@ public class GitLabService extends AbstractVersionControlService {
         if (repositoryUrl == null || repositoryUrl.getURL() == null) {
             return false;
         }
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         try {
             gitlab.getProjectApi().getProject(repositoryPath);
         }
@@ -447,7 +447,7 @@ public class GitLabService extends AbstractVersionControlService {
      */
     private void updateMemberPermissionInRepository(VcsRepositoryUrl repositoryUrl, String username, AccessLevel accessLevel) {
         final var userId = gitLabUserManagementService.getUserId(username);
-        final var repositoryPath = urlService.getPathFromRepositoryUrl(repositoryUrl);
+        final var repositoryPath = urlService.getRepositoryPathFromRepositoryUrl(repositoryUrl);
         try {
             gitlab.getProjectApi().updateMember(repositoryPath, userId, accessLevel);
         }
