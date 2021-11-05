@@ -71,6 +71,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#use-artemistimeagopipe-instead-of-timeagopipe">Use ArtemisTimeAgoPipe instead of TimeAgoPipe</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#chart-instantiation">14. Chart Instantiation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../client-tests/">Client Tests</a></li>
@@ -192,21 +193,21 @@
 <div class="section" id="icons-with-text">
 <h2>9. Icons with Text<a class="headerlink" href="#icons-with-text" title="Permalink to this headline"></a></h2>
 <p>If you use icons next to text (for example for a button or link), make sure that they are separated by a newline. HTML renders one or multiple newlines as a space.</p>
-<p>Do this:
-.. code-block:: html</p>
-<blockquote>
-<div><p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;
-&lt;span&gt;Text&lt;/span&gt;</p>
-</div></blockquote>
-<p>Don’t do one of these or any other combination of whitespaces:
-.. code-block:: html</p>
-<blockquote>
-<div><p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;&lt;span&gt;Text&lt;/span&gt;</p>
-<p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;&lt;span&gt; Text&lt;/span&gt;
-&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt; &lt;span&gt;Text&lt;/span&gt;</p>
-<p>&lt;fa-icon [icon]=“‘times’”&gt;&lt;/fa-icon&gt;
-&lt;span&gt; Text&lt;/span&gt;</p>
-</div></blockquote>
+<p>Do this:</p>
+<div class="highlight-html+ng2 notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">fa-icon</span> <span class="p">[</span><span class="na">icon</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&#39;times&#39;&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">fa-icon</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>Text<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Don’t do one of these or any other combination of whitespaces:</p>
+<div class="highlight-html+ng2 notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">fa-icon</span> <span class="p">[</span><span class="na">icon</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&#39;times&#39;&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">fa-icon</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;</span>Text<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+
+<span class="p">&lt;</span><span class="nt">fa-icon</span> <span class="p">[</span><span class="na">icon</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&#39;times&#39;&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">fa-icon</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;</span> Text<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">fa-icon</span> <span class="p">[</span><span class="na">icon</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&#39;times&#39;&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">fa-icon</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>Text<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+
+<span class="p">&lt;</span><span class="nt">fa-icon</span> <span class="p">[</span><span class="na">icon</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&#39;times&#39;&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">fa-icon</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span> Text<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+</pre></div>
+</div>
 <p>Ignoring this will lead to inconsistent spacing between icons and text.</p>
 </div>
 <div class="section" id="style">
@@ -308,26 +309,26 @@ RXJS subscriptions not being unsubscribed.</p>
 Doubling textual segments like <code class="docutils literal notranslate"><span class="pre">\lectures\statistics\:lectureId</span></code> should be avoided and instead formulated as <code class="docutils literal notranslate"><span class="pre">\lectures\:lectureId\statistics</span></code>.</p>
 <p>When creating a completely new route you will have to register the new paths in <code class="docutils literal notranslate"><span class="pre">navbar.ts</span></code>. A static/textual url segment gets a translation string assigned in the <code class="docutils literal notranslate"><span class="pre">mapping</span></code> table. Due to our code-style guidelines any <code class="docutils literal notranslate"><span class="pre">-</span></code> in the segment has to be replaced by a <code class="docutils literal notranslate"><span class="pre">_</span></code>. If your path includes a variable, you will have to add the preceding path segment to the <code class="docutils literal notranslate"><span class="pre">switch</span></code> statement inside the <code class="docutils literal notranslate"><span class="pre">addBreadcrumbForNumberSegment</span></code> method.</p>
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">mapping</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="nx">courses</span><span class="o">:</span> <span class="s1">&#39;artemisApp.course.home.title&#39;</span><span class="p">,</span>
-        <span class="nx">lectures</span><span class="o">:</span> <span class="s1">&#39;artemisApp.lecture.home.title&#39;</span><span class="p">,</span>
-        <span class="c1">// put your new directly translated url segments here</span>
-        <span class="c1">// the index is the path segment in which &#39;-&#39; have to be replaced by &#39;_&#39;</span>
-        <span class="c1">// the value is the translation string</span>
-        <span class="nx">your_case</span><span class="o">:</span> <span class="s1">&#39;artemisApp.cases.title&#39;</span><span class="p">,</span>
+    <span class="nx">courses</span><span class="o">:</span> <span class="s1">&#39;artemisApp.course.home.title&#39;</span><span class="p">,</span>
+    <span class="nx">lectures</span><span class="o">:</span> <span class="s1">&#39;artemisApp.lecture.home.title&#39;</span><span class="p">,</span>
+    <span class="c1">// put your new directly translated url segments here</span>
+    <span class="c1">// the index is the path segment in which &#39;-&#39; have to be replaced by &#39;_&#39;</span>
+    <span class="c1">// the value is the translation string</span>
+    <span class="nx">your_case</span><span class="o">:</span> <span class="s1">&#39;artemisApp.cases.title&#39;</span><span class="p">,</span>
 <span class="p">};</span>
 
 <span class="nx">addBreadcrumbForNumberSegment</span><span class="p">(</span><span class="nx">currentPath</span>: <span class="kt">string</span><span class="p">,</span> <span class="nx">segment</span>: <span class="kt">string</span><span class="p">)</span><span class="o">:</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="k">switch</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">lastRouteUrlSegment</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">case</span> <span class="s1">&#39;course-management&#39;</span><span class="o">:</span>
-                        <span class="c1">// handles :courseId</span>
-                        <span class="k">break</span><span class="p">;</span>
-                <span class="k">case</span> <span class="s1">&#39;lectures&#39;</span><span class="o">:</span>
-                        <span class="c1">// handles :lectureId</span>
-                        <span class="k">break</span><span class="p">;</span>
-                <span class="k">case</span> <span class="s1">&#39;your-case&#39;</span><span class="o">:</span>
-                        <span class="c1">// add a case here for your :variable which is preceded in the path by &#39;your-case&#39;</span>
-                        <span class="k">break</span><span class="p">;</span>
-        <span class="p">}</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">lastRouteUrlSegment</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="s1">&#39;course-management&#39;</span><span class="o">:</span>
+            <span class="c1">// handles :courseId</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="s1">&#39;lectures&#39;</span><span class="o">:</span>
+            <span class="c1">// handles :lectureId</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="s1">&#39;your-case&#39;</span><span class="o">:</span>
+            <span class="c1">// add a case here for your :variable which is preceded in the path by &#39;your-case&#39;</span>
+            <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -344,8 +345,55 @@ Doubling textual segments like <code class="docutils literal notranslate"><span 
 <h3>Use ArtemisTimeAgoPipe instead of TimeAgoPipe<a class="headerlink" href="#use-artemistimeagopipe-instead-of-timeagopipe" title="Permalink to this headline"></a></h3>
 <p>Do not use <code class="docutils literal notranslate"><span class="pre">&lt;span</span> <span class="pre">[ngbTooltip]=&quot;submittedDate</span> <span class="pre">|</span> <span class="pre">artemisDate&quot;&gt;{{</span> <span class="pre">submittedDate</span> <span class="pre">|</span> <span class="pre">amTimeAgo</span> <span class="pre">}}&lt;/span&gt;</span></code></p>
 <p>Use <code class="docutils literal notranslate"><span class="pre">&lt;span</span> <span class="pre">[ngbTooltip]=&quot;submittedDate</span> <span class="pre">|</span> <span class="pre">artemisDate&quot;&gt;{{</span> <span class="pre">submittedDate</span> <span class="pre">|</span> <span class="pre">artemisTimeAgo</span> <span class="pre">}}&lt;/span&gt;</span></code></p>
-<p>Some parts of these guidelines are adapted from <a class="reference external" href="https://github.com/microsoft/TypeScript-wiki/blob/main/Coding-guidelines.md">https://github.com/microsoft/TypeScript-wiki/blob/main/Coding-guidelines.md</a></p>
 </div>
+</div>
+<div class="section" id="chart-instantiation">
+<h2>14. Chart Instantiation<a class="headerlink" href="#chart-instantiation" title="Permalink to this headline"></a></h2>
+<p>We are using the framework ngx-charts in order to instantiate charts and diagrams in Artemis.</p>
+<p>The following is an example HTML template for a vertical bar chart:</p>
+<div class="highlight-html+ng2 notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="p">#</span><span class="na">containerRef</span><span class="p"> </span><span class="na">class</span><span class="o">=</span><span class="s">&quot;col-md-9&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">ngx-charts-bar-vertical</span>
+        <span class="p">[</span><span class="na">view</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;[containerRef.offsetWidth, 300]&quot;</span>
+        <span class="p">[</span><span class="na">results</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;ngxData&quot;</span>
+        <span class="p">[</span><span class="na">scheme</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;color&quot;</span>
+        <span class="p">[</span><span class="na">legend</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;false&quot;</span>
+        <span class="p">[</span><span class="na">xAxis</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;true&quot;</span>
+        <span class="p">[</span><span class="na">yAxis</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;true&quot;</span>
+        <span class="p">[</span><span class="na">yScaleMax</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;20&quot;</span>
+        <span class="p">[</span><span class="na">roundEdges</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;true&quot;</span>
+        <span class="p">[</span><span class="na">showDataLabel</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;true&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">ng-template</span> <span class="p">#</span><span class="na">tooltipTemplate</span><span class="p"> </span><span class="na">let-model</span><span class="o">=</span><span class="s">&quot;model&quot;</span><span class="p">&gt;</span>
+            <span class="cp">{{</span> <span class="nv">labelTitle</span> <span class="cp">}}</span>: <span class="cp">{{</span> <span class="nv">round((model.value / totalValue) * 100, 1)</span> <span class="cp">}}</span>%
+        <span class="p">&lt;/</span><span class="nt">ng-template</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">ngx-charts-bar-vertical</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Here are a few tips when using this framework:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>In order to configure the content of the tooltips in the chart, declare a <a class="reference external" href="https://angular.io/api/core/ng-template">ng-template</a> with the reference <code class="docutils literal notranslate"><span class="pre">#tooltipTemplate</span></code>
+containing the desired content within the selector. The framework dynamically recognizes this template. In the example above,
+the tooltips are configured in order to present the percentage value corresponding to the absolute value represented by the bar.
+Depending on the chart type, there is more than one type of tooltip configurable.
+For more information visit <a class="reference external" href="https://swimlane.gitbook.io/ngx-charts/">https://swimlane.gitbook.io/ngx-charts/</a></p></li>
+<li><p>Some design properties are not directly configurable via the framework (e.g. the font-size and weight of the data labels).
+The tool <code class="docutils literal notranslate"><span class="pre">::ng-deep</span></code> is useful in these situations as it allows to change some of these properties by overwriting them in
+a corresponding style sheet. Adapting the font-size and weight of data labels would look like this:</p>
+<div class="highlight-css notranslate"><div class="highlight"><pre><span></span><span class="p">::</span><span class="nd">ng-deep</span> <span class="p">.</span><span class="nc">textDataLabel</span> <span class="p">{</span>
+    <span class="k">font-weight</span><span class="p">:</span> <span class="kc">bolder</span><span class="p">;</span>
+    <span class="k">font-size</span><span class="p">:</span> <span class="mi">15</span><span class="kt">px</span> <span class="cp">!important</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>In order to make the chart responsive in width, bind it to the width of its parent container.
+First, annotate the parent container with a reference (in the example <code class="docutils literal notranslate"><span class="pre">#containerRef</span></code>).
+Then, when configuring the dimensions of the chart in <code class="docutils literal notranslate"><span class="pre">[view]</span></code>, insert <code class="docutils literal notranslate"><span class="pre">containerRef.offsetWidth</span></code> instead
+of an specific value for the width.</p></li>
+</ol>
+</div></blockquote>
+<p>Some parts of these guidelines are adapted from <a class="reference external" href="https://github.com/microsoft/TypeScript-wiki/blob/main/Coding-guidelines.md">https://github.com/microsoft/TypeScript-wiki/blob/main/Coding-guidelines.md</a></p>
 </div>
 </div>
 
