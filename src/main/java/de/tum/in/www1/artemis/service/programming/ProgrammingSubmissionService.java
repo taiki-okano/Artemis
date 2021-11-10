@@ -137,34 +137,44 @@ public class ProgrammingSubmissionService extends SubmissionService {
             throw new IllegalArgumentException(ex);
         }
 
+        log.info("notifyPush-1");
+
         String defaultBranch = versionControlService.get().getDefaultBranchOfRepository(programmingExerciseParticipation.getVcsRepositoryUrl());
+        log.info("notifyPush-2");
         if (commit.getBranch() != null && !commit.getBranch().equalsIgnoreCase(defaultBranch)) {
             // if the commit was made in a branch different than the default, ignore this
             throw new IllegalStateException(
                     "Submission for participation id " + participationId + " in branch " + commit.getBranch() + " will be ignored! Only the default branch is considered");
         }
+        log.info("notifyPush-3");
         if (artemisGitName.equalsIgnoreCase(commit.getAuthorName()) && artemisGitEmail.equalsIgnoreCase(commit.getAuthorEmail())
                 && SETUP_COMMIT_MESSAGE.equals(commit.getMessage())) {
             // if the commit was made by Artemis and the message is "Setup" (this means it is an empty setup commit), we ignore this as well and do not create a submission!
             throw new IllegalStateException("Submission for participation id " + participationId + " based on an empty setup commit by Artemis will be ignored!");
         }
 
+
+        log.info("notifyPush-4");
         if (programmingExerciseParticipation instanceof ProgrammingExerciseStudentParticipation && (programmingExerciseParticipation.getBuildPlanId() == null
                 || !programmingExerciseParticipation.getInitializationState().hasCompletedState(InitializationState.INITIALIZED))) {
+            log.info("notifyPush-5");
             // the build plan was deleted before, e.g. due to cleanup, therefore we need to reactivate the build plan by resuming the participation
             // This is needed as a request using a custom query is made using the ProgrammingExerciseRepository, but the user is not authenticated
             // as the VCS-server performs the request
             SecurityUtils.setAuthorizationObject();
 
             participationService.resumeProgrammingExercise((ProgrammingExerciseStudentParticipation) programmingExerciseParticipation);
+            log.info("notifyPush-6");
             // Note: in this case we do not need an empty commit: when we trigger the build manually (below), subsequent commits will work correctly
             try {
+                log.info("notifyPush-7");
                 continuousIntegrationService.get().triggerBuild(programmingExerciseParticipation);
             }
             catch (ContinuousIntegrationException ex) {
                 // TODO: This case is currently not handled. The correct handling would be creating the submission and informing the user that the build trigger failed.
             }
         }
+        log.info("notifyPush-8");
 
         // There can't be two submissions for the same participation and commitHash!
         ProgrammingSubmission programmingSubmission = programmingSubmissionRepository.findFirstByParticipationIdAndCommitHash(participationId, commit.getCommitHash());
@@ -172,6 +182,8 @@ public class ProgrammingSubmissionService extends SubmissionService {
             throw new IllegalStateException("Submission for participation id " + participationId + " and commitHash " + commit.getCommitHash() + " already exists!");
         }
 
+
+        log.info("notifyPush-9");
         programmingSubmission = new ProgrammingSubmission();
         programmingSubmission.setCommitHash(commit.getCommitHash());
         log.info("Create new programmingSubmission with commitHash: {} for participation {}", commit.getCommitHash(), participationId);
