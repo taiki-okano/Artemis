@@ -148,9 +148,13 @@ public class GitLabService extends AbstractVersionControlService {
 
         log.info("default-2");
         try {
-            var tmp = gitlab.getProjectApi().getProject(repositoryId).getDefaultBranch();
+            var projectApi = gitlab.getProjectApi();
             log.info("default-3");
-            return tmp;
+            var project = projectApi.getProject(repositoryId);
+            log.info("default-4");
+            var defaultBranch = gitlab.getProjectApi().getProject(repositoryId).getDefaultBranch();
+            log.info("default-5");
+            return defaultBranch;
         }
         catch (GitLabApiException e) {
             throw new GitLabException("Unable to get default branch for repository " + repositoryId, e);
