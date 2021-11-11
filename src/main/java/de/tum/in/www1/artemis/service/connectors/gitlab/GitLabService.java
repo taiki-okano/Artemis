@@ -147,18 +147,13 @@ public class GitLabService extends AbstractVersionControlService {
         var repositoryId = getPathIDFromRepositoryURL(repositoryUrl);
 
         log.info("default-2");
-        try {
-            var projectApi = gitlab.getProjectApi();
-            log.info("default-3");
-            var project = projectApi.getProject(repositoryId);
-            log.info("default-4");
-            var defaultBranch = project.getDefaultBranch();
-            log.info("default-5");
-            return defaultBranch;
-        }
-        catch (GitLabApiException e) {
-            throw new GitLabException("Unable to get default branch for repository " + repositoryId, e);
-        }
+        /*var projectApi = gitlab.getProjectApi();
+        log.info("default-3");
+        var project = projectApi.getProject(repositoryId);
+        log.info("default-4");
+        var defaultBranch = project.getDefaultBranch();
+        log.info("default-5");*/
+        return "master";
     }
 
     private String getPathIDFromRepositoryURL(VcsRepositoryUrl repositoryUrl) {
