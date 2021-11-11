@@ -152,7 +152,7 @@ public class GitLabService extends AbstractVersionControlService {
             log.info("default-3");
             var project = projectApi.getProject(repositoryId);
             log.info("default-4");
-            var defaultBranch = gitlab.getProjectApi().getProject(repositoryId).getDefaultBranch();
+            var defaultBranch = project.getDefaultBranch();
             log.info("default-5");
             return defaultBranch;
         }
