@@ -143,10 +143,14 @@ public class GitLabService extends AbstractVersionControlService {
      */
     @Override
     public String getDefaultBranchOfRepository(VcsRepositoryUrl repositoryUrl) throws GitLabException {
+        log.info("default-1");
         var repositoryId = getPathIDFromRepositoryURL(repositoryUrl);
 
+        log.info("default-2");
         try {
-            return gitlab.getProjectApi().getProject(repositoryId).getDefaultBranch();
+            var tmp = gitlab.getProjectApi().getProject(repositoryId).getDefaultBranch();
+            log.info("default-3");
+            return tmp;
         }
         catch (GitLabApiException e) {
             throw new GitLabException("Unable to get default branch for repository " + repositoryId, e);
