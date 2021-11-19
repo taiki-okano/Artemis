@@ -48,6 +48,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#server-setup">Server Setup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="bamboo-bitbucket-jira/">Bamboo, Bitbucket and Jira</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jenkins-gitlab/">Jenkins and Gitlab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="common-problems/">Common setup problems</a></li>
 <li class="toctree-l3"><a class="reference internal" href="distributed/">Multiple instances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="programming-exercises/">Adjustments for programming exercises</a></li>
 <li class="toctree-l3"><a class="reference internal" href="programming-exercises/#caching-example-for-maven">Caching example for Maven</a></li>
@@ -57,7 +58,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#other-run-debug-configurations">Other run / debug configurations</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#typical-problems-with-liquibase-checksums">Typical problems with Liquibase checksums</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#run-the-server-with-spring-boot-and-spring-profiles">Run the server with Spring Boot and Spring profiles</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#set-spring-profiles-with-intellij-ultimate">Set Spring profiles with IntelliJ Ultimate</a></li>
 </ul>
@@ -154,13 +154,12 @@ Boot</a>.</p></li>
 <li><p><a class="reference external" href="https://dev.mysql.com/downloads/mysql">MySQL Database Server 8</a>:
 Artemis uses Hibernate to store entities in a MySQL database.
 Download and install the MySQL Community Server (8.0.x) and configure
-the ‘root’ user with an empty password. (In case you want to use a
-different password, make sure to change the value in
-application-dev.yml and in liquibase.gradle). The required Artemis
-scheme will be created / updated automatically at startup time of the
-server application. Alternatively, you can run the MySQL Database
-Server inside a Docker container using
-e.g. <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/mysql.yml</span> <span class="pre">up</span></code></p></li>
+the ‘root’ user with an empty password.
+(In case you want to use a different password, make sure to change the value in
+<code class="docutils literal notranslate"><span class="pre">application-dev.yml</span></code> <em>(spring &gt; datasource &gt; password)</em> and in <code class="docutils literal notranslate"><span class="pre">liquibase.gradle</span></code> <em>(within the ‘liquibaseCommand’ as argument password)</em>).
+The required Artemis scheme will be created / updated automatically at startup time of the
+server application.
+Alternatively, you can run the MySQL Database Server inside a Docker container using e.g. <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/mysql.yml</span> <span class="pre">up</span></code></p></li>
 <li><p><a class="reference external" href="https://nodejs.org/en/download">Node.js</a>: We use Node LTS (&gt;=14.17.0 &lt; 15) to compile
 and run the client Angular application. Depending on your system, you
 can install Node either from source or as a pre-packaged bundle.</p></li>
@@ -256,6 +255,7 @@ information about the setup for programming exercises provided:</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="bamboo-bitbucket-jira/">Bamboo, Bitbucket and Jira</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jenkins-gitlab/">Jenkins and Gitlab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common-problems/">Common setup problems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="distributed/">Multiple instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="programming-exercises/">Adjustments for programming exercises</a></li>
 <li class="toctree-l1"><a class="reference internal" href="programming-exercises/#caching-example-for-maven">Caching example for Maven</a></li>
@@ -339,19 +339,6 @@ When you import the project into IntelliJ the run configurations will also be im
 <li><p><strong>Artemis (Server, Jenkins &amp; Gitlab):</strong> The server will be started separated from the client with the profiles <code class="docutils literal notranslate"><span class="pre">dev,jenkins,gitlab,artemis</span></code> instead of <code class="docutils literal notranslate"><span class="pre">dev,bamboo,bitbucket,jira,artemis</span></code>.</p></li>
 <li><p><strong>Artemis (Server, Athene):</strong> The server will be started separated from the client with <code class="docutils literal notranslate"><span class="pre">athene</span></code> profile enabled (see <a class="reference external" href="#athene-service">Athene Service</a>).</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="typical-problems-with-liquibase-checksums">
-<h3>Typical problems with Liquibase checksums<a class="headerlink" href="#typical-problems-with-liquibase-checksums" title="Permalink to this headline"></a></h3>
-<p>One typical problem in the development setup is that an exception occurs
-during the database initialization. Artemis uses
-<a class="reference external" href="https://www.liquibase.org">Liquibase</a> to automatically upgrade the
-database scheme after changes to the data model. This ensures that the
-changes can also be applied to the production server. In case you
-encounter errors with liquibase checksum values, run the following
-command in your terminal / command line:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">gradlew</span> <span class="n">liquibaseClearChecksums</span>
-</pre></div>
 </div>
 </div>
 <div class="section" id="run-the-server-with-spring-boot-and-spring-profiles">
@@ -438,7 +425,7 @@ run configuration that will be delivered with this repository:</p>
 </ul>
 </div>
 <div class="section" id="using-the-command-line">
-<h3>Using the command line<a class="headerlink" href="#using-the-command-line" title="Permalink to this headline"></a></h3>
+<span id="usingthecommandline"></span><h3>Using the command line<a class="headerlink" href="#using-the-command-line" title="Permalink to this headline"></a></h3>
 <p>You should be able to run the following
 command to install development tools and dependencies. You will only
 need to run this command when dependencies change in <code class="docutils literal notranslate"><span class="pre">package.json</span></code>.</p>
