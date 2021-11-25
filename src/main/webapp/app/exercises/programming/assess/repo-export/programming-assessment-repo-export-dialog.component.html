@@ -111,7 +111,8 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">
-            <span class="glyphicon glyphicon-ban-circle"></span>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+            <span class="glyphicon glyphicon-ban-circle"></span>
+            <span jhiTranslate="entity.action.cancel">Cancel</span>
         </button>
         <button
             [jhiFeatureToggle]="FeatureToggle.PROGRAMMING_EXERCISES"
@@ -121,7 +122,8 @@
             *ngIf="!isRepoExportForMultipleExercises"
         >
             <span *ngIf="this.exportInProgress" class="me-1"><fa-icon [icon]="'circle-notch'" [spin]="true"></fa-icon></span>
-            <span class="glyphicon glyphicon-download-alt"></span>&nbsp;<span jhiTranslate="entity.action.export">Export</span>
+            <span class="glyphicon glyphicon-download-alt"></span>
+            <span jhiTranslate="entity.action.export">Export</span>
         </button>
         <button
             [jhiFeatureToggle]="FeatureToggle.PROGRAMMING_EXERCISES"
@@ -131,7 +133,8 @@
             *ngIf="isRepoExportForMultipleExercises"
         >
             <span *ngIf="this.exportInProgress" class="me-1"><fa-icon [icon]="'circle-notch'" [spin]="true"></fa-icon></span>
-            <span class="glyphicon glyphicon-download-alt"></span>&nbsp;<span jhiTranslate="entity.action.export">Export</span>
+            <span class="glyphicon glyphicon-download-alt"></span>
+            <span jhiTranslate="entity.action.export">Export</span>
         </button>
     </div>
 </form>

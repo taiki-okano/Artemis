@@ -13,11 +13,11 @@
             id="create-quiz-button"
         >
             <fa-icon [icon]="'plus'"></fa-icon>
-            <span jhiTranslate="artemisApp.quizExercise.home.createLabel"> Create new Quiz </span>
+            <span jhiTranslate="artemisApp.quizExercise.home.createLabel">Create new Quiz </span>
         </a>
         <a *ngIf="course && course.isAtLeastEditor" class="btn me-2 btn-primary text-truncate mb-1 me-1" [routerLink]="['/course-management', courseId, 'apollon-diagrams']">
             <fa-icon [icon]="'plus'"></fa-icon>
-            <span jhiTranslate="artemisApp.quizExercise.home.createModelDragAndDrop"> Create new Drag and Drop Model Quiz </span>
+            <span jhiTranslate="artemisApp.quizExercise.home.createModelDragAndDrop">Create new Drag and Drop Model Quiz </span>
         </a>
         <a
             *ngIf="quizExercises && quizExercises.length > 0 && course.isAtLeastEditor"
@@ -25,7 +25,7 @@
             [routerLink]="['/course-management', courseId, 'quiz-exercises', 'export']"
         >
             <fa-icon [icon]="'plus'"></fa-icon>
-            <span jhiTranslate="artemisApp.quizExercise.home.exportLabel"> Export Quiz Exercises </span>
+            <span jhiTranslate="artemisApp.quizExercise.home.exportLabel">Export Quiz Exercises </span>
         </a>
     </h4>
     <jhi-alert *ngIf="showAlertHeading"></jhi-alert>
@@ -35,14 +35,33 @@
         <table class="table table-striped">
             <thead>
                 <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" (sortChange)="sortRows()">
-                    <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="title"><span jhiTranslate="artemisApp.exercise.title">Title</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="status"><span jhiTranslate="artemisApp.quizExercise.status">Status</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="releaseDate"><span jhiTranslate="artemisApp.quizExercise.startTime">Start Time</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="duration"><span jhiTranslate="artemisApp.quizExercise.duration">Duration</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="maxScore"><span jhiTranslate="artemisApp.exercise.points">Points</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
+                    <th jhiSortBy="id">
+                        <span jhiTranslate="global.field.id">ID</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="title">
+                        <span jhiTranslate="artemisApp.exercise.title">Title</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="status">
+                        <span jhiTranslate="artemisApp.quizExercise.status">Status</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="releaseDate">
+                        <span jhiTranslate="artemisApp.quizExercise.startTime">Start Time</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="duration">
+                        <span jhiTranslate="artemisApp.quizExercise.duration">Duration</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="maxScore">
+                        <span jhiTranslate="artemisApp.exercise.points">Points</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
                     <th jhiSortBy="includedInOverallScore">
-                        <span jhiTranslate="artemisApp.exercise.includedInOverallScore">Included in Overall Score</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon>
+                        <span jhiTranslate="artemisApp.exercise.includedInOverallScore">Included in Overall Score</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
                     </th>
                     <th>{{ 'artemisApp.quizExercise.quizLifecycle' | artemisTranslate }}</th>
                     <th></th>

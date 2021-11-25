@@ -94,10 +94,11 @@ export class ProgrammingExerciseTriggerAllButtonComponent implements OnInit {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cancel()">
-                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                    <fa-icon [icon]="'ban'"></fa-icon>
+                    <span jhiTranslate="entity.action.cancel">Cancel</span>
                 </button>
                 <button type="submit" class="btn btn-danger">
-                    <fa-icon [icon]="'times'"></fa-icon>&nbsp;
+                    <fa-icon [icon]="'times'"></fa-icon>
                     <span jhiTranslate="entity.action.confirm">Confirm</span>
                 </button>
             </div>

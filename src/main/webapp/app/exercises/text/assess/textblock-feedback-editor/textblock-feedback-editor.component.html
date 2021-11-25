@@ -31,7 +31,7 @@
     <div class="close" *ngIf="!readOnly">
         <ng-container *ngIf="canDismiss; then closeButton; else trashButton"></ng-container>
         <ng-template #closeButton>
-            <fa-icon icon="times" [ngbTooltip]="'artemisApp.textAssessment.feedbackEditor.dismissFeedback' | artemisTranslate" (click)="dismiss()"> </fa-icon>
+            <fa-icon icon="times" [ngbTooltip]="'artemisApp.textAssessment.feedbackEditor.dismissFeedback' | artemisTranslate" (click)="dismiss()"></fa-icon>
         </ng-template>
         <ng-template #trashButton>
             <jhi-confirm-icon
@@ -150,13 +150,14 @@
                             >
                         </div>
                         <div>
-                            <fa-icon [icon]="'info-circle'"></fa-icon>&nbsp;
-                            <span style="font-weight: bold" jhiTranslate="artemisApp.textAssessment.feedbackEditor.automaticFeedbackInformationModal.points"> Points: </span
-                            ><span>: {{ block.credits }}</span>
+                            <fa-icon [icon]="'info-circle'"></fa-icon>
+                            <span style="font-weight: bold" jhiTranslate="artemisApp.textAssessment.feedbackEditor.automaticFeedbackInformationModal.points">Points</span>
+                            <span>: {{ block.credits }}</span>
                         </div>
                         <div *ngIf="block.feedback">
-                            <fa-icon [icon]="'edit'"></fa-icon>&nbsp; <span style="font-weight: bold" jhiTranslate="artemisApp.assessment.detail.feedback">Feedback</span>:
-                            {{ block.feedback }}
+                            <fa-icon [icon]="'edit'"></fa-icon>
+                            <span style="font-weight: bold" jhiTranslate="artemisApp.assessment.detail.feedback">Feedback</span>
+                            <span>: {{ block.feedback }}</span>
                         </div>
                     </div>
                 </ng-container>

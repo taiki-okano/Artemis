@@ -29,7 +29,7 @@
     <div class="question card">
         <div class="question-options card-header question-card-header">
             <h5>
-                &nbsp;<fa-icon *ngIf="exercise && exercise.type" [icon]="getIcon(exercise.type)"></fa-icon>&nbsp;
+                <fa-icon *ngIf="exercise && exercise.type" [icon]="getIcon(exercise.type)"></fa-icon>
                 <span jhiTranslate="artemisApp.exam.exercise" [translateValues]="{ nr: i + 1 }">Exercise {{ i + 1 }}</span>
             </h5>
             <div

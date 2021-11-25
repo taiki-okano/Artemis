@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
     template: `
         <div class="d-flex mt-2 mb-3">
             <div *ngIf="hasStudentsWithoutExam; else allStudentsHaveExams" class="d-flex badge bg-warning">
-                <fa-icon class="ms-2 text-white" icon="exclamation-triangle" [ngbTooltip]="'artemisApp.studentExams.studentExamStatusWarningTooltip' | artemisTranslate"> </fa-icon>
+                <fa-icon class="ms-2 text-white" icon="exclamation-triangle" [ngbTooltip]="'artemisApp.studentExams.studentExamStatusWarningTooltip' | artemisTranslate"></fa-icon>
                 <span class="ms-1" jhiTranslate="artemisApp.studentExams.studentExamStatusWarning"></span>
             </div>
             <ng-template #allStudentsHaveExams>

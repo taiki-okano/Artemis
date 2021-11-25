@@ -23,7 +23,7 @@
             (click)="openImportModal()"
         >
             <fa-icon [icon]="'plus'"></fa-icon>
-            <span jhiTranslate="artemisApp.modelingExercise.home.importLabel"> Import Modeling Exercise </span>
+            <span jhiTranslate="artemisApp.modelingExercise.home.importLabel">Import Modeling Exercise</span>
         </button>
     </h4>
     <jhi-alert *ngIf="showAlertHeading"></jhi-alert>
@@ -33,20 +33,41 @@
         <table class="table table-striped">
             <thead>
                 <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" (sortChange)="sortRows()">
-                    <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="title"><span jhiTranslate="artemisApp.exercise.title">Title</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="releaseDate"><span jhiTranslate="artemisApp.exercise.releaseDate">Release Date</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="dueDate"><span jhiTranslate="artemisApp.exercise.dueDate">Due Date</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="assessmentDueDate">
-                        <span jhiTranslate="artemisApp.exercise.assessmentDueDate">Assessment Due Date</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon>
+                    <th jhiSortBy="id">
+                        <span jhiTranslate="global.field.id">ID</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
                     </th>
-                    <th jhiSortBy="maxScore"><span jhiTranslate="artemisApp.exercise.points">Points</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
-                    <th jhiSortBy="bonusPoints"><span jhiTranslate="artemisApp.exercise.bonusPoints">Bonus Points</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon></th>
+                    <th jhiSortBy="title">
+                        <span jhiTranslate="artemisApp.exercise.title">Title</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="releaseDate">
+                        <span jhiTranslate="artemisApp.exercise.releaseDate">Release Date</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="dueDate">
+                        <span jhiTranslate="artemisApp.exercise.dueDate">Due Date</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="assessmentDueDate">
+                        <span jhiTranslate="artemisApp.exercise.assessmentDueDate">Assessment Due Date</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="maxScore">
+                        <span jhiTranslate="artemisApp.exercise.points">Points</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
+                    <th jhiSortBy="bonusPoints">
+                        <span jhiTranslate="artemisApp.exercise.bonusPoints">Bonus Points</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
+                    </th>
                     <th jhiSortBy="includedInOverallScore">
-                        <span jhiTranslate="artemisApp.exercise.includedInOverallScore">Included in Overall Score</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon>
+                        <span jhiTranslate="artemisApp.exercise.includedInOverallScore">Included in Overall Score</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
                     </th>
                     <th jhiSortBy="presentationScoreEnabled" *ngIf="course.presentationScore !== 0">
-                        <span jhiTranslate="artemisApp.exercise.presentationScoreEnabled.title">Presentation</span>&nbsp;<fa-icon [icon]="'sort'"></fa-icon>
+                        <span jhiTranslate="artemisApp.exercise.presentationScoreEnabled.title">Presentation</span>
+                        <fa-icon [icon]="'sort'"></fa-icon>
                     </th>
                     <th><span jhiTranslate="artemisApp.modelingExercise.diagramType">Diagram Type</span></th>
                     <th></th>

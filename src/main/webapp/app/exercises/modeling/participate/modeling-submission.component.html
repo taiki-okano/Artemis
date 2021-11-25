@@ -40,7 +40,7 @@
                         [(explanation)]="explanation"
                         [resizeOptions]="resizeOptions"
                     ></jhi-modeling-editor>
-                    <fa-icon [icon]="'grip-lines'" class="rg-bottom text-lightgrey"><span></span></fa-icon>
+                    <fa-icon [icon]="'grip-lines'" class="rg-bottom text-lightgrey">&nbsp;</fa-icon>
                     <jhi-team-submission-sync
                         *ngIf="modelingExercise.teamMode"
                         [exerciseType]="modelingExercise.type!"
@@ -127,7 +127,7 @@
     </div>
     <!--endregion-->
     <!--region Right Panel-->
-    <fa-icon right-header [icon]="['far', 'list-alt']"></fa-icon>&nbsp;
+    <fa-icon right-header [icon]="['far', 'list-alt']"></fa-icon>
     <span right-header id="problem-statement" jhiTranslate="artemisApp.modelingSubmission.problemStatement">Problem Statement</span>
     <p right-body class="mb-3 markdown-preview" *ngIf="modelingExercise!.problemStatement">
         <span [innerHTML]="modelingExercise!.problemStatement! | htmlForMarkdown"></span>

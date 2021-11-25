@@ -30,11 +30,11 @@
             </button>
             <button type="submit" id="save-button" (click)="saveExerciseWithoutReevaluation()" [disabled]="instructionDeleted && deleteFeedback" class="btn btn-warning">
                 <fa-icon [icon]="'exclamation-triangle'"></fa-icon>
-                &nbsp;<span jhiTranslate="artemisApp.exercise.update.warning.saveExerciseWithoutReevaluation">Do not re-evaluate</span>
+                <span jhiTranslate="artemisApp.exercise.update.warning.saveExerciseWithoutReevaluation">Do not re-evaluate</span>
             </button>
             <button type="submit" id="reevaluate-button" (click)="reEvaluateExercise()" class="btn btn-success">
                 <fa-icon [icon]="'check'"></fa-icon>
-                &nbsp;<span jhiTranslate="artemisApp.exercise.update.warning.reevaluateExercise">Re-evaluate</span>
+                <span jhiTranslate="artemisApp.exercise.update.warning.reevaluateExercise">Re-evaluate</span>
             </button>
         </div>
     </div>

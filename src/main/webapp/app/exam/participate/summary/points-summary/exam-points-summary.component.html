@@ -68,11 +68,9 @@
     <div *ngIf="gradingScaleExists" style="margin-top: 1em" [routerLink]="['overview', 'grading-key']" [queryParams]="{ grade: grade }">
         <a class="btn btn-primary">
             <fa-icon [icon]="'clipboard'"></fa-icon>
-            <span
-                >&nbsp;{{
-                    isBonus ? ('artemisApp.exam.examSummary.gradeKeyButtonBonus' | artemisTranslate) : ('artemisApp.exam.examSummary.gradeKeyButton' | artemisTranslate)
-                }}</span
-            >
+            <span>
+                {{ isBonus ? ('artemisApp.exam.examSummary.gradeKeyButtonBonus' | artemisTranslate) : ('artemisApp.exam.examSummary.gradeKeyButton' | artemisTranslate) }}
+            </span>
         </a>
     </div>
 </div>

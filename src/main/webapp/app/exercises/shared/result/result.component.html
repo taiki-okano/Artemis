@@ -41,7 +41,7 @@
             </span>
             <span *ngIf="hasBuildArtifact() && participation.type === ParticipationType.PROGRAMMING">
                 <a (click)="downloadBuildResult(participation.id)">
-                    &nbsp; <fa-icon [icon]="'file'"></fa-icon>
+                    <fa-icon [icon]="'file'"></fa-icon>
                     <span jhiTranslate="artemisApp.editor.downloadBuildResult">Download Build Result</span>
                 </a>
             </span>
@@ -54,7 +54,7 @@
         <span [ngClass]="textColorClass">
             <fa-icon [icon]="resultIconClass" size="lg"></fa-icon>
             <span class="score" *ngIf="exercise">
-                &nbsp;<span *ngIf="!short" jhiTranslate="artemisApp.result.score">Score:</span>
+                <span *ngIf="!short" jhiTranslate="artemisApp.result.score">Score:</span>
                 {{ roundScoreSpecifiedByCourseSettings(result!.score, getCourseFromExercise(exercise!)) }} %,
             </span>
             <span class="text-muted">{{ 'artemisApp.courseOverview.exerciseList.exerciseLateFeedback' | artemisTranslate }}</span>
@@ -71,7 +71,7 @@
     </ng-container>
     <ng-container *ngSwitchCase="ResultTemplateStatus.MISSING">
         <span class="text-danger">
-            <fa-icon [icon]="['fas', 'exclamation-circle']" size="lg"></fa-icon>&nbsp;
+            <fa-icon [icon]="['fas', 'exclamation-circle']" size="lg"></fa-icon>
             <ng-container [ngSwitch]="missingResultInfo">
                 <ng-container *ngSwitchCase="MissingResultInfo.FAILED_PROGRAMMING_SUBMISSION_ONLINE_IDE">
                     <span [ngbTooltip]="'artemisApp.result.missing.programmingFailedSubmission.tooltipOnlineIde' | artemisTranslate">{{
@@ -89,7 +89,7 @@
     </ng-container>
     <ng-container *ngSwitchDefault>
         <span class="text-muted">
-            <fa-icon [icon]="['far', 'circle']" size="lg"></fa-icon>&nbsp;
+            <fa-icon [icon]="['far', 'circle']" size="lg"></fa-icon>
             <span jhiTranslate="artemisApp.result.noResult">No graded result</span>
         </span>
     </ng-container>

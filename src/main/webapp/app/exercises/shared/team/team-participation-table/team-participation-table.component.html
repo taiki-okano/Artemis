@@ -15,7 +15,7 @@
             <ngx-datatable-column prop="title" [minWidth]="180" [width]="200" [maxWidth]="240" [frozenLeft]="true">
                 <ng-template ngx-datatable-header-template>
                     <span class="datatable-header-cell-wrapper" (click)="controls.onSort('title')">
-                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.exercise.exercise"> Exercise </span>
+                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.exercise.exercise">Exercise</span>
                         <fa-icon [icon]="controls.iconForSortPropField('title')"></fa-icon>
                     </span>
                 </ng-template>
@@ -29,7 +29,7 @@
             <ngx-datatable-column prop="releaseDate" [minWidth]="160" [width]="160" [maxWidth]="160" [frozenLeft]="true">
                 <ng-template ngx-datatable-header-template>
                     <span class="datatable-header-cell-wrapper" (click)="controls.onSort('releaseDate')">
-                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.exercise.releaseDate"> Release Date </span>
+                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.exercise.releaseDate">Release Date</span>
                         <fa-icon [icon]="controls.iconForSortPropField('releaseDate')"></fa-icon>
                     </span>
                 </ng-template>
@@ -41,7 +41,7 @@
             <ngx-datatable-column prop="dueDate" [minWidth]="160" [width]="160" [maxWidth]="160" [frozenLeft]="true">
                 <ng-template ngx-datatable-header-template>
                     <span class="datatable-header-cell-wrapper" (click)="controls.onSort('dueDate')">
-                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.exercise.dueDate"> Due Date </span>
+                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.exercise.dueDate">Due Date</span>
                         <fa-icon [icon]="controls.iconForSortPropField('dueDate')"></fa-icon>
                     </span>
                 </ng-template>
@@ -92,7 +92,7 @@
             <ngx-datatable-column prop="participation.initializationDate" [minWidth]="190" [width]="190" [maxWidth]="190">
                 <ng-template ngx-datatable-header-template>
                     <span class="datatable-header-cell-wrapper" (click)="controls.onSort('participation.initializationDate')">
-                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.participation.initializationDate"> Initialization Date </span>
+                        <span class="datatable-header-cell-label bold sortable" jhiTranslate="artemisApp.participation.initializationDate">Initialization Date</span>
                         <fa-icon [icon]="controls.iconForSortPropField('participation.initializationDate')"></fa-icon>
                     </span>
                 </ng-template>
@@ -109,7 +109,7 @@
             <ngx-datatable-column *ngIf="isTeamOwner || exercise.isAtLeastInstructor" [minWidth]="200" [width]="200">
                 <ng-template ngx-datatable-header-template>
                     <span class="datatable-header-cell-wrapper">
-                        <span class="datatable-header-cell-label bold" jhiTranslate="artemisApp.team.detail.participationsTable.columns.assessment.label"> Assessment </span>
+                        <span class="datatable-header-cell-label bold" jhiTranslate="artemisApp.team.detail.participationsTable.columns.assessment.label">Assessment</span>
                     </span>
                 </ng-template>
                 <ng-template ngx-datatable-cell-template let-value="row">
@@ -124,9 +124,10 @@
                                 [class.disabled]="isAssessmentButtonDisabled(value, value.submission)"
                                 [routerLink]="getAssessmentLink(exercise, value.participation, value.submission)"
                                 class="btn btn-warning btn-sm"
-                                ><fa-icon [icon]="'folder-open'" [fixedWidth]="true"></fa-icon>
-                                {{ 'artemisApp.exerciseAssessmentDashboard.' + assessmentAction(value.submission) + 'Assessment' | artemisTranslate }}</a
                             >
+                                <fa-icon [icon]="'folder-open'" [fixedWidth]="true"></fa-icon>
+                                {{ 'artemisApp.exerciseAssessmentDashboard.' + assessmentAction(value.submission) + 'Assessment' | artemisTranslate }}
+                            </a>
                         </div>
                         <fa-icon
                             class="mx-3"

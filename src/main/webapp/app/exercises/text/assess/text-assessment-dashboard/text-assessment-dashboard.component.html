@@ -131,7 +131,8 @@
                                     [routerLink]="getAssessmentLink(submission.participation!.id!, submission.id)"
                                     class="btn btn-success btn-sm mb-1"
                                 >
-                                    <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>&nbsp;{{ 'artemisApp.assessment.dashboard.actions.assess' | artemisTranslate }}
+                                    <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>
+                                    {{ 'artemisApp.assessment.dashboard.actions.assess' | artemisTranslate }}
                                 </a>
 
                                 <a
@@ -140,7 +141,8 @@
                                     [routerLink]="getAssessmentLink(submission.participation!.id!, submission.id)"
                                     class="btn btn-primary btn-sm mb-1"
                                 >
-                                    <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>&nbsp;{{ 'artemisApp.assessment.dashboard.actions.open' | artemisTranslate }}
+                                    <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>
+                                    {{ 'artemisApp.assessment.dashboard.actions.open' | artemisTranslate }}
                                 </a>
                             </span>
                             <!-- start-->
@@ -155,7 +157,7 @@
                                         [routerLink]="getAssessmentLink(submission.participation!.id!, submission.id)"
                                         class="btn btn-primary btn-sm mb-1"
                                     >
-                                        <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>&nbsp;
+                                        <fa-icon [fixedWidth]="true" [icon]="'folder-open'"></fa-icon>
                                         <span>
                                             {{ 'artemisApp.assessment.dashboard.actions.open' | artemisTranslate }}
                                         </span>
@@ -169,7 +171,7 @@
                                                 [routerLink]="getAssessmentLink(submission.participation!.id!, submission.id)"
                                                 class="btn btn-warning btn-sm mb-1"
                                             >
-                                                <fa-icon [fixedWidth]="true" [icon]="'edit'"></fa-icon>&nbsp;
+                                                <fa-icon [fixedWidth]="true" [icon]="'edit'"></fa-icon>
                                                 <span>
                                                     {{ 'artemisApp.assessment.dashboard.actions.continue' | artemisTranslate }}
                                                 </span>
@@ -181,9 +183,8 @@
                                                 [disabled]="busy"
                                                 class="btn btn-danger btn-sm mb-1"
                                             >
-                                                <fa-icon [fixedWidth]="true" [icon]="'ban'"></fa-icon>&nbsp;{{
-                                                    'artemisApp.assessment.dashboard.actions.cancel' | artemisTranslate
-                                                }}
+                                                <fa-icon [fixedWidth]="true" [icon]="'ban'"></fa-icon>
+                                                {{ 'artemisApp.assessment.dashboard.actions.cancel' | artemisTranslate }}
                                             </button>
                                         </div>
                                     </span>

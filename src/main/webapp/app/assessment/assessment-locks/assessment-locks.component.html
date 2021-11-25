@@ -56,7 +56,8 @@
                                 ]"
                                 class="btn btn-outline-secondary btn-sm mb-1"
                             >
-                                <fa-icon [icon]="'folder-open'" [fixedWidth]="true"></fa-icon>&nbsp;{{ 'artemisApp.assessment.dashboard.actions.open' | artemisTranslate }}
+                                <fa-icon [icon]="'folder-open'" [fixedWidth]="true"></fa-icon>
+                                {{ 'artemisApp.assessment.dashboard.actions.open' | artemisTranslate }}
                             </a>
                             <a
                                 *ngIf="submission.participation!.exercise!.type !== ExerciseType.TEXT"
@@ -71,12 +72,14 @@
                                 ]"
                                 class="btn btn-outline-secondary btn-sm mb-1"
                             >
-                                <fa-icon [icon]="'folder-open'" [fixedWidth]="true"></fa-icon>&nbsp;{{ 'artemisApp.assessment.dashboard.actions.open' | artemisTranslate }}
+                                <fa-icon [icon]="'folder-open'" [fixedWidth]="true"></fa-icon>
+                                {{ 'artemisApp.assessment.dashboard.actions.open' | artemisTranslate }}
                             </a>
                         </span>
                         <span>
                             <button *ngIf="!submission.latestResult!.completionDate" (click)="cancelAssessment(submission)" class="btn btn-outline-secondary btn-sm mb-1">
-                                <fa-icon [icon]="'ban'" [fixedWidth]="true"></fa-icon>&nbsp;{{ 'artemisApp.assessment.dashboard.actions.cancel' | artemisTranslate }}
+                                <fa-icon [icon]="'ban'" [fixedWidth]="true"></fa-icon>
+                                {{ 'artemisApp.assessment.dashboard.actions.cancel' | artemisTranslate }}
                             </button>
                         </span>
                     </td>
