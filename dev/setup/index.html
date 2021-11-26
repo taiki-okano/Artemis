@@ -45,6 +45,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Setup Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mysql-setup">MySQL Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-setup">Server Setup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="bamboo-bitbucket-jira/">Bamboo, Bitbucket and Jira</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jenkins-gitlab/">Jenkins and Gitlab</a></li>
@@ -156,25 +157,48 @@ Artemis uses Hibernate to store entities in a MySQL database.
 Download and install the MySQL Community Server (8.0.x) and configure
 the ‘root’ user with an empty password.
 (In case you want to use a different password, make sure to change the value in
-<code class="docutils literal notranslate"><span class="pre">application-dev.yml</span></code> <em>(spring &gt; datasource &gt; password)</em> and in <code class="docutils literal notranslate"><span class="pre">liquibase.gradle</span></code> <em>(within the ‘liquibaseCommand’ as argument password)</em>).
+<code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> <em>(spring &gt; datasource &gt; password)</em> and in <code class="docutils literal notranslate"><span class="pre">liquibase.gradle</span></code> <em>(within the ‘liquibaseCommand’ as argument password)</em>).
 The required Artemis scheme will be created / updated automatically at startup time of the
 server application.
 Alternatively, you can run the MySQL Database Server inside a Docker container using e.g. <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/mysql.yml</span> <span class="pre">up</span></code></p></li>
-<li><p><a class="reference external" href="https://nodejs.org/en/download">Node.js</a>: We use Node LTS (&gt;=14.17.0 &lt; 15) to compile
+<li><p><a class="reference external" href="https://nodejs.org/en/download">Node.js</a>: We use Node LTS (&gt;=16.13.0 &lt; 17) to compile
 and run the client Angular application. Depending on your system, you
 can install Node either from source or as a pre-packaged bundle.</p></li>
-<li><p><a class="reference external" href="https://nodejs.org/en/download">Npm</a>: We use Npm (&gt;=6.14.0) to
-manage client side Node dependencies. Npm is typically bundled with Node.js,
-but can also be installed <a href="#id2"><span class="problematic" id="id3">separately__</span></a>.</p></li>
+<li><p><a class="reference external" href="https://nodejs.org/en/download">Npm</a>: We use Npm (&gt;=8.1.0) to
+manage client side dependencies. Npm is typically bundled with Node.js,
+but can also be installed separately.</p></li>
 </ol>
+<div class="section" id="mysql-setup">
+<h2>MySQL Setup<a class="headerlink" href="#mysql-setup" title="Permalink to this headline"></a></h2>
+<p>If you run your own MySQL server, make sure to specify the default <code class="docutils literal notranslate"><span class="pre">character-set</span></code>
+as <code class="docutils literal notranslate"><span class="pre">utf8mb4</span></code> and the default <code class="docutils literal notranslate"><span class="pre">collation</span></code> as <code class="docutils literal notranslate"><span class="pre">utf8mb4_unicode_ci</span></code>.
+You can achieve this e.g. by using a <code class="docutils literal notranslate"><span class="pre">my.cnf</span></code> file in the location <code class="docutils literal notranslate"><span class="pre">/etc</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">client</span><span class="p">]</span>
+<span class="n">default</span><span class="o">-</span><span class="n">character</span><span class="o">-</span><span class="nb">set</span> <span class="o">=</span> <span class="n">utf8mb4</span>
+<span class="p">[</span><span class="n">mysql</span><span class="p">]</span>
+<span class="n">default</span><span class="o">-</span><span class="n">character</span><span class="o">-</span><span class="nb">set</span> <span class="o">=</span> <span class="n">utf8mb4</span>
+<span class="p">[</span><span class="n">mysqld</span><span class="p">]</span>
+<span class="n">character</span><span class="o">-</span><span class="nb">set</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">handshake</span> <span class="o">=</span> <span class="n">TRUE</span>
+<span class="n">init</span><span class="o">-</span><span class="n">connect</span><span class="o">=</span><span class="s1">&#39;SET NAMES utf8mb4&#39;</span>
+<span class="n">character</span><span class="o">-</span><span class="nb">set</span><span class="o">-</span><span class="n">server</span> <span class="o">=</span> <span class="n">utf8mb4</span>
+<span class="n">collation</span><span class="o">-</span><span class="n">server</span> <span class="o">=</span> <span class="n">utf8mb4_unicode_ci</span>
+</pre></div>
+</div>
+<p>Make sure the configuration file is used by MySQL when you start the server.
+You can find more information on <a class="reference external" href="https://dev.mysql.com/doc/refman/8.0/en/option-files.html">https://dev.mysql.com/doc/refman/8.0/en/option-files.html</a></p>
+</div>
 <div class="section" id="server-setup">
 <h2>Server Setup<a class="headerlink" href="#server-setup" title="Permalink to this headline"></a></h2>
 <p>To start the Artemis application server from the development
 environment, first import the project into IntelliJ and then make sure
 to install the Spring Boot plugins to run the main class
 <code class="docutils literal notranslate"><span class="pre">de.tum.in.www1.artemis.ArtemisApp</span></code>. Before the application runs, you
-have to configure the file <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code> in the folder
-<code class="docutils literal notranslate"><span class="pre">src/main/resources/config</span></code>.</p>
+have to change some configuration options.
+You can change the options directly in the file <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code> in the folder
+<code class="docutils literal notranslate"><span class="pre">src/main/resources/config</span></code>. However, you have to be careful that you do not
+accidentally commit your password. Therefore, we strongly recommend, to create a new file
+<code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> in the folder <code class="docutils literal notranslate"><span class="pre">src/main/resources/config</span></code> which is ignored by default.
+You can override the following configuration options in this file.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">artemis</span><span class="p">:</span>
     <span class="nt">repo-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos/</span>
     <span class="nt">repo-download-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos-download/</span>
@@ -264,7 +288,7 @@ information about the setup for programming exercises provided:</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Be careful that you don’t commit changes to <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code>.
+<p>Be careful that you do not commit changes to <code class="docutils literal notranslate"><span class="pre">application-artemis.yml</span></code>.
 To avoid this, follow the best practice when configuring your local development environment:</p>
 <ol class="arabic simple">
 <li><p>Create a file named <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> under <code class="docutils literal notranslate"><span class="pre">src/main/resources/config</span></code>.</p></li>
@@ -272,7 +296,10 @@ To avoid this, follow the best practice when configuring your local development 
 <li><p>Update configuration values in <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code>.</p></li>
 </ol>
 <p>By default, changes to <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> will be ignored by git so you don’t accidentally
-share your credentials or other local configuration options.</p>
+share your credentials or other local configuration options. The run configurations contain a profile
+<code class="docutils literal notranslate"><span class="pre">local</span></code> at the end to make sure the <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> is considered. You can create your own
+configuration files <code class="docutils literal notranslate"><span class="pre">application-&lt;name&gt;.yml</span></code> and then activate the profile <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> in the run
+configuration if you need additional customizations.</p>
 </div>
 <p>If you use a password, you need to adapt it in
 <code class="docutils literal notranslate"><span class="pre">gradle/liquibase.gradle</span></code>.</p>

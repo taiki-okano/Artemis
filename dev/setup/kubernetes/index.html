@@ -45,6 +45,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../">Setup Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../#mysql-setup">MySQL Setup</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../#server-setup">Server Setup</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../bamboo-bitbucket-jira/">Bamboo, Bitbucket and Jira</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../jenkins-gitlab/">Jenkins and Gitlab</a></li>
@@ -355,7 +356,7 @@ If you want to configure Artemis with local user management and no programming e
 <h3>Configure Local User Management<a class="headerlink" href="#configure-local-user-management" title="Permalink to this headline"></a></h3>
 <p>If you want to run with local user management and no programming exercises setup follow the steps:</p>
 <ol class="arabic">
-<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code> file, and set use-external in the user-management section to false. If you have created an additional <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> file as it is described in the <cite>Setup documentation &lt;https://artemis-platform.readthedocs.io/en/latest/dev/setup/#server-setup&gt;</cite>, make sure to edit this one.</p>
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-artemis.yml</span></code> file, and set use-external in the user-management section to false. If you have created an additional <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> file as it is described in the <a class="reference external" href="https://artemis-platform.readthedocs.io/en/latest/dev/setup/#server-setup">Setup documentation</a>, make sure to edit this one.</p>
 <p>Another possibility is to add the variable directly in <code class="docutils literal notranslate"><span class="pre">src/main/kubernetes/artemis/configmap/artemis-configmap.yml</span></code>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">:</span>
    <span class="n">artemis</span><span class="o">.</span><span class="n">user</span><span class="o">-</span><span class="n">management</span><span class="o">.</span><span class="n">use</span><span class="o">-</span><span class="n">external</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span>
