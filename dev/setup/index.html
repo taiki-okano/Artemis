@@ -160,7 +160,10 @@ the ‘root’ user with an empty password.
 <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> <em>(spring &gt; datasource &gt; password)</em> and in <code class="docutils literal notranslate"><span class="pre">liquibase.gradle</span></code> <em>(within the ‘liquibaseCommand’ as argument password)</em>).
 The required Artemis scheme will be created / updated automatically at startup time of the
 server application.
-Alternatively, you can run the MySQL Database Server inside a Docker container using e.g. <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/mysql.yml</span> <span class="pre">up</span></code></p></li>
+Alternatively, you can run the MySQL Database Server inside a Docker container using e.g. <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/mysql.yml</span> <span class="pre">up</span></code>
+In case you are using a computer with an arm64 processor you might want to change the used image
+in the mysql.yml file. Using e.g. <code class="docutils literal notranslate"><span class="pre">ubuntu/mysql:8.0-21.10_beta</span></code> will let the MySQL database
+run natively on arm64 processors.</p></li>
 <li><p><a class="reference external" href="https://nodejs.org/en/download">Node.js</a>: We use Node LTS (&gt;=16.13.0 &lt; 17) to compile
 and run the client Angular application. Depending on your system, you
 can install Node either from source or as a pre-packaged bundle.</p></li>
