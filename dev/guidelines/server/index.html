@@ -222,7 +222,7 @@ To understand how to create new changelog file you can check existing changelog 
 <li><p>Think about lazy vs. eager fetching when modeling the data types.</p></li>
 <li><p>Only if it is inevitable, use nested queries. You should try use as few tables as possible.</p></li>
 <li><p>Simple datatypes: immediately think about whether <code class="docutils literal notranslate"><span class="pre">null</span></code> should be supported as additional state or not. In most cases it is preferable to avoid <code class="docutils literal notranslate"><span class="pre">null</span></code>.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">Timestamp</span></code> instead of <code class="docutils literal notranslate"><span class="pre">Datetime</span></code>.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">Datetime</span></code> instead of <code class="docutils literal notranslate"><span class="pre">Timestamp</span></code>. <code class="docutils literal notranslate"><span class="pre">Datetime</span></code> occupies more storage space compared to <code class="docutils literal notranslate"><span class="pre">Timestamp</span></code>, however it covers a greater date range that justifies its use in the long run.</p></li>
 </ul>
 </div>
 <div class="section" id="comments">
