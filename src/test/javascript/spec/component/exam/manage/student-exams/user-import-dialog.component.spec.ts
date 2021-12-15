@@ -53,6 +53,7 @@ describe('UsersImportButtonComponent', () => {
                 MockProvider(LocalStorageService),
                 MockProvider(Router),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

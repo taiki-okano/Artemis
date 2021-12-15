@@ -23,6 +23,7 @@ describe('DragItemComponent', () => {
             imports: [ArtemisTestModule, DndModule.forRoot(), AngularFittextModule],
             declarations: [MockComponent(SecuredImageComponent), DragItemComponent],
             providers: [MockProvider(DeviceDetectorService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

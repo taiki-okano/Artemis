@@ -71,6 +71,7 @@ describe('CourseExercisesComponent', () => {
                     useValue: route,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

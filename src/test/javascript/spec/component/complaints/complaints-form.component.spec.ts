@@ -51,6 +51,7 @@ describe('ComplaintsComponent', () => {
                     useClass: MockTranslateService,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

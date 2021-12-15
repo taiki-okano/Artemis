@@ -133,6 +133,7 @@ function sharedSetup(url: string[]) {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

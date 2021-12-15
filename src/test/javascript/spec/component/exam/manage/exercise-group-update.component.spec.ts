@@ -59,6 +59,7 @@ describe('ExerciseGroupUpdateComponent', () => {
                 { provide: ActivatedRoute, useValue: route },
                 { provide: Router, useValue: mockRouter },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ExerciseGroupUpdateComponent);

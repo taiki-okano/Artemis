@@ -61,6 +61,7 @@ describe('CourseParticipantScores', () => {
                     useValue: { params: of({ courseId: 1 }) },
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

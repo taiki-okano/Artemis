@@ -17,6 +17,7 @@ describe('CodeEditorGridComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [CodeEditorGridComponent],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

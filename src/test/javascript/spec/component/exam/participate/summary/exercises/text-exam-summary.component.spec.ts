@@ -12,7 +12,10 @@ describe('TextExamSummaryComponent', () => {
     let component: TextExamSummaryComponent;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({ declarations: [TextExamSummaryComponent] })
+        TestBed.configureTestingModule({
+            declarations: [TextExamSummaryComponent],
+            teardown: { destroyAfterEach: true },
+        })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(TextExamSummaryComponent);

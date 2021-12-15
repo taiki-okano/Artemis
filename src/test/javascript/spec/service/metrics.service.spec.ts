@@ -11,6 +11,7 @@ describe('Service Tests', () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 imports: [HttpClientTestingModule],
+                teardown: { destroyAfterEach: true },
             });
             service = TestBed.inject(MetricsService);
             httpMock = TestBed.inject(HttpTestingController);

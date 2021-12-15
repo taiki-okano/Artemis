@@ -15,9 +15,9 @@ describe('Delete Dialog Service', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [],
             providers: [DeleteDialogService, { provide: TranslateService, useClass: MockTranslateService }],
             declarations: [MockComponent(DeleteDialogComponent)],
+            teardown: { destroyAfterEach: true },
         });
         service = TestBed.inject(DeleteDialogService);
         modalService = TestBed.inject(NgbModal);

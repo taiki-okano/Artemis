@@ -53,6 +53,7 @@ describe('UserManagementComponent', () => {
                 { provide: AccountService, useClass: MockAccountService },
                 { provide: Router, useClass: MockRouter },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

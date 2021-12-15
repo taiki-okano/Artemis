@@ -43,7 +43,7 @@ describe('ApollonDiagramList Component', () => {
                 MockProvider(CourseManagementService),
                 MockProvider(AccountService),
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ApollonDiagramListComponent, '')
             .compileComponents()

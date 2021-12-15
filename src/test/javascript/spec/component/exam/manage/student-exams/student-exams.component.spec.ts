@@ -204,6 +204,7 @@ describe('StudentExamsComponent', () => {
                 MockComponent(DataTableComponent),
             ],
             providers,
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

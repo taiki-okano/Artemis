@@ -102,6 +102,7 @@ describe('CoursesComponent', () => {
                 { provide: CourseExerciseRowComponent },
                 { provide: AlertService, useClass: MockAlertService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

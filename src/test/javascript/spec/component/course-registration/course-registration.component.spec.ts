@@ -31,6 +31,7 @@ describe('CourseRegistrationComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [CourseRegistrationComponent],
             providers: [{ provide: LocalStorageService, useClass: MockSyncStorage }, { provide: SessionStorageService, useClass: MockSyncStorage }, MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(CourseRegistrationComponent, '')
             .compileComponents()

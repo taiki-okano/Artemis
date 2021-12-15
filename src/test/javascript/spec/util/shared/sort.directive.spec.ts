@@ -26,6 +26,7 @@ describe('Directive: SortDirective', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [TestSortDirectiveComponent, SortDirective],
+            teardown: { destroyAfterEach: true },
         });
         fixture = TestBed.createComponent(TestSortDirectiveComponent);
         component = fixture.componentInstance;

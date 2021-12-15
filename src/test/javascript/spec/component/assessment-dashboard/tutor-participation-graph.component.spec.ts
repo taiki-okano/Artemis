@@ -32,6 +32,7 @@ describe('TutorParticipationGraphComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [TutorParticipationGraphComponent, MockComponent(ProgressBarComponent), TranslatePipeMock, MockDirective(NgbTooltip)],
             providers: [{ provide: Router, useValue: router }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

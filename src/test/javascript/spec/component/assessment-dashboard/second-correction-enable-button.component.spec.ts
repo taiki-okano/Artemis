@@ -11,6 +11,7 @@ describe('SecondCorrectionEnableButtonComponent', () => {
         return TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [SecondCorrectionEnableButtonComponent, TranslatePipeMock],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -51,6 +51,7 @@ describe('Exercise detail common actions Component', () => {
                 MockProvider(ModelingExerciseService),
                 { provide: Router, useClass: MockRouter },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(NonProgrammingExerciseDetailCommonActionsComponent);
         comp = fixture.componentInstance;

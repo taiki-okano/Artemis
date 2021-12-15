@@ -85,6 +85,7 @@ describe('AssessmentHeaderComponent', () => {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents();

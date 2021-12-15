@@ -39,6 +39,7 @@ describe('AssessmentLayoutComponent', () => {
                 MockQueryParamsDirective,
             ],
             providers: [MockProvider(TextAssessmentAnalytics), { provide: ActivatedRoute, useValue: new MockActivatedRoute() }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

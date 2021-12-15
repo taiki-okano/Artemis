@@ -25,6 +25,7 @@ describe('FileUploadExamSummaryComponent', () => {
             imports: [HttpClientTestingModule],
             declarations: [FileUploadExamSummaryComponent, MockPipe(ArtemisTranslatePipe)],
             providers: [MockProvider(FileService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

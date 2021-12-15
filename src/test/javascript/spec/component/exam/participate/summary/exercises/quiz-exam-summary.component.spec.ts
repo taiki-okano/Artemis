@@ -86,6 +86,7 @@ describe('QuizExamSummaryComponent', () => {
             imports: [HttpClientTestingModule, MockModule(ArtemisQuizQuestionTypesModule)],
             declarations: [QuizExamSummaryComponent, MockPipe(ArtemisTranslatePipe)],
             providers: [MockProvider(TranslateService), MockProvider(QuizExerciseService), MockProvider(ArtemisServerDateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

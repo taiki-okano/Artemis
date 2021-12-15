@@ -18,6 +18,7 @@ describe('CourseManagementOverviewStatisticsComponent', () => {
             imports: [MockModule(LineChartModule)],
             declarations: [CourseManagementOverviewStatisticsComponent, MockPipe(ArtemisTranslatePipe), MockComponent(FaIconComponent), MockDirective(TranslateDirective)],
             providers: [MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

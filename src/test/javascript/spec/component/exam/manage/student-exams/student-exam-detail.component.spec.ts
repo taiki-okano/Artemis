@@ -176,6 +176,7 @@ describe('StudentExamDetailComponent', () => {
                     },
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

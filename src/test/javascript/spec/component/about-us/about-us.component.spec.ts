@@ -27,6 +27,7 @@ describe('AboutUsComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [AboutUsComponent, TranslatePipeMock],
             providers: [{ provide: ActivatedRoute, useValue: route }, MockProvider(ProfileService), MockProvider(StaticContentService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

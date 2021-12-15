@@ -68,6 +68,7 @@ describe('Exam Management Component', () => {
                 { provide: ActivatedRoute, useValue: route },
                 EventManager,
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ExamManagementComponent);

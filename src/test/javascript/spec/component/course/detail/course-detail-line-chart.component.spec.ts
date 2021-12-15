@@ -22,6 +22,7 @@ describe('CourseDetailLineChartComponent', () => {
             imports: [ArtemisTestModule, MockModule(NgxChartsModule)],
             declarations: [CourseDetailLineChartComponent, MockPipe(ArtemisTranslatePipe)],
             providers: [MockCourseManagementService, { provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -61,6 +61,7 @@ describe('StudentExamDetailTableRowComponent', () => {
                 MockPipe(ArtemisTranslatePipe),
             ],
             providers: [MockProvider(AlertService), MockDirective(TranslateDirective)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

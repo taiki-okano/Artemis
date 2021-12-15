@@ -101,7 +101,7 @@ describe('ExamDetailComponent', () => {
                     safeHtmlForMarkdown: () => exampleHTML,
                 }),
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

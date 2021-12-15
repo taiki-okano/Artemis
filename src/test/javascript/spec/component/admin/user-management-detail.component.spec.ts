@@ -25,6 +25,7 @@ describe('User Management Detail Component', () => {
                     useValue: route,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(UserManagementDetailComponent, '')
             .compileComponents();

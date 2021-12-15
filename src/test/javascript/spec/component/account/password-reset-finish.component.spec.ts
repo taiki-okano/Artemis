@@ -32,6 +32,7 @@ describe('Component Tests', () => {
                     { provide: SessionStorageService, useClass: MockSyncStorage },
                     { provide: ProfileService, useClass: MockProfileService },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .overrideTemplate(PasswordResetFinishComponent, '')
                 .createComponent(PasswordResetFinishComponent);

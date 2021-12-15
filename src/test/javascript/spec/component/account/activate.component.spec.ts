@@ -24,6 +24,7 @@ describe('ActivateComponent', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: ProfileService, useClass: MockProfileService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ActivateComponent, '')
             .compileComponents();

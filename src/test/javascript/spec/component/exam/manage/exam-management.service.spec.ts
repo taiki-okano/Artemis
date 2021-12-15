@@ -34,6 +34,7 @@ describe('Exam Management Service Tests', () => {
         TestBed.configureTestingModule({
             providers: [ExamManagementService],
             imports: [ArtemisTestModule, HttpClientTestingModule],
+            teardown: { destroyAfterEach: true },
         });
 
         service = TestBed.inject(ExamManagementService);

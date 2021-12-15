@@ -45,6 +45,7 @@ describe('CodeEditorActionsComponent', () => {
                 { provide: CookieService, useClass: MockCookieService },
                 { provide: FeatureToggleService, useClass: MockFeatureToggleService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

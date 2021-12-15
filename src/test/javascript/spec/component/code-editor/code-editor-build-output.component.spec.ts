@@ -92,6 +92,7 @@ describe('CodeEditorBuildOutputComponent', () => {
                 { provide: ParticipationWebsocketService, useClass: MockParticipationWebsocketService },
                 MockProvider(CodeEditorSubmissionService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

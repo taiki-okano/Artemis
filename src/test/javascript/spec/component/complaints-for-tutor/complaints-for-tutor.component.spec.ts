@@ -30,6 +30,7 @@ describe('ComplaintsForTutorComponent', () => {
             imports: [RouterTestingModule.withRoutes([]), FormsModule],
             declarations: [ComplaintsForTutorComponent, MockPipe(ArtemisTranslatePipe), MockPipe(ArtemisDatePipe)],
             providers: [MockProvider(ComplaintResponseService), MockProvider(ComplaintService), MockProvider(AlertService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

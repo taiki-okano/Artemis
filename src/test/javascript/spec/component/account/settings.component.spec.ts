@@ -40,6 +40,7 @@ describe('SettingsComponent', () => {
                 { provide: ProfileService, useClass: MockProfileService },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(SettingsComponent, '')
             .compileComponents();

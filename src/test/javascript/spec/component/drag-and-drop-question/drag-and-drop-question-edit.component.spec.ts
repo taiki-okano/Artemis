@@ -62,6 +62,7 @@ describe('DragAndDropQuestionEditComponent', () => {
                 { provide: NgbModal, useClass: MockNgbModalService },
                 MockProvider(ChangeDetectorRef),
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(DragAndDropQuestionEditComponent);
         component = fixture.componentInstance;

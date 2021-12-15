@@ -71,6 +71,7 @@ describe('ExamParticipationCoverComponent', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: Router, useValue: MockRouter },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(ExamParticipationCoverComponent);
         component = fixture.componentInstance;

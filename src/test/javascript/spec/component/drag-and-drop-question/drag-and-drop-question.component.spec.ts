@@ -50,6 +50,7 @@ describe('DragAndDropQuestionComponent', () => {
                 DragItemComponent,
             ],
             providers: [MockProvider(DragAndDropQuestionUtil)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

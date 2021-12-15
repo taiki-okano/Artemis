@@ -66,6 +66,7 @@ describe('FileUploadExamSubmissionComponent', () => {
                 MockComponent(ExamExerciseUpdateHighlighterComponent),
             ],
             providers: [MockProvider(ChangeDetectorRef), { provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

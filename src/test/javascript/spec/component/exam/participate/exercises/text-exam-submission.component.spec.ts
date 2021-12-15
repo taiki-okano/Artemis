@@ -45,6 +45,7 @@ describe('TextExamSubmissionComponent', () => {
                 MockComponent(ResizeableContainerComponent),
             ],
             providers: [MockProvider(TextEditorService), MockProvider(ArtemisMarkdownService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

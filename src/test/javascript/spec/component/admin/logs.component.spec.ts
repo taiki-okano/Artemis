@@ -18,6 +18,7 @@ describe('Component Tests', () => {
                     imports: [HttpClientTestingModule],
                     declarations: [LogsComponent],
                     providers: [LogsService],
+                    teardown: { destroyAfterEach: true },
                 })
                     .overrideTemplate(LogsComponent, '')
                     .compileComponents();

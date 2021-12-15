@@ -13,6 +13,7 @@ describe('Service Tests', () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 imports: [HttpClientTestingModule],
+                teardown: { destroyAfterEach: true },
             });
 
             expectedResult = null;

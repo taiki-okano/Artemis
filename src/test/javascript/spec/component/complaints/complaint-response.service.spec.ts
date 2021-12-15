@@ -22,6 +22,7 @@ describe('ComplaintResponseService', () => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
             providers: [MockProvider(AccountService)],
+            teardown: { destroyAfterEach: true },
         });
         expectedComplaintResponse = {} as HttpResponse<ComplaintResponse>;
 

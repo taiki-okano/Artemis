@@ -70,7 +70,7 @@ describe('QuizExercise Generator', () => {
                 },
                 { provide: Router, useClass: MockRouter },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
     });
 

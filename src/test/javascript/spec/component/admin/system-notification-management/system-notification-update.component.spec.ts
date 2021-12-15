@@ -41,6 +41,7 @@ describe('SystemNotificationManagementUpdateComponent', () => {
                 MockDirective(FormDateTimePickerComponent),
             ],
             providers: [{ provide: ActivatedRoute, useValue: route }, MockProvider(ArtemisNavigationUtilService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -19,6 +19,7 @@ describe('UsersImportButtonComponent', () => {
             imports: [MockModule(NgbModule), TranslateModule.forRoot()],
             declarations: [UsersImportButtonComponent, MockComponent(ButtonComponent)],
             providers: [MockProvider(AlertService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

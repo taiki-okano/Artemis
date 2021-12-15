@@ -54,6 +54,7 @@ describe('AuditsComponent', () => {
                 },
                 AuditsService,
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(AuditsComponent, '')
             .compileComponents()

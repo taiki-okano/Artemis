@@ -76,6 +76,7 @@ describe('ComplaintsStudentViewComponent', () => {
                     useClass: MockAccountService,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -125,6 +125,7 @@ describe('Exam Update Component', function () {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ExamUpdateComponent);

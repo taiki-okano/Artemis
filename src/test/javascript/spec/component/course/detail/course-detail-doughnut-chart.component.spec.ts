@@ -21,6 +21,7 @@ describe('CourseDetailDoughnutChartComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, RouterTestingModule.withRoutes([]), MockModule(PieChartModule)],
             declarations: [CourseDetailDoughnutChartComponent, MockPipe(ArtemisTranslatePipe)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

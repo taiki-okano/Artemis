@@ -22,7 +22,7 @@ describe('Course Management Exercises Search Component', () => {
                 MockDirective(TranslateDirective),
                 MockDirective(NgModel),
             ],
-            providers: [],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(CourseManagementExercisesSearchComponent);
         comp = fixture.componentInstance;

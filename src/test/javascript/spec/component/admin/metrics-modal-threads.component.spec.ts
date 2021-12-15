@@ -16,6 +16,7 @@ describe('MetricsModalThreadsComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [MetricsModalThreadsComponent],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(MetricsModalThreadsComponent, '')
             .compileComponents()

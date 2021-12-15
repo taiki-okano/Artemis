@@ -55,7 +55,7 @@ describe('ApollonDiagramDetail Component', () => {
                 { provide: ActivatedRoute, useValue: route },
                 { provide: Router, useClass: MockRouter },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ApollonDiagramDetailComponent, '')
             .compileComponents()

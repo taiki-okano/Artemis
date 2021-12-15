@@ -70,6 +70,7 @@ describe('Course Management Detail Component', () => {
                 MockProvider(CourseManagementService),
                 MockProvider(UserService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -111,6 +111,7 @@ describe('CourseOverviewComponent', () => {
                 { provide: AlertService, useClass: MockAlertService },
                 { provide: Router, useClass: MockRouter },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

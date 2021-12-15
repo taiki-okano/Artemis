@@ -17,6 +17,7 @@ describe('Component Tests', () => {
                     imports: [HttpClientTestingModule],
                     declarations: [ConfigurationComponent],
                     providers: [ConfigurationService],
+                    teardown: { destroyAfterEach: true },
                 })
                     .overrideTemplate(ConfigurationComponent, '')
                     .compileComponents();

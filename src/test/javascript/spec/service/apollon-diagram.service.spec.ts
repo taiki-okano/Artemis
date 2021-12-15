@@ -19,6 +19,7 @@ describe('ApollonDiagramService', () => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
             providers: [ApollonDiagramService],
+            teardown: { destroyAfterEach: true },
         });
         courseId = 1;
         apollonDiagram = new ApollonDiagram(UMLDiagramType.ClassDiagram, courseId);

@@ -258,6 +258,7 @@ describe('CourseScoresComponent', () => {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

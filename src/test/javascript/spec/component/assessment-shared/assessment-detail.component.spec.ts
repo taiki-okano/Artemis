@@ -31,6 +31,7 @@ describe('Assessment Detail Component', () => {
                 MockComponent(AssessmentCorrectionRoundBadgeComponent),
             ],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }, MockProvider(StructuredGradingCriterionService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -54,6 +54,7 @@ describe('Course Management Service', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         courseManagementService = injector.get(CourseManagementService);

@@ -30,6 +30,7 @@ The most basic test looks similar to this:
                 providers: [
                     MockProvider(SomeServiceUsedInComponent),
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {
@@ -72,6 +73,7 @@ Some guidelines:
                     providers: [
                         ...
                     ],
+                    teardown: { destroyAfterEach: true },
                 })
                     .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
                     .compileComponents()
@@ -113,6 +115,7 @@ Some guidelines:
                         providers: [
                             ...
                         ],
+                        teardown: { destroyAfterEach: true },
                     })
                         .compileComponents()
                         .then(() => {
@@ -165,6 +168,7 @@ Some guidelines:
                 beforeEach(() => {
                     TestBed.configureTestingModule({
                         imports: [HttpClientTestingModule],
+                        teardown: { destroyAfterEach: true },
                     });
 
                     ...
@@ -225,12 +229,10 @@ Some guidelines:
 
             beforeEach(() => {
                 TestBed.configureTestingModule({
-                    imports: [],
                     declarations: [
                         SomeComponent,
                     ],
-                    providers: [
-                    ],
+                    teardown: { destroyAfterEach: true },
                 })
                     .overrideTemplate(SomeComponent, '') // DO NOT DO THIS
                     .compileComponents()

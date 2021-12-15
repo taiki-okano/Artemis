@@ -12,6 +12,7 @@ describe('AssessmentComplaintAlertComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [AssessmentComplaintAlertComponent, TranslatePipeMock],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

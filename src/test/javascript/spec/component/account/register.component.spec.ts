@@ -31,6 +31,7 @@ describe('Component Tests', () => {
                     { provide: ProfileService, useClass: MockProfileService },
                     { provide: TranslateService, useClass: MockTranslateService },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .overrideTemplate(RegisterComponent, '')
                 .compileComponents();

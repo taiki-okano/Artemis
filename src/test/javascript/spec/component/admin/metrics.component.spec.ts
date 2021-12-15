@@ -14,6 +14,7 @@ describe('MetricsComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [MetricsComponent],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(MetricsComponent, '')
             .compileComponents();

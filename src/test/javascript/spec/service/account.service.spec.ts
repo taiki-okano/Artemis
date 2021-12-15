@@ -27,8 +27,8 @@ describe('AccountService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         });
         httpService = new MockHttpService();
         translateService = TestBed.inject(TranslateService);

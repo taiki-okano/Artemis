@@ -69,6 +69,7 @@ describe('Test Run Management Component', () => {
                 { provide: ActivatedRoute, useValue: route },
                 MockDirective(TranslateDirective),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

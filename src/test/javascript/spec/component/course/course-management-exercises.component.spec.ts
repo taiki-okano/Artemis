@@ -56,6 +56,7 @@ describe('Course Management Exercises Component', () => {
                     useValue: route,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(CourseManagementExercisesComponent);
         comp = fixture.componentInstance;

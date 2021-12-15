@@ -26,6 +26,7 @@ describe('StudentExamSummaryComponent', () => {
         return TestBed.configureTestingModule({
             declarations: [StudentExamSummaryComponent, MockDirective(ExamParticipationSummaryComponent)],
             providers: [{ provide: ActivatedRoute, useValue: { data: of({ studentExam: studentExamValue }) } }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

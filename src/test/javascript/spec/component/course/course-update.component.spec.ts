@@ -101,6 +101,7 @@ describe('Course Management Update Component', () => {
                 MockDirective(TranslateDirective),
                 MockPipe(RemoveKeysPipe),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -23,6 +23,7 @@ describe('UpcomingExamsAndExercisesComponent', () => {
                     useClass: MockExamManagementService,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

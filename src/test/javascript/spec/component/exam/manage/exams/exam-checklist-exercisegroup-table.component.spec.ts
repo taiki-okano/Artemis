@@ -87,7 +87,7 @@ describe('ExamChecklistExerciseGroupTableComponent', () => {
                 MockDirective(NgbTooltip),
                 MockComponent(FaIconComponent),
             ],
-            providers: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

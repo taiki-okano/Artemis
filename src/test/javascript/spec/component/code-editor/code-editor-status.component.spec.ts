@@ -17,6 +17,7 @@ describe('CodeEditorStatusComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, AceEditorModule],
             declarations: [CodeEditorStatusComponent, TranslatePipeMock, MockDirective(NgbTooltip)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

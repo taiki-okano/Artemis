@@ -36,7 +36,7 @@ describe('ApollonDiagramCreateForm Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: Router, useClass: MockRouter },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ApollonDiagramCreateFormComponent, '')
             .compileComponents()

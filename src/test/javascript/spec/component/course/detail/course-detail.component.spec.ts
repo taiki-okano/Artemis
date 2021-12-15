@@ -80,6 +80,7 @@ describe('Course Management Detail Component', () => {
                 MockComponent(CourseDetailLineChartComponent),
             ],
             providers: [{ provide: ActivatedRoute, useValue: route }, { provide: Router, useClass: MockRouter }, MockProvider(CourseManagementService)],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(CourseDetailComponent);
         component = fixture.componentInstance;

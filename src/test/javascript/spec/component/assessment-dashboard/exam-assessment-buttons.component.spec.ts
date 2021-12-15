@@ -123,6 +123,7 @@ describe('ExamAssessmentButtons', () => {
             imports: [],
             declarations: [ExamAssessmentButtonsComponent],
             providers,
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

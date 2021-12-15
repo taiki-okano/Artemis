@@ -32,6 +32,7 @@ describe('Alert Service Test', () => {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         });
         const translateService = TestBed.inject(TranslateService);
         translateService.setDefaultLang('en');

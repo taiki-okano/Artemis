@@ -18,9 +18,8 @@ describe('ModelingExamSummaryComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [],
             declarations: [ModelingExamSummaryComponent, MockComponent(ModelingEditorComponent)],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

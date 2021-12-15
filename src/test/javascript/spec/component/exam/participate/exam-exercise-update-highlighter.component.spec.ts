@@ -28,6 +28,7 @@ describe('ExamExerciseUpdateHighlighterComponent', () => {
         return TestBed.configureTestingModule({
             declarations: [MockPipe(ArtemisTranslatePipe), ExamExerciseUpdateHighlighterComponent],
             providers: [{ provide: ExamExerciseUpdateService, useValue: mockExamExerciseUpdateService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

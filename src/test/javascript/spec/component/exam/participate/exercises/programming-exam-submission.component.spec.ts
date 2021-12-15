@@ -43,6 +43,7 @@ describe('ProgrammingExamSubmissionComponent', () => {
                 MockPipe(ArtemisTranslatePipe),
             ],
             providers: [MockProvider(ChangeDetectorRef), MockProvider(DomainService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

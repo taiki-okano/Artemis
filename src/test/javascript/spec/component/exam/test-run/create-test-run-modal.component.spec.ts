@@ -39,6 +39,7 @@ describe('Create Test Run Modal Component', () => {
                 { provide: ArtemisDurationFromSecondsPipe, useClass: ArtemisDurationFromSecondsPipe },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(CreateTestRunModalComponent);

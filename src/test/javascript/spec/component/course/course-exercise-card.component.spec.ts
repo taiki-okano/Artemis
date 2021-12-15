@@ -20,6 +20,7 @@ describe('Course Exercise Card Component', () => {
             imports: [ArtemisTestModule],
             declarations: [CourseExerciseCardComponent, MockDirective(NgbCollapse), MockDirective(TranslateDirective)],
             providers: [MockProvider(CourseManagementService)],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(CourseExerciseCardComponent);
     });

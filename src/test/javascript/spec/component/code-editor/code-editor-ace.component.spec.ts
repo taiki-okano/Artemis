@@ -32,6 +32,7 @@ describe('CodeEditorAceComponent', () => {
                 { provide: CodeEditorRepositoryFileService, useClass: MockCodeEditorRepositoryFileService },
                 { provide: LocalStorageService, useClass: MockLocalStorageService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

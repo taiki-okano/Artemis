@@ -63,7 +63,7 @@ describe('ApollonQuizExerciseGeneration Component', () => {
                 { provide: Location, useClass: SpyLocation },
                 { provide: Router, useClass: MockRouter },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ApollonQuizExerciseGenerationComponent, '')
             .compileComponents()

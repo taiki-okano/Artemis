@@ -16,6 +16,7 @@ describe('HealthComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [HealthComponent],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(HealthComponent, '')
             .compileComponents();

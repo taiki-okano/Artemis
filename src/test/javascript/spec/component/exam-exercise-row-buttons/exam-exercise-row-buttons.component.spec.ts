@@ -71,6 +71,7 @@ describe('ExamExerciseRowButtonsComponent', () => {
                 MockProvider(ModelingExerciseService),
                 MockProvider(QuizExerciseService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

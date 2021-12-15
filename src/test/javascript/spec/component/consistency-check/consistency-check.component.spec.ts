@@ -49,6 +49,7 @@ describe('ConsistencyCheckComponent', () => {
                 MockRouterLinkDirective,
             ],
             providers: [MockProvider(TranslateService), MockProvider(AlertService), MockProvider(ConsistencyCheckService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

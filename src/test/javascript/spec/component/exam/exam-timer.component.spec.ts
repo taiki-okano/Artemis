@@ -27,6 +27,7 @@ describe('ExamTimerComponent', function () {
             imports: [ArtemisTestModule],
             declarations: [ExamTimerComponent, MockPipe(ArtemisTranslatePipe)],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ExamTimerComponent);

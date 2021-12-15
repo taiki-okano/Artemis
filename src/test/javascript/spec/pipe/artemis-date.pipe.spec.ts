@@ -18,6 +18,7 @@ describe('ArtemisDatePipe', () => {
         TestBed.configureTestingModule({
             declarations: [ArtemisDatePipe],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         });
         translateService = TestBed.inject(TranslateService);
         pipe = new ArtemisDatePipe(translateService);

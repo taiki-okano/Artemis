@@ -110,6 +110,7 @@ describe('ExamChecklistComponent', () => {
                     isAtLeastInstructorInCourse: () => true,
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {
