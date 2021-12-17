@@ -26,11 +26,13 @@ describe('Directive: SortDirective', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [TestSortDirectiveComponent, SortDirective],
-            teardown: { destroyAfterEach: true },
-        });
-        fixture = TestBed.createComponent(TestSortDirectiveComponent);
-        component = fixture.componentInstance;
-        tableRow = fixture.debugElement.query(By.directive(SortDirective));
+        })
+            .compileComponents()
+            .then(() => {
+                fixture = TestBed.createComponent(TestSortDirectiveComponent);
+                component = fixture.componentInstance;
+                tableRow = fixture.debugElement.query(By.directive(SortDirective));
+            });
     });
 
     it('should update predicate, order and invoke callback function', () => {
@@ -42,9 +44,8 @@ describe('Directive: SortDirective', () => {
         sortDirective.sort('ID');
 
         // THEN
-        expect(component.predicate).toEqual('ID');
-        expect(component.ascending).toEqual(true);
-        expect(component.transition).toHaveBeenCalled();
+        expect(component.predicate).toBe('ID');
+        expect(component.ascending).toBe(true);
         expect(component.transition).toHaveBeenCalledTimes(1);
     });
 
@@ -59,9 +60,8 @@ describe('Directive: SortDirective', () => {
         sortDirective.sort('ID');
 
         // THEN
-        expect(component.predicate).toEqual('ID');
-        expect(component.ascending).toEqual(false);
-        expect(component.transition).toHaveBeenCalled();
+        expect(component.predicate).toBe('ID');
+        expect(component.ascending).toBe(false);
         expect(component.transition).toHaveBeenCalledTimes(2);
     });
 
@@ -76,9 +76,8 @@ describe('Directive: SortDirective', () => {
         sortDirective.sort('NAME');
 
         // THEN
-        expect(component.predicate).toEqual('NAME');
-        expect(component.ascending).toEqual(true);
-        expect(component.transition).toHaveBeenCalled();
+        expect(component.predicate).toBe('NAME');
+        expect(component.ascending).toBe(true);
         expect(component.transition).toHaveBeenCalledTimes(2);
     });
 });

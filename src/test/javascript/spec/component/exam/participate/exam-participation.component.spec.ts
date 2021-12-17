@@ -113,6 +113,7 @@ describe('ExamParticipationComponent', () => {
 
     afterEach(() => {
         jest.restoreAllMocks();
+        comp.ngOnDestroy();
     });
 
     it('should initialize', () => {
