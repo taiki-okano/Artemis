@@ -30,6 +30,7 @@ describe('Feature Overview Component', () => {
                     { provide: ActivatedRoute, useValue: route },
                     { provide: ProfileService, useValue: MockProfileService },
                 ],
+                teardown: { destroyAfterEach: true },
             }).compileComponents();
 
             fixture = TestBed.createComponent(FeatureOverviewComponent);

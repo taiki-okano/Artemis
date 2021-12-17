@@ -57,6 +57,7 @@ describe('ModelingExamSubmissionComponent', () => {
                 MockComponent(ExamExerciseUpdateHighlighterComponent),
             ],
             providers: [MockProvider(ChangeDetectorRef)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

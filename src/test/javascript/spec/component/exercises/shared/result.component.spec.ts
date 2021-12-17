@@ -40,6 +40,7 @@ describe('ResultComponent', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

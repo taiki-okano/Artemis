@@ -20,6 +20,7 @@ describe('PostFooterComponent', () => {
             imports: [MockModule(ArtemisCoursesRoutingModule)],
             providers: [{ provide: MetisService, useClass: MockMetisService }],
             declarations: [PostFooterComponent, MockPipe(ArtemisTranslatePipe), MockComponent(FaIconComponent), MockComponent(PostReactionsBarComponent)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

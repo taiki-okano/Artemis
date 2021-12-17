@@ -22,7 +22,7 @@ describe('AttachmentUnitFormComponent', () => {
             imports: [ReactiveFormsModule, FormsModule],
             declarations: [AttachmentUnitFormComponent, MockPipe(ArtemisTranslatePipe), MockComponent(FormDateTimePickerComponent)],
             providers: [MockProviders(TranslateService)],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

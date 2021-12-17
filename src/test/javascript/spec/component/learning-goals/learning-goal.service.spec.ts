@@ -31,6 +31,7 @@ describe('LearningGoalService', () => {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         });
         expectedResultLearningGoal = {} as HttpResponse<LearningGoal>;
         expectedResultLearningGoalProgress = {} as HttpResponse<IndividualLearningGoalProgress>;

@@ -34,6 +34,7 @@ describe('Modeling Submission Viewer Component', () => {
                 { provide: LocalStorageService, useClass: MockLocalStorageService },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ModelingSubmissionViewerComponent);

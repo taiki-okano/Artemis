@@ -124,6 +124,7 @@ describe('CourseExerciseDetailsComponent', () => {
                 MockProvider(ComplaintService),
                 MockProvider(ArtemisNavigationUtilService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

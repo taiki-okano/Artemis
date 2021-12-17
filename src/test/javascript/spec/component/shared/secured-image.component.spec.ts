@@ -45,6 +45,7 @@ describe('SecuredImageComponent', () => {
                 { provide: CacheableImageService, useClass: MockCacheableImageService },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

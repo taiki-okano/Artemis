@@ -47,7 +47,7 @@ describe('TextUnitFormComponent', () => {
             imports: [ReactiveFormsModule, FormsModule],
             declarations: [TextUnitFormComponent, MarkdownEditorStubComponent, MockComponent(FormDateTimePickerComponent), MockPipe(ArtemisTranslatePipe)],
             providers: [MockProvider(TranslateService), { provide: Router, useClass: MockRouter }],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

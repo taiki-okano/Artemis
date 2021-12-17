@@ -19,6 +19,7 @@ describe('Plagiarism Run Details', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, ArtemisPlagiarismModule, TranslateTestingModule],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(PlagiarismRunDetailsComponent);

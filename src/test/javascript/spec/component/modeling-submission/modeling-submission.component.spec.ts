@@ -100,6 +100,7 @@ describe('ModelingSubmission Management Component', () => {
                 { provide: ParticipationWebsocketService, useClass: MockParticipationWebsocketService },
                 { provide: DeviceDetectorService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

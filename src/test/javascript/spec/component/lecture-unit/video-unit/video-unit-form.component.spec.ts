@@ -23,8 +23,7 @@ describe('VideoUnitFormComponent', () => {
         TestBed.configureTestingModule({
             imports: [ReactiveFormsModule, FormsModule],
             declarations: [VideoUnitFormComponent, MockPipe(ArtemisTranslatePipe), MockComponent(FormDateTimePickerComponent), MockComponent(FaIconComponent)],
-            providers: [],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

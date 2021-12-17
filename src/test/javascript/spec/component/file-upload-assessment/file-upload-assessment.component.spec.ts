@@ -93,6 +93,7 @@ describe('FileUploadAssessmentComponent', () => {
                 { provide: ComplaintService, useClass: MockComplaintService },
                 { provide: ActivatedRoute, useValue: { queryParamMap: of(map1), params: of(params1) } },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

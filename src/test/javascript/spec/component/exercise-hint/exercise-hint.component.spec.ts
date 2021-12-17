@@ -16,7 +16,7 @@ describe('ExerciseHint Management Component', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [ExerciseHintComponent],
-            providers: [],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ExerciseHintComponent, '')
             .compileComponents();

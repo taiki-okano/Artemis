@@ -96,6 +96,7 @@ describe('LectureUnitManagementComponent', () => {
                     },
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

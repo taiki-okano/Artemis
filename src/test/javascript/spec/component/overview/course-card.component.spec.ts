@@ -41,6 +41,7 @@ describe('CourseCardComponent', () => {
                 MockDirective(NgbTooltip),
                 MockDirective(TranslateDirective),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

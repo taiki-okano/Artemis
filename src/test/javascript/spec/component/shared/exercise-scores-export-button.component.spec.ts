@@ -101,6 +101,7 @@ describe('ExerciseScoresExportButtonComponent', () => {
                 { provide: ResultService, useClass: MockResultService },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ExerciseScoresExportButtonComponent);

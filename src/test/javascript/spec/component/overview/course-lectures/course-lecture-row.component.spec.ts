@@ -43,8 +43,7 @@ describe('CourseLectureRow', () => {
                 MockDirective(NgbTooltip),
                 MockPipe(ArtemisTimeAgoPipe),
             ],
-            providers: [],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

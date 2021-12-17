@@ -56,6 +56,7 @@ describe('ModelingExercise Management Detail Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: ActivatedRoute, useValue: route },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ModelingExerciseDetailComponent, '')
             .compileComponents();

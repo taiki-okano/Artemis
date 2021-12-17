@@ -72,7 +72,7 @@ describe('CreateVideoUnitComponent', () => {
                     },
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

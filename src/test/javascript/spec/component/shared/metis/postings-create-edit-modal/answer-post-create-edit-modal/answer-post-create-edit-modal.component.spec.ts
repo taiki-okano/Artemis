@@ -30,6 +30,7 @@ describe('AnswerPostCreateEditModalComponent', () => {
                 MockComponent(HelpIconComponent),
             ],
             providers: [FormBuilder, { provide: MetisService, useClass: MockMetisService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

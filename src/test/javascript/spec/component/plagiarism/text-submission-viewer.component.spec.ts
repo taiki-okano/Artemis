@@ -42,6 +42,7 @@ describe('Text Submission Viewer Component', () => {
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(TextSubmissionViewerComponent);

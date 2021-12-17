@@ -89,6 +89,7 @@ describe('FileUploadExercise Management Detail Component', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: CookieService, useClass: MockCookieService },
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(FileUploadExerciseDetailComponent);
         comp = fixture.componentInstance;

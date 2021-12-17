@@ -13,6 +13,7 @@ describe('PostingButtonComponent', () => {
     beforeEach(() => {
         return TestBed.configureTestingModule({
             declarations: [PostingButtonComponent, MockComponent(FaIconComponent)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

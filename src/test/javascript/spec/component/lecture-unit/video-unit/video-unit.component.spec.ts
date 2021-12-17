@@ -43,7 +43,7 @@ describe('VideoUnitComponent', () => {
                 MockDirective(NgbTooltip),
             ],
             providers: [{ provide: SafeResourceUrlPipe, useClass: SafeResourceUrlPipe }],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

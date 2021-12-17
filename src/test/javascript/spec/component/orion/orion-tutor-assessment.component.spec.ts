@@ -26,6 +26,7 @@ describe('OrionTutorAssessmentComponent', () => {
                 MockComponent(OrionAssessmentInstructionsComponent),
             ],
             providers: [MockProvider(OrionConnectorService), MockProvider(OrionAssessmentService), MockProvider(CodeEditorTutorAssessmentContainerComponent)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

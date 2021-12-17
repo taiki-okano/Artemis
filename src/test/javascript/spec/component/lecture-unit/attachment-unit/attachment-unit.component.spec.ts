@@ -37,7 +37,7 @@ describe('AttachmentUnitComponent', () => {
                 MockDirective(NgbTooltip),
             ],
             providers: [MockProvider(FileService)],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

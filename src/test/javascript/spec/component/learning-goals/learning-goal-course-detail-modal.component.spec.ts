@@ -43,7 +43,7 @@ describe('LearningGoalCourseDetailModalComponent', () => {
                     useValue: activeModalStub,
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

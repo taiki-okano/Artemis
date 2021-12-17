@@ -49,6 +49,7 @@ describe('ParticipantScoresTablesContainer', () => {
                 ParticipantScoresAverageTableStubComponent,
                 MockPipe(ArtemisTranslatePipe),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

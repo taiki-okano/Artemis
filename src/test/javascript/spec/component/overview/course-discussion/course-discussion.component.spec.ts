@@ -97,6 +97,7 @@ describe('CourseDiscussionComponent', () => {
                 { provide: LocalStorageService, useClass: MockLocalStorageService },
                 { provide: MetisService, useClass: MetisService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -66,6 +66,7 @@ describe('ExamParticipationCoverComponent', () => {
                 { provide: ExamParticipationService, useClass: MockExamParticipationService },
                 { provide: ArtemisServerDateService, useClass: MockArtemisServerDateService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -80,6 +80,7 @@ describe('ProgrammingAssessmentDashboardComponent', () => {
                     },
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ProgrammingExerciseSubmissionsComponent, '')
             .compileComponents()

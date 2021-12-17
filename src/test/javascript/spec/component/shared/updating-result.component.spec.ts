@@ -48,6 +48,7 @@ describe('UpdatingResultComponent', () => {
                 { provide: ParticipationWebsocketService, useClass: MockParticipationWebsocketService },
                 { provide: ProgrammingSubmissionService, useClass: MockProgrammingSubmissionService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

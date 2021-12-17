@@ -36,7 +36,7 @@ describe('TextUnitFormComponent', () => {
                 MockDirective(NgbTooltip),
                 MockPipe(ArtemisDatePipe),
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

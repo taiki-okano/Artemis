@@ -71,6 +71,7 @@ describe('TeamComponent', () => {
                     },
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

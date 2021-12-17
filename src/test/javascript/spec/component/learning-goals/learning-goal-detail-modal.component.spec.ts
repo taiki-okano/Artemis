@@ -43,7 +43,7 @@ describe('LearningGoalDetailModalComponent', () => {
                 },
                 MockProvider(LectureUnitService),
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

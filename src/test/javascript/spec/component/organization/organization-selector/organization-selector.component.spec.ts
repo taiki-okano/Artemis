@@ -24,6 +24,7 @@ describe('OrganizationSelectorComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [OrganizationSelectorComponent],
             providers: [{ provide: LocalStorageService, useClass: MockSyncStorage }, { provide: SessionStorageService, useClass: MockSyncStorage }, MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(OrganizationSelectorComponent, '')
             .compileComponents()

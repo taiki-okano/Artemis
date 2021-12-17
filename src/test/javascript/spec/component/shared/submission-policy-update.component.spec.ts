@@ -21,6 +21,7 @@ describe('Submission Policy Update Form Component', () => {
         TestBed.configureTestingModule({
             imports: [FormsModule, ReactiveFormsModule],
             declarations: [SubmissionPolicyUpdateComponent, MockPipe(ArtemisTranslatePipe), MockDirective(TranslateDirective), MockComponent(HelpIconComponent)],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(SubmissionPolicyUpdateComponent);

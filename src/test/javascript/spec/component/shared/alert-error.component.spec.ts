@@ -18,6 +18,7 @@ describe('Alert Error Component', () => {
             imports: [ArtemisTestModule, TranslateModule.forRoot()],
             declarations: [AlertErrorComponent],
             providers: [EventManager, AlertService],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(AlertErrorComponent, '')
             .compileComponents();

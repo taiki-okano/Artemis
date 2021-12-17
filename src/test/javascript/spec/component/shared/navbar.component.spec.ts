@@ -92,6 +92,7 @@ describe('NavbarComponent', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: Router, useValue: router },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

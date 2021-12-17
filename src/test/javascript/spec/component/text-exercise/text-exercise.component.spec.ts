@@ -37,6 +37,7 @@ describe('TextExercise Management Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: NgbModal, useClass: MockNgbModalService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(TextExerciseComponent, '')
             .compileComponents();

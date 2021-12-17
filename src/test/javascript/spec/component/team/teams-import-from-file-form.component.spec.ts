@@ -29,6 +29,7 @@ describe('TeamsImportFromFileFormComponent', () => {
             imports: [],
             declarations: [TeamsImportFromFileFormComponent, MockComponent(HelpIconComponent), MockComponent(FaIconComponent)],
             providers: [MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

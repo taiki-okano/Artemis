@@ -24,6 +24,7 @@ describe('DoughnutChartComponent', () => {
             imports: [ArtemisTestModule, MockModule(PieChartModule)],
             declarations: [DoughnutChartComponent, MockPipe(ArtemisTranslatePipe), MockRouterLinkDirective],
             providers: [{ provide: Router, useClass: MockRouter }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

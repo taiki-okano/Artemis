@@ -36,6 +36,7 @@ describe('MetricsComponent', () => {
                 MockComponent(MetricsCacheComponent),
                 MockComponent(MetricsDatasourceComponent),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

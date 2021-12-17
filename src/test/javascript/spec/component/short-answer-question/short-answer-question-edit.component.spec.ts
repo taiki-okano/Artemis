@@ -65,6 +65,7 @@ describe('ShortAnswerQuestionEditComponent', () => {
                 MockDirective(NgbCollapse),
             ],
             providers: [MockProvider(NgbModal)],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(ShortAnswerQuestionEditComponent);
         component = fixture.componentInstance;

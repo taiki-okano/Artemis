@@ -68,6 +68,7 @@ describe('ProgrammingAssessmentRepoExportDialogComponent', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

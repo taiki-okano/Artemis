@@ -32,6 +32,7 @@ describe('ProgrammingExerciseTestSchedulePickerComponent', () => {
                 MockDirective(NgModel),
                 TranslatePipeMock,
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

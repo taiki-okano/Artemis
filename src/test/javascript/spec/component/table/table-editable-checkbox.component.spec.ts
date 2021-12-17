@@ -19,6 +19,7 @@ describe('TableEditableFieldComponent', () => {
     beforeEach(async () => {
         return TestBed.configureTestingModule({
             imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisTableModule],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

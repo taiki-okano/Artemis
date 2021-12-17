@@ -157,6 +157,7 @@ describe('TextSubmissionAssessmentComponent', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, {
                 remove: {

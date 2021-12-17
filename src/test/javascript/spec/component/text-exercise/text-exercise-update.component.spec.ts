@@ -32,6 +32,7 @@ describe('TextExercise Management Update Component', () => {
                 MockProvider(TranslateService),
             ],
             declarations: [TextExerciseUpdateComponent],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(TextExerciseUpdateComponent, '')
             .compileComponents();

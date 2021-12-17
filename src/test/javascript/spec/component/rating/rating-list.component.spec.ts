@@ -30,6 +30,7 @@ describe('RatingListComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [RatingListComponent, TranslatePipeMock, MockComponent(AlertComponent), MockComponent(StarRatingComponent), MockDirective(SortDirective)],
             providers: [{ provide: ActivatedRoute, useValue: route }, { provide: Router, useClass: MockRouter }, MockProvider(RatingService), MockProvider(SortService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

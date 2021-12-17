@@ -166,6 +166,7 @@ describe('TextFeedbackConflictsComponent', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 MockProvider(Router),
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
     });
 

@@ -13,7 +13,7 @@ describe('OrionButtonComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [OrionButtonComponent, MockDirective(FeatureToggleDirective)],
-            providers: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

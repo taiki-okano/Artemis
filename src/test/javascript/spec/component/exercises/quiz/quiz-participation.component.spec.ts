@@ -136,6 +136,7 @@ describe('QuizParticipationComponent', () => {
                         useClass: MockTranslateService,
                     },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {
@@ -369,6 +370,7 @@ describe('QuizParticipationComponent', () => {
                         useClass: MockTranslateService,
                     },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {
@@ -451,6 +453,7 @@ describe('QuizParticipationComponent', () => {
                         useClass: MockTranslateService,
                     },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {
@@ -534,6 +537,7 @@ describe('QuizParticipationComponent', () => {
                         useClass: MockTranslateService,
                     },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {

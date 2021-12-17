@@ -41,6 +41,7 @@ describe('PresentationScoreComponent', () => {
     beforeEach(async () => {
         return TestBed.configureTestingModule({
             declarations: [PresentationScoreComponent],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(PresentationScoreComponent, '')
             .compileComponents()

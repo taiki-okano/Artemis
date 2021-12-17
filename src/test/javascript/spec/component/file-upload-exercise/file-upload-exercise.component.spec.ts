@@ -37,6 +37,7 @@ describe('FileUploadExercise Management Component', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(FileUploadExerciseComponent, '')
             .compileComponents();

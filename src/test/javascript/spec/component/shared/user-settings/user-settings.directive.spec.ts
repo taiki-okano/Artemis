@@ -71,6 +71,7 @@ describe('User Settings Directive', () => {
                 { provide: UserSettingsService, useClass: MockUserSettingsService },
                 { provide: Router, useValue: router },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

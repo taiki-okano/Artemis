@@ -67,6 +67,7 @@ describe('ParticipationComponent', () => {
                 MockProvider(ExerciseService),
                 MockProvider(ParticipationService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -62,6 +62,7 @@ describe('Notification Popup Component', () => {
                 { provide: ExamExerciseUpdateService, useClass: MockExamExerciseUpdateService },
                 { provide: ExamParticipationService, useClass: MockExamParticipationService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

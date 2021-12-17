@@ -45,6 +45,7 @@ describe('System Notification Component', () => {
                 { provide: AccountService, useClass: MockAccountService },
                 { provide: jhiWebsocketService, useClass: JhiWebsocketService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -33,6 +33,7 @@ describe('TutorLeaderboardComponent', () => {
                     useClass: MockRouter,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

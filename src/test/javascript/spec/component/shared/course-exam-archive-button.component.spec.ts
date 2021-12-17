@@ -57,6 +57,7 @@ describe('Course Exam Archive Button Component', () => {
                 MockProvider(AlertService),
                 MockProvider(NgbModal),
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(CourseExamArchiveButtonComponent);
         comp = fixture.componentInstance;

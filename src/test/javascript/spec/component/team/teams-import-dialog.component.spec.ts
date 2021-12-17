@@ -74,6 +74,7 @@ describe('TeamsImportDialogComponent', () => {
                     MockDirective(NgForm),
                 ],
                 providers: [MockProvider(TeamService), MockProvider(NgbActiveModal)],
+                teardown: { destroyAfterEach: true },
             }).compileComponents();
         }),
     );

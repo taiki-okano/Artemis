@@ -90,7 +90,7 @@ describe('EditAttachmentUnitComponent', () => {
                     },
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

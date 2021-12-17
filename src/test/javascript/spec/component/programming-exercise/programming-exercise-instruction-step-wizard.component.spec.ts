@@ -25,6 +25,7 @@ describe('ProgrammingExerciseInstructionStepWizardComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [ProgrammingExerciseInstructionStepWizardComponent],
             providers: [ProgrammingExerciseInstructionService],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

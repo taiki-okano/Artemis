@@ -32,6 +32,7 @@ describe('NotificationSettingsComponent', () => {
             imports,
             declarations,
             providers,
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

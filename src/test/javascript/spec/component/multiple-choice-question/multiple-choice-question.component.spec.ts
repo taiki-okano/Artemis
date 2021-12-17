@@ -32,6 +32,7 @@ describe('MultipleChoiceQuestionComponent', () => {
                 MockComponent(QuizScoringInfoStudentModalComponent),
             ],
             providers: [ArtemisMarkdownService],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(MultipleChoiceQuestionComponent);
         component = fixture.componentInstance;

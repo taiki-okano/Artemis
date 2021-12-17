@@ -17,6 +17,7 @@ describe('Plagiarism Header Component', () => {
             imports: [ArtemisTestModule, TranslateTestingModule],
             declarations: [PlagiarismHeaderComponent],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(PlagiarismHeaderComponent);

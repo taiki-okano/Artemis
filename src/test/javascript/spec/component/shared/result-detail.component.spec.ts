@@ -162,6 +162,7 @@ describe('ResultDetailComponent', () => {
                 MockDirective(NgbTooltip),
             ],
             providers: [MockProvider(NgbActiveModal), MockProvider(ResultService), MockProvider(BuildLogService), MockProvider(ProfileService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

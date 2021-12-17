@@ -10,6 +10,7 @@ describe('ResizeableContainerComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [ResizeableContainerComponent],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
     }));
 

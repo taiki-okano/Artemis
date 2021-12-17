@@ -66,6 +66,7 @@ describe('QuizExercise Short Answer Question Statistic Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ShortAnswerQuestionStatisticComponent, '')
             .compileComponents()

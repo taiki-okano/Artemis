@@ -15,6 +15,7 @@ describe('Plagiarism Sidebar Component', () => {
             imports: [ArtemisTestModule],
             declarations: [PlagiarismSidebarComponent, MockPipe(ArtemisTranslatePipe)],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(PlagiarismSidebarComponent);

@@ -31,6 +31,7 @@ describe('Plagiarism Split Pane Header Component', () => {
                 MockComponent(PlagiarismSidebarComponent),
             ],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

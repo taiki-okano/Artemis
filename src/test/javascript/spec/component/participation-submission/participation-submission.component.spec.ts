@@ -111,6 +111,7 @@ describe('ParticipationSubmissionComponent', () => {
                 { provide: ComplaintService, useClass: MockComplaintService },
                 { provide: ActivatedRoute, useValue: route() },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

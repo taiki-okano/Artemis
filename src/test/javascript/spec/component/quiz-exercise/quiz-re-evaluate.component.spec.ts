@@ -104,6 +104,7 @@ describe('QuizExercise Re-evaluate Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: Router, useClass: MockRouter },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(QuizReEvaluateComponent, '')
             .compileComponents();

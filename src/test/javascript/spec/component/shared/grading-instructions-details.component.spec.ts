@@ -57,6 +57,7 @@ describe('Grading Instructions Management Component', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(GradingInstructionsDetailsComponent, '')
             .compileComponents();

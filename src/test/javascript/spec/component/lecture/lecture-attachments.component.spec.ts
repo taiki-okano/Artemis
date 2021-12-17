@@ -99,6 +99,7 @@ describe('LectureAttachmentsComponent', () => {
                 { provide: FileService, useClass: MockFileService },
                 MockProvider(AttachmentService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

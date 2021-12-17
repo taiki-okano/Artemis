@@ -15,6 +15,7 @@ describe('Exercise Update Warning Component Tests', () => {
             imports: [ArtemisTestModule],
             declarations: [ExerciseUpdateWarningComponent, MockDirective(NgModel), MockPipe(ArtemisTranslatePipe)],
             providers: [MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -42,6 +42,7 @@ describe('Plagiarism Split View Component', () => {
             imports: [],
             declarations: [PlagiarismSplitViewComponent, MockPipe(ArtemisDatePipe), MockComponent(ModelingSubmissionViewerComponent), MockComponent(TextSubmissionViewerComponent)],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(PlagiarismSplitViewComponent);

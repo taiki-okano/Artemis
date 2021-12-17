@@ -11,7 +11,7 @@ describe('ShortAnswerQuestionUtil', () => {
     let shortAnswerQuestionUtil: ShortAnswerQuestionUtil;
 
     beforeEach(fakeAsync(() => {
-        TestBed.configureTestingModule({ providers: [ArtemisMarkdownService] });
+        TestBed.configureTestingModule({ providers: [ArtemisMarkdownService], teardown: { destroyAfterEach: true } });
         shortAnswerQuestionUtil = new ShortAnswerQuestionUtil();
     }));
 

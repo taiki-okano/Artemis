@@ -46,6 +46,7 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(DragAndDropQuestionStatisticComponent, '')
             .compileComponents()

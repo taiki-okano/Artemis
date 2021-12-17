@@ -53,6 +53,7 @@ describe('TextblockFeedbackEditorComponent', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, {
                 remove: {

@@ -116,6 +116,7 @@ describe('User Settings Service', () => {
                 { provide: JhiWebsocketService, useClass: MockWebsocketService },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -41,6 +41,7 @@ describe('OrionExerciseDetailsStudentActionsComponent', () => {
                 MockProvider(OrionConnectorService),
                 { provide: ActivatedRoute, useValue: { queryParams: of({ withIdeSubmit: true }) } },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

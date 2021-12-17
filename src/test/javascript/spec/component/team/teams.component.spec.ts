@@ -69,6 +69,7 @@ describe('TeamsComponent', () => {
                 { provide: ExerciseService, useClass: MockExerciseService },
                 { provide: TeamService, useClass: MockTeamService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

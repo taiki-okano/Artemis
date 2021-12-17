@@ -42,8 +42,7 @@ describe('ModelingExerciseImportComponent', () => {
                 MockDirective(SortDirective),
                 MockDirective(ButtonComponent),
             ],
-            providers: [],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

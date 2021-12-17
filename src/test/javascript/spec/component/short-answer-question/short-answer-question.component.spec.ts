@@ -29,7 +29,7 @@ describe('ShortAnswerQuestionComponent', () => {
                 MockComponent(FaIconComponent),
                 MockDirective(NgbTooltip),
             ],
-            providers: [],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(ShortAnswerQuestionComponent);
         component = fixture.componentInstance;

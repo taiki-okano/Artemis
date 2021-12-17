@@ -62,6 +62,7 @@ describe('ProgrammingExerciseImportComponent', () => {
                 { provide: ProgrammingExercisePagingService, useClass: MockProgrammingExercisePagingService },
                 { provide: FeatureToggleService, useClass: MockFeatureToggleService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

@@ -84,7 +84,7 @@ describe('CreateExerciseUnitComponent', () => {
                     },
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -168,6 +168,7 @@ describe('TeamParticipationTableComponent', () => {
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -137,6 +137,7 @@ describe('ExamPointsSummaryComponent', function () {
             imports: [RouterTestingModule.withRoutes([]), MockModule(NgbModule), HttpClientTestingModule],
             declarations: [ExamPointsSummaryComponent, MockComponent(FaIconComponent), MockPipe(ArtemisTranslatePipe)],
             providers: [MockProvider(ExerciseService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -74,6 +74,7 @@ describe('JhiCloneRepoButtonComponent', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 MockProvider(SourceTreeService, {}),
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(CloneRepoButtonComponent);

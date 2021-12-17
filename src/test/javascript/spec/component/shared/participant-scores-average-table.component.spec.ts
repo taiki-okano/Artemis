@@ -41,6 +41,7 @@ describe('ParticipantScoresAverageTable', () => {
                     useClass: MockSyncStorage,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -52,6 +52,7 @@ describe('ExampleSubmissionImportComponent', () => {
                 MockDirective(NgbTooltip),
             ],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -23,6 +23,7 @@ describe('OrionProgrammingExerciseComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [OrionProgrammingExerciseComponent, MockComponent(ProgrammingExerciseComponent), MockPipe(ArtemisTranslatePipe), MockComponent(OrionButtonComponent)],
             providers: [MockProvider(OrionConnectorService), MockProvider(ProgrammingExerciseService), MockProvider(Router)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

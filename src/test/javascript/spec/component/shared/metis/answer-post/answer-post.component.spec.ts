@@ -23,6 +23,7 @@ describe('AnswerPostComponent', () => {
                 MockComponent(PostingContentComponent),
                 MockComponent(AnswerPostFooterComponent),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

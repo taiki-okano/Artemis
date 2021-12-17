@@ -34,6 +34,7 @@ describe('TextUnitService', () => {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         });
         expectedResult = {} as HttpResponse<TextUnit>;
         injector = getTestBed();

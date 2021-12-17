@@ -35,6 +35,7 @@ describe('CourseExamsComponent', () => {
                 MockProvider(CourseManagementService),
                 MockProvider(ArtemisServerDateService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

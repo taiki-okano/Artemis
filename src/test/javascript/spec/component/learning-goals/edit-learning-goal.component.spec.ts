@@ -63,7 +63,7 @@ describe('EditLearningGoalComponent', () => {
                     },
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

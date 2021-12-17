@@ -30,6 +30,7 @@ describe('PostingContentComponent', () => {
             imports: [HttpClientTestingModule],
             providers: [{ provide: MetisService, useClass: MockMetisService }],
             declarations: [PostingContentComponent, MockComponent(PostingContentPartComponent), MockComponent(FaIconComponent), MockPipe(ArtemisTranslatePipe)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

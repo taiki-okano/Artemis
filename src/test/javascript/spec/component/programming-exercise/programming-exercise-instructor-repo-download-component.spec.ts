@@ -23,6 +23,7 @@ describe('ProgrammingExerciseInstructorRepoDownloadComponent', () => {
             imports: [TranslateModule.forRoot()],
             declarations: [ProgrammingExerciseInstructorRepoDownloadComponent, MockComponent(ButtonComponent)],
             providers: [{ provide: ProgrammingExerciseService, useClass: MockProgrammingExerciseService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ProgrammingExerciseInstructorRepoDownloadComponent);

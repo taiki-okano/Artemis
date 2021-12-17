@@ -39,6 +39,7 @@ describe('ModelingEditorComponent', () => {
             imports: [HttpClientTestingModule, ArtemisTestModule],
             declarations: [ModelingEditorComponent, MockComponent(ModelingExplanationEditorComponent)],
             providers: [MockProvider(GuidedTourService), { provide: ActivatedRoute, useValue: route }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

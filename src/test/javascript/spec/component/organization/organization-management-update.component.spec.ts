@@ -26,6 +26,7 @@ describe('OrganizationManagementUpdateComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [OrganizationManagementUpdateComponent, MockDirective(TranslateDirective)],
             providers: [{ provide: ActivatedRoute, useValue: route }],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(OrganizationManagementUpdateComponent, '')
             .compileComponents();

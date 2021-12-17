@@ -138,7 +138,7 @@ describe('CourseLectureDetails', () => {
                     },
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

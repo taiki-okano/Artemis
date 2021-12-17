@@ -35,6 +35,7 @@ describe('ExamInformationComponent', function () {
         return TestBed.configureTestingModule({
             imports: [RouterTestingModule.withRoutes([])],
             declarations: [ExamInformationComponent, MockPipe(ArtemisTranslatePipe), MockPipe(ArtemisDatePipe), MockPipe(ArtemisDurationFromSecondsPipe)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

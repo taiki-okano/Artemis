@@ -18,6 +18,7 @@ describe('ManualTextSelectionComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [ManualTextSelectionComponent],
             providers: [MockProvider(TextAssessmentAnalytics), MockProvider(ActivatedRoute)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

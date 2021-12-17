@@ -22,6 +22,7 @@ describe('Grading Instruction Command', () => {
         return TestBed.configureTestingModule({
             imports: [ArtemisTestModule, AceEditorModule, ArtemisMarkdownEditorModule],
             declarations: [MockPipe(ArtemisTranslatePipe), MockDirective(NgModel)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

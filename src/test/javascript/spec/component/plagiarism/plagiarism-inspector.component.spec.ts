@@ -91,6 +91,7 @@ describe('Plagiarism Inspector Component', () => {
                 MockComponent(PlagiarismSidebarComponent),
             ],
             providers: [{ provide: ActivatedRoute, useValue: activatedRoute }, MockProvider(JhiWebsocketService), MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

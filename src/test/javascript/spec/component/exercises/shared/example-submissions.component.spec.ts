@@ -53,6 +53,7 @@ describe('Example Submission Component', () => {
                 MockDirective(NgbTooltip),
             ],
             providers: [{ provide: ActivatedRoute, useValue: route }, { provide: TranslateService, useClass: MockTranslateService }, MockProvider(NgbModal)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

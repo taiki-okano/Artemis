@@ -31,6 +31,7 @@ describe('ProgrammingExercise Edit Selected Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: ActivatedRoute, useValue: new MockActivatedRoute() },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ProgrammingExerciseEditSelectedComponent, '')
             .compileComponents();

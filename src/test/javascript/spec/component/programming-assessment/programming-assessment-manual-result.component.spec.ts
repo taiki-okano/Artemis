@@ -197,6 +197,7 @@ describe('CodeEditorTutorAssessmentContainerComponent', () => {
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: ActivatedRoute, useValue: route() },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

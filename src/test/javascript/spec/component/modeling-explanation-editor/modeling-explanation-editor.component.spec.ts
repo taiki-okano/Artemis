@@ -17,7 +17,7 @@ describe('ModelingExplanationEditorComponent', () => {
         TestBed.configureTestingModule({
             imports: [FormsModule],
             declarations: [ModelingExplanationEditorComponent],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

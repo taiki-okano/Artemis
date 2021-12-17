@@ -74,6 +74,7 @@ describe('ExampleTextSubmissionComponent', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 MockProvider(TranslateService),
             ],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(ExampleTextSubmissionComponent);

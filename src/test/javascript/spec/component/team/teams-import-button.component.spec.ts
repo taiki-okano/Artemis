@@ -34,6 +34,7 @@ describe('TeamsImportButtonComponent', () => {
                 imports: [ArtemisTestModule, MockModule(NgbModule), MockModule(FeatureToggleModule)],
                 declarations: [TeamsImportButtonComponent, ButtonComponent, MockPipe(ArtemisTranslatePipe), MockDirective(TranslateDirective)],
                 providers: [MockProvider(TeamService), MockProvider(NgbModal)],
+                teardown: { destroyAfterEach: true },
             }).compileComponents();
         }),
     );

@@ -56,7 +56,7 @@ describe('CreateLearningGoal', () => {
                     },
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

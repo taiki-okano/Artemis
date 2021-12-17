@@ -32,6 +32,7 @@ describe('RatingComponent', () => {
                 { provide: RatingService, useClass: MockRatingService },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

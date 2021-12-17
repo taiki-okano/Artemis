@@ -41,6 +41,7 @@ describe('TextblockAssessmentCardComponent', () => {
                 MockComponent(FaLayersComponent),
             ],
             providers: [MockProvider(StructuredGradingCriterionService), MockProvider(TextAssessmentAnalytics), MockProvider(TextAssessmentService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

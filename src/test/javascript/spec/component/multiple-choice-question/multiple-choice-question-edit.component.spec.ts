@@ -52,6 +52,7 @@ describe('MultipleChoiceQuestionEditComponent', () => {
                 MockComponent(MultipleChoiceQuestionComponent),
             ],
             providers: [{ provide: NgbModal, useClass: MockNgbModalService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(MultipleChoiceQuestionEditComponent);
         component = fixture.componentInstance;

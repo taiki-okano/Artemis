@@ -90,6 +90,7 @@ describe('FileUploadAssessmentDashboardComponent', () => {
                     },
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

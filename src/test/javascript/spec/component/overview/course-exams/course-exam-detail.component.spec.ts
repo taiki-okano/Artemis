@@ -28,6 +28,7 @@ describe('CourseExamDetailComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [CourseExamDetailComponent, MockPipe(ArtemisTranslatePipe), MockPipe(ArtemisDatePipe), MockPipe(ArtemisDurationFromSecondsPipe)],
             providers: [{ provide: Router, useClass: MockRouter }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

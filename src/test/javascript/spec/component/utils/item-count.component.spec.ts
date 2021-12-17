@@ -11,6 +11,7 @@ describe('ItemCountComponent test', () => {
         TestBed.configureTestingModule({
             imports: [TranslateModule.forRoot()],
             declarations: [ItemCountComponent, TranslateDirective],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

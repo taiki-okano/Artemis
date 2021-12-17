@@ -20,6 +20,7 @@ describe('ReEvaluateShortAnswerQuestionComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [ReEvaluateShortAnswerQuestionComponent, MockComponent(ShortAnswerQuestionEditComponent)],
             providers: [MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

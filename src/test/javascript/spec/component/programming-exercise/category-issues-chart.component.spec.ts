@@ -13,7 +13,7 @@ describe('CategoryIssuesChartComponent', () => {
         TestBed.configureTestingModule({
             imports: [],
             declarations: [CategoryIssuesChartComponent, MockDirective(NgbTooltip)],
-            providers: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

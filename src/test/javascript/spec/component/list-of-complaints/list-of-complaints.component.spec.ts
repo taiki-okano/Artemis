@@ -41,6 +41,7 @@ describe('ListOfComplaintsComponent', () => {
                 MockProvider(ArtemisDatePipe),
                 MockProvider(SortService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -59,6 +59,7 @@ describe('QuizExamSubmissionComponent', () => {
                 MockComponent(ShortAnswerQuestionComponent),
             ],
             providers: [MockProvider(ArtemisQuizService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

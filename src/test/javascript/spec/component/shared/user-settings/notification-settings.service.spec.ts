@@ -25,6 +25,7 @@ describe('User Settings Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

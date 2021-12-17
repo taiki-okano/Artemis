@@ -55,7 +55,7 @@ describe('CourseLearningGoals', () => {
                     useValue: mockActivatedRoute,
                 },
             ],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

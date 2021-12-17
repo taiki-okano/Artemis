@@ -334,6 +334,7 @@ describe('CourseStatisticsComponent', () => {
                 MockDirective(NgbTooltip),
             ],
             providers: [{ provide: ActivatedRoute, useValue: { parent: { params: of(1) } } }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

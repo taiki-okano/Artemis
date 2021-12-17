@@ -49,6 +49,7 @@ describe('ProgrammingExercise Management Detail Component', () => {
                 { provide: ActivatedRoute, useValue: new MockActivatedRoute() },
                 { provide: ProfileService, useValue: new MockProfileService() },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ProgrammingExerciseDetailComponent, '')
             .compileComponents();

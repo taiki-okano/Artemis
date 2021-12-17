@@ -32,6 +32,7 @@ describe('AttachmentUnitService', () => {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         });
         expectedResult = {} as HttpResponse<AttachmentUnit>;
         injector = getTestBed();

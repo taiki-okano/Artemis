@@ -23,6 +23,7 @@ describe('ResultHistoryComponent', () => {
         return TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [ResultHistoryComponent, MockPipe(ArtemisDatePipe), MockDirective(NgbTooltip)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

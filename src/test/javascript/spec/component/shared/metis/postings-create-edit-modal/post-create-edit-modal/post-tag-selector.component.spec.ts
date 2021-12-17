@@ -20,6 +20,7 @@ describe('PostTagSelectorComponent', () => {
             imports: [MockModule(TagInputModule), MockModule(FormsModule)],
             providers: [{ provide: MetisService, useClass: MockMetisService }],
             declarations: [PostTagSelectorComponent, MockPipe(ArtemisTranslatePipe)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

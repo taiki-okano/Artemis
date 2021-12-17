@@ -68,6 +68,7 @@ describe('PostingThreadComponent', () => {
                 MockComponent(FaIconComponent),
                 MockComponent(AnswerPostCreateEditModalComponent),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

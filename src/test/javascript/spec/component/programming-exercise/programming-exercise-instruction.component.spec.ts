@@ -83,6 +83,7 @@ describe('ProgrammingExerciseInstructionComponent', () => {
                 { provide: NgbModal, useClass: MockNgbModalService },
                 { provide: ExerciseHintService, useClass: MockExerciseHintService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .overrideModule(BrowserDynamicTestingModule, { set: { entryComponents: [FaIconComponent, ProgrammingExerciseInstructionTaskStatusComponent] } })

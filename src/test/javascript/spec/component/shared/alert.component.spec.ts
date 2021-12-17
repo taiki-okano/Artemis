@@ -12,6 +12,7 @@ describe('Alert Component Tests', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [AlertComponent],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(AlertComponent, '')
             .compileComponents();

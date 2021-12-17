@@ -61,6 +61,7 @@ describe('TextExercise Management Detail Component', () => {
                 MockPipe(ArtemisTranslatePipe),
             ],
             providers: [{ provide: ActivatedRoute, useValue: new MockActivatedRoute() }, MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
         fixture = TestBed.createComponent(TextExerciseDetailComponent);
         comp = fixture.componentInstance;

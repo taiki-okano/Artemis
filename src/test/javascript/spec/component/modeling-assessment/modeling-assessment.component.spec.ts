@@ -97,6 +97,7 @@ describe('ModelingAssessmentComponent', () => {
             imports: [ArtemisTestModule, MockModule(FormsModule)],
             declarations: [ModelingAssessmentComponent, ScoreDisplayComponent, ModelingExplanationEditorComponent, MockDirective(NgbTooltip), MockPipe(ArtemisTranslatePipe)],
             providers: [MockProvider(ArtemisTranslatePipe)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

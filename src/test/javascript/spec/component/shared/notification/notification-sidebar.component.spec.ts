@@ -78,6 +78,7 @@ describe('Notification Sidebar Component', () => {
                 { provide: UserService, useClass: MockUserService },
                 { provide: UserSettingsService, useClass: MockUserSettingsService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

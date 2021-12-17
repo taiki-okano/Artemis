@@ -34,8 +34,7 @@ describe('LearningGoalPopoverComponent', () => {
                 ]),
             ],
             declarations: [LearningGoalsPopoverComponent, MockPipe(ArtemisTranslatePipe), MockComponent(FaIconComponent), DummyStatisticsComponent, DummyManagementComponent],
-            providers: [],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

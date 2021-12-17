@@ -38,6 +38,7 @@ describe('ExerciseUnitService', () => {
                 }),
                 MockProvider(ExerciseService),
             ],
+            teardown: { destroyAfterEach: true },
         });
         expectedResult = {} as HttpResponse<ExerciseUnit>;
         expectedResultArray = {} as HttpResponse<ExerciseUnit[]>;

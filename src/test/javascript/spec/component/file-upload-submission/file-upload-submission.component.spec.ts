@@ -81,6 +81,7 @@ describe('FileUploadSubmissionComponent', () => {
                 { provide: FileUploadSubmissionService, useClass: MockFileUploadSubmissionService },
                 { provide: ParticipationWebsocketService, useClass: MockParticipationWebsocketService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

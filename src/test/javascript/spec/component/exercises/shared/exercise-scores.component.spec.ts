@@ -109,6 +109,7 @@ describe('Exercise Scores Component', () => {
                 { provide: CourseManagementService, useClass: MockCourseManagementService },
                 { provide: ProgrammingSubmissionService, useClass: MockProgrammingSubmissionService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

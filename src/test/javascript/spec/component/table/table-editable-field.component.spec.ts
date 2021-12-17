@@ -20,6 +20,7 @@ describe('TableEditableFieldComponent', () => {
         return TestBed.configureTestingModule({
             imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisTableModule],
             declarations: [TableEditableFieldComponent],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

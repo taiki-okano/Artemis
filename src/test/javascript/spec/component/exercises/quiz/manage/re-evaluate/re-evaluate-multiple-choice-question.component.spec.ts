@@ -45,6 +45,7 @@ describe('ReEvaluateMultipleChoiceQuestionComponent', () => {
                 MockPipe(ArtemisTranslatePipe),
             ],
             providers: [MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -13,6 +13,7 @@ describe('OrionCourseExerciseDetailsComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [OrionCourseExerciseDetailsComponent, MockComponent(CourseExerciseDetailsComponent), MockComponent(OrionExerciseDetailsStudentActionsComponent)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

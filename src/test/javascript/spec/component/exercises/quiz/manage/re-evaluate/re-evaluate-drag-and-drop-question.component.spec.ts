@@ -20,6 +20,7 @@ describe('ReEvaluateDragAndDropQuestionComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [ReEvaluateDragAndDropQuestionComponent, MockComponent(DragAndDropQuestionEditComponent)],
             providers: [MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

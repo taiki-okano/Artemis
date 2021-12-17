@@ -61,6 +61,7 @@ describe('ManualTextblockSelectionComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [ManualTextblockSelectionComponent, MockComponent(TextblockAssessmentCardComponent), MockComponent(ManualTextSelectionComponent)],
             providers: [MockProvider(TextSelectDirective)], // Not mocking this will cause a leak through the mocked ManualTextSelectionComponent
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

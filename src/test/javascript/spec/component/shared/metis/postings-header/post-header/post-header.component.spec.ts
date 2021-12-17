@@ -39,6 +39,7 @@ describe('PostHeaderComponent', () => {
                 MockComponent(FaIconComponent),
                 MockComponent(ConfirmIconComponent),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

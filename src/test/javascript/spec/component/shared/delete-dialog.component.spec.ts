@@ -32,6 +32,7 @@ describe('DeleteDialogComponent', () => {
             imports: [TranslateModule.forRoot(), ArtemisTestModule, FormsModule, NgbModule],
             declarations: [DeleteDialogComponent, AlertComponent, MockPipe(ArtemisTranslatePipe), MockDirective(TranslateDirective)],
             providers: [JhiLanguageHelper, AlertService],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

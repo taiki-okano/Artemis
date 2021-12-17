@@ -16,6 +16,7 @@ describe('TextAssessmentAreaComponent', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [TextAssessmentAreaComponent, MockComponent(TextblockAssessmentCardComponent), MockComponent(ManualTextblockSelectionComponent), TranslatePipeMock],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

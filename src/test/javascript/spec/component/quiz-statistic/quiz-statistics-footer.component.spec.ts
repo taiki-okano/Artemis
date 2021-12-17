@@ -45,6 +45,7 @@ describe('QuizExercise Statistic Footer Component', () => {
                 { provide: Router, useClass: MockRouter },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(QuizStatisticsFooterComponent, '')
             .compileComponents()

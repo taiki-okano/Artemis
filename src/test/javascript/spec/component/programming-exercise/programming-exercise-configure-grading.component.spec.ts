@@ -247,6 +247,7 @@ describe('ProgrammingExerciseConfigureGradingComponent', () => {
                 { provide: FeatureToggleService, useClass: MockFeatureToggleService },
                 { provide: AlertService, useClass: MockAlertService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

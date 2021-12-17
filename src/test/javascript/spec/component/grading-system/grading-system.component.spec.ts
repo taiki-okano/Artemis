@@ -90,6 +90,7 @@ describe('Grading System Component', () => {
                 MockProvider(ExamManagementService),
                 { provide: CourseManagementService, useClass: MockCourseManagementService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

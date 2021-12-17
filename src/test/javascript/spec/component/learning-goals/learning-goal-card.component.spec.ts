@@ -28,7 +28,7 @@ describe('LearningGoalCardComponent', () => {
             imports: [],
             declarations: [LearningGoalCardComponent, MockPipe(ArtemisTranslatePipe), CircularProgressBarStubComponent],
             providers: [MockProvider(LectureUnitService), MockProvider(TranslateService), MockProvider(NgbModal)],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -54,6 +54,7 @@ describe('ProgrammingExercise Management Component', () => {
                 { provide: CourseExerciseService, useClass: MockCourseExerciseService },
                 { provide: NgbModal, useClass: MockNgbModalService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ProgrammingExerciseComponent, '')
             .compileComponents();

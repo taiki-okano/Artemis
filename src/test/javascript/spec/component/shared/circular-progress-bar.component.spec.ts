@@ -13,8 +13,7 @@ describe('CircularProgressBarComponent', () => {
         TestBed.configureTestingModule({
             imports: [],
             declarations: [CircularProgressBarComponent],
-            providers: [],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

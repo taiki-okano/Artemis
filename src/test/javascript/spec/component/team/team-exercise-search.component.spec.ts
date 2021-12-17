@@ -26,6 +26,7 @@ describe('Team Exercise Search Component', () => {
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(TeamExerciseSearchComponent, '')
             .compileComponents();

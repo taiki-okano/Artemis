@@ -23,6 +23,7 @@ describe('ButtonComponent', () => {
             imports: [ArtemisTestModule],
             declarations: [ButtonComponent, FeatureToggleDirective, TranslatePipeMock, MockDirective(NgbTooltip), MockDirective(TranslateDirective)],
             providers: [{ provide: FeatureToggleService, useClass: MockFeatureToggleService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

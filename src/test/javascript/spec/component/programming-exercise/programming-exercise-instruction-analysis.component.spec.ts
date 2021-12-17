@@ -42,6 +42,7 @@ describe('ProgrammingExerciseInstructionInstructorAnalysis', () => {
                 imports: [],
                 declarations: [ProgrammingExerciseInstructionAnalysisComponent, MockDirective(NgbTooltip), MockPipe(ArtemisTranslatePipe), MockComponent(FaIconComponent)],
                 providers: [{ provide: ProgrammingExerciseInstructionAnalysisService, useClass: MockProgrammingExerciseInstructionAnalysisService }],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {

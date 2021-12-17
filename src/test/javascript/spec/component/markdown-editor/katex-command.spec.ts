@@ -19,6 +19,7 @@ describe('KatexCommand', () => {
     beforeEach(async () => {
         return TestBed.configureTestingModule({
             imports: [ArtemisTestModule, TranslateModule.forRoot(), AceEditorModule, ArtemisMarkdownEditorModule],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

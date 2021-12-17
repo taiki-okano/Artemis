@@ -74,6 +74,7 @@ describe('ExerciseStatisticsComponent', () => {
                 MockComponent(ExerciseDetailStatisticsComponent),
             ],
             providers: [{ provide: LocalStorageService, useClass: MockSyncStorage }, { provide: SessionStorageService, useClass: MockSyncStorage }, MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

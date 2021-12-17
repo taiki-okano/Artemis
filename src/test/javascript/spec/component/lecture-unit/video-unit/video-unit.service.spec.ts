@@ -34,6 +34,7 @@ describe('VideoUnitService', () => {
                     },
                 }),
             ],
+            teardown: { destroyAfterEach: true },
         });
         expectedResult = {} as HttpResponse<VideoUnit>;
         injector = getTestBed();

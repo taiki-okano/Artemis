@@ -50,6 +50,7 @@ describe('QuizExercise Re-evaluate Warning Component', () => {
                 MockPipe(ArtemisDatePipe),
             ],
             providers: [NgbModal, NgbActiveModal, { provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         }).compileComponents();
 
         fixture = TestBed.createComponent(QuizReEvaluateWarningComponent);

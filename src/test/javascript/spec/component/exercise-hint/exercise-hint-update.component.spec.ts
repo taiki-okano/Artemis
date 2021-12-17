@@ -20,6 +20,7 @@ describe('ExerciseHint Management Update Component', () => {
             imports: [ArtemisTestModule],
             declarations: [ExerciseHintUpdateComponent],
             providers: [FormBuilder, MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ExerciseHintUpdateComponent, '')
             .compileComponents();

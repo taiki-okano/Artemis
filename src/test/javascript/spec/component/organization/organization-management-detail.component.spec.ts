@@ -41,6 +41,7 @@ describe('OrganizationManagementDetailComponent', () => {
                 { provide: ActivatedRoute, useValue: route },
                 { provide: DataTableComponent, useClass: DataTableComponent },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(OrganizationManagementDetailComponent, '')
             .overrideTemplate(DataTableComponent, '')

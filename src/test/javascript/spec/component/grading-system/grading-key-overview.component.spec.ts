@@ -53,6 +53,7 @@ describe('GradeKeyOverviewComponent', () => {
                 MockProvider(GradingSystemService),
                 MockProvider(ArtemisNavigationUtilService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

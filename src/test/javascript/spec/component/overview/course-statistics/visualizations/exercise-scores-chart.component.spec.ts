@@ -51,6 +51,7 @@ describe('ExerciseScoresChartComponent', () => {
                     useValue: mockActivatedRoute,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -32,6 +32,7 @@ describe('FileUploadExercise Management Update Component', () => {
                 { provide: ActivatedRoute, useValue: new MockActivatedRoute() },
                 MockProvider(TranslateService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(FileUploadExerciseUpdateComponent, '')
             .compileComponents();

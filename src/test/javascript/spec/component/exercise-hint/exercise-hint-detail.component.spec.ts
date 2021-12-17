@@ -18,6 +18,7 @@ describe('ExerciseHint Management Detail Component', () => {
             imports: [ArtemisTestModule],
             declarations: [ExerciseHintDetailComponent],
             providers: [{ provide: ActivatedRoute, useValue: route }],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ExerciseHintDetailComponent, '')
             .compileComponents();

@@ -40,6 +40,7 @@ describe('PostCreateEditModalComponent', () => {
                 MockComponent(NgbPanel),
             ],
             providers: [FormBuilder, { provide: MetisService, useClass: MockMetisService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

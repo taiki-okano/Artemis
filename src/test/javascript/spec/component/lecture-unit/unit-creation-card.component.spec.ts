@@ -17,8 +17,7 @@ describe('UnitCreationCardComponent', () => {
         TestBed.configureTestingModule({
             imports: [RouterTestingModule],
             declarations: [UnitCreationCardComponent, MockPipe(ArtemisTranslatePipe), MockComponent(FaIconComponent)],
-            providers: [],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

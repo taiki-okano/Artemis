@@ -41,6 +41,7 @@ describe('ExerciseDetailsComponent', () => {
                 MockPipe(ArtemisDatePipe),
             ],
             providers: [MockProvider(TranslateService)],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

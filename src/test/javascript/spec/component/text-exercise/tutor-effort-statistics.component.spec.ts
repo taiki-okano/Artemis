@@ -64,6 +64,7 @@ describe('TutorEffortStatisticsComponent', () => {
                     useValue: new MockActivatedRoute({ courseId: 1, exerciseId: 1 }),
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

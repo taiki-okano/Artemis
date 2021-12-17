@@ -29,6 +29,7 @@ describe('PostingsMarkdownEditor', () => {
         return TestBed.configureTestingModule({
             declarations: [PostingMarkdownEditorComponent, MockMarkdownEditorDirective],
             schemas: [CUSTOM_ELEMENTS_SCHEMA], // required because we mock the nested MarkdownEditorComponent
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

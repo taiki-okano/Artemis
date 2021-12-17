@@ -23,7 +23,7 @@ describe('LearningGoalFormComponent', () => {
             imports: [ReactiveFormsModule, FormsModule, NgbDropdownModule],
             declarations: [LearningGoalFormComponent, MockPipe(ArtemisTranslatePipe)],
             providers: [MockProvider(LearningGoalService), MockProvider(LectureUnitService), MockProvider(AlertService), MockProvider(TranslateService)],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

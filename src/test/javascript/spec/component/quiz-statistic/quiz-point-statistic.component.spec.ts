@@ -57,6 +57,7 @@ describe('QuizExercise Point Statistic Component', () => {
                 { provide: Router, useClass: MockRouter },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(QuizPointStatisticComponent, '')
             .compileComponents()

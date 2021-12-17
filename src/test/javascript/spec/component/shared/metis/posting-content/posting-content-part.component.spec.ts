@@ -19,6 +19,7 @@ describe('PostingContentPartComponent', () => {
                 MockRouterLinkDirective,
                 MockQueryParamsDirective,
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

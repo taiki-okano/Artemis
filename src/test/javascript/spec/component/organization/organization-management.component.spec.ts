@@ -34,6 +34,7 @@ describe('OrganizationManagementComponent', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: ActivatedRoute, useValue: new MockActivatedRoute() },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(OrganizationManagementComponent, '')
             .compileComponents();

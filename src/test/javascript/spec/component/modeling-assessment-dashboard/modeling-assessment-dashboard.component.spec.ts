@@ -69,6 +69,7 @@ describe('ModelingAssessmentDashboardComponent', () => {
                 { provide: Router, useClass: MockRouter },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(ModelingAssessmentDashboardComponent, '')
             .compileComponents()

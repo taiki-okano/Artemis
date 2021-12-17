@@ -30,8 +30,7 @@ describe('ExerciseUnitComponent', () => {
         TestBed.configureTestingModule({
             imports: [],
             declarations: [ExerciseUnitComponent, CourseExerciseRowStubComponent],
-            providers: [],
-            schemas: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

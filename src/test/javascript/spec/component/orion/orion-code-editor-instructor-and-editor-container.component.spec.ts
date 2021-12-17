@@ -54,6 +54,7 @@ describe('CodeEditorInstructorAndEditorOrionContainerComponent', () => {
                 MockProvider(Location),
                 MockProvider(ParticipationService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

@@ -78,6 +78,7 @@ describe('PageDiscussionSectionComponent', () => {
                 MockPipe(ArtemisTranslatePipe),
                 MockDirective(NgbTooltip),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideComponent(DiscussionSectionComponent, {
                 set: {

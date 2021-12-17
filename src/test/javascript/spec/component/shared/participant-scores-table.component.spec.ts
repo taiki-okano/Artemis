@@ -34,6 +34,7 @@ describe('ParticipantScoresTable', () => {
                     useClass: MockSyncStorage,
                 },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

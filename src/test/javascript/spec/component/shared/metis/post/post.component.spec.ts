@@ -41,6 +41,7 @@ describe('PostComponent', () => {
                 MockQueryParamsDirective,
                 TranslatePipeMock,
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

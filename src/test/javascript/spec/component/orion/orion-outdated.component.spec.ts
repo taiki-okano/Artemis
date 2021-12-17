@@ -19,6 +19,7 @@ describe('OrionOutdatedComponent', () => {
                 { provide: ActivatedRoute, useValue: { queryParams: of({ versionString: 'version' }) } },
                 { provide: ProfileService, useClass: MockProfileService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {
