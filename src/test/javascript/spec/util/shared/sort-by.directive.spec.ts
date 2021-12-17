@@ -32,6 +32,7 @@ describe('Directive: SortByDirective', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [TestSortByDirectiveComponent, SortDirective, SortByDirective, FaIconComponent],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

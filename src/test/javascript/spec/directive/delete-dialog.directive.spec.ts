@@ -44,6 +44,7 @@ describe('DeleteDialogDirective', () => {
                 MockDirective(TranslateDirective),
             ],
             providers: [JhiLanguageHelper, AlertService],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

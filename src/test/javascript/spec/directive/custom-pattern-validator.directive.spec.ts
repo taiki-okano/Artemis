@@ -21,6 +21,7 @@ describe('CustomPatternValidatorDirective', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, CommonModule, FormsModule],
             declarations: [CustomPatternValidatorDirective, CustomPatternComponent],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

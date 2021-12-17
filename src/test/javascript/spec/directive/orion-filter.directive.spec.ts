@@ -19,6 +19,7 @@ describe('OrionFilterDirective', () => {
             imports: [],
             declarations: [TestComponent, OrionFilterDirective],
             providers: [],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

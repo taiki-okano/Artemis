@@ -16,6 +16,7 @@ describe('TranslateDirective Tests', () => {
         TestBed.configureTestingModule({
             imports: [TranslateModule.forRoot()],
             declarations: [TranslateDirective, TestTranslateDirectiveComponent],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {
