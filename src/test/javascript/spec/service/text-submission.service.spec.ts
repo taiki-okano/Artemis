@@ -20,6 +20,7 @@ describe('TextSubmission Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(TextSubmissionService);

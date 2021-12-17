@@ -46,6 +46,7 @@ describe('UserRouteAccessService', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: DeviceDetectorService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideTemplate(CourseExerciseDetailsComponent, '')
             .compileComponents()

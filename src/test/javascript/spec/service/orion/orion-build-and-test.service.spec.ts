@@ -58,20 +58,23 @@ describe('OrionBuildAndTestService', () => {
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
             ],
-        });
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                serviceUnderTest = TestBed.inject(OrionBuildAndTestService);
+                programmingSubmissionService = TestBed.inject(ProgrammingSubmissionService);
+                const orionConnectorService = TestBed.inject(OrionConnectorService);
+                const buildLogService = TestBed.inject(BuildLogService);
+                const participationService = TestBed.inject(ParticipationWebsocketService);
 
-        serviceUnderTest = TestBed.inject(OrionBuildAndTestService);
-        programmingSubmissionService = TestBed.inject(ProgrammingSubmissionService);
-        const orionConnectorService = TestBed.inject(OrionConnectorService);
-        const buildLogService = TestBed.inject(BuildLogService);
-        const participationService = TestBed.inject(ParticipationWebsocketService);
-
-        onBuildFinishedSpy = jest.spyOn(orionConnectorService, 'onBuildFinished');
-        onBuildStartedSpy = jest.spyOn(orionConnectorService, 'onBuildStarted');
-        onTestResultSpy = jest.spyOn(orionConnectorService, 'onTestResult');
-        onBuildFailedSpy = jest.spyOn(orionConnectorService, 'onBuildFailed');
-        buildLogsStub = jest.spyOn(buildLogService, 'getBuildLogs');
-        participationSubscriptionStub = jest.spyOn(participationService, 'subscribeForLatestResultOfParticipation');
+                onBuildFinishedSpy = jest.spyOn(orionConnectorService, 'onBuildFinished');
+                onBuildStartedSpy = jest.spyOn(orionConnectorService, 'onBuildStarted');
+                onTestResultSpy = jest.spyOn(orionConnectorService, 'onTestResult');
+                onBuildFailedSpy = jest.spyOn(orionConnectorService, 'onBuildFailed');
+                buildLogsStub = jest.spyOn(buildLogService, 'getBuildLogs');
+                participationSubscriptionStub = jest.spyOn(participationService, 'subscribeForLatestResultOfParticipation');
+            });
     });
 
     afterEach(() => {

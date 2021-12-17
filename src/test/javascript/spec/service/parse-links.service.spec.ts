@@ -6,6 +6,7 @@ describe('Parse links service test', () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 providers: [ParseLinks],
+                teardown: { destroyAfterEach: true },
             });
         });
 

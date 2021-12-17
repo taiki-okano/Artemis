@@ -13,6 +13,7 @@ describe('ArtemisDatePipe', () => {
         TestBed.configureTestingModule({
             declarations: [ArtemisDatePipe],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

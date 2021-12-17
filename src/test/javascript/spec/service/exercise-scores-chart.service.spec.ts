@@ -26,12 +26,16 @@ describe('Exercise Scores Chart Service', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
-        });
-        injector = getTestBed();
-        service = injector.get(ExerciseScoresChartService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(ExerciseScoresChartService);
+                httpMock = injector.get(HttpTestingController);
 
-        elemDefault = new ExerciseScoresDTO();
+                elemDefault = new ExerciseScoresDTO();
+            });
     });
 
     afterEach(() => {

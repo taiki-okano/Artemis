@@ -14,6 +14,7 @@ describe('Rating Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, HttpClientTestingModule],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(RatingService);

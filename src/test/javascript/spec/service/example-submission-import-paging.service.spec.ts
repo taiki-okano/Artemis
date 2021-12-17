@@ -23,10 +23,14 @@ describe('Example Submission Import Paging Service', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
             ],
-        });
-        injector = getTestBed();
-        service = injector.get(ExampleSubmissionImportPagingService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(ExampleSubmissionImportPagingService);
+                httpMock = injector.get(HttpTestingController);
+            });
     });
 
     afterEach(() => {

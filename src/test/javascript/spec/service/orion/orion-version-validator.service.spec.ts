@@ -41,13 +41,17 @@ describe('OrionValidatorService', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             providers: [OrionVersionValidator, MockProvider(Router), MockProvider(ProfileService)],
-        });
-        orionVersionValidator = TestBed.inject(OrionVersionValidator);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                orionVersionValidator = TestBed.inject(OrionVersionValidator);
 
-        profileInfoStub = jest.spyOn(TestBed.inject(ProfileService), 'getProfileInfo');
-        profileInfoStub.mockReturnValue(of(profileInfo));
+                profileInfoStub = jest.spyOn(TestBed.inject(ProfileService), 'getProfileInfo');
+                profileInfoStub.mockReturnValue(of(profileInfo));
 
-        navigateSpy = jest.spyOn(TestBed.inject(Router), 'navigateByUrl');
+                navigateSpy = jest.spyOn(TestBed.inject(Router), 'navigateByUrl');
+            });
     });
 
     afterEach(() => {

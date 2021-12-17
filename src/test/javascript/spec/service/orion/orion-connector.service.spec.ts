@@ -30,30 +30,33 @@ describe('OrionConnectorService', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: Router, useValue: router },
             ],
-        });
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                serviceUnderTest = TestBed.inject(OrionConnectorService);
+                alertService = TestBed.inject(AlertService);
 
-        serviceUnderTest = TestBed.inject(OrionConnectorService);
-        alertService = TestBed.inject(AlertService);
+                // Mock all connectors. It may or may not be possible to do this automatically
+                (window as any).orionSharedUtilConnector = { login: jest.fn(), log: jest.fn() } as OrionSharedUtilConnector;
+                (window as any).orionExerciseConnector = {
+                    editExercise: jest.fn(),
+                    assessExercise: jest.fn(),
+                    downloadSubmission: jest.fn(),
+                    initializeAssessment: jest.fn(),
+                    importParticipation: jest.fn(),
+                } as OrionExerciseConnector;
+                (window as any).orionVCSConnector = { selectRepository: jest.fn(), submit: jest.fn() } as OrionVCSConnector;
+                (window as any).orionBuildConnector = {
+                    buildAndTestLocally: jest.fn(),
+                    onBuildStarted: jest.fn(),
+                    onBuildFinished: jest.fn(),
+                    onBuildFailed: jest.fn(),
+                    onTestResult: jest.fn(),
+                } as OrionBuildConnector;
 
-        // Mock all connectors. It may or may not be possible to do this automatically
-        (window as any).orionSharedUtilConnector = { login: jest.fn(), log: jest.fn() } as OrionSharedUtilConnector;
-        (window as any).orionExerciseConnector = {
-            editExercise: jest.fn(),
-            assessExercise: jest.fn(),
-            downloadSubmission: jest.fn(),
-            initializeAssessment: jest.fn(),
-            importParticipation: jest.fn(),
-        } as OrionExerciseConnector;
-        (window as any).orionVCSConnector = { selectRepository: jest.fn(), submit: jest.fn() } as OrionVCSConnector;
-        (window as any).orionBuildConnector = {
-            buildAndTestLocally: jest.fn(),
-            onBuildStarted: jest.fn(),
-            onBuildFinished: jest.fn(),
-            onBuildFailed: jest.fn(),
-            onTestResult: jest.fn(),
-        } as OrionBuildConnector;
-
-        OrionConnectorService.initConnector(serviceUnderTest);
+                OrionConnectorService.initConnector(serviceUnderTest);
+            });
     });
 
     it('should return router', () => {

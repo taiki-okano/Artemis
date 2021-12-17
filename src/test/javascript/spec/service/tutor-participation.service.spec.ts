@@ -22,6 +22,7 @@ describe('Rating Service', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, HttpClientTestingModule],
             providers: [{ provide: AccountService, useClass: MockAccountService }],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(TutorParticipationService);

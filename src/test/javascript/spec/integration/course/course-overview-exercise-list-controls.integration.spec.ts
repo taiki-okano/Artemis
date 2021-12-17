@@ -59,6 +59,7 @@ describe('CourseOverviewExerciseListControls', () => {
                 { provide: Router, useClass: MockRouter },
                 { provide: ActivatedRoute, useValue: route },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

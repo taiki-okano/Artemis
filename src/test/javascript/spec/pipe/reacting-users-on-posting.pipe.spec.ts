@@ -15,6 +15,7 @@ describe('ReactingUsersOnPostingsPipe', () => {
         TestBed.configureTestingModule({
             declarations: [HtmlForPostingMarkdownPipe],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

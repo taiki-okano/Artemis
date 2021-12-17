@@ -34,6 +34,7 @@ describe('ResultService', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 MockProvider(SubmissionService),
             ],
+            teardown: { destroyAfterEach: true },
         });
 
         resultService = getTestBed().get(ResultService);

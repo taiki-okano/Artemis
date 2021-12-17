@@ -18,6 +18,7 @@ describe('Submission Policy Service', () => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
             providers: [{ provide: SubmissionPolicyService, useClass: SubmissionPolicyService }],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         httpMock = injector.get(HttpTestingController);

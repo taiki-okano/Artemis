@@ -69,22 +69,26 @@ describe('Metis Service', () => {
                 { provide: Router, useClass: MockRouter },
                 { provide: LocalStorageService, useClass: MockLocalStorageService },
             ],
-        });
-        injector = getTestBed();
-        metisService = injector.get(MetisService);
-        websocketService = injector.get(JhiWebsocketService);
-        reactionService = injector.get(ReactionService);
-        postService = injector.get(PostService);
-        answerPostService = injector.get(AnswerPostService);
-        metisServiceGetFilteredPostsSpy = jest.spyOn(metisService, 'getFilteredPosts');
-        metisServiceCreateWebsocketSubscriptionSpy = jest.spyOn(metisService, 'createWebsocketSubscription');
-        metisServiceUserStub = jest.spyOn(metisService, 'getUser');
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                metisService = injector.get(MetisService);
+                websocketService = injector.get(JhiWebsocketService);
+                reactionService = injector.get(ReactionService);
+                postService = injector.get(PostService);
+                answerPostService = injector.get(AnswerPostService);
+                metisServiceGetFilteredPostsSpy = jest.spyOn(metisService, 'getFilteredPosts');
+                metisServiceCreateWebsocketSubscriptionSpy = jest.spyOn(metisService, 'createWebsocketSubscription');
+                metisServiceUserStub = jest.spyOn(metisService, 'getUser');
 
-        post = metisPostExerciseUser1;
-        post.displayPriority = DisplayPriority.PINNED;
-        answerPost = metisResolvingAnswerPostUser1;
-        reaction = metisReactionUser2;
-        course = metisCourse;
+                post = metisPostExerciseUser1;
+                post.displayPriority = DisplayPriority.PINNED;
+                answerPost = metisResolvingAnswerPostUser1;
+                reaction = metisReactionUser2;
+                course = metisCourse;
+            });
     });
 
     afterEach(() => {

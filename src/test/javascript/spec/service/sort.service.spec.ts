@@ -16,7 +16,9 @@ describe('Sort Service', () => {
     let e1: TestObject, e2: TestObject, e3: TestObject, e4: TestObject, e5: TestObject, e6: TestObject;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({
+            teardown: { destroyAfterEach: true },
+        });
         injector = getTestBed();
         service = injector.get(SortService);
 

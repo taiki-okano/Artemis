@@ -22,6 +22,7 @@ describe('ModelingExercise Service', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(ModelingExercisePagingService);

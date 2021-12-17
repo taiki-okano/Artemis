@@ -29,6 +29,7 @@ describe('Participation Service', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(ParticipationService);

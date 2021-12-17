@@ -12,10 +12,14 @@ describe('AnswerPost Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
-        });
-        injector = getTestBed();
-        service = injector.get(AnswerPostService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(AnswerPostService);
+                httpMock = injector.get(HttpTestingController);
+            });
     });
 
     describe('Service methods', () => {

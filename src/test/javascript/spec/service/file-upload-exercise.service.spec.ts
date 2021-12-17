@@ -33,12 +33,16 @@ describe('FileUploadExercise Service', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: ExerciseService, useClass: MockExerciseService },
             ],
-        });
-        injector = getTestBed();
-        service = injector.get(FileUploadExerciseService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(FileUploadExerciseService);
+                httpMock = injector.get(HttpTestingController);
 
-        elemDefault = new FileUploadExercise(undefined, undefined);
+                elemDefault = new FileUploadExercise(undefined, undefined);
+            });
     });
 
     it('should find an element', fakeAsync(() => {

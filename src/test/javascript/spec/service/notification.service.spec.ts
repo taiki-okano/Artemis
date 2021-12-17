@@ -86,6 +86,7 @@ describe('Notification Service', () => {
                 { provide: JhiWebsocketService, useClass: MockWebsocketService },
                 { provide: MetisService, useClass: MockMetisService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

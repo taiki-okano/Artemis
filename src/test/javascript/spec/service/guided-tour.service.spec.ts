@@ -111,6 +111,7 @@ describe('GuidedTourService', () => {
                     { provide: LocalStorageService, useClass: MockSyncStorage },
                     { provide: SessionStorageService, useClass: MockSyncStorage },
                 ],
+                teardown: { destroyAfterEach: true },
             }).compileComponents();
 
             service = TestBed.inject(GuidedTourService);
@@ -175,6 +176,7 @@ describe('GuidedTourService', () => {
                     { provide: TranslateService, useClass: MockTranslateService },
                     { provide: Router, useClass: MockRouter },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {
@@ -754,6 +756,7 @@ describe('GuidedTourService', () => {
                     { provide: SessionStorageService, useClass: MockSyncStorage },
                     { provide: Router, useClass: MockRouterWithEvents },
                 ],
+                teardown: { destroyAfterEach: true },
             })
                 .compileComponents()
                 .then(() => {

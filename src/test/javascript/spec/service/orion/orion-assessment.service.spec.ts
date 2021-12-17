@@ -32,6 +32,7 @@ describe('OrionAssessmentService', () => {
                 MockProvider(ProgrammingAssessmentRepoExportService),
                 MockProvider(ProgrammingAssessmentManualResultService),
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

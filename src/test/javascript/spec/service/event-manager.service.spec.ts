@@ -19,9 +19,13 @@ describe('Event Manager tests', () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 providers: [EventManager],
-            });
-            receivedEvent = null;
-            eventManager = TestBed.inject(EventManager);
+                teardown: { destroyAfterEach: true },
+            })
+                .compileComponents()
+                .then(() => {
+                    receivedEvent = null;
+                    eventManager = TestBed.inject(EventManager);
+                });
         });
 
         it('should not fail when no subscriber and broadcasting', () => {

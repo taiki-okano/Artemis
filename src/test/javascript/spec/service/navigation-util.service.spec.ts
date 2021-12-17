@@ -19,6 +19,7 @@ describe('Navigation Util Service', () => {
                 { provide: Router, useValue: router },
                 { provide: Location, useClass: Location },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {

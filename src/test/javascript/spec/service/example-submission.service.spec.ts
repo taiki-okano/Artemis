@@ -27,46 +27,50 @@ describe('Example Submission Service', () => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, HttpClientTestingModule],
             providers: [{ provide: ExerciseService, useClass: MockExerciseService }, MockProvider(StringCountService)],
-        });
-        injector = getTestBed();
-        service = injector.get(ExampleSubmissionService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(ExampleSubmissionService);
+                httpMock = injector.get(HttpTestingController);
 
-        expectedResult = {} as HttpResponse<ExampleSubmission[]>;
-        elemDefault = new ExampleSubmission();
-        elemDefault.id = 1;
-        elemDefault.usedForTutorial = false;
-        elemDefault.exercise = {
-            id: 1,
-            problemStatement: 'problem statement',
-            title: 'title',
-            shortName: 'titleShort',
-        } as unknown as Exercise;
-        elemDefault.submission = {
-            id: 1,
-            submitted: true,
-            type: 'AUTOMATIC',
-            text: 'Test\n\nTest\n\nTest',
-        } as unknown as TextSubmission;
-        elemDefault.submission.results = [
-            {
-                id: 2374,
-                resultString: '1 of 12 points',
-                score: 8,
-                rated: true,
-                hasFeedback: true,
-                hasComplaint: false,
-            } as unknown as Result,
-        ];
-        getLatestSubmissionResult(elemDefault.submission)!.feedbacks = [
-            {
-                id: 2,
-                detailText: 'Feedback',
-                credits: 1,
-            } as Feedback,
-        ];
-        elemDefault.assessmentExplanation = 'exampleSubmissionTest';
-        studentSubmission = elemDefault.submission;
+                expectedResult = {} as HttpResponse<ExampleSubmission[]>;
+                elemDefault = new ExampleSubmission();
+                elemDefault.id = 1;
+                elemDefault.usedForTutorial = false;
+                elemDefault.exercise = {
+                    id: 1,
+                    problemStatement: 'problem statement',
+                    title: 'title',
+                    shortName: 'titleShort',
+                } as unknown as Exercise;
+                elemDefault.submission = {
+                    id: 1,
+                    submitted: true,
+                    type: 'AUTOMATIC',
+                    text: 'Test\n\nTest\n\nTest',
+                } as unknown as TextSubmission;
+                elemDefault.submission.results = [
+                    {
+                        id: 2374,
+                        resultString: '1 of 12 points',
+                        score: 8,
+                        rated: true,
+                        hasFeedback: true,
+                        hasComplaint: false,
+                    } as unknown as Result,
+                ];
+                getLatestSubmissionResult(elemDefault.submission)!.feedbacks = [
+                    {
+                        id: 2,
+                        detailText: 'Feedback',
+                        credits: 1,
+                    } as Feedback,
+                ];
+                elemDefault.assessmentExplanation = 'exampleSubmissionTest';
+                studentSubmission = elemDefault.submission;
+            });
     });
 
     describe('Service methods', () => {

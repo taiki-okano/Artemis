@@ -36,6 +36,7 @@ describe('ProgrammingExercise Service', () => {
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: AccountService, useClass: MockAccountService },
             ],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(ProgrammingExerciseService);

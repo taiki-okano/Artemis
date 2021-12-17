@@ -27,25 +27,29 @@ describe('ExerciseHint Service', () => {
                     },
                 }),
             ],
-        });
-        expectedResult = {} as HttpResponse<ExerciseHint>;
-        injector = getTestBed();
-        service = injector.get(ExerciseHintService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                expectedResult = {} as HttpResponse<ExerciseHint>;
+                injector = getTestBed();
+                service = injector.get(ExerciseHintService);
+                httpMock = injector.get(HttpTestingController);
 
-        const exercise = new ProgrammingExercise(undefined, undefined);
-        exercise.id = 1;
+                const exercise = new ProgrammingExercise(undefined, undefined);
+                exercise.id = 1;
 
-        elemDefault = new ExerciseHint();
-        elemDefault.id = 0;
-        elemDefault.title = 'AAAAAAA';
-        elemDefault.content = 'AAAAAAA';
-        elemDefault.exercise = exercise;
+                elemDefault = new ExerciseHint();
+                elemDefault.id = 0;
+                elemDefault.title = 'AAAAAAA';
+                elemDefault.content = 'AAAAAAA';
+                elemDefault.exercise = exercise;
 
-        exerciseHint = new ExerciseHint();
-        exerciseHint.title = 'AAAAA';
-        exerciseHint.content = 'BBBBB';
-        exerciseHint.exercise = exercise;
+                exerciseHint = new ExerciseHint();
+                exerciseHint.title = 'AAAAA';
+                exerciseHint.content = 'BBBBB';
+                exerciseHint.exercise = exercise;
+            });
     });
 
     describe('Service methods', () => {

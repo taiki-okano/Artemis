@@ -212,6 +212,7 @@ describe('Logs Service', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: Router, useClass: MockRouter },
             ],
+            teardown: { destroyAfterEach: true },
         });
         service = TestBed.inject(ProfileService);
         httpMock = TestBed.inject(HttpTestingController);

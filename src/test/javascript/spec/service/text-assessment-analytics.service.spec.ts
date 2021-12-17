@@ -26,6 +26,7 @@ describe('TextAssessmentAnalytics Service', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(TextAssessmentAnalytics);

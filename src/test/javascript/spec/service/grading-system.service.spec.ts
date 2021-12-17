@@ -43,6 +43,7 @@ describe('Grading System Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, RouterTestingModule],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(GradingSystemService);

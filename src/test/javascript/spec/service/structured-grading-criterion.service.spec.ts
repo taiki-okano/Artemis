@@ -16,6 +16,7 @@ describe('Structured Grading Criteria Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
+            teardown: { destroyAfterEach: true },
         });
         injector = getTestBed();
         service = injector.get(StructuredGradingCriterionService);

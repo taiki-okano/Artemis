@@ -103,6 +103,7 @@ describe('Guided tour integration', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: MetisService, useClass: MockMetisService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .overrideModule(ArtemisTestModule, { set: { declarations: [], exports: [] } })
             .compileComponents()

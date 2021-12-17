@@ -44,14 +44,16 @@ describe('ShortAnswerQuestionUtil', () => {
         }
     };
 
-    beforeEach(async () => {
+    beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [TranslateModule.forRoot(), ArtemisTestModule],
+            teardown: { destroyAfterEach: true },
         });
 
         injector = getTestBed();
         service = injector.get(ShortAnswerQuestionUtil);
     });
+
     it('should return correct getter', () => {
         const solutions = service.getAllSolutionsForSpot(shortAnswerQuestion.correctMappings, spot);
         const spots = service.getAllSpotsForSolutions(shortAnswerQuestion.correctMappings, solution);

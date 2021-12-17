@@ -38,6 +38,7 @@ describe('TextExercise Service', () => {
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
             ],
+            teardown: { destroyAfterEach: true },
         });
         requestResult = {} as HttpResponse<TextExercise>;
         injector = getTestBed();

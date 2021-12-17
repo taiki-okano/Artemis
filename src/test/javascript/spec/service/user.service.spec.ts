@@ -11,6 +11,7 @@ describe('User Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
+            teardown: { destroyAfterEach: true },
         });
 
         service = TestBed.inject(UserService);

@@ -10,6 +10,7 @@ describe('Logs Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
+            teardown: { destroyAfterEach: true },
         });
 
         service = TestBed.inject(LogsService);

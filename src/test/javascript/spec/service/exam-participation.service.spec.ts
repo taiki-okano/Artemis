@@ -35,15 +35,19 @@ describe('Exam Participation Service', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
             ],
-        });
-        injector = getTestBed();
-        service = injector.get(ExamParticipationService);
-        httpMock = injector.get(HttpTestingController);
-        localStorage = injector.get(LocalStorageService);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(ExamParticipationService);
+                httpMock = injector.get(HttpTestingController);
+                localStorage = injector.get(LocalStorageService);
 
-        exam = new Exam();
-        studentExam = new StudentExam();
-        quizSubmission = new QuizSubmission();
+                exam = new Exam();
+                studentExam = new StudentExam();
+                quizSubmission = new QuizSubmission();
+            });
     });
 
     it('should load a StudentExam with exercises for conduction', async () => {

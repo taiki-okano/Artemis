@@ -13,10 +13,14 @@ describe('Reaction Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
-        });
-        injector = getTestBed();
-        service = injector.get(ReactionService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(ReactionService);
+                httpMock = injector.get(HttpTestingController);
+            });
     });
 
     describe('Service methods', () => {

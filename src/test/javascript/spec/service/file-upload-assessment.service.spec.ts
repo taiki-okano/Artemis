@@ -20,13 +20,17 @@ describe('Modeling Assessment Service', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule, HttpClientTestingModule],
-        });
-        injector = getTestBed();
-        service = injector.get(FileUploadAssessmentService);
-        httpMock = injector.get(HttpTestingController);
+            teardown: { destroyAfterEach: true },
+        })
+            .compileComponents()
+            .then(() => {
+                injector = getTestBed();
+                service = injector.get(FileUploadAssessmentService);
+                httpMock = injector.get(HttpTestingController);
 
-        expectedResult = {} as Result;
-        httpExpectedResult = {} as HttpResponse<Result>;
+                expectedResult = {} as Result;
+                httpExpectedResult = {} as HttpResponse<Result>;
+            });
     });
 
     afterEach(() => {

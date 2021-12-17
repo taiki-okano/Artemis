@@ -150,6 +150,7 @@ describe('CodeEditorInstructorIntegration', () => {
                 { provide: ExerciseHintService, useClass: MockExerciseHintService },
                 { provide: JhiWebsocketService, useClass: MockWebsocketService },
             ],
+            teardown: { destroyAfterEach: true },
         })
             .compileComponents()
             .then(() => {
