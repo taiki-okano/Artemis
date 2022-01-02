@@ -111,6 +111,8 @@ sourceSets {
             include 'de/tum/in/www1/artemis/service/listeners/**'
             include 'de/tum/in/www1/artemis/service/ldap/**'
             include 'de/tum/in/www1/artemis/service/user/PasswordService.*'
+            include 'de/tum/in/www1/artemis/service/user/AuthorityService.*'
+//            include 'de/tum/in/www1/artemis/service/user/UserManagementInfoContributor.*'
 
             include 'de/tum/in/www1/artemis/service/connectors/bamboo/BambooAuthorizationInterceptor.*' // needed from RestTemplateConfiguration
             include 'de/tum/in/www1/artemis/service/connectors/bitbucket/BitbucketAuthorizationInterceptor.*' // needed from RestTemplateConfiguration
@@ -313,7 +315,8 @@ dependencies {
 
     developmentOnly "org.springframework.boot:spring-boot-devtools:${spring_boot_version}"
     testImplementation "com.h2database:h2:${h2_database_version}"
-
+    // Embedded message broker for testing
+    testImplementation "org.apache.activemq:artemis-jms-server:2.20.0"
 }
 
 task executeTests (type: Exec) {

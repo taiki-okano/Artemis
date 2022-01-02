@@ -27,13 +27,17 @@ import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
 import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.security.ArtemisAuthenticationProvider;
 import de.tum.in.www1.artemis.security.SecurityUtils;
-import de.tum.in.www1.artemis.service.user.UserCreationService;
+import de.tum.in.www1.artemis.service.messaging.services.UserServiceProducer;
+import de.tum.in.www1.artemis.service.user.UserService;
 import de.tum.in.www1.artemis.web.rest.dto.LtiLaunchRequestDTO;
 
 public class LtiServiceTest {
 
     @Mock
-    private UserCreationService userCreationService;
+    private UserServiceProducer userCreationServiceProducer;
+
+    @Mock
+    private UserService userService;
 
     @Mock
     private UserRepository userRepository;
@@ -71,7 +75,8 @@ public class LtiServiceTest {
     public void init() {
         MockitoAnnotations.openMocks(this);
         SecurityContextHolder.clearContext();
-        ltiService = new LtiService(userCreationService, userRepository, ltiOutcomeUrlRepository, resultRepository, artemisAuthenticationProvider, ltiUserIdRepository, response);
+        ltiService = new LtiService(userCreationServiceProducer, userService, userRepository, ltiOutcomeUrlRepository, resultRepository, artemisAuthenticationProvider,
+                ltiUserIdRepository, response);
         Course course = new Course();
         course.setStudentGroupName(courseStudentGroupName);
         exercise = new TextExercise();
@@ -155,13 +160,13 @@ public class LtiServiceTest {
         user.setActivated(false);
         when(ltiUserIdRepository.findByLtiUserId(launchRequest.getUser_id())).thenReturn(Optional.empty());
         when(userRepository.findOneByLogin(username)).thenReturn(Optional.empty());
-        when(userCreationService.createInternalUser(username, null, groups, "", launchRequest.getLis_person_sourcedid(), launchRequest.getLis_person_contact_email_primary(), null,
-                null, "en")).thenReturn(user);
+        when(userCreationServiceProducer.createInternalUser(username, null, groups, "", launchRequest.getLis_person_sourcedid(),
+                launchRequest.getLis_person_contact_email_primary(), null, null, "en")).thenReturn(user);
 
         onSuccessfulAuthenticationSetup(user, ltiUserId);
         ltiService.handleLaunchRequest(launchRequest, exercise);
         onSuccessfulAuthenticationAssertions(user, ltiUserId);
-        verify(userCreationService).activateUser(user);
+        verify(userCreationServiceProducer).activateUser(user);
 
         SecurityContextHolder.clearContext();
         launchRequest.setContext_label("randomLabel");
@@ -178,14 +183,14 @@ public class LtiServiceTest {
         user.setActivated(false);
         when(ltiUserIdRepository.findByLtiUserId(launchRequest.getUser_id())).thenReturn(Optional.empty());
         when(userRepository.findOneByLogin(username)).thenReturn(Optional.empty());
-        when(userCreationService.createInternalUser(username, null, groups, "", launchRequest.getLis_person_sourcedid(), launchRequest.getLis_person_contact_email_primary(), null,
-                null, "en")).thenReturn(user);
+        when(userCreationServiceProducer.createInternalUser(username, null, groups, "", launchRequest.getLis_person_sourcedid(),
+                launchRequest.getLis_person_contact_email_primary(), null, null, "en")).thenReturn(user);
 
         onSuccessfulAuthenticationSetup(user, ltiUserId);
         launchRequest.setContext_label("TUMx");
         ltiService.handleLaunchRequest(launchRequest, exercise);
         onSuccessfulAuthenticationAssertions(user, ltiUserId);
-        verify(userCreationService).activateUser(user);
+        verify(userCreationServiceProducer).activateUser(user);
 
         SecurityContextHolder.clearContext();
         launchRequest.setContext_label("randomLabel");
@@ -254,7 +259,7 @@ public class LtiServiceTest {
         assertThat("ff30145d6884eeb2c1cef50298939383").isEqualTo(ltiUserId.getLtiUserId());
         assertThat("some.outcome.service.url.com").isEqualTo(ltiOutcomeUrl.getUrl());
         assertThat("someResultSourceId").isEqualTo(ltiOutcomeUrl.getSourcedId());
-        verify(userCreationService, times(1)).saveUser(user);
+        verify(userService, times(1)).saveUser(user);
         verify(artemisAuthenticationProvider, times(1)).addUserToGroup(user, courseStudentGroupName);
         verify(ltiOutcomeUrlRepository, times(1)).save(ltiOutcomeUrl);
     }

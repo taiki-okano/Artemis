@@ -67,18 +67,6 @@ public interface InstanceMessageSendService {
     void sendLockAllRepositories(Long exerciseId);
 
     /**
-     * Send a message to the main server that the non-activated should be deleted.
-     * @param userId the user id of the non-activated user
-     */
-    void sendRemoveNonActivatedUserSchedule(Long userId);
-
-    /**
-     * Send a message to the main server that cancels the schedule to remove the non-activated user.
-     * @param userId the user id of the non-activated user
-     */
-    void sendCancelRemoveNonActivatedUserSchedule(Long userId);
-
-    /**
      * Send a message to the main server that schedules a notification for an exercise
      * @param exerciseId of the exercise a notification should be created
      */

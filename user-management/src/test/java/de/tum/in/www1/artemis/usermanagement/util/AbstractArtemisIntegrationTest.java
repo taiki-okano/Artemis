@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Import;
 /**
  * This test should be completely independent of any profiles or configurations (e.g. VCS, CIS)
  */
-@Import(ActiveMqArtemisMockProvider.class)
 public abstract class AbstractArtemisIntegrationTest implements MockDelegate {
 
     @Value("${server.url}")

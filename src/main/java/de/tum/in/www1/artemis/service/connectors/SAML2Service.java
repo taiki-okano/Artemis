@@ -23,19 +23,18 @@ import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.security.Role;
 import de.tum.in.www1.artemis.security.UserNotActivatedException;
 import de.tum.in.www1.artemis.service.MailService;
-import de.tum.in.www1.artemis.service.user.UserCreationService;
-import de.tum.in.www1.artemis.service.user.UserService;
+import de.tum.in.www1.artemis.service.messaging.services.UserServiceProducer;
 import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
 
 /**
  * This class describes a service for SAML2 authentication.
- * 
+ *
  * The main method is {@link #handleAuthentication(Saml2AuthenticatedPrincipal)}. The service extracts the user information
- * from the {@link Saml2AuthenticatedPrincipal} and creates the user, if it does not exist already. 
- * 
+ * from the {@link Saml2AuthenticatedPrincipal} and creates the user, if it does not exist already.
+ *
  * When the user gets created, the SAML2 attributes can be used to fill in user information. The configuration happens
  * via patterns for every field in the SAML2 configuration.
- * 
+ *
  * The service creates a {@link UsernamePasswordAuthenticationToken} which can then be used by the client to authenticate.
  * This is needed, since the client "does not know" that he is already authenticated via SAML2.
  */
@@ -48,11 +47,9 @@ public class SAML2Service {
 
     private final Logger log = LoggerFactory.getLogger(SAML2Service.class);
 
-    private final UserCreationService userCreationService;
+    private final UserServiceProducer userServiceProducer;
 
     private final UserRepository userRepository;
-
-    private final UserService userService;
 
     private final SAML2Properties properties;
 
@@ -63,20 +60,18 @@ public class SAML2Service {
      *
      * @param userRepository The user repository
      * @param properties The properties
-     * @param userCreationService The user creation service
+     * @param userServiceProducer The producer sending messages to the user microservice
      */
-    public SAML2Service(final UserRepository userRepository, final SAML2Properties properties, final UserCreationService userCreationService, MailService mailService,
-            UserService userService) {
+    public SAML2Service(final UserRepository userRepository, final SAML2Properties properties, final UserServiceProducer userServiceProducer, MailService mailService) {
         this.userRepository = userRepository;
         this.properties = properties;
-        this.userCreationService = userCreationService;
+        this.userServiceProducer = userServiceProducer;
         this.mailService = mailService;
-        this.userService = userService;
     }
 
     /**
      * Handles an authentication via SAML2.
-     * 
+     *
      * Registers new users and returns a new {@link UsernamePasswordAuthenticationToken} matching the SAML2 user.
      *
      * @param principal the principal, containing the user information
@@ -96,9 +91,9 @@ public class SAML2Service {
 
             if (saml2EnablePassword.isPresent() && Boolean.TRUE.equals(saml2EnablePassword.get())) {
                 log.debug("Sending SAML2 creation mail");
-                Optional<User> mailUser = userService.requestPasswordReset(user.get().getEmail());
-                if (mailUser.isPresent()) {
-                    mailService.sendSAML2SetPasswordMail(mailUser.get());
+                User mailUser = userServiceProducer.requestPasswordReset(user.get().getEmail());
+                if (mailUser != null) {
+                    mailService.sendSAML2SetPasswordMail(mailUser);
                 }
                 else {
                     log.error("User {} was created but could not be found in the database!", user.get());
@@ -132,7 +127,7 @@ public class SAML2Service {
 
         // userService.createUser(ManagedUserVM) does create an activated User
         // a random password is generated
-        return userCreationService.createUser(newUser);
+        return userServiceProducer.createUser(newUser);
     }
 
     private static Collection<GrantedAuthority> toGrantedAuthorities(final Collection<Authority> authorities) {

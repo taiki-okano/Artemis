@@ -133,7 +133,7 @@ spring:
                 -   id: usermanagement
                     uri: lb://usermanagement
                     predicates:
-                        - Path=/api/users, /api/users/**, /api/users/authorities, /api/guided-tour-settings/**
+                        - Path=/api/users, /api/users/**, /api/users/authorities, /api/guided-tour-settings/**, /api/account/**, /api/activate, /api/register
                 -   id: usermanagement
                     uri: lb://usermanagement
                     predicates:

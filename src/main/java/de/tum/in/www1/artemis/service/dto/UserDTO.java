@@ -2,6 +2,7 @@ package de.tum.in.www1.artemis.service.dto;
 
 import static de.tum.in.www1.artemis.config.Constants.*;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -21,7 +22,7 @@ import de.tum.in.www1.artemis.domain.*;
  * A DTO representing a user, with his authorities.
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class UserDTO extends AuditingEntityDTO {
+public class UserDTO extends AuditingEntityDTO implements Serializable {
 
     private Long id;
 

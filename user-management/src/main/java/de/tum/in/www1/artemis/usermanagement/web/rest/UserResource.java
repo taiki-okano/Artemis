@@ -5,7 +5,7 @@ import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.repository.AuthorityRepository;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.service.dto.UserDTO;
-import de.tum.in.www1.artemis.usermanagement.security.ArtemisAuthenticationProvider;
+import de.tum.in.www1.artemis.usermanagement.service.messaging.services.UserServiceProducer;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserCreationService;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserService;
 import de.tum.in.www1.artemis.usermanagement.web.rest.errors.EmailAlreadyUsedException;
@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -74,19 +75,19 @@ public class UserResource {
 
     private final UserCreationService userCreationService;
 
-    private final ArtemisAuthenticationProvider artemisAuthenticationProvider;
-
     private final UserRepository userRepository;
 
     private final AuthorityRepository authorityRepository;
 
+    private final UserServiceProducer userServiceProducer;
+
     public UserResource(UserRepository userRepository, UserService userService, UserCreationService userCreationService,
-                        ArtemisAuthenticationProvider artemisAuthenticationProvider, AuthorityRepository authorityRepository) {
+                        AuthorityRepository authorityRepository, UserServiceProducer userServiceProducer) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.userCreationService = userCreationService;
-        this.artemisAuthenticationProvider = artemisAuthenticationProvider;
         this.authorityRepository = authorityRepository;
+        this.userServiceProducer = userServiceProducer;
     }
 
     private static void checkUsernameAndPasswordValidity(String username, String password) {
@@ -136,10 +137,9 @@ public class UserResource {
         else if (userRepository.findOneByEmailIgnoreCase(managedUserVM.getEmail()).isPresent()) {
             throw new EmailAlreadyUsedException();
         }
-        else if (managedUserVM.getGroups().stream().anyMatch(group -> !artemisAuthenticationProvider.isGroupAvailable(group))) {
+        else if (!CollectionUtils.isEmpty(managedUserVM.getGroups()) && !userServiceProducer.areGroupsAvailable(managedUserVM.getGroups())) {
             throw new EntityNotFoundException("Not all groups are available: " + managedUserVM.getGroups());
-        }
-        else {
+        } else {
             User newUser = userCreationService.createUser(managedUserVM);
 
             // NOTE: Mail service is NOT active at the moment
@@ -173,7 +173,7 @@ public class UserResource {
             throw new LoginAlreadyUsedException();
         }
 
-        if (managedUserVM.getGroups().stream().anyMatch(group -> !artemisAuthenticationProvider.isGroupAvailable(group))) {
+        if (!CollectionUtils.isEmpty(managedUserVM.getGroups()) && !userServiceProducer.areGroupsAvailable(managedUserVM.getGroups())) {
             throw new EntityNotFoundException("Not all groups are available: " + managedUserVM.getGroups());
         }
 

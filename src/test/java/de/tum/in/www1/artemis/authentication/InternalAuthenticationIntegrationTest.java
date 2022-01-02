@@ -9,12 +9,10 @@ import static org.mockito.Mockito.doReturn;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -35,7 +33,6 @@ import de.tum.in.www1.artemis.util.ModelFactory;
 import de.tum.in.www1.artemis.web.rest.UserJWTController;
 import de.tum.in.www1.artemis.web.rest.dto.LtiLaunchRequestDTO;
 import de.tum.in.www1.artemis.web.rest.vm.LoginVM;
-import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
 
 public class InternalAuthenticationIntegrationTest extends AbstractSpringIntegrationJenkinsGitlabTest {
 
@@ -68,18 +65,6 @@ public class InternalAuthenticationIntegrationTest extends AbstractSpringIntegra
 
     @Autowired
     private GitlabRequestMockProvider gitlabRequestMockProvider;
-
-    @Value("${info.guided-tour.course-group-students:#{null}}")
-    private Optional<String> tutorialGroupStudents;
-
-    @Value("${info.guided-tour.course-group-tutors:#{null}}")
-    private Optional<String> tutorialGroupTutors;
-
-    @Value("${info.guided-tour.course-group-editors:#{null}}")
-    private Optional<String> tutorialGroupEditors;
-
-    @Value("${info.guided-tour.course-group-instructors:#{null}}")
-    private Optional<String> tutorialGroupInstructors;
 
     private User student;
 
@@ -166,88 +151,6 @@ public class InternalAuthenticationIntegrationTest extends AbstractSpringIntegra
         assertThat(updatedStudent.getGroups()).as("User is registered for course").contains(course1.getStudentGroupName());
     }
 
-    @Deprecated // Moved to user management microservice. To be removed.
-    @NotNull
-    private User createUserWithRestApi(Set<Authority> authorities) throws Exception {
-        gitlabRequestMockProvider.enableMockingOfRequests();
-        gitlabRequestMockProvider.mockGetUserID();
-        database.addTutorialCourse();
-
-        student.setId(null);
-        student.setLogin("user1");
-        student.setPassword("foobar");
-        student.setEmail("user1@secret.invalid");
-        student.setAuthorities(authorities);
-
-        var exercises = programmingExerciseRepository.findAllByInstructorOrEditorOrTAGroupNameIn(student.getGroups());
-        assertThat(exercises).hasSize(0);
-        jenkinsRequestMockProvider.mockCreateUser(student, false, false, false);
-
-        final var user = request.postWithResponseBody("/api/users", new ManagedUserVM(student), User.class, HttpStatus.CREATED);
-        assertThat(user).isNotNull();
-        return user;
-    }
-
-    @Deprecated // Moved to user management microservice. To be removed.
-    private void assertUserGroups(User user, boolean students, boolean tutors, boolean editors, boolean instructors) {
-        if (students) {
-            assertThat(user.getGroups()).contains(tutorialGroupStudents.get());
-        }
-        else {
-            assertThat(user.getGroups()).doesNotContain(tutorialGroupStudents.get());
-        }
-        if (tutors) {
-            assertThat(user.getGroups()).contains(tutorialGroupTutors.get());
-        }
-        else {
-            assertThat(user.getGroups()).doesNotContain(tutorialGroupTutors.get());
-        }
-        if (editors) {
-            assertThat(user.getGroups()).contains(tutorialGroupEditors.get());
-        }
-        else {
-            assertThat(user.getGroups()).doesNotContain(tutorialGroupEditors.get());
-        }
-        if (instructors) {
-            assertThat(user.getGroups()).contains(tutorialGroupInstructors.get());
-        }
-        else {
-            assertThat(user.getGroups()).doesNotContain(tutorialGroupInstructors.get());
-        }
-    }
-
-    @Deprecated // Moved to user management microservice. To be removed.
-    @Test
-    @WithMockUser(value = "admin", roles = "ADMIN")
-    public void createUserWithInternalUserManagementAndAutomatedTutorialGroupsAssignment() throws Exception {
-        final User user = createUserWithRestApi(Set.of(USER_AUTHORITY));
-        assertUserGroups(user, true, false, false, false);
-    }
-
-    @Deprecated // Moved to user management microservice. To be removed.
-    @Test
-    @WithMockUser(value = "admin", roles = "ADMIN")
-    public void createTutorWithInternalUserManagementAndAutomatedTutorialGroupsAssignment() throws Exception {
-        final User user = createUserWithRestApi(Set.of(USER_AUTHORITY, TA_AUTHORITY));
-        assertUserGroups(user, true, true, false, false);
-    }
-
-    @Deprecated // Moved to user management microservice. To be removed.
-    @Test
-    @WithMockUser(value = "admin", roles = "ADMIN")
-    public void createEditorWithInternalUserManagementAndAutomatedTutorialGroupsAssignment() throws Exception {
-        final User user = createUserWithRestApi(Set.of(USER_AUTHORITY, TA_AUTHORITY, EDITOR_AUTHORITY));
-        assertUserGroups(user, true, true, true, false);
-    }
-
-    @Deprecated // Moved to user management microservice. To be removed.
-    @Test
-    @WithMockUser(value = "admin", roles = "ADMIN")
-    public void createInstructorWithInternalUserManagementAndAutomatedTutorialGroupsAssignment() throws Exception {
-        final User user = createUserWithRestApi(Set.of(USER_AUTHORITY, TA_AUTHORITY, EDITOR_AUTHORITY, INSTRUCTOR_AUTHORITY));
-        assertUserGroups(user, true, true, true, true);
-    }
-
     @Test
     @WithAnonymousUser
     public void testJWTAuthentication() throws Exception {
@@ -262,29 +165,5 @@ public class InternalAuthenticationIntegrationTest extends AbstractSpringIntegra
         UserJWTController.JWTToken jwtToken = request.postWithResponseBody("/api/authenticate", loginVM, UserJWTController.JWTToken.class, HttpStatus.OK, httpHeaders);
         assertThat(jwtToken.getIdToken()).as("JWT token is present").isNotNull();
         assertThat(this.tokenProvider.validateTokenForAuthority(jwtToken.getIdToken())).as("JWT token is valid").isTrue();
-    }
-
-    @Deprecated // Moved to user management microservice. To be removed.
-    @Test
-    @WithMockUser(value = "admin", roles = "ADMIN")
-    public void updateUserWithRemovedGroups_internalAuth_successful() throws Exception {
-        gitlabRequestMockProvider.enableMockingOfRequests();
-        gitlabRequestMockProvider.mockUpdateUser();
-
-        final var oldGroups = student.getGroups();
-        final var newGroups = Set.of("foo", "bar");
-        student.setGroups(newGroups);
-        final var managedUserVM = new ManagedUserVM(student);
-        managedUserVM.setPassword("12345678");
-
-        jenkinsRequestMockProvider.mockUpdateUserAndGroups(student.getLogin(), student, newGroups, oldGroups, false);
-
-        final var response = request.putWithResponseBody("/api/users", managedUserVM, User.class, HttpStatus.OK);
-        final var updatedUserIndDB = userRepository.findOneWithGroupsAndAuthoritiesByLogin(student.getLogin()).get();
-        updatedUserIndDB.setPassword(passwordService.decryptPasswordByLogin(updatedUserIndDB.getLogin()).get());
-
-        assertThat(response).isNotNull();
-        assertThat(student).as("Returned user is equal to sent update").isEqualTo(response);
-        assertThat(student).as("Updated user in DB is equal to sent update").isEqualTo(updatedUserIndDB);
     }
 }

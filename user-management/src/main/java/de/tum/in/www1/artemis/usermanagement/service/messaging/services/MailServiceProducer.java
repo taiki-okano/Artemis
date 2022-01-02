@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 public class MailServiceProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceProducer.class);
 
-    private static final String USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL = "user_management_queue.send_activation_mail";
-    private static final String USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL = "user_management_queue.send_password_reset_mail";
+    public static final String USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL = "user_management_queue.send_activation_mail";
+    public static final String USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL = "user_management_queue.send_password_reset_mail";
 
     @Autowired
     private final JmsTemplate jmsTemplate;
