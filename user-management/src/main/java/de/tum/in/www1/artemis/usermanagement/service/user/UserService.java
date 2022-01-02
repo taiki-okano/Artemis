@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.jhipster.security.RandomUtil;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -436,5 +437,10 @@ public class UserService {
             }
         }
         return saveUser(loggedInUser);
+    }
+
+    @Transactional
+    public void updateUserNotificationVisibility(Long userId, ZonedDateTime hideUntil) {
+        userRepository.updateUserNotificationVisibility(userId, hideUntil);
     }
 }

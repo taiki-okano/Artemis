@@ -33,7 +33,7 @@ eureka:
         lease-expiration-duration-in-seconds: 10
         status-page-url-path: ${management.endpoints.web.base-path}/info
         health-check-url-path: ${management.endpoints.web.base-path}/health
-        preferIpAddress: true
+#        preferIpAddress: true
         metadata-map:
             zone: primary # This is needed for the load balancer
             profile: ${spring.profiles.active}
@@ -70,6 +70,10 @@ management:
     info:
         git:
             mode: full
+        java:
+            enabled: true
+        env:
+            enabled: true
     health:
         group:
             liveness:
@@ -133,7 +137,11 @@ spring:
                 -   id: usermanagement
                     uri: lb://usermanagement
                     predicates:
+<<<<<<< HEAD
                         - Path=/api/users, /api/users/**, /api/users/authorities, /api/guided-tour-settings/**, /api/account/**, /api/activate, /api/register
+=======
+                        - Path=/api/users, /api/users/**, /api/users/authorities, /api/guided-tour-settings/**
+>>>>>>> develop-microservices
                 -   id: usermanagement
                     uri: lb://usermanagement
                     predicates:

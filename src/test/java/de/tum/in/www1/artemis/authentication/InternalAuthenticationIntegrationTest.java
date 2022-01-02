@@ -1,6 +1,5 @@
 package de.tum.in.www1.artemis.authentication;
 
-import static de.tum.in.www1.artemis.domain.Authority.*;
 import static de.tum.in.www1.artemis.util.ModelFactory.USER_PASSWORD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
