@@ -18,9 +18,9 @@ export class ProgrammingExerciseResolve implements Resolve<ProgrammingExercise> 
     constructor(private service: ProgrammingExerciseService) {}
 
     resolve(route: ActivatedRouteSnapshot) {
-        const id = route.params['exerciseId'] ? route.params['exerciseId'] : undefined;
-        if (id) {
-            return this.service.find(id).pipe(map((programmingExercise: HttpResponse<ProgrammingExercise>) => programmingExercise.body!));
+        const exerciseId = route.params['exerciseId'] ? route.params['exerciseId'] : undefined;
+        if (exerciseId) {
+            return this.service.find(exerciseId).pipe(map((programmingExercise: HttpResponse<ProgrammingExercise>) => programmingExercise.body!));
         }
         return of(new ProgrammingExercise(undefined, undefined));
     }
@@ -83,7 +83,7 @@ export const routes: Routes = [
         },
         data: {
             authorities: [Authority.EDITOR, Authority.INSTRUCTOR, Authority.ADMIN],
-            pageTitle: 'artemisApp.plagiarism.plagiarism-detection',
+            pageTitle: 'artemisApp.plagiarism.plagiarismDetection',
         },
         canActivate: [UserRouteAccessService],
     },

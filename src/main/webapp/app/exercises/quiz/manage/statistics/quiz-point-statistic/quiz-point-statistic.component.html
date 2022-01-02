@@ -3,31 +3,47 @@
         <h3>{{ quizExercise.title }}</h3>
 
         <button *jhiHasAnyAuthority="['ROLE_TA', 'ROLE_EDITOR', 'ROLE_INSTRUCTOR', 'ROLE_ADMIN']" class="btn btn-primary btn-sm float-end" (click)="recalculate()">
-            <fa-icon [icon]="'sync'" [fixedWidth]="true"></fa-icon>&nbsp;{{ 'showStatistic.recalculateStatistics' | artemisTranslate }}
+            <fa-icon [icon]="faSync" [fixedWidth]="true"></fa-icon>&nbsp;{{ 'showStatistic.recalculateStatistics' | artemisTranslate }}
         </button>
 
-        <div class="text-center">
-            <p class="text-start" style="font-size: large">
+        <div #containerRef class="text-center">
+            <p class="text-start" class="chart-title-text">
                 <span jhiTranslate="showStatistic.quizPointStatistic.maxScore"></span><span>{{ maxScore }}</span>
             </p>
             <div class="row">
                 <div class="col-md-7 text-start">
-                    <p style="font-size: large">
+                    <p class="chart-title-text">
                         <span *ngIf="rated" jhiTranslate="showStatistic.quizPointStatistic.titleRated"></span>
                         <span *ngIf="!rated" jhiTranslate="showStatistic.quizPointStatistic.titleUnrated"></span>
                     </p>
                 </div>
                 <div class="col-md-5 text-end">
-                    <p style="font-size: large">
+                    <p class="chart-title-text">
                         <span>{{ participants }} </span><span jhiTranslate="showStatistic.participants"></span>
                     </p>
                 </div>
             </div>
-            <canvas baseChart [datasets]="datasets" [labels]="labels" [options]="options" [chartType]="chartType" [colors]="colors"> </canvas>
-
+            <ngx-charts-bar-vertical
+                [view]="[containerRef.offsetWidth, height]"
+                [results]="ngxData"
+                [scheme]="ngxColor"
+                [xAxisLabel]="xAxisLabel"
+                [yAxisLabel]="yAxisLabel"
+                [legend]="false"
+                [showXAxisLabel]="true"
+                [showYAxisLabel]="true"
+                [xAxis]="true"
+                [yAxis]="true"
+                [yScaleMax]="maxScale"
+                [roundEdges]="false"
+                [showDataLabel]="true"
+                [dataLabelFormatting]="bindFormatting"
+                [tooltipDisabled]="true"
+            >
+            </ngx-charts-bar-vertical>
             <div class="text-center">
                 <button (click)="switchRated()" type="button" class="btn btn-primary">
-                    <fa-icon [icon]="'sync'"></fa-icon>&nbsp;
+                    <fa-icon [icon]="faSync"></fa-icon>&nbsp;
                     <span *ngIf="rated" jhiTranslate="showStatistic.switchToUnrated"></span>
                     <span *ngIf="!rated" jhiTranslate="showStatistic.switchToRated"></span>
                 </button>

@@ -1,18 +1,22 @@
 import { Component, Input } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { ModelingExercise } from 'app/entities/modeling-exercise.model';
 import { ModelingExerciseService } from './modeling-exercise.service';
 import { AccountService } from 'app/core/auth/account.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CourseExerciseService, CourseManagementService } from 'app/course/manage/course-management.service';
+import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { ExerciseComponent } from 'app/exercises/shared/exercise/exercise.component';
 import { TranslateService } from '@ngx-translate/core';
 import { onError } from 'app/shared/util/global.utils';
 import { SortService } from 'app/shared/service/sort.service';
 import { ModelingExerciseImportComponent } from 'app/exercises/modeling/manage/modeling-exercise-import.component';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faBook, faPlus, faSort, faTable, faTimes, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faListAlt } from '@fortawesome/free-regular-svg-icons';
+import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 
 @Component({
     selector: 'jhi-modeling-exercise',
@@ -20,19 +24,29 @@ import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service'
 })
 export class ModelingExerciseComponent extends ExerciseComponent {
     @Input() modelingExercises: ModelingExercise[];
+    filteredModelingExercises: ModelingExercise[];
+    // Icons
+    faPlus = faPlus;
+    faSort = faSort;
+    faTable = faTable;
+    farListAlt = faListAlt;
+    faBook = faBook;
+    faUsers = faUsers;
+    faWrench = faWrench;
+    faTimes = faTimes;
 
     constructor(
         public exerciseService: ExerciseService,
         private modelingExerciseService: ModelingExerciseService,
         private courseExerciseService: CourseExerciseService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private accountService: AccountService,
         private sortService: SortService,
         private modalService: NgbModal,
         private router: Router,
         courseService: CourseManagementService,
         translateService: TranslateService,
-        eventManager: JhiEventManager,
+        eventManager: EventManager,
         route: ActivatedRoute,
     ) {
         super(courseService, translateService, route, eventManager);
@@ -46,14 +60,18 @@ export class ModelingExerciseComponent extends ExerciseComponent {
                 // reconnect exercise with course
                 this.modelingExercises.forEach((exercise) => {
                     exercise.course = this.course;
-                    exercise.isAtLeastTutor = this.accountService.isAtLeastTutorInCourse(exercise.course);
-                    exercise.isAtLeastEditor = this.accountService.isAtLeastEditorInCourse(exercise.course);
-                    exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(exercise.course);
+                    this.accountService.setAccessRightsForExercise(exercise);
                 });
+                this.applyFilter();
                 this.emitExerciseCount(this.modelingExercises.length);
             },
-            (res: HttpErrorResponse) => onError(this.jhiAlertService, res),
+            (res: HttpErrorResponse) => onError(this.alertService, res),
         );
+    }
+
+    protected applyFilter(): void {
+        this.filteredModelingExercises = this.modelingExercises.filter((exercise) => this.filter.matchesExercise(exercise));
+        this.emitFilteredExerciseCount(this.filteredModelingExercises.length);
     }
 
     /**
@@ -88,6 +106,7 @@ export class ModelingExerciseComponent extends ExerciseComponent {
 
     sortRows() {
         this.sortService.sortByProperty(this.modelingExercises, this.predicate, this.reverse);
+        this.applyFilter();
     }
 
     /**

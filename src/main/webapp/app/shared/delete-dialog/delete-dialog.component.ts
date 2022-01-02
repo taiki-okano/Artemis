@@ -1,9 +1,10 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { mapValues } from 'lodash';
+import { mapValues } from 'lodash-es';
 import { ActionType } from 'app/shared/delete-dialog/delete-dialog.model';
 import { Observable, Subscription } from 'rxjs';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
+import { faBan, faSpinner, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-delete-dialog',
@@ -19,6 +20,7 @@ export class DeleteDialogComponent implements OnInit, OnDestroy {
     entityTitle: string;
     deleteQuestion: string;
     deleteConfirmationText: string;
+    requireConfirmationOnlyForAdditionalChecks: boolean;
     additionalChecks?: { [key: string]: string };
     additionalChecksValues: { [key: string]: boolean } = {};
     actionType: ActionType;
@@ -26,7 +28,12 @@ export class DeleteDialogComponent implements OnInit, OnDestroy {
     // used by *ngFor in the template
     objectKeys = Object.keys;
 
-    constructor(private activeModal: NgbActiveModal, private jhiAlertService: JhiAlertService) {}
+    // Icons
+    faBan = faBan;
+    faSpinner = faSpinner;
+    faTimes = faTimes;
+
+    constructor(private activeModal: NgbActiveModal, private alertService: AlertService) {}
 
     /**
      * Life cycle hook called by Angular to indicate that Angular is done creating the component
@@ -37,7 +44,7 @@ export class DeleteDialogComponent implements OnInit, OnDestroy {
                 this.clear();
             } else {
                 this.submitDisabled = false;
-                this.jhiAlertService.error(errorMessage);
+                this.alertService.error(errorMessage);
             }
         });
         if (this.additionalChecks) {
@@ -67,5 +74,26 @@ export class DeleteDialogComponent implements OnInit, OnDestroy {
     confirmDelete(): void {
         this.submitDisabled = true;
         this.delete.emit(this.additionalChecksValues);
+    }
+
+    /**
+     * Check if at least one additionalCheck is selected
+     */
+    get isAnyAdditionalCheckSelected(): boolean {
+        return Object.values(this.additionalChecksValues).some((check) => check);
+    }
+
+    /**
+     * Check if all security checks are fulfilled
+     * if deleteConfirmationText is passed the entityTitle and entered confirmation have to match
+     * if requireConfirmationOnlyForAdditionalChecks is passed:
+     *   if at least one additional check is selected the entityTitle and entered confirmation also have to match
+     */
+    get areSecurityChecksFulfilled(): boolean {
+        return !(
+            this.deleteConfirmationText &&
+            this.confirmEntityName !== this.entityTitle &&
+            (!this.requireConfirmationOnlyForAdditionalChecks || this.isAnyAdditionalCheckSelected)
+        );
     }
 }

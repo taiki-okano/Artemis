@@ -4,8 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +35,8 @@ public class AssessmentService {
 
     private final ExamDateService examDateService;
 
+    private final ExerciseDateService exerciseDateService;
+
     protected final SubmissionRepository submissionRepository;
 
     protected final GradingCriterionRepository gradingCriterionRepository;
@@ -47,12 +47,10 @@ public class AssessmentService {
 
     private final LtiService ltiService;
 
-    private final Logger log = LoggerFactory.getLogger(AssessmentService.class);
-
     public AssessmentService(ComplaintResponseService complaintResponseService, ComplaintRepository complaintRepository, FeedbackRepository feedbackRepository,
             ResultRepository resultRepository, StudentParticipationRepository studentParticipationRepository, ResultService resultService, SubmissionService submissionService,
-            SubmissionRepository submissionRepository, ExamDateService examDateService, GradingCriterionRepository gradingCriterionRepository, UserRepository userRepository,
-            LtiService ltiService) {
+            SubmissionRepository submissionRepository, ExamDateService examDateService, ExerciseDateService exerciseDateService,
+            GradingCriterionRepository gradingCriterionRepository, UserRepository userRepository, LtiService ltiService) {
         this.complaintResponseService = complaintResponseService;
         this.complaintRepository = complaintRepository;
         this.feedbackRepository = feedbackRepository;
@@ -62,6 +60,7 @@ public class AssessmentService {
         this.submissionService = submissionService;
         this.submissionRepository = submissionRepository;
         this.examDateService = examDateService;
+        this.exerciseDateService = exerciseDateService;
         this.gradingCriterionRepository = gradingCriterionRepository;
         this.userRepository = userRepository;
         this.ltiService = ltiService;
@@ -92,15 +91,7 @@ public class AssessmentService {
         resultRepository.save(newResult);
 
         if (exercise instanceof ProgrammingExercise) {
-            double points = ((ProgrammingAssessmentService) this).calculateTotalScore(newResult);
-            newResult.setScore(points, exercise.getMaxPoints());
-            /*
-             * Result string has following structure e.g: "1 of 13 passed, 2 issues, 10 of 100 points" The last part of the result string has to be updated, as the points the
-             * student has achieved have changed
-             */
-            String[] resultStringParts = newResult.getResultString().split(", ");
-            resultStringParts[resultStringParts.length - 1] = newResult.createResultString(points, exercise.getMaxPoints());
-            newResult.setResultString(String.join(", ", resultStringParts));
+            newResult.calculateScoreForProgrammingExercise(exercise.getMaxPoints());
             newResult.setCompletionDate(ZonedDateTime.now());
             newResult.setHasFeedback(true);
             newResult.setRated(true);
@@ -109,7 +100,7 @@ public class AssessmentService {
             return resultRepository.findByIdWithEagerAssessor(savedResult.getId()).orElseThrow(); // to eagerly load assessor
         }
         else {
-            return resultRepository.submitResult(newResult, exercise);
+            return resultRepository.submitResult(newResult, exercise, exerciseDateService.getDueDate(newResult.getParticipation()));
         }
     }
 
@@ -123,8 +114,8 @@ public class AssessmentService {
      * @param exercise the exercise to which the submission and result belong and which potentially includes an assessment due date
      * @param user the user who initiates a request
      * @param isAtLeastInstructor whether the given user is an instructor for the given exercise
-     * @param participation the participation to which the submission and result belongs to
-     * @return true of the the given user can override a potentially existing result
+     * @param participation the participation to which the submission and result belong to
+     * @return true if the given user can override a potentially existing result
      */
     public boolean isAllowedToCreateOrOverrideResult(Result existingResult, Exercise exercise, StudentParticipation participation, User user, boolean isAtLeastInstructor) {
 
@@ -186,17 +177,6 @@ public class AssessmentService {
     }
 
     /**
-     * Finds the example result for the given submission ID. The submission has to be an example submission
-     *
-     * @param submissionId The ID of the submission for which the result should be fetched
-     * @return The example result, which is linked to the submission
-     */
-    public Submission findExampleSubmissionWithResult(long submissionId) {
-        return submissionRepository.findExampleSubmissionByIdWithEagerResult(submissionId)
-                .orElseThrow(() -> new EntityNotFoundException("Submission with id '" + submissionId + "' with 'exampleSubmission = true' does not exist"));
-    }
-
-    /**
      * Returns whether a user is allowed to be the assessor of an existing result
      * @param result Result for which to check if the user can be the assessor
      * @param exercise Exercise to which the result belongs to
@@ -244,9 +224,9 @@ public class AssessmentService {
     public Result submitManualAssessment(long resultId, Exercise exercise, ZonedDateTime submissionDate) {
         Result result = resultRepository.findWithEagerSubmissionAndFeedbackAndAssessorById(resultId)
                 .orElseThrow(() -> new EntityNotFoundException("No result for the given resultId could be found"));
-        result.setRatedIfNotExceeded(exercise.getDueDate(), submissionDate);
+        result.setRatedIfNotExceeded(exerciseDateService.getDueDate(result.getParticipation()).orElse(null), submissionDate);
         result.setCompletionDate(ZonedDateTime.now());
-        result = resultRepository.submitResult(result, exercise);
+        result = resultRepository.submitResult(result, exercise, exerciseDateService.getDueDate(result.getParticipation()));
         // Note: we always need to report the result (independent of the assessment due date) over LTI, otherwise it might never become visible in the external system
         ltiService.onNewResult((StudentParticipation) result.getParticipation());
         return result;
@@ -307,7 +287,7 @@ public class AssessmentService {
     @Transactional // NOTE: As we use delete methods with underscores, we need a transactional context here!
     public void deleteAssessment(Submission submission, Result result) {
 
-        if (complaintRepository.findByResult_Id(result.getId()).isPresent()) {
+        if (complaintRepository.findByResultId(result.getId()).isPresent()) {
             throw new BadRequestAlertException("Result has a complaint", "result", "hasComplaint");
         }
         submission.getResults().remove(result);

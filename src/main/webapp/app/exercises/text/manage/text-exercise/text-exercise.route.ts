@@ -102,7 +102,7 @@ export const textExerciseRoute: Routes = [
         },
         data: {
             authorities: [Authority.EDITOR, Authority.INSTRUCTOR, Authority.ADMIN],
-            pageTitle: 'artemisApp.plagiarism.plagiarism-detection',
+            pageTitle: 'artemisApp.plagiarism.plagiarismDetection',
         },
         canActivate: [UserRouteAccessService],
     },
@@ -133,5 +133,13 @@ export const textExerciseRoute: Routes = [
             pageTitle: 'exercise-statistics.title',
         },
         canActivate: [UserRouteAccessService],
+    },
+    {
+        path: ':courseId/text-exercises/:exerciseId/tutor-effort-statistics',
+        loadChildren: () => import('../tutor-effort/tutor-effort-statistics.module').then((m) => m.ArtemisTutorEffortStatisticsModule),
+    },
+    {
+        path: ':courseId/text-exercises/:exerciseId/text-cluster-statistics',
+        loadChildren: () => import('../cluster-statistics/cluster-statistics.module').then((m) => m.ArtemisTextClusterStatisticsModule),
     },
 ];

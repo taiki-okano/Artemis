@@ -46,6 +46,14 @@ public abstract class Notification extends DomainObject {
     @Column(name = "target")
     private String target;
 
+    /**
+     * The String target is created based on a custom JAVA class
+     * which hold the needed information to build a valid URL/Link
+     * it is used to create Emails without the need to parse the target (e.g. via GSON)
+     */
+    @Transient
+    private transient NotificationTarget targetTransient;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "priority", columnDefinition = "varchar(15) default 'MEDIUM'")
     private NotificationPriority priority = NotificationPriority.MEDIUM;
@@ -108,6 +116,19 @@ public abstract class Notification extends DomainObject {
         this.target = target;
     }
 
+    public NotificationTarget getTargetTransient() {
+        return targetTransient;
+    }
+
+    public void setTargetTransient(NotificationTarget targetTransient) {
+        this.targetTransient = targetTransient;
+    }
+
+    public void setTransientAndStringTarget(NotificationTarget targetTransient) {
+        this.setTargetTransient(targetTransient);
+        this.setTarget(targetTransient.toJsonString());
+    }
+
     public NotificationPriority getPriority() {
         return priority;
     }
@@ -149,7 +170,7 @@ public abstract class Notification extends DomainObject {
 
     @Override
     public String toString() {
-        return "Notification{" + "id=" + getId() + ", title='" + title + '\'' + ", text='" + text + '\'' + ", notificationDate=" + notificationDate + ", target='" + target + '\''
-                + ", priority=" + priority + ", outdated=" + outdated + ", author=" + author + '}';
+        return "Notification{" + "title='" + title + '\'' + ", text='" + text + '\'' + ", notificationDate=" + notificationDate + ", target='" + target + '\'' + ", priority="
+                + priority + ", outdated=" + outdated + ", author=" + author + '}';
     }
 }

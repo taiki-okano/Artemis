@@ -62,6 +62,14 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
             """)
     Set<Exercise> findAllExercisesWithCurrentOrUpcomingDueDate(@Param("now") ZonedDateTime now);
 
+    @Query("""
+            SELECT e FROM Exercise e
+            WHERE e.course.testCourse = FALSE
+            	AND e.releaseDate >= :#{#now}
+            ORDER BY e.dueDate ASC
+            """)
+    Set<Exercise> findAllExercisesWithCurrentOrUpcomingReleaseDate(@Param("now") ZonedDateTime now);
+
     /**
      * Select Exercise for Course ID WHERE there does exist an LtiOutcomeUrl for the current user (-> user has started exercise once using LTI)
      * @param courseId the id of the course
@@ -424,7 +432,7 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
      * calculates the average score and the participation rate of students for each given course exercise (team or individual)
      * by using the last result (rated or not)
      *
-     * @param exerciseIds              - list of exercise ids (must be belong to the same course)
+     * @param exerciseIds              - list of exercise ids (must belong to the same course)
      * @param useParticipantScoreTable use the participant score table instead of going through participation -> submission -> result
      * @return the list of {@link CourseExerciseStatisticsDTO}
      * @throws IllegalArgumentException if exercise is not found in database, exercise is not a course exercise or not all exercises are from the same course
@@ -445,7 +453,7 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
             exercisesFromDb.add(exerciseFromDb);
         }
 
-        List<Long> uniqueCourseIds = exercisesFromDb.stream().map(exercise -> exercise.getCourseViaExerciseGroupOrCourseMember().getId()).distinct().collect(Collectors.toList());
+        List<Long> uniqueCourseIds = exercisesFromDb.stream().map(exercise -> exercise.getCourseViaExerciseGroupOrCourseMember().getId()).distinct().toList();
         if (uniqueCourseIds.size() > 1) {
             throw new IllegalArgumentException("Not all exercises are from the same course");
         }
@@ -506,8 +514,8 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
      * @return Map which maps from exercise id to statistic query row data
      */
     private Map<Long, Object[]> getRawStatisticQueryData(List<Exercise> exercisesFromDb, boolean useParticipantScoreTable) {
-        List<Exercise> individualExercises = exercisesFromDb.stream().filter(exercise -> exercise.getMode().equals(ExerciseMode.INDIVIDUAL)).collect(Collectors.toList());
-        List<Exercise> teamExercises = exercisesFromDb.stream().filter(exercise -> exercise.getMode().equals(ExerciseMode.TEAM)).collect(Collectors.toList());
+        List<Exercise> individualExercises = exercisesFromDb.stream().filter(exercise -> exercise.getMode().equals(ExerciseMode.INDIVIDUAL)).toList();
+        List<Exercise> teamExercises = exercisesFromDb.stream().filter(exercise -> exercise.getMode().equals(ExerciseMode.TEAM)).toList();
 
         List<Object[]> statisticForIndividualExercises;
         List<Object[]> statisticTeamExercises;

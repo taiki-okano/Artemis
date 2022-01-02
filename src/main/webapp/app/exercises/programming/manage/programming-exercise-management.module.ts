@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { ArtemisProgrammingExerciseManagementRoutingModule } from 'app/exercises/programming/manage/programming-exercise-management-routing.module';
-import { ProgrammingExerciseUtilsModule } from 'app/exercises/programming/shared/utils/programming-exercise-utils.module';
 import { ProgrammingExerciseDetailComponent } from 'app/exercises/programming/manage/programming-exercise-detail.component';
 import { ArtemisAssessmentSharedModule } from 'app/assessment/assessment-shared.module';
 import { ArtemisProgrammingAssessmentModule } from 'app/exercises/programming/assess/programming-assessment.module';
@@ -22,11 +21,11 @@ import { ArtemisPlagiarismModule } from 'app/exercises/shared/plagiarism/plagiar
 import { ProgrammingExerciseInstructorRepoDownloadComponent } from '../shared/actions/programming-exercise-instructor-repo-download.component';
 import { ArtemisProgrammingExerciseLifecycleModule } from 'app/exercises/programming/shared/lifecycle/programming-exercise-lifecycle.module';
 import { ProgrammingExerciseInstructorExerciseDownloadComponent } from '../shared/actions/programming-exercise-instructor-exercise-download.component';
+import { SubmissionResultStatusModule } from 'app/overview/submission-result-status.module';
 
 @NgModule({
     imports: [
         ArtemisSharedModule,
-        ProgrammingExerciseUtilsModule,
         ArtemisSharedComponentModule,
         ArtemisResultModule,
         ArtemisAssessmentSharedModule,
@@ -43,6 +42,7 @@ import { ProgrammingExerciseInstructorExerciseDownloadComponent } from '../share
         AssessmentInstructionsModule,
         OrionModule,
         ArtemisProgrammingExerciseLifecycleModule,
+        SubmissionResultStatusModule,
     ],
     declarations: [
         ProgrammingExerciseDetailComponent,

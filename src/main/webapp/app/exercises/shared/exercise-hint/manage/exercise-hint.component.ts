@@ -3,12 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { JhiEventManager } from 'ng-jhipster';
 
 import { ExerciseHint } from 'app/entities/exercise-hint.model';
 import { ExerciseHintService } from './exercise-hint.service';
 import { onError } from 'app/shared/util/global.utils';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faEye, faPlus, faTimes, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-exercise-hint',
@@ -24,12 +25,13 @@ export class ExerciseHintComponent implements OnInit, OnDestroy {
 
     paramSub: Subscription;
 
-    constructor(
-        private route: ActivatedRoute,
-        protected exerciseHintService: ExerciseHintService,
-        private jhiAlertService: JhiAlertService,
-        protected eventManager: JhiEventManager,
-    ) {}
+    // Icons
+    faPlus = faPlus;
+    faTimes = faTimes;
+    faEye = faEye;
+    faWrench = faWrench;
+
+    constructor(private route: ActivatedRoute, protected exerciseHintService: ExerciseHintService, private alertService: AlertService, protected eventManager: EventManager) {}
 
     /**
      * Subscribes to the route params to act on the currently selected exercise.
@@ -67,7 +69,7 @@ export class ExerciseHintComponent implements OnInit, OnDestroy {
                 (res: ExerciseHint[]) => {
                     this.exerciseHints = res;
                 },
-                (res: HttpErrorResponse) => onError(this.jhiAlertService, res),
+                (res: HttpErrorResponse) => onError(this.alertService, res),
             );
     }
 

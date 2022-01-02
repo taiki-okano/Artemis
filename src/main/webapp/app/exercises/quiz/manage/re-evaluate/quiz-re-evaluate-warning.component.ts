@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiEventManager } from 'ng-jhipster';
 import { QuizReEvaluateService } from './quiz-re-evaluate.service';
 import { ShortAnswerQuestion } from 'app/entities/quiz/short-answer-question.model';
 import { QuizExerciseService } from 'app/exercises/quiz/manage/quiz-exercise.service';
@@ -8,6 +7,8 @@ import { QuizQuestion, QuizQuestionType } from 'app/entities/quiz/quiz-question.
 import { DragAndDropQuestion } from 'app/entities/quiz/drag-and-drop-question.model';
 import { MultipleChoiceQuestion } from 'app/entities/quiz/multiple-choice-question.model';
 import { QuizExercise } from 'app/entities/quiz/quiz-exercise.model';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faBan, faCheck, faCheckCircle, faSpinner, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-quiz-re-evaluate-warning',
@@ -32,9 +33,16 @@ export class QuizReEvaluateWarningComponent implements OnInit {
     quizExercise: QuizExercise;
     backUpQuiz: QuizExercise;
 
+    // Icons
+    faBan = faBan;
+    faSpinner = faSpinner;
+    faTimes = faTimes;
+    faCheck = faCheck;
+    faCheckCircle = faCheckCircle;
+
     constructor(
         public activeModal: NgbActiveModal,
-        private eventManager: JhiEventManager,
+        private eventManager: EventManager,
         private quizExerciseService: QuizExerciseService,
         private quizReEvaluateService: QuizReEvaluateService,
     ) {}

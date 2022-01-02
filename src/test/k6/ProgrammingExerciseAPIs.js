@@ -10,7 +10,7 @@ import {
     deleteProgrammingExercise,
 } from './requests/programmingExercise.js';
 import { startExercise } from './requests/exercises.js';
-import { deleteCourse, newCourse } from './requests/course.js';
+import { addUserToInstructorsInCourse, deleteCourse, newCourse } from './requests/course.js';
 import { createUsersIfNeeded } from './requests/user.js';
 import { allSuccessfulContentJava, buildErrorContentJava, someSuccessfulErrorContentJava } from './resource/constants_java.js';
 import { allSuccessfulContentPython, buildErrorContentPython, someSuccessfulErrorContentPython } from './resource/constants_python.js';
@@ -55,6 +55,8 @@ export function setup() {
 
         const instructorUsername = baseUsername.replace('USERID', '101');
         const instructorPassword = basePassword.replace('USERID', '101');
+
+        addUserToInstructorsInCourse(artemis, instructorUsername, course.id);
 
         // Login to Artemis
         artemis = login(instructorUsername, instructorPassword);
@@ -126,7 +128,7 @@ export default function (data) {
     }
 
     group('Participate in Programming Exercise', function () {
-        let participationId = startExercise(artemis, courseId, exerciseId).id;
+        let participationId = startExercise(artemis, exerciseId).id;
         if (participationId) {
             // partial success, then 100%, then build error -- wait some time between submissions in order to the build server time for the result
             let simulation = new ParticipationSimulation(timeoutParticipation, exerciseId, participationId, someSuccessfulErrorContent);

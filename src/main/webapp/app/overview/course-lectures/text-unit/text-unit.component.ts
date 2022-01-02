@@ -1,8 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
+import { faExternalLinkAlt, faScroll } from '@fortawesome/free-solid-svg-icons';
 import { TextUnit } from 'app/entities/lecture-unit/textUnit.model';
 import { ArtemisMarkdownService } from 'app/shared/markdown.service';
-import { SERVER_API_URL } from 'app/app.constants';
+import { htmlForMarkdown } from 'app/shared/util/markdown.conversion.util';
 
 @Component({
     selector: 'jhi-text-unit',
@@ -15,6 +16,10 @@ export class TextUnitComponent implements OnInit {
     isCollapsed = true;
 
     formattedContent?: SafeHtml;
+
+    // Icons
+    faExternalLinkAlt = faExternalLinkAlt;
+    faScroll = faScroll;
 
     constructor(private artemisMarkdown: ArtemisMarkdownService) {}
 
@@ -38,7 +43,7 @@ export class TextUnitComponent implements OnInit {
         win!.document.write('</head><body class="markdown-body">');
         win!.document.write('</body></html>');
         win!.document.close();
-        win!.document.body.innerHTML = this.artemisMarkdown.htmlForMarkdown(this.textUnit.content, []);
+        win!.document.body.innerHTML = htmlForMarkdown(this.textUnit.content, []);
         win!.focus();
     }
 }

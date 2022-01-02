@@ -9,12 +9,13 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.bamboo.specs.api.builders.AtlassianModule;
@@ -57,7 +58,7 @@ import de.tum.in.www1.artemis.exception.ContinuousIntegrationBuildPlanException;
 import de.tum.in.www1.artemis.service.ResourceLoaderService;
 import de.tum.in.www1.artemis.service.connectors.ContinuousIntegrationService.RepositoryCheckoutPath;
 import de.tum.in.www1.artemis.service.connectors.VersionControlService;
-import io.github.jhipster.config.JHipsterConstants;
+import tech.jhipster.config.JHipsterConstants;
 
 @Service
 @Profile("bamboo")
@@ -202,11 +203,29 @@ public class BambooBuildPlanService {
                 var tasks = readScriptTasksFromTemplate(programmingLanguage, "", sequentialBuildRuns, false, null);
                 tasks.add(0, checkoutTask);
                 defaultJob.tasks(tasks.toArray(new Task[0]));
+
                 // Final tasks:
                 final TestParserTask testParserTask = new TestParserTask(TestParserTaskProperties.TestType.JUNIT).resultDirectories("test-reports/*results.xml");
-                final ScriptTask cleanupTask = new ScriptTask().description("cleanup").inlineBody("sudo rm -rf tests/\nsudo rm -rf assignment/\nsudo rm -rf test-reports/");
-                defaultJob.finalTasks(testParserTask, cleanupTask);
+                defaultJob.finalTasks(testParserTask);
+
+                if (Boolean.TRUE.equals(staticCodeAnalysisEnabled)) {
+                    // Create artifacts and a final task for the execution of static code analysis
+                    List<StaticCodeAnalysisTool> staticCodeAnalysisTools = StaticCodeAnalysisTool.getToolsForProgrammingLanguage(ProgrammingLanguage.C);
+                    Artifact[] artifacts = staticCodeAnalysisTools.stream()
+                            .map(tool -> new Artifact().name(tool.getArtifactLabel()).location("target").copyPattern(tool.getFilePattern()).shared(false)).toArray(Artifact[]::new);
+                    defaultJob.artifacts(artifacts);
+                    var scaTasks = readScriptTasksFromTemplate(programmingLanguage, "", false, true, null);
+                    defaultJob.finalTasks(scaTasks.toArray(new Task[0]));
+                }
+
+                // Do not remove target, so the report can be sent to Artemis
+                final ScriptTask cleanupTask = new ScriptTask().description("cleanup").inlineBody("""
+                        sudo rm -rf tests/
+                        sudo rm -rf assignment/
+                        sudo rm -rf test-reports/""");
+                defaultJob.finalTasks(cleanupTask);
                 defaultStage.jobs(defaultJob);
+
                 return defaultStage;
             }
             case HASKELL, OCAML -> {
@@ -219,7 +238,11 @@ public class BambooBuildPlanService {
                 var isXcodeProject = ProjectType.XCODE.equals(projectType);
                 var subDirectory = isXcodeProject ? "/xcode" : "";
                 Map<String, String> replacements = Map.of("${packageName}", packageName);
-                final var testParserTask = new TestParserTask(TestParserTaskProperties.TestType.JUNIT).resultDirectories("**/tests.xml");
+                var testParserTask = new TestParserTask(TestParserTaskProperties.TestType.JUNIT).resultDirectories("**/tests.xml");
+                if (isXcodeProject) {
+                    testParserTask = new TestParserTask(TestParserTaskProperties.TestType.JUNIT).resultDirectories("**/report.junit");
+                    replacements = Map.of("${appName}", packageName);
+                }
                 var tasks = readScriptTasksFromTemplate(programmingLanguage, subDirectory, sequentialBuildRuns, false, replacements);
                 tasks.add(0, checkoutTask);
                 defaultJob.tasks(tasks.toArray(new Task[0])).finalTasks(testParserTask);
@@ -234,8 +257,8 @@ public class BambooBuildPlanService {
                     defaultJob.finalTasks(scaTasks.toArray(new Task[0]));
                 }
                 if (isXcodeProject) {
-                    // add a requirement to be able to run the Xcode build tasks
-                    var requirement = new Requirement("system.builder.xcode.Simulator - iOS 14.5");
+                    // add a requirement to be able to run the Xcode build tasks using fastlane
+                    var requirement = new Requirement("system.builder.fastlane.fastlane");
                     defaultJob.requirements(requirement);
                 }
                 return defaultStage.jobs(defaultJob);
@@ -261,7 +284,7 @@ public class BambooBuildPlanService {
 
     private Plan createDefaultBuildPlan(String planKey, String planDescription, String projectKey, String projectName, String repositoryName, String vcsTestRepositorySlug,
             boolean checkoutSolutionRepository, String vcsSolutionRepositorySlug, List<AuxiliaryRepository.AuxRepoNameWithSlug> auxiliaryRepositories) {
-        List<VcsRepositoryIdentifier> vcsTriggerRepositories = new LinkedList<>();
+        List<VcsRepositoryIdentifier> vcsTriggerRepositories = new ArrayList<>();
         // Trigger the build when a commit is pushed to the ASSIGNMENT_REPO.
         vcsTriggerRepositories.add(new VcsRepositoryIdentifier(ASSIGNMENT_REPO_NAME));
         // Trigger the build when a commit is pushed to the TEST_REPO only for the

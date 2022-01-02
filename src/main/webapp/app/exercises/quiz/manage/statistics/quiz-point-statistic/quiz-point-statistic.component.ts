@@ -1,10 +1,7 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import { ChartOptions, ChartType } from 'chart.js';
-import { calculateHeightOfChart, createOptions, DataSet, DataSetProvider } from '../quiz-statistic/quiz-statistic.component';
 import { Subscription } from 'rxjs';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { QuizStatisticUtil } from 'app/exercises/quiz/shared/quiz-statistic-util.service';
 import { AccountService } from 'app/core/auth/account.service';
 import { JhiWebsocketService } from 'app/core/websocket/websocket.service';
@@ -14,39 +11,45 @@ import { QuizPointStatistic } from 'app/entities/quiz/quiz-point-statistic.model
 import { QuizExercise } from 'app/entities/quiz/quiz-exercise.model';
 import { Authority } from 'app/shared/constants/authority.constants';
 import { blueColor } from 'app/exercises/quiz/manage/statistics/question-statistic.component';
-import { BaseChartDirective, Color } from 'ng2-charts';
 import { UI_RELOAD_TIME } from 'app/shared/constants/exercise-exam-constants';
+import { round } from 'app/shared/util/utils';
+import { QuizStatisticsDirective } from 'app/exercises/quiz/manage/statistics/quiz-statistics.directive';
+import { TranslateService } from '@ngx-translate/core';
+import { faSync } from '@fortawesome/free-solid-svg-icons';
+import { calculateMaxScore } from 'app/exercises/quiz/manage/statistics/quiz-statistic/quiz-statistics.utils';
 
 @Component({
     selector: 'jhi-quiz-point-statistic',
     templateUrl: './quiz-point-statistic.component.html',
+    styleUrls: ['./quiz-point-statistic.component.scss'],
 })
-export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetProvider {
-    @ViewChild(BaseChartDirective) chart: BaseChartDirective;
+export class QuizPointStatisticComponent extends QuizStatisticsDirective implements OnInit, OnDestroy {
+    readonly round = round;
 
     quizExercise: QuizExercise;
     quizPointStatistic: QuizPointStatistic;
     private sub: Subscription;
 
     labels: string[] = [];
-    data: number[] = [];
-    colors: Color[] = [];
-    chartType: ChartType = 'bar';
-    datasets: DataSet[] = [];
 
     label: string[] = [];
-    ratedData: number[] = [];
-    unratedData: number[] = [];
     backgroundColor: string[] = [];
 
     maxScore: number;
-    rated = true;
-    participants: number;
     websocketChannelForData: string;
     quizExerciseChannel: string;
 
-    // options for chart.js style
-    options: ChartOptions;
+    // variables for ngx-charts
+    legend = false;
+    showXAxisLabel = true;
+    showYAxisLabel = true;
+    xAxis = true;
+    yAxis = true;
+    roundEdges = true;
+    showDataLabel = true;
+    height = 500;
+    tooltipDisabled = true;
+    animations = false;
 
     // timer
     waitingForQuizStart = false;
@@ -54,15 +57,21 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
     remainingTimeSeconds = 0;
     interval: any;
 
+    // Icons
+    faSync = faSync;
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private accountService: AccountService,
-        private translateService: TranslateService,
+        protected translateService: TranslateService,
         private quizExerciseService: QuizExerciseService,
         private quizStatisticUtil: QuizStatisticUtil,
         private jhiWebsocketService: JhiWebsocketService,
-    ) {}
+        protected changeDetector: ChangeDetectorRef,
+    ) {
+        super(translateService);
+    }
 
     ngOnInit() {
         this.sub = this.route.params.subscribe((params) => {
@@ -102,6 +111,7 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
         this.interval = setInterval(() => {
             this.updateDisplayedTimes();
         }, UI_RELOAD_TIME);
+        this.changeDetector.detectChanges();
     }
 
     /**
@@ -112,9 +122,9 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
         // update remaining time
         if (this.quizExercise && this.quizExercise.adjustedDueDate) {
             const endDate = this.quizExercise.adjustedDueDate;
-            if (endDate.isAfter(moment())) {
+            if (endDate.isAfter(dayjs())) {
                 // quiz is still running => calculate remaining seconds and generate text based on that
-                this.remainingTimeSeconds = endDate.diff(moment(), 'seconds');
+                this.remainingTimeSeconds = endDate.diff(dayjs(), 'seconds');
                 this.remainingTimeText = this.relativeTimeText(this.remainingTimeSeconds);
             } else {
                 // quiz is over => set remaining seconds to negative, to deactivate 'Submit' button
@@ -149,14 +159,6 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
         this.jhiWebsocketService.unsubscribe(this.websocketChannelForData);
     }
 
-    getDataSets() {
-        return this.datasets;
-    }
-
-    getParticipants() {
-        return this.participants;
-    }
-
     /**
      * load the new quizPointStatistic from the server if the Websocket has been notified
      *
@@ -186,26 +188,12 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
             this.router.navigate(['courses']);
         }
         this.quizExercise = quizExercise;
-        this.quizExercise.adjustedDueDate = moment().add(this.quizExercise.remainingTime, 'seconds');
+        this.quizExercise.adjustedDueDate = dayjs().add(this.quizExercise.remainingTime!, 'seconds');
         this.waitingForQuizStart = !this.quizExercise.started;
         this.quizPointStatistic = this.quizExercise.quizPointStatistic!;
-        this.maxScore = this.calculateMaxScore();
+        this.maxScore = calculateMaxScore(this.quizExercise);
 
         this.loadData();
-    }
-
-    /**
-     * calculate the maximal  possible Score for the quiz
-     *
-     * @return (number): sum over the Scores of all questions
-     */
-    calculateMaxScore() {
-        let result = 0;
-
-        this.quizExercise.quizQuestions!.forEach((question) => {
-            result = result + question.points!;
-        });
-        return result;
     }
 
     /**
@@ -225,8 +213,8 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
             this.backgroundColor.push(blueColor);
         });
 
-        this.labels = this.label;
-        this.colors = this.backgroundColor.map((backgroundColor) => ({ backgroundColor }));
+        this.chartLabels = this.label;
+        this.ngxColor.domain = this.backgroundColor;
 
         // load data into the chart
         this.loadDataInDiagram();
@@ -236,27 +224,12 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
      * check if the rated or unrated
      * load the rated or unrated data into the diagram
      */
-    loadDataInDiagram() {
-        if (this.rated) {
-            this.participants = this.quizPointStatistic.participantsRated!;
-            this.data = this.ratedData;
-        } else {
-            // load the unrated data
-            this.participants = this.quizPointStatistic.participantsUnrated!;
-            this.data = this.unratedData;
-        }
-
-        this.datasets = [{ data: this.data, backgroundColor: this.colors.map((color) => color.backgroundColor as string) }];
-        // recalculate the height of the chart because rated/unrated might have changed or new results might have appeared
-        const height = calculateHeightOfChart(this);
+    loadDataInDiagram(): void {
+        this.setData(this.quizPointStatistic);
+        this.pushDataToNgxEntry(this.changeDetector);
 
         // add Axes-labels based on selected language
-        const xLabel = this.translateService.instant('showStatistic.quizPointStatistic.xAxes');
-        const yLabel = this.translateService.instant('showStatistic.quizPointStatistic.yAxes');
-        this.options = createOptions(this, height, height / 5, xLabel, yLabel);
-        if (this.chart) {
-            this.chart.update(0);
-        }
+        this.setAxisLabels('showStatistic.quizPointStatistic.xAxes', 'showStatistic.quizPointStatistic.yAxes');
     }
 
     /**
@@ -268,16 +241,6 @@ export class QuizPointStatisticComponent implements OnInit, OnDestroy, DataSetPr
         this.quizExerciseService.recalculate(this.quizExercise.id!).subscribe((res) => {
             this.loadQuizSuccess(res.body!);
         });
-    }
-
-    /**
-     * switch between showing and hiding the solution in the chart
-     *  1. change the amount of  participants
-     *  2. change the bar-Data
-     */
-    switchRated() {
-        this.rated = !this.rated;
-        this.loadDataInDiagram();
     }
 
     /**

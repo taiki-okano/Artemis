@@ -3,9 +3,9 @@ package de.tum.in.www1.artemis;
 import static de.tum.in.www1.artemis.config.Constants.*;
 import static de.tum.in.www1.artemis.domain.enumeration.BuildPlanType.*;
 import static de.tum.in.www1.artemis.util.TestConstants.COMMIT_HASH_OBJECT_ID;
-import static io.github.jhipster.config.JHipsterConstants.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static tech.jhipster.config.JHipsterConstants.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -86,8 +86,8 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
         gitlabRequestMockProvider.mockGetDefaultBranch("master", exercise.getVcsTemplateRepositoryUrl());
         gitlabRequestMockProvider.mockAddAuthenticatedWebHook();
         jenkinsRequestMockProvider.mockCreateProjectForExercise(exercise, failToCreateCiProject);
-        jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, TEMPLATE.getName());
-        jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, SOLUTION.getName());
+        jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, TEMPLATE.getName(), false);
+        jenkinsRequestMockProvider.mockCreateBuildPlan(projectKey, SOLUTION.getName(), false);
         jenkinsRequestMockProvider.mockTriggerBuild(projectKey, TEMPLATE.getName(), false);
         jenkinsRequestMockProvider.mockTriggerBuild(projectKey, SOLUTION.getName(), false);
 
@@ -166,8 +166,8 @@ public abstract class AbstractSpringIntegrationJenkinsGitlabTest extends Abstrac
     private void mockSetupBuildPlansForNewExercise(ProgrammingExercise exerciseToBeImported) throws Exception {
         final var targetProjectKey = exerciseToBeImported.getProjectKey();
         jenkinsRequestMockProvider.mockCreateProjectForExercise(exerciseToBeImported, false);
-        jenkinsRequestMockProvider.mockCreateBuildPlan(targetProjectKey, TEMPLATE.getName());
-        jenkinsRequestMockProvider.mockCreateBuildPlan(targetProjectKey, SOLUTION.getName());
+        jenkinsRequestMockProvider.mockCreateBuildPlan(targetProjectKey, TEMPLATE.getName(), false);
+        jenkinsRequestMockProvider.mockCreateBuildPlan(targetProjectKey, SOLUTION.getName(), false);
         jenkinsRequestMockProvider.mockTriggerBuild(targetProjectKey, TEMPLATE.getName(), false);
         jenkinsRequestMockProvider.mockTriggerBuild(targetProjectKey, SOLUTION.getName(), false);
     }

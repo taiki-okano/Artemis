@@ -1,10 +1,10 @@
 package de.tum.in.www1.artemis.domain;
 
+import static de.tum.in.www1.artemis.domain.enumeration.ExerciseType.PROGRAMMING;
+
 import java.net.MalformedURLException;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -14,12 +14,16 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.tum.in.www1.artemis.domain.enumeration.*;
 import de.tum.in.www1.artemis.domain.participation.Participation;
 import de.tum.in.www1.artemis.domain.participation.SolutionProgrammingExerciseParticipation;
 import de.tum.in.www1.artemis.domain.participation.TemplateProgrammingExerciseParticipation;
+import de.tum.in.www1.artemis.domain.submissionpolicy.SubmissionPolicy;
 
 /**
  * A ProgrammingExercise.
@@ -68,9 +72,6 @@ public class ProgrammingExercise extends Exercise {
     @Column(name = "show_test_names_to_students", table = "programming_exercise_details")
     private boolean showTestNamesToStudents;
 
-    @Column(name = "allow_complaints_for_automatic_assessments", table = "programming_exercise_details")
-    private boolean allowComplaintsForAutomaticAssessments;
-
     @Nullable
     @Column(name = "build_and_test_student_submissions_after_due_date", table = "programming_exercise_details")
     private ZonedDateTime buildAndTestStudentSubmissionsAfterDueDate;
@@ -100,6 +101,11 @@ public class ProgrammingExercise extends Exercise {
     @JsonIgnoreProperties("exercise")
     private Set<StaticCodeAnalysisCategory> staticCodeAnalysisCategories = new HashSet<>();
 
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(unique = true, name = "submission_policy_id")
+    @JsonIgnoreProperties("programmingExercise")
+    private SubmissionPolicy submissionPolicy;
+
     @Transient
     private boolean isLocalSimulationTransient;
 
@@ -111,7 +117,7 @@ public class ProgrammingExercise extends Exercise {
      * This boolean flag determines whether the solution repository should be checked out during the build (additional to the student's submission).
      * This property is only used when creating the exercise (the client sets this value when POSTing the new exercise to the server).
      * It is not persisted as this setting can not be changed afterwards.
-     * This is currently only supported for HASKELL on BAMBOO, thus the default value is false.
+     * This is currently only supported for HASKELL and OCAML on BAMBOO, thus the default value is false.
      */
     @Transient
     @JsonProperty
@@ -137,11 +143,6 @@ public class ProgrammingExercise extends Exercise {
         }
     }
 
-    @JsonIgnore
-    public String getTemplateRepositoryName() {
-        return getRepositoryNameFor(getTemplateRepositoryUrl(), RepositoryType.TEMPLATE);
-    }
-
     /**
      * Convenience getter. The actual URL is stored in the {@link SolutionProgrammingExerciseParticipation}
      *
@@ -161,46 +162,12 @@ public class ProgrammingExercise extends Exercise {
         }
     }
 
-    @JsonIgnore
-    public String getSolutionRepositoryName() {
-        return getRepositoryNameFor(getSolutionRepositoryUrl(), RepositoryType.SOLUTION);
-    }
-
     public void setTestRepositoryUrl(String testRepositoryUrl) {
         this.testRepositoryUrl = testRepositoryUrl;
     }
 
     public String getTestRepositoryUrl() {
         return testRepositoryUrl;
-    }
-
-    /**
-     * Returns the test repository name of the exercise. Test test repository name is extracted from the test repository url.
-     *
-     * @return the test repository name if a valid test repository url is set. Otherwise returns null!
-     */
-    public String getTestRepositoryName() {
-        return getRepositoryNameFor(getTestRepositoryUrl(), RepositoryType.TESTS);
-    }
-
-    /**
-     * Get the repository name for any stored repository, i.e. the slug of the repository.
-     *
-     * @param repoUrl The full URL of the repository
-     * @param repoType The repository type, meaning one of the base repositories (template, solution, test)
-     * @return The full repository slug for the given URL
-     */
-    private String getRepositoryNameFor(final String repoUrl, final RepositoryType repoType) {
-        if (repoUrl == null) {
-            return null;
-        }
-
-        Pattern pattern = Pattern.compile(".*/(.*-" + repoType.getName() + ")\\.git");
-        Matcher matcher = pattern.matcher(repoUrl);
-        if (!matcher.matches() || matcher.groupCount() != 1)
-            return null;
-
-        return matcher.group(1);
     }
 
     public List<AuxiliaryRepository> getAuxiliaryRepositories() {
@@ -346,7 +313,8 @@ public class ProgrammingExercise extends Exercise {
 
     /**
      * Get the latest (potentially) graded submission for a programming exercise.
-     * Programming submissions work differently in this regard as a submission without a result does not mean it is not rated/assessed, but that e.g. the CI system failed to deliver the build results.
+     * Programming submissions work differently in this regard as a submission without a result does not mean it is not rated/assessed,
+     * but that e.g. the CI system failed to deliver the build results.
      *
      * @param submissions Submissions for the given student.
      * @return the latest graded submission.
@@ -359,9 +327,23 @@ public class ProgrammingExercise extends Exercise {
             if (result != null) {
                 return checkForRatedAndAssessedResult(result);
             }
-            return this.getDueDate() == null || submission.getType().equals(SubmissionType.INSTRUCTOR) || submission.getType().equals(SubmissionType.TEST)
-                    || submission.getSubmissionDate().isBefore(this.getDueDate());
+            return this.getDueDate() == null || SubmissionType.INSTRUCTOR.equals(submission.getType()) || SubmissionType.TEST.equals(submission.getType())
+                    || submission.getSubmissionDate().isBefore(getRelevantDueDateForSubmission(submission));
         }).max(Comparator.comparing(Submission::getSubmissionDate)).orElse(null);
+    }
+
+    private ZonedDateTime getRelevantDueDateForSubmission(Submission submission) {
+        if (submission.getParticipation().getIndividualDueDate() != null) {
+            return submission.getParticipation().getIndividualDueDate();
+        }
+        else {
+            return this.getDueDate();
+        }
+    }
+
+    @Override
+    public ExerciseType getExerciseType() {
+        return PROGRAMMING;
     }
 
     public ProgrammingLanguage getProgrammingLanguage() {
@@ -405,6 +387,14 @@ public class ProgrammingExercise extends Exercise {
         if (this.solutionParticipation != null) {
             this.solutionParticipation.setProgrammingExercise(this);
         }
+    }
+
+    public SubmissionPolicy getSubmissionPolicy() {
+        return this.submissionPolicy;
+    }
+
+    public void setSubmissionPolicy(SubmissionPolicy submissionPolicy) {
+        this.submissionPolicy = submissionPolicy;
     }
 
     // jhipster-needle-entity-add-getters-setters - Jhipster will add getters and setters here, do not remove
@@ -483,7 +473,7 @@ public class ProgrammingExercise extends Exercise {
             case TEMPLATE -> this.getVcsTemplateRepositoryUrl();
             case SOLUTION -> this.getVcsSolutionRepositoryUrl();
             case TESTS -> this.getVcsTestRepositoryUrl();
-            default -> throw new UnsupportedOperationException("Can retrieve URL for repositorytype " + repositoryType);
+            default -> throw new UnsupportedOperationException("Can retrieve URL for repository type " + repositoryType);
         };
     }
 
@@ -521,10 +511,7 @@ public class ProgrammingExercise extends Exercise {
 
     @JsonProperty("sequentialTestRuns")
     public boolean hasSequentialTestRuns() {
-        if (sequentialTestRuns == null) {
-            return false;
-        }
-        return sequentialTestRuns;
+        return Objects.requireNonNullElse(sequentialTestRuns, false);
     }
 
     public void setSequentialTestRuns(Boolean sequentialTestRuns) {
@@ -539,14 +526,6 @@ public class ProgrammingExercise extends Exercise {
         this.showTestNamesToStudents = showTestNamesToStudents;
     }
 
-    public boolean getAllowComplaintsForAutomaticAssessments() {
-        return allowComplaintsForAutomaticAssessments;
-    }
-
-    public void setAllowComplaintsForAutomaticAssessments(boolean allowComplaintsForAutomaticAssessments) {
-        this.allowComplaintsForAutomaticAssessments = allowComplaintsForAutomaticAssessments;
-    }
-
     @Nullable
     public ZonedDateTime getBuildAndTestStudentSubmissionsAfterDueDate() {
         return buildAndTestStudentSubmissionsAfterDueDate;
@@ -557,10 +536,7 @@ public class ProgrammingExercise extends Exercise {
     }
 
     public boolean getTestCasesChanged() {
-        if (testCasesChanged == null) {
-            return false;
-        }
-        return testCasesChanged;
+        return Objects.requireNonNullElse(testCasesChanged, false);
     }
 
     public void setTestCasesChanged(boolean testCasesChanged) {
@@ -577,7 +553,7 @@ public class ProgrammingExercise extends Exercise {
 
     public boolean needsLockOperation() {
         return isExamExercise() || AssessmentType.AUTOMATIC != getAssessmentType() || getBuildAndTestStudentSubmissionsAfterDueDate() != null
-                || allowComplaintsForAutomaticAssessments;
+                || getAllowComplaintsForAutomaticAssessments();
     }
 
     @Nullable
@@ -609,7 +585,7 @@ public class ProgrammingExercise extends Exercise {
      */
     @Override
     public Set<Result> findResultsFilteredForStudents(Participation participation) {
-        return participation.getResults().stream().filter(result -> checkForAssessedResult(result)).collect(Collectors.toSet());
+        return participation.getResults().stream().filter(this::checkForAssessedResult).collect(Collectors.toSet());
     }
 
     /**
@@ -619,7 +595,7 @@ public class ProgrammingExercise extends Exercise {
     public boolean areManualResultsAllowed() {
         // Only allow manual results for programming exercises if option was enabled and due dates have passed;
         final var relevantDueDate = getBuildAndTestStudentSubmissionsAfterDueDate() != null ? getBuildAndTestStudentSubmissionsAfterDueDate() : getDueDate();
-        return (getAssessmentType() == AssessmentType.SEMI_AUTOMATIC || allowComplaintsForAutomaticAssessments)
+        return (getAssessmentType() == AssessmentType.SEMI_AUTOMATIC || getAllowComplaintsForAutomaticAssessments())
                 && (relevantDueDate == null || relevantDueDate.isBefore(ZonedDateTime.now()));
     }
 
@@ -636,7 +612,7 @@ public class ProgrammingExercise extends Exercise {
      * This checks if the current result has a completion date and if the assessment is over
      *
      * @param result The current result
-     * @return true if the result is manual and the assessment is over or it is an automatic result, false otherwise
+     * @return true if the result is manual and the assessment is over, or it is an automatic result, false otherwise
      */
     private boolean checkForAssessedResult(Result result) {
         boolean isAssessmentOver = getAssessmentDueDate() == null || getAssessmentDueDate().isBefore(ZonedDateTime.now());

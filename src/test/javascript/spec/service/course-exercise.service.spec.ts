@@ -2,8 +2,6 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { fakeAsync, getTestBed, TestBed, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { SERVER_API_URL } from 'app/app.constants';
-import { CourseExerciseService } from 'app/course/manage/course-management.service';
 import { Course } from 'app/entities/course.model';
 import { Exercise } from 'app/entities/exercise.model';
 import { FileUploadExercise } from 'app/entities/file-upload-exercise.model';
@@ -11,17 +9,13 @@ import { ModelingExercise, UMLDiagramType } from 'app/entities/modeling-exercise
 import { StudentParticipation } from 'app/entities/participation/student-participation.model';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
 import { TextExercise } from 'app/entities/text-exercise.model';
-import * as chai from 'chai';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { take } from 'rxjs/operators';
-import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
 import { MockRouter } from '../helpers/mocks/mock-router';
 import { MockSyncStorage } from '../helpers/mocks/service/mock-sync-storage.service';
 import { MockTranslateService } from '../helpers/mocks/service/mock-translate.service';
-chai.use(sinonChai);
-const expect = chai.expect;
+import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 
 describe('Course Management Service', () => {
     let injector: TestBed;
@@ -38,9 +32,9 @@ describe('Course Management Service', () => {
     let textExercise: TextExercise;
 
     let fileUploadExercise: FileUploadExercise;
-    let releaseDate: moment.Moment;
-    let dueDate: moment.Moment;
-    let assessmentDueDate: moment.Moment;
+    let releaseDate: dayjs.Dayjs;
+    let dueDate: dayjs.Dayjs;
+    let assessmentDueDate: dayjs.Dayjs;
 
     let releaseDateString: string;
     let dueDateString: string;
@@ -66,12 +60,12 @@ describe('Course Management Service', () => {
         course.title = 'testTitle';
         const releaseDateRaw = new Date();
         releaseDateRaw.setMonth(3);
-        releaseDate = moment(releaseDateRaw);
+        releaseDate = dayjs(releaseDateRaw);
         const dueDateRaw = new Date();
         dueDateRaw.setMonth(6);
-        dueDate = moment(dueDateRaw);
+        dueDate = dayjs(dueDateRaw);
         const assessmentDueDateRaw = new Date();
-        assessmentDueDate = moment(assessmentDueDateRaw);
+        assessmentDueDate = dayjs(assessmentDueDateRaw);
 
         releaseDateString = releaseDateRaw.toISOString();
         dueDateString = dueDateRaw.toISOString();
@@ -107,13 +101,13 @@ describe('Course Management Service', () => {
     });
 
     const expectDateConversionToBeDone = (exerciseToCheck: Exercise, withoutAssessmentDueDate?: boolean) => {
-        expect(moment.isMoment(exerciseToCheck.releaseDate)).to.be.true;
-        expect(exerciseToCheck.releaseDate?.toISOString()).to.equal(releaseDateString);
-        expect(moment.isMoment(exerciseToCheck.dueDate)).to.be.true;
-        expect(exerciseToCheck.dueDate?.toISOString()).to.equal(dueDateString);
+        expect(dayjs.isDayjs(exerciseToCheck.releaseDate)).toBe(true);
+        expect(exerciseToCheck.releaseDate?.toISOString()).toBe(releaseDateString);
+        expect(dayjs.isDayjs(exerciseToCheck.dueDate)).toBe(true);
+        expect(exerciseToCheck.dueDate?.toISOString()).toBe(dueDateString);
         if (!withoutAssessmentDueDate) {
-            expect(moment.isMoment(exerciseToCheck.assessmentDueDate)).to.be.true;
-            expect(exerciseToCheck.assessmentDueDate?.toISOString()).to.equal(assessmentDueDateString);
+            expect(dayjs.isDayjs(exerciseToCheck.assessmentDueDate)).toBe(true);
+            expect(exerciseToCheck.assessmentDueDate?.toISOString()).toBe(assessmentDueDateString);
         }
     };
 
@@ -134,7 +128,7 @@ describe('Course Management Service', () => {
         service
             .findAllProgrammingExercisesForCourse(course.id!)
             .pipe(take(1))
-            .subscribe((res) => expect(res.body).to.deep.equal([programmingExercise]));
+            .subscribe((res) => expect(res.body).toEqual([programmingExercise]));
 
         requestAndExpectDateConversion('GET', `${resourceUrl}/${course.id}/programming-exercises/`, returnedFromService, programmingExercise);
         tick();
@@ -145,7 +139,7 @@ describe('Course Management Service', () => {
         service
             .findAllModelingExercisesForCourse(course.id!)
             .pipe(take(1))
-            .subscribe((res) => expect(res.body).to.deep.equal([modelingExercise]));
+            .subscribe((res) => expect(res.body).toEqual([modelingExercise]));
 
         requestAndExpectDateConversion('GET', `${resourceUrl}/${course.id}/modeling-exercises/`, returnedFromService, modelingExercise);
         tick();
@@ -156,7 +150,7 @@ describe('Course Management Service', () => {
         service
             .findAllTextExercisesForCourse(course.id!)
             .pipe(take(1))
-            .subscribe((res) => expect(res.body).to.deep.equals([textExercise]));
+            .subscribe((res) => expect(res.body).toEqual([textExercise]));
 
         requestAndExpectDateConversion('GET', `${resourceUrl}/${course.id}/text-exercises/`, returnedFromService, textExercise);
         tick();
@@ -167,7 +161,7 @@ describe('Course Management Service', () => {
         service
             .findAllFileUploadExercisesForCourse(course.id!)
             .pipe(take(1))
-            .subscribe((res) => expect(res.body).to.deep.equals([fileUploadExercise]));
+            .subscribe((res) => expect(res.body).toEqual([fileUploadExercise]));
 
         requestAndExpectDateConversion('GET', `${resourceUrl}/${course.id}/file-upload-exercises/`, returnedFromService, fileUploadExercise);
         tick();
@@ -186,12 +180,12 @@ describe('Course Management Service', () => {
             participation,
         );
         service
-            .startExercise(course.id!, exerciseId)
+            .startExercise(exerciseId)
             .pipe(take(1))
-            .subscribe((res) => expect(res).to.deep.equals(expected));
+            .subscribe((res) => expect(res).toEqual(expected));
 
-        requestAndExpectDateConversion('POST', `${resourceUrl}/${course.id}/exercises/${exerciseId}/participations`, returnedFromService, participation.exercise, true);
-        expect(programmingExercise.studentParticipations?.[0]?.id).to.eq(participationId);
+        requestAndExpectDateConversion('POST', SERVER_API_URL + `api/exercises/${exerciseId}/participations`, returnedFromService, participation.exercise, true);
+        expect(programmingExercise.studentParticipations?.[0]?.id).toBe(participationId);
         tick();
     }));
 
@@ -208,23 +202,17 @@ describe('Course Management Service', () => {
             participation,
         );
         service
-            .resumeProgrammingExercise(course.id!, exerciseId)
+            .resumeProgrammingExercise(exerciseId)
             .pipe(take(1))
-            .subscribe((res) => expect(res).to.deep.equals(expected));
+            .subscribe((res) => expect(res).toEqual(expected));
 
-        requestAndExpectDateConversion(
-            'PUT',
-            `${resourceUrl}/${course.id}/exercises/${exerciseId}/resume-programming-participation`,
-            returnedFromService,
-            participation.exercise,
-            true,
-        );
-        expect(programmingExercise.studentParticipations?.[0]?.id).to.eq(participationId);
+        requestAndExpectDateConversion('PUT', SERVER_API_URL + `api/exercises/${exerciseId}/resume-programming-participation`, returnedFromService, participation.exercise, true);
+        expect(programmingExercise.studentParticipations?.[0]?.id).toBe(participationId);
         tick();
     }));
 
     afterEach(() => {
         httpMock.verify();
-        sinon.restore();
+        jest.restoreAllMocks();
     });
 });

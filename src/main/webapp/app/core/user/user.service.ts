@@ -2,9 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { createRequestOption } from 'app/shared/util/request-util';
+import { createRequestOption } from 'app/shared/util/request.util';
 import { User } from 'app/core/user/user.model';
-import { SERVER_API_URL } from 'app/app.constants';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -35,8 +34,8 @@ export class UserService {
      * @param login The login of the user to find.
      * @return Observable<HttpResponse<User>> with the found user as body.
      */
-    find(login: string): Observable<HttpResponse<User>> {
-        return this.http.get<User>(`${this.resourceUrl}/${login}`, { observe: 'response' });
+    find(login: string): Observable<User> {
+        return this.http.get<User>(`${this.resourceUrl}/${login}`);
     }
 
     /**
@@ -72,6 +71,15 @@ export class UserService {
      */
     updateLastNotificationRead(): Observable<HttpResponse<void>> {
         return this.http.put<void>(`${this.resourceUrl}/notification-date`, null, { observe: 'response' });
+    }
+
+    /**
+     * Updates the property that decides what notifications should be displayed or hidden in the notification sidebar based on notification date.
+     * If the value is set to null -> show all notifications
+     * (Not to be confused with the notification settings. This filter is only based on the date a notification was created)
+     */
+    updateNotificationVisibility(showAllNotifications: boolean): Observable<HttpResponse<void>> {
+        return this.http.put<void>(`${this.resourceUrl}/notification-visibility`, showAllNotifications, { observe: 'response' });
     }
 
     /**

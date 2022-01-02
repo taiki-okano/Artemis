@@ -4,8 +4,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 
 import de.tum.in.www1.artemis.config.Constants;
 import de.tum.in.www1.artemis.domain.*;
@@ -24,6 +24,8 @@ import de.tum.in.www1.artemis.domain.notification.SystemNotification;
 import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseStudentParticipation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
 import de.tum.in.www1.artemis.domain.quiz.*;
+import de.tum.in.www1.artemis.domain.submissionpolicy.LockRepositoryPolicy;
+import de.tum.in.www1.artemis.domain.submissionpolicy.SubmissionPenaltyPolicy;
 import de.tum.in.www1.artemis.security.Role;
 import de.tum.in.www1.artemis.service.connectors.bamboo.dto.BambooBuildLogDTO;
 import de.tum.in.www1.artemis.service.connectors.bamboo.dto.BambooBuildPlanDTO;
@@ -33,7 +35,7 @@ import de.tum.in.www1.artemis.service.dto.StaticCodeAnalysisReportDTO;
 
 public class ModelFactory {
 
-    public static final String USER_PASSWORD = "0000";
+    public static final String USER_PASSWORD = "00000000";
 
     public static Lecture generateLecture(ZonedDateTime startDate, ZonedDateTime endDate, Course course) {
         Lecture lecture = new Lecture();
@@ -498,6 +500,7 @@ public class ModelFactory {
         course.setExercises(exercises);
         course.setOnlineCourse(false);
         course.setPresentationScore(2);
+        course.setAccuracyOfScores(1);
         return course;
     }
 
@@ -630,8 +633,8 @@ public class ModelFactory {
 
     public static List<GradingInstruction> generateGradingInstructions(GradingCriterion criterion, int numberOfTestInstructions, int usageCount) {
         var instructions = new ArrayList<GradingInstruction>();
-        var exampleInstruction1 = new GradingInstruction();
         while (numberOfTestInstructions > 0) {
+            var exampleInstruction1 = new GradingInstruction();
             exampleInstruction1.setGradingCriterion(criterion);
             exampleInstruction1.setCredits(1);
             exampleInstruction1.setGradingScale("good test");
@@ -691,6 +694,16 @@ public class ModelFactory {
         negativeFeedback.setText("bad");
         negativeFeedback.setType(type);
         return negativeFeedback;
+    }
+
+    @NotNull
+    public static Feedback createManualTextFeedback(Double credits, String textBlockReference) {
+        Feedback feedback = new Feedback();
+        feedback.setCredits(credits);
+        feedback.setText("bad");
+        feedback.setType(FeedbackType.MANUAL);
+        feedback.setReference(textBlockReference);
+        return feedback;
     }
 
     public static List<Feedback> generateStaticCodeAnalysisFeedbackList(int numOfFeedback) {
@@ -769,6 +782,7 @@ public class ModelFactory {
         toBeImported.setCategories(template.getCategories());
         toBeImported.setPackageName(template.getPackageName());
         toBeImported.setAllowOnlineEditor(template.isAllowOnlineEditor());
+        toBeImported.setAllowOfflineIde(template.isAllowOfflineIde());
         toBeImported.setStaticCodeAnalysisEnabled(template.isStaticCodeAnalysisEnabled());
         toBeImported.setTutorParticipations(null);
         toBeImported.setPosts(null);
@@ -869,6 +883,21 @@ public class ModelFactory {
         apollonDiagram.setDiagramType(diagramType);
         apollonDiagram.setTitle(title);
         return apollonDiagram;
+    }
+
+    public static LockRepositoryPolicy generateLockRepositoryPolicy(int submissionLimit, boolean active) {
+        LockRepositoryPolicy policy = new LockRepositoryPolicy();
+        policy.setSubmissionLimit(submissionLimit);
+        policy.setActive(active);
+        return policy;
+    }
+
+    public static SubmissionPenaltyPolicy generateSubmissionPenaltyPolicy(int submissionLimit, double penalty, boolean active) {
+        SubmissionPenaltyPolicy policy = new SubmissionPenaltyPolicy();
+        policy.setSubmissionLimit(submissionLimit);
+        policy.setExceedingPenalty(penalty);
+        policy.setActive(active);
+        return policy;
     }
 
     /**
@@ -1144,6 +1173,7 @@ public class ModelFactory {
             case CHECKSTYLE -> "coding";
             case PMD_CPD -> "Copy/Paste Detection";
             case SWIFTLINT -> "swiftLint"; // TODO: rene: set better value after categories are better defined
+            case GCC -> "Memory";
         };
 
         var issue = new StaticCodeAnalysisReportDTO.StaticCodeAnalysisIssue();

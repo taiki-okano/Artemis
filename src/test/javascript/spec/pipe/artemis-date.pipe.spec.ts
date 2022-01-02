@@ -1,50 +1,37 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
-import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import * as moment from 'moment';
-import { ArtemisDatePipe } from 'app/shared/pipes/artemis-date.pipe';
+import dayjs from 'dayjs';
+import { ArtemisDatePipe, GERMAN_SHORT_DATE_FORMAT } from 'app/shared/pipes/artemis-date.pipe';
 import { MockTranslateService } from '../helpers/mocks/service/mock-translate.service';
-
-chai.use(sinonChai);
-const expect = chai.expect;
 
 describe('ArtemisDatePipe', () => {
     let pipe: ArtemisDatePipe;
     let translateService: TranslateService;
-    const dateTime = moment({
-        year: 2020,
-        month: 3,
-        day: 14,
-        hour: 9,
-        minute: 27,
-        seconds: 3,
-    }); // 2020-04-14 09:27:03
+    const dateTime = dayjs().year(2020).month(3).date(14).hour(9).minute(27).second(3); // 2020-03-14 09:27:03
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [ArtemisDatePipe],
             providers: [{ provide: TranslateService, useClass: MockTranslateService }],
-        });
-        translateService = TestBed.inject(TranslateService);
-        pipe = new ArtemisDatePipe(translateService);
+        })
+            .compileComponents()
+            .then(() => {
+                translateService = TestBed.inject(TranslateService);
+                pipe = new ArtemisDatePipe(translateService);
+            });
     });
 
-    it('Return empty string if given date time is null', () => {
+    it('Return empty string if given date time is null or undefined', () => {
         let localizedDateTime = pipe.transform(null);
-        expect(localizedDateTime).to.be.equal('');
-        localizedDateTime = pipe.transform(moment(null));
-        expect(localizedDateTime).to.be.equal('');
+        expect(localizedDateTime).toBe('');
+        localizedDateTime = pipe.transform(undefined);
+        expect(localizedDateTime).toBe('');
     });
 
-    it('Return empty string if given date time is invalid moment object', () => {
-        const invalidMoment = moment({
-            year: 2019,
-            month: 2,
-            day: 333,
-        }); // 2019-02-333
-        const localizedDateTime = pipe.transform(invalidMoment);
-        expect(localizedDateTime).to.be.equal('');
+    it('Return empty string if given date time is invalid dayjs object', () => {
+        const invalidDayjs = dayjs('1993-51-11', 'YYYY-MM-DD', true);
+        const localizedDateTime = pipe.transform(invalidDayjs);
+        expect(localizedDateTime).toBe('');
     });
 
     describe('en locale', () => {
@@ -57,41 +44,41 @@ describe('ArtemisDatePipe', () => {
             it('Should return format equal to "2020-04-14 09:27" with format parameter set to "short"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short');
                 const format = 'YYYY-MM-DD HH:mm';
-                expect(ArtemisDatePipe.format('en', 'short')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('2020-04-14 09:27');
+                expect(ArtemisDatePipe.format('en', 'short')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('2020-04-14 09:27');
             });
 
             it('Should return format equal to "Apr 14, 2020 09:27" with format parameter set to "long"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long');
                 const format = 'll HH:mm';
-                expect(ArtemisDatePipe.format('en', 'long')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('Apr 14, 2020 09:27');
+                expect(ArtemisDatePipe.format('en', 'long')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('Apr 14, 2020 09:27');
             });
 
             it('Should return format equal to "2020-04-14" with format parameter set to "short-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short-date');
                 const format = 'YYYY-MM-DD';
-                expect(ArtemisDatePipe.format('en', 'short-date')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('2020-04-14');
+                expect(ArtemisDatePipe.format('en', 'short-date')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('2020-04-14');
             });
 
             it('Should return format equal to "Apr 14, 2020" with format parameter set to "long-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long-date');
                 const format = 'll';
-                expect(ArtemisDatePipe.format('en', 'long-date')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('Apr 14, 2020');
+                expect(ArtemisDatePipe.format('en', 'long-date')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('Apr 14, 2020');
             });
 
             it('Should return format equal to "09:27" with format parameter set to "time"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'time');
                 const format = 'HH:mm';
-                expect(ArtemisDatePipe.format('en', 'time')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('09:27');
+                expect(ArtemisDatePipe.format('en', 'time')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('09:27');
             });
         });
 
@@ -99,41 +86,41 @@ describe('ArtemisDatePipe', () => {
             it('Should return format equal to "2020-04-14 09:27:03" with format parameter set to "short"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short', true);
                 const format = 'YYYY-MM-DD HH:mm:ss';
-                expect(ArtemisDatePipe.format('en', 'short', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('2020-04-14 09:27:03');
+                expect(ArtemisDatePipe.format('en', 'short', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('2020-04-14 09:27:03');
             });
 
             it('Should return format equal to "Apr 14, 2020 09:27:03" with format parameter set to "long"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long', true);
                 const format = 'll HH:mm:ss';
-                expect(ArtemisDatePipe.format('en', 'long', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('Apr 14, 2020 09:27:03');
+                expect(ArtemisDatePipe.format('en', 'long', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('Apr 14, 2020 09:27:03');
             });
 
             it('Should return format equal to "2020-04-14" with format parameter set to "short-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short-date', true);
                 const format = 'YYYY-MM-DD';
-                expect(ArtemisDatePipe.format('en', 'short-date', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('2020-04-14');
+                expect(ArtemisDatePipe.format('en', 'short-date', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('2020-04-14');
             });
 
             it('Should return format equal to "Apr 14, 2020" with format parameter set to "long-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long-date', true);
                 const format = 'll';
-                expect(ArtemisDatePipe.format('en', 'long-date', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('Apr 14, 2020');
+                expect(ArtemisDatePipe.format('en', 'long-date', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('Apr 14, 2020');
             });
 
             it('Should return format equal to "09:27:03" with format parameter set to "time"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'time', true);
                 const format = 'HH:mm:ss';
-                expect(ArtemisDatePipe.format('en', 'time', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('09:27:03');
+                expect(ArtemisDatePipe.format('en', 'time', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('09:27:03');
             });
         });
     });
@@ -148,41 +135,41 @@ describe('ArtemisDatePipe', () => {
             it('Should return format equal to "14.04.2020 09:27" with format parameter set to "short"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short');
                 const format = 'DD.MM.YYYY HH:mm';
-                expect(ArtemisDatePipe.format('de', 'short')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14.04.2020 09:27');
+                expect(ArtemisDatePipe.format('de', 'short')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14.04.2020 09:27');
             });
 
             it('Should return format equal to "14. Apr. 2020 09:27" with format parameter set to "long"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long');
-                const format = 'll HH:mm';
-                expect(ArtemisDatePipe.format('de', 'long')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14. Apr. 2020 09:27');
+                const format = GERMAN_SHORT_DATE_FORMAT + ' HH:mm';
+                expect(ArtemisDatePipe.format('de', 'long')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14. Apr. 2020 09:27');
             });
 
             it('Should return format equal to "14.04.2020" with format parameter set to "short-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short-date');
                 const format = 'DD.MM.YYYY';
-                expect(ArtemisDatePipe.format('de', 'short-date')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14.04.2020');
+                expect(ArtemisDatePipe.format('de', 'short-date')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14.04.2020');
             });
 
             it('Should return format equal to "14. Apr. 2020" with format parameter set to "long-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long-date');
-                const format = 'll';
-                expect(ArtemisDatePipe.format('de', 'long-date')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14. Apr. 2020');
+                const format = GERMAN_SHORT_DATE_FORMAT;
+                expect(ArtemisDatePipe.format('de', 'long-date')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14. Apr. 2020');
             });
 
             it('Should return format equal to "09:27" with format parameter set to "time"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'time');
                 const format = 'HH:mm';
-                expect(ArtemisDatePipe.format('de', 'time')).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('09:27');
+                expect(ArtemisDatePipe.format('de', 'time')).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('09:27');
             });
         });
 
@@ -190,41 +177,41 @@ describe('ArtemisDatePipe', () => {
             it('Should return format equal to "14.04.2020 09:27:03" with format parameter set to "short"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short', true);
                 const format = 'DD.MM.YYYY HH:mm:ss';
-                expect(ArtemisDatePipe.format('de', 'short', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14.04.2020 09:27:03');
+                expect(ArtemisDatePipe.format('de', 'short', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14.04.2020 09:27:03');
             });
 
             it('Should return format equal to "14. Apr. 2020 09:27:03" with format parameter set to "long"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long', true);
-                const format = 'll HH:mm:ss';
-                expect(ArtemisDatePipe.format('de', 'long', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14. Apr. 2020 09:27:03');
+                const format = GERMAN_SHORT_DATE_FORMAT + ' HH:mm:ss';
+                expect(ArtemisDatePipe.format('de', 'long', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14. Apr. 2020 09:27:03');
             });
 
             it('Should return format equal to "14.04.2020" with format parameter set to "short-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'short-date', true);
                 const format = 'DD.MM.YYYY';
-                expect(ArtemisDatePipe.format('de', 'short-date', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14.04.2020');
+                expect(ArtemisDatePipe.format('de', 'short-date', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14.04.2020');
             });
 
             it('Should return format equal to "14. Apr. 2020" with format parameter set to "long-date"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'long-date', true);
-                const format = 'll';
-                expect(ArtemisDatePipe.format('de', 'long-date', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('14. Apr. 2020');
+                const format = GERMAN_SHORT_DATE_FORMAT;
+                expect(ArtemisDatePipe.format('de', 'long-date', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('14. Apr. 2020');
             });
 
             it('Should return format equal to "09:27:03" with format parameter set to "time"', () => {
                 const localizedDateTime = pipe.transform(dateTime, 'time', true);
                 const format = 'HH:mm:ss';
-                expect(ArtemisDatePipe.format('de', 'time', true)).to.be.equal(format);
-                expect(localizedDateTime).to.be.equal(dateTime.format(format));
-                expect(localizedDateTime).to.be.equal('09:27:03');
+                expect(ArtemisDatePipe.format('de', 'time', true)).toBe(format);
+                expect(localizedDateTime).toBe(dateTime.format(format));
+                expect(localizedDateTime).toBe('09:27:03');
             });
         });
     });

@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ContentChild, ElementRef, EventEmitter, Input, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
-import { AceEditorComponent } from 'ng2-ace-editor';
+// Note: this import has to be before the 'brace' imports
+import { AceEditorComponent } from 'app/shared/markdown-editor/ace-editor/ace-editor.component';
 import 'brace/theme/chrome';
 import 'brace/mode/markdown';
 import 'brace/mode/latex';
@@ -9,7 +10,7 @@ import { Interactable } from '@interactjs/core/Interactable';
 import interact from 'interactjs';
 import { ArtemisMarkdownService } from 'app/shared/markdown.service';
 import { FileUploaderService } from 'app/shared/http/file-uploader.service';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { ColorSelectorComponent } from 'app/shared/color-selector/color-selector.component';
 import { DomainTagCommand } from './domainCommands/domainTag.command';
 import { escapeStringForUseInRegex } from 'app/shared/util/global.utils';
@@ -31,6 +32,7 @@ import { DomainCommand } from 'app/shared/markdown-editor/domainCommands/domainC
 import { UnorderedListCommand } from 'app/shared/markdown-editor/commands/unorderedListCommand';
 import { HeadingThreeCommand } from 'app/shared/markdown-editor/commands/headingThree.command';
 import { CodeBlockCommand } from 'app/shared/markdown-editor/commands/codeblock.command';
+import { faGripLines, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 
 export enum MarkdownEditorHeight {
     SMALL = 200,
@@ -156,7 +158,11 @@ export class MarkdownEditorComponent implements AfterViewInit {
     @Input()
     shouldDisplayAlert = true;
 
-    constructor(private artemisMarkdown: ArtemisMarkdownService, private fileUploaderService: FileUploaderService, private jhiAlertService: JhiAlertService) {}
+    // Icons
+    faQuestionCircle = faQuestionCircle;
+    faGripLines = faGripLines;
+
+    constructor(private artemisMarkdown: ArtemisMarkdownService, private fileUploaderService: FileUploaderService, private alertService: AlertService) {}
 
     /** {boolean} true when the plane html view is needed, false when the preview content is needed from the parent */
     get showDefaultPreview(): boolean {
@@ -440,8 +446,8 @@ export class MarkdownEditorComponent implements AfterViewInit {
             const extension = file.name.split('.').pop()!.toLocaleLowerCase();
             if (this.acceptedFileExtensions.split(',').indexOf(extension) === -1) {
                 const errorMessage = `Unsupported file type! Only files of type ${this.acceptedFileExtensions} allowed.`;
-                const jhiAlert = this.jhiAlertService.error(errorMessage);
-                jhiAlert.msg = errorMessage;
+                const jhiAlert = this.alertService.error(errorMessage);
+                jhiAlert.message = errorMessage;
             } else {
                 this.fileUploaderService.uploadMarkdownFile(file).then(
                     (res) => {
@@ -453,8 +459,8 @@ export class MarkdownEditorComponent implements AfterViewInit {
                         aceEditor.insert(textToAdd);
                     },
                     (error: Error) => {
-                        const jhiAlert = this.jhiAlertService.error(error.message);
-                        jhiAlert.msg = error.message;
+                        const jhiAlert = this.alertService.error(error.message);
+                        jhiAlert.message = error.message;
                     },
                 );
             }

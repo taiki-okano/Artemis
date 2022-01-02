@@ -1,9 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
-import { JhiEventManager } from 'ng-jhipster';
 import { TextExerciseService } from 'app/exercises/text/manage/text-exercise/text-exercise.service';
 import { TextExercise } from 'app/entities/text-exercise.model';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faBook, faTable, faTimes, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faListAlt } from '@fortawesome/free-regular-svg-icons';
 
 @Component({
     selector: 'jhi-text-exercise-row-buttons',
@@ -15,7 +17,15 @@ export class TextExerciseRowButtonsComponent {
     private dialogErrorSource = new Subject<string>();
     dialogError$ = this.dialogErrorSource.asObservable();
 
-    constructor(private textExerciseService: TextExerciseService, private eventManager: JhiEventManager) {}
+    // Icons
+    faTimes = faTimes;
+    faBook = faBook;
+    faWrench = faWrench;
+    faUsers = faUsers;
+    faTable = faTable;
+    farListAlt = faListAlt;
+
+    constructor(private textExerciseService: TextExerciseService, private eventManager: EventManager) {}
 
     deleteExercise() {
         this.textExerciseService.delete(this.exercise.id!).subscribe(

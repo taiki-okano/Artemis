@@ -1,7 +1,7 @@
 import { BaseEntity } from 'app/shared/model/base-entity';
 import { Participation } from 'app/entities/participation/participation.model';
 import { Result } from 'app/entities/result.model';
-import { Moment } from 'moment';
+import dayjs from 'dayjs';
 
 export const enum SubmissionType {
     MANUAL = 'MANUAL',
@@ -24,7 +24,7 @@ export const enum SubmissionExerciseType {
 export abstract class Submission implements BaseEntity {
     public id?: number;
     public submitted?: boolean;
-    public submissionDate?: Moment;
+    public submissionDate?: dayjs.Dayjs;
     public type?: SubmissionType;
     public exampleSubmission?: boolean;
     public submissionExerciseType?: SubmissionExerciseType;
@@ -42,6 +42,9 @@ export abstract class Submission implements BaseEntity {
 
     // only used for exam to check if it is saved to server
     public isSynced?: boolean;
+
+    // client-side property, shows the number of elements used in the example submission
+    public submissionSize?: number;
 
     protected constructor(submissionExerciseType: SubmissionExerciseType) {
         this.submissionExerciseType = submissionExerciseType;
@@ -143,12 +146,15 @@ export function getFirstResultWithComplaint(submission: Submission | undefined):
     }
 }
 
-/**
- * Calculates the status of a submission by inspecting the result. Returns true if the submission is a draft, or false if it is done
- * @param submission which to check
- * @param correctionRound for which to get status
- */
-export function calculateSubmissionStatusIsDraft(submission: Submission, correctionRound = 0): boolean {
-    const tmpResult = submission.results?.[correctionRound];
-    return !(tmpResult && tmpResult!.completionDate && Result.isManualResult(tmpResult!));
+export function reconnectSubmissions(submissions: Submission[]): void {
+    return submissions.forEach((submission: Submission) => {
+        // reconnect some associations
+        const latestResult = getLatestSubmissionResult(submission);
+        if (latestResult) {
+            latestResult.submission = submission;
+            latestResult.participation = submission.participation;
+            submission.participation!.results = [latestResult!];
+            setLatestSubmissionResult(submission, latestResult);
+        }
+    });
 }

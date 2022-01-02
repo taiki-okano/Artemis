@@ -4,6 +4,7 @@ import static de.tum.in.www1.artemis.config.Constants.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -34,9 +35,9 @@ import de.tum.in.www1.artemis.web.rest.dto.PageableSearchDTO;
 import de.tum.in.www1.artemis.web.rest.errors.*;
 import de.tum.in.www1.artemis.web.rest.util.HeaderUtil;
 import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
-import io.github.jhipster.web.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
+import tech.jhipster.web.util.PaginationUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing users.
@@ -275,6 +276,23 @@ public class UserResource {
         log.debug("REST request to update notification date for logged in user");
         User user = userRepository.getUser();
         userRepository.updateUserNotificationReadDate(user.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Updates the HideNotificationsUntil property that indicates which notifications to show (based on their creation date)
+     *
+     * @param showAllNotifications is true if all notifications should be displayed in the sidebar else depending on the HideNotificationsUntil property
+     * @return void
+     */
+    @PutMapping("/users/notification-visibility")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> updateUserNotificationVisibility(@RequestBody boolean showAllNotifications) {
+        log.debug("REST request to update notification visibility for logged in user");
+        User user = userRepository.getUser();
+        // if all notifications (regardless of their creation date) should be shown hideUntil should be null
+        ZonedDateTime hideUntil = showAllNotifications ? null : ZonedDateTime.now();
+        userService.updateUserNotificationVisibility(user.getId(), hideUntil);
         return ResponseEntity.ok().build();
     }
 }

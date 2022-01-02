@@ -3,13 +3,14 @@ import { ActivatedRoute } from '@angular/router';
 import { ApollonEditor, ApollonMode, Locale, UMLModel } from '@ls1intum/apollon';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { JhiLanguageHelper } from 'app/core/language/language.helper';
-import { JhiLanguageService } from 'ng-jhipster';
 import { ApollonQuizExerciseGenerationComponent } from './exercise-generation/apollon-quiz-exercise-generation.component';
 import { convertRenderedSVGToPNG } from './exercise-generation/svg-renderer';
 import { ApollonDiagramService } from 'app/exercises/quiz/manage/apollon-diagrams/apollon-diagram.service';
 import { ApollonDiagram } from 'app/entities/apollon-diagram.model';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { AUTOSAVE_CHECK_INTERVAL, AUTOSAVE_EXERCISE_INTERVAL } from 'app/shared/constants/exercise-exam-constants';
+import { TranslateService } from '@ngx-translate/core';
+import { faDownload, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-apollon-diagram-detail',
@@ -40,10 +41,14 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
         return !!this.apollonEditor && !![...this.apollonEditor.selection.elements, ...this.apollonEditor.selection.relationships].length;
     }
 
+    // Icons
+    faDownload = faDownload;
+    faQuestionCircle = faQuestionCircle;
+
     constructor(
         private apollonDiagramService: ApollonDiagramService,
-        private jhiAlertService: JhiAlertService,
-        private languageService: JhiLanguageService,
+        private alertService: AlertService,
+        private translateService: TranslateService,
         private languageHelper: JhiLanguageHelper,
         private modalService: NgbModal,
         private route: ActivatedRoute,
@@ -68,7 +73,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
                     this.setAutoSaveTimer();
                 },
                 () => {
-                    this.jhiAlertService.error('artemisApp.apollonDiagram.detail.error.loading');
+                    this.alertService.error('artemisApp.apollonDiagram.detail.error.loading');
                 },
             );
         });
@@ -103,7 +108,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
             mode: ApollonMode.Exporting,
             model: initialModel,
             type: this.apollonDiagram!.diagramType,
-            locale: this.languageService.currentLang as Locale,
+            locale: this.translateService.currentLang as Locale,
         });
     }
 
@@ -123,7 +128,7 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
 
         this.apollonDiagramService.update(updatedDiagram, this.courseId).subscribe(
             () => this.setAutoSaveTimer(),
-            () => this.jhiAlertService.error('artemisApp.apollonDiagram.update.error'),
+            () => this.alertService.error('artemisApp.apollonDiagram.update.error'),
         );
     }
 
@@ -159,10 +164,10 @@ export class ApollonDiagramDetailComponent implements OnInit, OnDestroy {
         try {
             const result = await modalRef.result;
             if (result) {
-                this.jhiAlertService.success('artemisApp.apollonDiagram.create.success', { title: result.title });
+                this.alertService.success('artemisApp.apollonDiagram.create.success', { title: result.title });
             }
         } catch (error) {
-            this.jhiAlertService.error('artemisApp.apollonDiagram.create.error');
+            this.alertService.error('artemisApp.apollonDiagram.create.error');
             throw error;
         }
     }

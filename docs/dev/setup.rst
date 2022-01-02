@@ -27,21 +27,44 @@ following dependencies/tools on your machine:
 2. `MySQL Database Server 8 <https://dev.mysql.com/downloads/mysql>`__:
    Artemis uses Hibernate to store entities in a MySQL database.
    Download and install the MySQL Community Server (8.0.x) and configure
-   the ‘root’ user with an empty password. (In case you want to use a
-   different password, make sure to change the value in
-   application-dev.yml and in liquibase.gradle). The required Artemis
-   scheme will be created / updated automatically at startup time of the
-   server application. Alternatively, you can run the MySQL Database
-   Server inside a Docker container using
-   e.g. ``docker-compose -f src/main/docker/mysql.yml up``
-3. `Node.js <https://nodejs.org>`__: We use Node LTS (>=14.15.0 < 15) to compile
+   the ‘root’ user with an empty password.
+   (In case you want to use a different password, make sure to change the value in
+   ``application-local.yml`` *(spring > datasource > password)* and in ``liquibase.gradle`` *(within the 'liquibaseCommand' as argument password)*).
+   The required Artemis scheme will be created / updated automatically at startup time of the
+   server application.
+   Alternatively, you can run the MySQL Database Server inside a Docker container using e.g. ``docker-compose -f src/main/docker/mysql.yml up``
+   In case you are using a computer with an arm64 processor you might want to change the used image
+   in the mysql.yml file. Using e.g. ``ubuntu/mysql:8.0-21.10_beta`` will let the MySQL database
+   run natively on arm64 processors.
+3. `Node.js <https://nodejs.org/en/download>`__: We use Node LTS (>=16.13.0 < 17) to compile
    and run the client Angular application. Depending on your system, you
    can install Node either from source or as a pre-packaged bundle.
-4. `Yarn <https://classic.yarnpkg.com>`__: We use Yarn (>=1.22.4 <2) to
-   manage client side Node dependencies. Depending on your system, you
-   can install Yarn either from source or as a pre-packaged bundle. To
-   do so, please follow the instructions on the `Yarn installation
-   page <https://classic.yarnpkg.com/en/docs/install>`__.
+4. `Npm <https://nodejs.org/en/download>`__: We use Npm (>=8.1.0) to
+   manage client side dependencies. Npm is typically bundled with Node.js,
+   but can also be installed separately.
+
+
+MySQL Setup
+------------
+
+If you run your own MySQL server, make sure to specify the default ``character-set``
+as ``utf8mb4`` and the default ``collation`` as ``utf8mb4_unicode_ci``.
+You can achieve this e.g. by using a ``my.cnf`` file in the location ``/etc``.
+
+.. code::
+
+    [client]
+    default-character-set = utf8mb4
+    [mysql]
+    default-character-set = utf8mb4
+    [mysqld]
+    character-set-client-handshake = TRUE
+    init-connect='SET NAMES utf8mb4'
+    character-set-server = utf8mb4
+    collation-server = utf8mb4_unicode_ci
+
+Make sure the configuration file is used by MySQL when you start the server.
+You can find more information on `<https://dev.mysql.com/doc/refman/8.0/en/option-files.html>`__
 
 Server Setup
 ------------
@@ -50,8 +73,12 @@ To start the Artemis application server from the development
 environment, first import the project into IntelliJ and then make sure
 to install the Spring Boot plugins to run the main class
 ``de.tum.in.www1.artemis.ArtemisApp``. Before the application runs, you
-have to configure the file ``application-artemis.yml`` in the folder
-``src/main/resources/config``.
+have to change some configuration options.
+You can change the options directly in the file ``application-artemis.yml`` in the folder
+``src/main/resources/config``. However, you have to be careful that you do not
+accidentally commit your password. Therefore, we strongly recommend, to create a new file
+``application-local.yml`` in the folder ``src/main/resources/config`` which is ignored by default.
+You can override the following configuration options in this file.
 
 .. code:: yaml
 
@@ -137,12 +164,14 @@ information about the setup for programming exercises provided:
 
    Bamboo, Bitbucket and Jira <setup/bamboo-bitbucket-jira>
    Jenkins and Gitlab <setup/jenkins-gitlab>
+   Common setup problems <setup/common-problems>
    Multiple instances <setup/distributed>
    Programming Exercise adjustments <setup/programming-exercises>
+   Kubernetes <setup/kubernetes>
 
 
 .. note::
-   Be careful that you don’t commit changes to ``application-artemis.yml``.
+   Be careful that you do not commit changes to ``application-artemis.yml``.
    To avoid this, follow the best practice when configuring your local development environment:
 
    1) Create a file named ``application-local.yml`` under ``src/main/resources/config``.
@@ -150,7 +179,10 @@ information about the setup for programming exercises provided:
    3) Update configuration values in ``application-local.yml``.
 
    By default, changes to ``application-local.yml`` will be ignored by git so you don't accidentally
-   share your credentials or other local configuration options.
+   share your credentials or other local configuration options. The run configurations contain a profile
+   ``local`` at the end to make sure the ``application-local.yml`` is considered. You can create your own
+   configuration files ``application-<name>.yml`` and then activate the profile ``<name>`` in the run
+   configuration if you need additional customizations.
 
 If you use a password, you need to adapt it in
 ``gradle/liquibase.gradle``.
@@ -217,7 +249,7 @@ When you import the project into IntelliJ the run configurations will also be im
 The recommended way is to run the server and the client separated. This provides fast rebuilds of the server and hot module replacement in the client.
 
 * **Artemis (Server):** The server will be started separated from the client. The startup time decreases significantly.
-* **Artemis (Client):** Will execute ``yarn install`` and ``yarn start``. The client will be available at `http://localhost:9000/ <http://localhost:9000/>`__ with hot module replacement enabled (also see `Client Setup <#client-setup>`__).
+* **Artemis (Client):** Will execute ``npm install`` and ``npm run serve``. The client will be available at `http://localhost:9000/ <http://localhost:9000/>`__ with hot module replacement enabled (also see `Client Setup <#client-setup>`__).
 
 Other run / debug configurations
 """"""""""""""""""""""""""""""""
@@ -225,22 +257,6 @@ Other run / debug configurations
 * **Artemis (Server & Client):** Will start the server and the client. The client will be available at `http://localhost:8080/ <http://localhost:8080/>`__ with hot module replacement disabled.
 * **Artemis (Server, Jenkins & Gitlab):** The server will be started separated from the client with the profiles ``dev,jenkins,gitlab,artemis`` instead of ``dev,bamboo,bitbucket,jira,artemis``.
 * **Artemis (Server, Athene):** The server will be started separated from the client with ``athene`` profile enabled (see `Athene Service <#athene-service>`__).
-
-
-Typical problems with Liquibase checksums
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-One typical problem in the development setup is that an exception occurs
-during the database initialization. Artemis uses
-`Liquibase <https://www.liquibase.org>`__ to automatically upgrade the
-database scheme after changes to the data model. This ensures that the
-changes can also be applied to the production server. In case you
-encounter errors with liquibase checksum values, run the following
-command in your terminal / command line:
-
-::
-
-   ./gradlew liquibaseClearChecksums
 
 Run the server with Spring Boot and Spring profiles
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -326,7 +342,7 @@ This feature is disabled by default. We can enable it by modifying the configura
 Client Setup
 ------------
 
-You need to install Node and Yarn on your local machine.
+You need to install Node and Npm on your local machine.
 
 Using IntelliJ
 ^^^^^^^^^^^^^^
@@ -338,6 +354,8 @@ run configuration that will be delivered with this repository:
 * Select the ``Artemis (Client)`` configuration from the ``npm section``
 * Now you can run the configuration in the upper right corner of IntelliJ
 
+.. _UsingTheCommandLine:
+
 Using the command line
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -347,14 +365,14 @@ need to run this command when dependencies change in ``package.json``.
 
 ::
 
-   yarn install
+   npm install
 
 To start the client application in the browser, use the following
 command:
 
 ::
 
-   yarn start
+   npm run serve
 
 This compiles TypeScript code to JavaScript code, starts the hot module
 replacement feature in Webpack (i.e. whenever you change a TypeScript
@@ -365,13 +383,23 @@ above in Server Setup) and if you have configured
 ``application-artemis.yml`` correctly, then you should be able to login
 with your TUM Online account.
 
-In case you encounter any problems regarding JavaScript heap memory leaks when executing ``yarn start`` or any other scripts from ``package.json``, you can change the memory limit parameter used in the ``webpack-ts`` script in ``package.json`` to the following:
+In case you encounter any problems regarding JavaScript heap memory leaks when executing ``npm run serve`` or any other scripts from ``package.json``,
+you can add a memory limit parameter (``--max_old_space_size=5120``) in the script.
+You can do it by changing the **start** script in ``package.json`` from:
 
 ::
 
-   # This local change in `package.json` should not be committed.
-   "webpack-ts": "cross-env NODE_OPTIONS=--max_old_space_size=5120 TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack" # possible higher values are 6144, 7168, and 8192
+   "start": "ng serve --hmr",
 
+to
+
+::
+
+   "start": "node --max_old_space_size=5120 ./node_modules/@angular/cli/bin/ng serve --hmr",
+
+If you still face the issue, you can try to set a higher value than 5120. Possible values are 6144, 7168, and 8192.
+
+The same change could be applied to each **ng** command as in the example above.
 
 Make sure to **not commit this change** in ``package.json``.
 
@@ -389,7 +417,7 @@ You can define the following custom assets for Artemis to be used
 instead of the TUM defaults:
 
 * The logo next to the “Artemis” heading on the navbar → ``${artemisRunDirectory}/public/images/logo.png``
-* The favicon → ``${artemisRunDirectory}/favicon.svg``
+* The favicon → ``${artemisRunDirectory}/logo/favicon.svg``
 * The privacy statement HTML → ``${artemisRunDirectory}/public/content/privacy_statement.html``
 * The imprint statement HTML → ``${artemisRunDirectory}/public/content/imprint.html``
 * The contact email address in the ``application-{dev,prod}.yml`` configuration file under the key ``info.contact``
@@ -405,7 +433,7 @@ docker-compose:
 3. Run ``docker-compose up``
 4. Go to http://localhost:9000
 
-The client and the server will run in different containers. As yarn is
+The client and the server will run in different containers. As Npm is
 used with its live reload mode to build and run the client, any change
 in the client’s codebase will trigger a rebuild automatically. In case
 of changes in the codebase of the server one has to restart the
@@ -462,7 +490,7 @@ HTTP. We need to extend the configuration in the file
 .. _Athene: https://github.com/ls1intum/Athene
 
 Apollon Service
---------------
+---------------
 
 The `Apollon Converter`_ is needed to convert models from their JSON representaiton to PDF.
 Special configuration is required:

@@ -1,8 +1,10 @@
 package de.tum.in.www1.artemis;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.HashSet;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import de.tum.in.www1.artemis.repository.CourseRepository;
 import de.tum.in.www1.artemis.util.CourseTestService;
 import de.tum.in.www1.artemis.util.ModelFactory;
 
@@ -19,9 +22,12 @@ public class CourseBitbucketBambooJiraIntegrationTest extends AbstractSpringInte
     @Autowired
     private CourseTestService courseTestService;
 
+    @Autowired
+    private CourseRepository courseRepo;
+
     @BeforeEach
     public void setup() {
-        courseTestService.setup(this, this.groupNotificationService);
+        courseTestService.setup(this);
 
         jiraRequestMockProvider.enableMockingOfRequests();
         bitbucketRequestMockProvider.enableMockingOfRequests();
@@ -221,8 +227,8 @@ public class CourseBitbucketBambooJiraIntegrationTest extends AbstractSpringInte
 
     @Test
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
-    public void testGetCourseForInstructorDashboardWithStats() throws Exception {
-        courseTestService.testGetCourseForInstructorDashboardWithStats();
+    public void testGetCourseForAssessmentDashboard_averageRatingComputedCorrectly() throws Exception {
+        courseTestService.testGetCourseForAssessmentDashboard_averageRatingComputedCorrectly();
     }
 
     @Test
@@ -325,7 +331,7 @@ public class CourseBitbucketBambooJiraIntegrationTest extends AbstractSpringInte
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void testUpdateCourse_withExternalUserManagement_vcsUserManagementHasNotBeenCalled() throws Exception {
         var course = ModelFactory.generateCourse(1L, null, null, new HashSet<>(), "tumuser", "tutor", "editor", "instructor");
-        course = courseTestService.getCourseRepo().save(course);
+        course = courseRepo.save(course);
 
         request.put("/api/courses", course, HttpStatus.OK);
 
@@ -552,32 +558,45 @@ public class CourseBitbucketBambooJiraIntegrationTest extends AbstractSpringInte
     }
 
     @Test
-    @WithMockUser(value = "instructor1", roles = "INSTRUCTOR")
+    @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testGetAllCoursesForManagementOverview() throws Exception {
         courseTestService.testGetAllCoursesForManagementOverview();
     }
 
     @Test
-    @WithMockUser(value = "instructor1", roles = "INSTRUCTOR")
+    @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testGetExercisesForCourseOverview() throws Exception {
         courseTestService.testGetExercisesForCourseOverview();
     }
 
     @Test
-    @WithMockUser(value = "instructor1", roles = "INSTRUCTOR")
+    @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testGetExerciseStatsForCourseOverview() throws Exception {
         courseTestService.testGetExerciseStatsForCourseOverview();
     }
 
     @Test
-    @WithMockUser(value = "instructor1", roles = "INSTRUCTOR")
+    @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testGetExerciseStatsForCourseOverviewWithPastExercises() throws Exception {
         courseTestService.testGetExerciseStatsForCourseOverviewWithPastExercises();
     }
 
     @Test
-    @WithMockUser(value = "instructor1", roles = "INSTRUCTOR")
+    @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testGetCourseManagementDetailData() throws Exception {
         courseTestService.testGetCourseManagementDetailData();
+    }
+
+    @Test
+    @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
+    public void testAddUsersToCourseGroup() throws Exception {
+        String group = "students";
+        String registrationNumber1 = "1234567";
+        String registrationNumber2 = "2345678";
+        jiraRequestMockProvider.mockAddUserToGroup(group, false);
+        jiraRequestMockProvider.mockAddUserToGroup(group, false);
+        doReturn(Optional.empty()).when(ldapUserService).findByRegistrationNumber(registrationNumber1);
+        doReturn(Optional.empty()).when(ldapUserService).findByRegistrationNumber(registrationNumber2);
+        courseTestService.testAddUsersToCourseGroup(group, registrationNumber1, registrationNumber2);
     }
 }

@@ -22,10 +22,13 @@ import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.domain.quiz.QuizExercise;
 import de.tum.in.www1.artemis.repository.CourseRepository;
 import de.tum.in.www1.artemis.repository.QuizExerciseRepository;
+import de.tum.in.www1.artemis.repository.StudentParticipationRepository;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.security.Role;
 import de.tum.in.www1.artemis.service.*;
 import de.tum.in.www1.artemis.service.exam.ExamDateService;
+import de.tum.in.www1.artemis.service.messaging.InstanceMessageSendService;
+import de.tum.in.www1.artemis.service.notifications.GroupNotificationService;
 import de.tum.in.www1.artemis.service.scheduled.quiz.QuizScheduleService;
 import de.tum.in.www1.artemis.web.rest.errors.AccessForbiddenException;
 import de.tum.in.www1.artemis.web.rest.util.HeaderUtil;
@@ -56,6 +59,8 @@ public class QuizExerciseResource {
 
     private final ExerciseService exerciseService;
 
+    private final ExerciseDeletionService exerciseDeletionService;
+
     private final ExamDateService examDateService;
 
     private final QuizScheduleService quizScheduleService;
@@ -66,12 +71,18 @@ public class QuizExerciseResource {
 
     private final GroupNotificationService groupNotificationService;
 
+    private final InstanceMessageSendService instanceMessageSendService;
+
+    private final StudentParticipationRepository studentParticipationRepository;
+
     public QuizExerciseResource(QuizExerciseService quizExerciseService, QuizExerciseRepository quizExerciseRepository, CourseService courseService,
-            QuizScheduleService quizScheduleService, QuizStatisticService quizStatisticService, AuthorizationCheckService authCheckService, CourseRepository courseRepository,
-            GroupNotificationService groupNotificationService, ExerciseService exerciseService, UserRepository userRepository, ExamDateService examDateService,
-            QuizMessagingService quizMessagingService) {
+            ExerciseDeletionService exerciseDeletionServiceService, QuizScheduleService quizScheduleService, QuizStatisticService quizStatisticService,
+            AuthorizationCheckService authCheckService, CourseRepository courseRepository, GroupNotificationService groupNotificationService, ExerciseService exerciseService,
+            UserRepository userRepository, ExamDateService examDateService, QuizMessagingService quizMessagingService, InstanceMessageSendService instanceMessageSendService,
+            StudentParticipationRepository studentParticipationRepository) {
         this.quizExerciseService = quizExerciseService;
         this.quizExerciseRepository = quizExerciseRepository;
+        this.exerciseDeletionService = exerciseDeletionServiceService;
         this.userRepository = userRepository;
         this.courseService = courseService;
         this.quizScheduleService = quizScheduleService;
@@ -82,6 +93,8 @@ public class QuizExerciseResource {
         this.examDateService = examDateService;
         this.courseRepository = courseRepository;
         this.quizMessagingService = quizMessagingService;
+        this.instanceMessageSendService = instanceMessageSendService;
+        this.studentParticipationRepository = studentParticipationRepository;
     }
 
     /**
@@ -121,13 +134,6 @@ public class QuizExerciseResource {
         }
 
         quizExercise = quizExerciseService.save(quizExercise);
-
-        // Only notify students and tutors if the exercise is created for a course
-        if (quizExercise.isCourseExercise()) {
-            // notify websocket channel of changes to the quiz exercise
-            quizMessagingService.sendQuizExerciseToSubscribedClients(quizExercise, "change");
-            groupNotificationService.notifyTutorGroupAboutExerciseCreated(quizExercise);
-        }
 
         return ResponseEntity.created(new URI("/api/quiz-exercises/" + quizExercise.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, quizExercise.getId().toString())).body(quizExercise);
@@ -172,7 +178,7 @@ public class QuizExerciseResource {
         }
 
         // Forbid conversion between normal course exercise and exam exercise
-        var originalQuiz = quizExerciseRepository.findByIdElseThrow(quizExercise.getId());
+        final var originalQuiz = quizExerciseRepository.findByIdElseThrow(quizExercise.getId());
         exerciseService.checkForConversionBetweenExamAndCourseExercise(quizExercise, originalQuiz, ENTITY_NAME);
 
         // check if quiz is has already started
@@ -187,13 +193,6 @@ public class QuizExerciseResource {
         quizExercise = quizExerciseService.save(quizExercise);
         exerciseService.logUpdate(quizExercise, quizExercise.getCourseViaExerciseGroupOrCourseMember(), user);
 
-        // TODO: it does not really make sense to notify students here because the quiz is not visible yet when it is edited!
-        // Only notify students about changes if a regular exercise in a course was updated
-        if (notificationText != null && quizExercise.isCourseExercise()) {
-            // notify websocket channel of changes to the quiz exercise
-            quizMessagingService.sendQuizExerciseToSubscribedClients(quizExercise, "change");
-            groupNotificationService.notifyStudentGroupAboutExerciseUpdate(quizExercise, notificationText);
-        }
         return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, quizExercise.getId().toString())).body(quizExercise);
     }
 
@@ -266,7 +265,7 @@ public class QuizExerciseResource {
             if (!authCheckService.isAtLeastEditorInCourse(course, null)) {
                 return forbidden();
             }
-            exerciseService.checkTestRunsExist(quizExercise);
+            studentParticipationRepository.checkTestRunsExist(quizExercise);
         }
         else if (!authCheckService.isAllowedToSeeExercise(quizExercise, null)) {
             return forbidden();
@@ -410,7 +409,7 @@ public class QuizExerciseResource {
         }
         // note: we use the exercise service here, because this one makes sure to clean up all lazy references correctly.
         exerciseService.logDeletion(quizExercise, course, user);
-        exerciseService.delete(quizExerciseId, false, false);
+        exerciseDeletionService.delete(quizExerciseId, false, false);
         quizExerciseService.cancelScheduledQuiz(quizExerciseId);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, quizExercise.getTitle())).build();
     }

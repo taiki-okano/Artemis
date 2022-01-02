@@ -6,6 +6,7 @@ export class ProgrammingExerciseStudentParticipation extends StudentParticipatio
     public buildPlanId?: string;
 
     // helper attribute
+    public buildPlanUrl?: string;
     public userIndependentRepositoryUrl?: string;
 
     constructor() {

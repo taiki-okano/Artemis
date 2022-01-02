@@ -14,23 +14,16 @@ import { CourseScoreCalculationService } from 'app/overview/course-score-calcula
 import { ArtemisDatePipe } from 'app/shared/pipes/artemis-date.pipe';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { SidePanelComponent } from 'app/shared/side-panel/side-panel.component';
-import * as chai from 'chai';
-import * as moment from 'moment';
-import { JhiTranslateDirective } from 'ng-jhipster';
+import dayjs from 'dayjs';
 import { MockComponent, MockDirective, MockPipe, MockProvider } from 'ng-mocks';
 import { of } from 'rxjs';
-import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
 import { MockTranslateService } from '../../../helpers/mocks/service/mock-translate.service';
-
-chai.use(sinonChai);
-const expect = chai.expect;
+import { TranslateDirective } from 'app/shared/language/translate.directive';
 
 @Component({ selector: 'jhi-course-lecture-row', template: '' })
 class CourseLectureRowStubComponent {
     @Input() lecture: Lecture;
     @Input() course: Course;
-    @Input() extendedLink = false;
 }
 
 class MockActivatedRoute {
@@ -60,9 +53,9 @@ describe('CourseLectures', () => {
         course = new Course();
         course.id = 1;
 
-        const wednesdayBase = moment('18-03-2020', 'DD-MM-YYYY');
-        const wednesdayBefore = moment('11-03-2020', 'DD-MM-YYYY');
-        const wednesdayAfter = moment('25-03-2020', 'DD-MM-YYYY');
+        const wednesdayBase = dayjs('18-03-2020', 'DD-MM-YYYY');
+        const wednesdayBefore = dayjs('11-03-2020', 'DD-MM-YYYY');
+        const wednesdayAfter = dayjs('25-03-2020', 'DD-MM-YYYY');
 
         lecture1 = new Lecture();
         lecture1.id = 1;
@@ -84,7 +77,7 @@ describe('CourseLectures', () => {
                 MockPipe(ArtemisDatePipe),
                 MockComponent(SidePanelComponent),
                 MockComponent(FaIconComponent),
-                MockDirective(JhiTranslateDirective),
+                MockDirective(TranslateDirective),
             ],
             providers: [
                 MockProvider(CourseManagementService, {
@@ -114,12 +107,12 @@ describe('CourseLectures', () => {
     });
 
     afterEach(function () {
-        sinon.restore();
+        jest.restoreAllMocks();
     });
 
     it('should initialize', () => {
         courseLecturesComponentFixture.detectChanges();
-        expect(courseLecturesComponent).to.be.ok;
+        expect(courseLecturesComponent).not.toBe(null);
         courseLecturesComponent.ngOnDestroy();
     });
 
@@ -127,15 +120,15 @@ describe('CourseLectures', () => {
         courseLecturesComponentFixture.detectChanges();
         const weeks = courseLecturesComponentFixture.debugElement.nativeElement.querySelectorAll('.exercise-row-container');
         const labelsOfWeeks = courseLecturesComponentFixture.debugElement.nativeElement.querySelectorAll('.exercise-row-container > .control-label');
-        expect(weeks).to.have.lengthOf(3);
-        expect(labelsOfWeeks).to.have.lengthOf(3);
+        expect(weeks).toHaveLength(3);
+        expect(labelsOfWeeks).toHaveLength(3);
         for (const label of labelsOfWeeks) {
             label.click();
         }
         courseLecturesComponentFixture.whenStable().then(() => {
             courseLecturesComponentFixture.detectChanges();
             const lectures = courseLecturesComponentFixture.debugElement.queryAll(By.directive(CourseLectureRowStubComponent));
-            expect(lectures).to.have.lengthOf(3);
+            expect(lectures).toHaveLength(3);
         });
     }));
 });

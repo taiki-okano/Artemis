@@ -74,6 +74,9 @@ public abstract class Exercise extends DomainObject {
     @Column(name = "assessment_type")
     private AssessmentType assessmentType;
 
+    @Column(name = "allow_complaints_for_automatic_assessments")
+    private boolean allowComplaintsForAutomaticAssessments;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "included_in_overall_score")
     private IncludedInOverallScore includedInOverallScore = IncludedInOverallScore.INCLUDED_COMPLETELY;
@@ -157,11 +160,10 @@ public abstract class Exercise extends DomainObject {
 
     @OneToMany(mappedBy = "exercise", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    @JsonIgnoreProperties("exercise")
+    @JsonIncludeProperties({ "id" })
     private Set<Post> posts = new HashSet<>();
 
     @OneToMany(mappedBy = "exercise", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
     private Set<ExerciseHint> exerciseHints = new HashSet<>();
 
     // NOTE: Helpers variable names must be different from Getter name, so that Jackson ignores the @Transient annotation, but Hibernate still respects it
@@ -200,6 +202,12 @@ public abstract class Exercise extends DomainObject {
 
     @Transient
     private boolean isGradingInstructionFeedbackUsedTransient = false;
+
+    @Transient
+    private Double averageRatingTransient;
+
+    @Transient
+    private Long numberOfRatingsTransient;
 
     public String getTitle() {
         return title;
@@ -299,6 +307,14 @@ public abstract class Exercise extends DomainObject {
 
     public void setAssessmentType(AssessmentType assessmentType) {
         this.assessmentType = assessmentType;
+    }
+
+    public boolean getAllowComplaintsForAutomaticAssessments() {
+        return allowComplaintsForAutomaticAssessments;
+    }
+
+    public void setAllowComplaintsForAutomaticAssessments(boolean allowComplaintsForAutomaticAssessments) {
+        this.allowComplaintsForAutomaticAssessments = allowComplaintsForAutomaticAssessments;
     }
 
     public String getProblemStatement() {
@@ -505,26 +521,6 @@ public abstract class Exercise extends DomainObject {
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
-
-    public Boolean isEnded() {
-        if (getDueDate() == null) {
-            return Boolean.FALSE;
-        }
-        return ZonedDateTime.now().isAfter(getDueDate());
-    }
-
-    /**
-     * Checks if the due date is in the future. Returns true, if no due date is set.
-     *
-     * @return true if the due date is in the future, otherwise false
-     */
-    @JsonIgnore
-    public boolean isBeforeDueDate() {
-        if (dueDate == null) {
-            return true;
-        }
-        return ZonedDateTime.now().isBefore(dueDate);
-    }
 
     public Set<LearningGoal> getLearningGoals() {
         return learningGoals;
@@ -868,6 +864,22 @@ public abstract class Exercise extends DomainObject {
         this.isGradingInstructionFeedbackUsedTransient = isGradingInstructionFeedbackUsedTransient;
     }
 
+    public Double getAverageRating() {
+        return averageRatingTransient;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRatingTransient = averageRating;
+    }
+
+    public Long getNumberOfRatings() {
+        return numberOfRatingsTransient;
+    }
+
+    public void setNumberOfRatings(Long numberOfRatings) {
+        this.numberOfRatingsTransient = numberOfRatings;
+    }
+
     public Boolean getPresentationScoreEnabled() {
         return presentationScoreEnabled;
     }
@@ -1021,10 +1033,13 @@ public abstract class Exercise extends DomainObject {
         if (getReleaseDate() == null && getDueDate() == null && getAssessmentDueDate() == null) {
             return;
         }
+        if (isExamExercise()) {
+            throw new BadRequestAlertException("An exam exercise may not have any dates set!", getTitle(), "invalidDatesForExamExercise");
+        }
         // at least one is set, so we have to check the two possible errors
-        boolean validDates = isBeforeAndNotNull(getReleaseDate(), getDueDate()) && isValidAssessmentDueDate(getReleaseDate(), getDueDate(), getAssessmentDueDate());
+        boolean areDatesValid = isBeforeAndNotNull(getReleaseDate(), getDueDate()) && isValidAssessmentDueDate(getReleaseDate(), getDueDate(), getAssessmentDueDate());
 
-        if (!validDates) {
+        if (!areDatesValid) {
             throw new BadRequestAlertException("The exercise dates are not valid", getTitle(), "noValidDates");
         }
     }
@@ -1055,4 +1070,5 @@ public abstract class Exercise extends DomainObject {
         return previousDate.isBefore(laterDate);
     }
 
+    public abstract ExerciseType getExerciseType();
 }

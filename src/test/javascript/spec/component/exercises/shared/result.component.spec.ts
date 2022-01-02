@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ResultComponent } from 'app/exercises/shared/result/result.component';
@@ -15,9 +15,10 @@ import { MockTranslateService } from '../../../helpers/mocks/service/mock-transl
 import { TranslateService } from '@ngx-translate/core';
 import { Participation, ParticipationType } from 'app/entities/participation/participation.model';
 import { ModelingExercise } from 'app/entities/modeling-exercise.model';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { Submission } from 'app/entities/submission.model';
 import { ExerciseType } from 'app/entities/exercise.model';
+import { faTimesCircle } from '@fortawesome/free-regular-svg-icons';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -72,7 +73,7 @@ describe('ResultComponent', () => {
         expect(component.submission).to.equal(submission1);
         expect(component.textColorClass).to.equal('text-danger');
         expect(component.hasFeedback).to.be.false;
-        expect(component.resultIconClass).to.deep.equal(['far', 'times-circle']);
+        expect(component.resultIconClass).to.deep.equal(faTimesCircle);
         expect(component.resultString).to.equal('artemisApp.editor.buildSuccessful');
     });
 });

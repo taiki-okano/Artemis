@@ -2,10 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SERVER_API_URL } from 'app/app.constants';
 
 import { QuizExercise, QuizStatus } from 'app/entities/quiz/quiz-exercise.model';
-import { createRequestOption } from 'app/shared/util/request-util';
+import { createRequestOption } from 'app/shared/util/request.util';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
 import { QuizQuestion } from 'app/entities/quiz/quiz-question.model';
 import { downloadFile } from 'app/shared/util/download.util';
@@ -171,7 +170,7 @@ export class QuizExerciseService {
      * @param exportAll If true exports all questions, else exports only those whose export flag is true
      * @param fileName Name (without ending) of the resulting file, defaults to 'quiz'
      */
-    exportQuiz(quizQuestions?: QuizQuestion[], exportAll?: boolean, fileName?: String) {
+    exportQuiz(quizQuestions?: QuizQuestion[], exportAll?: boolean, fileName?: string) {
         // Make list of questions which we need to export,
         const questions: QuizQuestion[] = [];
         quizQuestions!.forEach((question) => {

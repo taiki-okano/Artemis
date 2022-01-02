@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of, Subject } from 'rxjs';
 import { User } from 'app/core/user/user.model';
@@ -14,6 +13,9 @@ import { Exam } from 'app/entities/exam.model';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { ButtonSize, ButtonType } from 'app/shared/components/button.component';
 import { AccountService } from 'app/core/auth/account.service';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faPlus, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 const cssClasses = {
     alreadyRegistered: 'already-registered',
@@ -51,11 +53,15 @@ export class ExamStudentsComponent implements OnInit, OnDestroy {
 
     isAdmin = false;
 
+    // Icons
+    faPlus = faPlus;
+    faUserSlash = faUserSlash;
+
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private jhiAlertService: JhiAlertService,
-        private eventManager: JhiEventManager,
+        private alertService: AlertService,
+        private eventManager: EventManager,
         private examManagementService: ExamManagementService,
         private userService: UserService,
         private accountService: AccountService,
@@ -250,7 +256,7 @@ export class ExamStudentsComponent implements OnInit, OnDestroy {
      * The error must already be provided translated by the emitting component.
      */
     onError(error: string) {
-        this.jhiAlertService.error(error);
+        this.alertService.error(error);
         this.isTransitioning = false;
     }
 

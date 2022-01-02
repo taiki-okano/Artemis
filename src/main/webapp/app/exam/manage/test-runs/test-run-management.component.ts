@@ -5,7 +5,7 @@ import { StudentExam } from 'app/entities/student-exam.model';
 import { SortService } from 'app/shared/service/sort.service';
 import { Exam } from 'app/entities/exam.model';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { CreateTestRunModalComponent } from 'app/exam/manage/test-runs/create-test-run-modal.component';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
@@ -13,6 +13,7 @@ import { AccountService } from 'app/core/auth/account.service';
 import { Subject } from 'rxjs';
 import { User } from 'app/core/user/user.model';
 import { onError } from 'app/shared/util/global.utils';
+import { faSort, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-test-run-management',
@@ -24,15 +25,19 @@ export class TestRunManagementComponent implements OnInit {
     isLoading: boolean;
     isExamStarted: boolean;
     testRuns: StudentExam[] = [];
-    instructor: User;
+    instructor?: User;
     private dialogErrorSource = new Subject<string>();
     dialogError$ = this.dialogErrorSource.asObservable();
     predicate: string;
     ascending: boolean;
 
+    // Icons
+    faSort = faSort;
+    faTimes = faTimes;
+
     constructor(
         private route: ActivatedRoute,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private examManagementService: ExamManagementService,
         private accountService: AccountService,
         private sortService: SortService,
@@ -53,14 +58,14 @@ export class TestRunManagementComponent implements OnInit {
                     (res: HttpResponse<StudentExam[]>) => {
                         this.testRuns = res.body!;
                     },
-                    (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+                    (error: HttpErrorResponse) => onError(this.alertService, error),
                 );
             },
-            (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+            (error: HttpErrorResponse) => onError(this.alertService, error),
         );
-        this.accountService.fetch().subscribe((res) => {
-            if (res.body != undefined) {
-                this.instructor = res.body;
+        this.accountService.identity().then((user) => {
+            if (user) {
+                this.instructor = user;
             }
         });
     }
@@ -80,7 +85,7 @@ export class TestRunManagementComponent implements OnInit {
                         }
                     },
                     (error: HttpErrorResponse) => {
-                        onError(this.jhiAlertService, error);
+                        onError(this.alertService, error);
                     },
                 );
             })
@@ -121,7 +126,7 @@ export class TestRunManagementComponent implements OnInit {
     get testRunCanBeAssessed(): boolean {
         if (!!this.testRuns && this.testRuns.length > 0) {
             for (const testRun of this.testRuns) {
-                if (testRun.user?.id === this.instructor.id && testRun.submitted) {
+                if (testRun.user?.id === this.instructor?.id && testRun.submitted) {
                     return true;
                 }
             }

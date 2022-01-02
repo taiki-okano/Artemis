@@ -14,7 +14,7 @@ logging:
     level:
         ROOT: INFO
         de.tum.in.www1.artemis: DEBUG
-        io.github.jhipster: INFO
+        tech.jhipster: INFO
 
 artemis:
     version: 1.3.3-beta7
@@ -45,7 +45,7 @@ spring:
     jmx:
         enabled: false
     jpa:
-#        database-platform: io.github.jhipster.domain.util.FixedH2Dialect
+        database-platform: tech.jhipster.domain.util.FixedH2Dialect
         open-in-view: false
         show-sql: false
         hibernate:
@@ -77,6 +77,10 @@ spring:
         host: localhost
     main:
         allow-bean-definition-overriding: true
+        allow-circular-references: true # TODO: we should deactivate this in the future, however currently securityConfiguration has a circular dependency to itself
+    mvc:
+        pathmatch:
+            matching-strategy: ant_path_matcher # TODO: we should update all paths to support PathPatternParser, in particular ClientForwardResource
     messages:
         basename: i18n/messages
         cache-duration: PT1S # 1 second, see the ISO 8601 standard
@@ -126,6 +130,9 @@ management:
                 include: ["jhimetrics"]
     endpoint:
         jhimetrics:
+            enabled: true
+    info:
+        env:
             enabled: true
 
 sentry:
@@ -179,10 +186,6 @@ jhipster:
     mail: # specific JHipster mail property, for standard properties see MailProperties
         from: Artemis@localhost
         base-url: http://127.0.0.1:8080
-    metrics:
-        logs: # Reports metrics in the logs
-            enabled: false
-            report-frequency: 60 # in seconds
     security:
         authentication:
             jwt:

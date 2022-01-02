@@ -7,16 +7,15 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.TestSecurityContextHolder;
@@ -355,7 +354,7 @@ public class RequestUtilService {
 
     public <T> T getNullable(String path, HttpStatus expectedStatus, Class<T> responseType) throws Exception {
         final var res = get(path, expectedStatus, String.class, new LinkedMultiValueMap<>());
-        if (res != null && res.equals("")) {
+        if (res == null || res.equals("")) {
             return null;
         }
 
@@ -463,7 +462,7 @@ public class RequestUtilService {
 
         if (expectedResponseHeaders != null) {
             for (String header : expectedResponseHeaders) {
-                assertThat(res.getResponse().containsHeader(header));
+                assertThat(res.getResponse().containsHeader(header)).isTrue();
             }
         }
 
@@ -488,4 +487,20 @@ public class RequestUtilService {
         SecurityContextHolder.setContext(TestSecurityContextHolder.getContext());
     }
 
+    /**
+     * Converts a {@link Map} to a {@link MultiValueMap} that can be used to specify request parameters.
+     *
+     * @param <V> the type of the values, will be converted to String using {@link Object#toString()}.
+     * @param map the normal Java map to convert. Use e.g. one of the {@link Map#of()} methods to get one. Must not contain null.
+     * @return a {@link MultiValueMap} that can be passed to requests as parameters
+     */
+    public static <V> MultiValueMap<String, String> parameters(Map<String, V> map) {
+        MultiValueMap<String, String> multiMap = new LinkedMultiValueMap<>();
+        map.forEach((key, value) -> {
+            Objects.requireNonNull(key, "paremeter key must not be null");
+            Objects.requireNonNull(value, "paremeter value must not be null");
+            multiMap.add(key, value.toString());
+        });
+        return multiMap;
+    }
 }

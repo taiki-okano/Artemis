@@ -12,7 +12,7 @@
             "register": {
                 "signUp": "Für einen Kurs anmelden",
                 "registerSuccessful": "Anmeldung erfolgreich",
-                "signUpForCourse": "Für den ausgewählten Kurs anmelden",
+                "signUpForCourse": "Anmelden",
                 "cancel": "Abbrechen",
                 "noCourse": "Keine Kurse für eine Registrierung verfügbar",
                 "courseLoading": "Kurse werden geladen...",
@@ -29,14 +29,17 @@
                 "exercises": "Aufgaben",
                 "statistics": "Statistiken",
                 "lectures": "Vorlesungen",
-                "exams": "Klausuren"
+                "exams": "Klausuren",
+                "discussion": "Diskussion"
             },
             "exerciseList": {
-                "fullScore": "Keine mit voller Punktzahl",
+                "filter": "Filter ({{ num }})",
                 "releaseDate": "Veröffentlichungsdatum",
                 "dueDate": "Einreichungsfrist",
-                "overdue": "Keine Überfälligen",
                 "unreleased": "Keine Unveröffentlichten",
+                "fullScore": "Keine mit voller Punktzahl",
+                "overdue": "Keine Überfälligen",
+                "optional": "Keine Optionalen",
                 "noExerciseDate": "Kein Datum zugeordnet",
                 "exerciseGroupHeader": "Aufgaben: {{ total }}",
                 "currentExerciseGroupHeader": "Aktuelle Übung aktiv bis {{ date }}:",
@@ -45,6 +48,7 @@
                 "newFirst": "Neueste",
                 "oldFirst": "Älteste",
                 "noExercises": "Es gibt keine Aufgaben für diesen Kurs.",
+                "notReleasedTooltip": "Nicht sichbar für Studierende. Veröffentlichungsdatum: ",
                 "notReleased": "Nicht freigegeben",
                 "live": "Live",
                 "noDueDate": "Keine Deadline",
@@ -87,6 +91,7 @@
                 "totalScore": "Gesamtpunktzahl",
                 "totalPresentationScore": "Dein gesamtes Präsentationsergebnis: {{ number }}",
                 "presentationScoreBonus": "Benötigtes Präsentationsergebnis für den Bonus: {{ number }}",
+                "hideNotIncludedInScoreExercises": "Keine Optionalen",
                 "exerciseCount": "{{ number }} {{ type }}",
                 "yourPoints": "Deine Punktzahl: {{ number }}",
                 "reachablePoints": "Erreichbare Punktzahl: {{ number }} ({{ relative }}%)",
@@ -110,7 +115,16 @@
                 "bonus": "Aktuelle Bonuspunkte",
                 "gradeInfo": "(basierend auf der erreichbaren Punktzahl)",
                 "gradeHelp": "Die Note basiert auf der von dir erreichbaren Punktzahl. Sie kann sich bis zum Ende des Kurses ändern, wenn mehr Übungen bewertet wurden.",
-                "bonusHelp": "Die Bonuspunkte basieren auf der von dir erreichbaren Punktzahl. Sie können sich bis zum Ende des Kurses ändern, wenn mehr Übungen bewertet wurden."
+                "bonusHelp": "Die Bonuspunkte basieren auf der von dir erreichbaren Punktzahl. Sie können sich bis zum Ende des Kurses ändern, wenn mehr Übungen bewertet wurden.",
+                "programmingExerciseFailedTests": "{{ tests }} Tests fehlgeschlagen ({{ percentage }}%)",
+                "programmingExercisePassedTests": "{{ tests }} Tests erfolgreich ({{ percentage }}%)",
+                "programmingPointLabel": "Programmieraufgaben Punkte",
+                "quizPointLabel": "Quizaufgaben Punkte",
+                "modelingPointLabel": "Modellierungsaufgaben Punkte",
+                "textPointLabel": "Textaufgaben Punkte",
+                "fileUploadPointLabel": "Dateiupload-Aufgaben Punkte",
+                "missingPointsLabel": "Fehlende Punkte",
+                "achievedPointsLabel": "Erreichte Punkte"
             },
             "lectureList": {
                 "lectureGroupHeader": "Vorlesungen: {{ total }}",

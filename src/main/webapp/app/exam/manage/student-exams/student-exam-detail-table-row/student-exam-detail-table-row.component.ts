@@ -3,10 +3,11 @@ import { Exercise, ExerciseType, getIcon } from 'app/entities/exercise.model';
 import { Submission } from 'app/entities/submission.model';
 import { StudentParticipation } from 'app/entities/participation/student-participation.model';
 import { getExerciseSubmissionsLink, getLinkToSubmissionAssessment } from 'app/utils/navigation.utils';
-import { round } from 'app/shared/util/utils';
+import { roundScoreSpecifiedByCourseSettings } from 'app/shared/util/utils';
 import { Course } from 'app/entities/course.model';
 import { Result } from 'app/entities/result.model';
 import { StudentExam } from 'app/entities/student-exam.model';
+import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     /* tslint:disable-next-line component-selector */
@@ -29,6 +30,11 @@ export class StudentExamDetailTableRowComponent implements OnChanges {
     openingAssessmentEditorForNewSubmission = false;
     readonly ExerciseType = ExerciseType;
     getIcon = getIcon;
+
+    readonly roundScoreSpecifiedByCourseSettings = roundScoreSpecifiedByCourseSettings;
+
+    // Icons
+    faFolderOpen = faFolderOpen;
 
     ngOnChanges() {
         if (this.exercise.studentParticipations?.[0]) {
@@ -65,9 +71,5 @@ export class StudentExamDetailTableRowComponent implements OnChanges {
             this.openingAssessmentEditorForNewSubmission = false;
         }
         return route;
-    }
-
-    rounding(number: number) {
-        return round(number, 1);
     }
 }

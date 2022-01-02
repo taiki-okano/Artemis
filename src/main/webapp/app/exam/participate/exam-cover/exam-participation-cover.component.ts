@@ -1,20 +1,18 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
-
 import { ArtemisMarkdownService } from 'app/shared/markdown.service';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { TranslateService } from '@ngx-translate/core';
-
 import { Exam } from 'app/entities/exam.model';
 import { Course } from 'app/entities/course.model';
 import { AccountService } from 'app/core/auth/account.service';
 import { ExamParticipationService } from 'app/exam/participate/exam-participation.service';
 import { StudentExam } from 'app/entities/student-exam.model';
 import { ArtemisServerDateService } from 'app/shared/server-date.service';
-import * as moment from 'moment';
-import { Moment } from 'moment';
+import dayjs from 'dayjs';
 import { EXAM_START_WAIT_TIME_MINUTES } from 'app/app.constants';
 import { UI_RELOAD_TIME } from 'app/shared/constants/exercise-exam-constants';
+import { faArrowLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-exam-participation-cover',
@@ -32,7 +30,7 @@ export class ExamParticipationCoverComponent implements OnInit, OnDestroy {
     @Input() handInEarly = false;
     @Input() handInPossible = true;
     @Input() submitInProgress = false;
-    @Input() testRunStartTime: Moment | undefined;
+    @Input() testRunStartTime: dayjs.Dayjs | undefined;
     @Output() onExamStarted: EventEmitter<StudentExam> = new EventEmitter<StudentExam>();
     @Output() onExamEnded: EventEmitter<StudentExam> = new EventEmitter<StudentExam>();
     @Output() onExamContinueAfterHandInEarly = new EventEmitter<void>();
@@ -53,8 +51,12 @@ export class ExamParticipationCoverComponent implements OnInit, OnDestroy {
     accountName = '';
     enteredName = '';
 
-    graceEndDate: moment.Moment;
-    criticalTime = moment.duration(30, 'seconds');
+    graceEndDate: dayjs.Dayjs;
+    criticalTime = dayjs.duration(30, 'seconds');
+
+    // Icons
+    faSpinner = faSpinner;
+    faArrowLeft = faArrowLeft;
 
     constructor(
         private courseService: CourseManagementService,
@@ -82,9 +84,9 @@ export class ExamParticipationCoverComponent implements OnInit, OnDestroy {
             this.formattedConfirmationText = this.artemisMarkdown.safeHtmlForMarkdown(this.exam.confirmationEndText);
             // this should be the individual working end + the grace period
             if (this.testRun) {
-                this.graceEndDate = moment(this.testRunStartTime!).add(this.studentExam.workingTime, 'seconds').add(this.exam.gracePeriod, 'seconds');
+                this.graceEndDate = dayjs(this.testRunStartTime!).add(this.studentExam.workingTime!, 'seconds').add(this.exam.gracePeriod!, 'seconds');
             } else {
-                this.graceEndDate = moment(this.exam.startDate).add(this.studentExam.workingTime, 'seconds').add(this.exam.gracePeriod, 'seconds');
+                this.graceEndDate = dayjs(this.exam.startDate).add(this.studentExam.workingTime!, 'seconds').add(this.exam.gracePeriod!, 'seconds');
             }
         }
 
@@ -139,6 +141,9 @@ export class ExamParticipationCoverComponent implements OnInit, OnDestroy {
                     this.onExamStarted.emit(studentExam);
                 } else {
                     this.waitingForExamStart = true;
+                    if (this.interval) {
+                        clearInterval(this.interval);
+                    }
                     this.interval = window.setInterval(() => {
                         this.updateDisplayedTimes(studentExam);
                     }, UI_RELOAD_TIME);
@@ -229,7 +234,7 @@ export class ExamParticipationCoverComponent implements OnInit, OnDestroy {
         if (this.testRun) {
             return false;
         }
-        const individualStudentEndDate = moment(this.exam.startDate).add(this.studentExam.workingTime, 'seconds');
-        return individualStudentEndDate.add(this.exam.gracePeriod, 'seconds').isBefore(this.serverDateService.now()) && !this.studentExam.submitted;
+        const individualStudentEndDate = dayjs(this.exam.startDate).add(this.studentExam.workingTime!, 'seconds');
+        return individualStudentEndDate.add(this.exam.gracePeriod!, 'seconds').isBefore(this.serverDateService.now()) && !this.studentExam.submitted;
     }
 }

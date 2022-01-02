@@ -1,17 +1,18 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
-import { JhiEventManager } from 'ng-jhipster';
 import { Course } from 'app/entities/course.model';
 import { CourseManagementService } from './course-management.service';
 import { onError } from 'app/shared/util/global.utils';
 import { Subject } from 'rxjs';
 import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
 import { tutorAssessmentTour } from 'app/guided-tour/tours/tutor-assessment-tour';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { LectureService } from 'app/lecture/lecture.service';
 import { CourseManagementOverviewStatisticsDto } from 'app/course/manage/overview/course-management-overview-statistics-dto.model';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faAngleDown, faAngleUp, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-course',
@@ -36,12 +37,17 @@ export class CourseManagementComponent implements OnInit, OnDestroy, AfterViewIn
 
     courseForGuidedTour?: Course;
 
+    // Icons
+    faPlus = faPlus;
+    faAngleDown = faAngleDown;
+    faAngleUp = faAngleUp;
+
     constructor(
         private examService: ExamManagementService,
         private lectureService: LectureService,
         private courseManagementService: CourseManagementService,
-        private jhiAlertService: JhiAlertService,
-        private eventManager: JhiEventManager,
+        private alertService: AlertService,
+        private eventManager: EventManager,
         private guidedTourService: GuidedTourService,
     ) {}
 
@@ -51,7 +57,7 @@ export class CourseManagementComponent implements OnInit, OnDestroy, AfterViewIn
     loadAll() {
         this.courseManagementService.getCourseOverview({ onlyActive: this.showOnlyActive }).subscribe(
             (res: HttpResponse<Course[]>) => {
-                this.courses = res.body!;
+                this.courses = res.body!.sort((a, b) => (a.title ?? '').localeCompare(b.title ?? ''));
                 this.courseForGuidedTour = this.guidedTourService.enableTourForCourseOverview(this.courses, tutorAssessmentTour, true);
 
                 this.courseSemesters = this.getUniqueSemesterNamesSorted(this.courses);
@@ -66,7 +72,7 @@ export class CourseManagementComponent implements OnInit, OnDestroy, AfterViewIn
                 // Load the user group numbers lastly
                 this.fetchUserStats();
             },
-            (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+            (error: HttpErrorResponse) => onError(this.alertService, error),
         );
     }
 
@@ -144,7 +150,7 @@ export class CourseManagementComponent implements OnInit, OnDestroy, AfterViewIn
                     }
                 });
             },
-            (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+            (error: HttpErrorResponse) => onError(this.alertService, error),
         );
     }
 
@@ -160,7 +166,7 @@ export class CourseManagementComponent implements OnInit, OnDestroy, AfterViewIn
                     }
                 });
             },
-            (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+            (error: HttpErrorResponse) => onError(this.alertService, error),
         );
     }
 
@@ -177,7 +183,7 @@ export class CourseManagementComponent implements OnInit, OnDestroy, AfterViewIn
                     }
                 });
             },
-            (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+            (error: HttpErrorResponse) => onError(this.alertService, error),
         );
     }
 

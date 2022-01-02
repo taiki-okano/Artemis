@@ -1,4 +1,4 @@
-import * as ace from 'brace';
+import { acequire, UndoManager } from 'brace';
 import 'brace/ext/language_tools';
 import 'brace/ext/modelist';
 import 'brace/mode/java';
@@ -14,7 +14,7 @@ import 'brace/mode/kotlin';
 import 'brace/mode/assembly_x86';
 import 'brace/mode/vhdl';
 import 'brace/theme/dreamweaver';
-import { AceEditorComponent } from 'ng2-ace-editor';
+import { AceEditorComponent } from 'app/shared/markdown-editor/ace-editor/ace-editor.component';
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ViewEncapsulation } from '@angular/core';
 import { fromEvent, of, Subscription } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -24,8 +24,11 @@ import { CodeEditorRepositoryFileService } from 'app/exercises/programming/share
 import { RepositoryFileService } from 'app/exercises/shared/result/repository.service';
 import { TextChange } from 'app/entities/text-change.model';
 import { LocalStorageService } from 'ngx-webstorage';
-import { fromPairs, pickBy } from 'lodash';
+import { fromPairs, pickBy } from 'lodash-es';
 import { Feedback } from 'app/entities/feedback.model';
+import { Course } from 'app/entities/course.model';
+import { faFileAlt } from '@fortawesome/free-regular-svg-icons';
+import { faCircleNotch, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 
 export type Annotation = { fileName: string; row: number; column: number; text: string; type: string; timestamp: number; hash?: string | null };
 
@@ -59,6 +62,8 @@ export class CodeEditorAceComponent implements AfterViewInit, OnChanges, OnDestr
     feedbacks: Feedback[];
     @Input()
     highlightDifferences: boolean;
+    @Input()
+    course?: Course;
 
     @Output()
     onFileContentChange = new EventEmitter<{ file: string; fileContent: string }>();
@@ -70,14 +75,14 @@ export class CodeEditorAceComponent implements AfterViewInit, OnChanges, OnDestr
     onFileLoad = new EventEmitter<string>();
 
     // This fetches a list of all supported editor modes and matches it afterwards against the file extension
-    readonly aceModeList = ace.acequire('ace/ext/modelist');
+    readonly aceModeList = acequire('ace/ext/modelist');
     // Line widgets for inline feedback
-    readonly LineWidgets = ace.acequire('ace/line_widgets').LineWidgets;
+    readonly LineWidgets = acequire('ace/line_widgets').LineWidgets;
 
-    readonly Range = ace.acequire('ace/range').Range;
+    readonly Range = acequire('ace/range').Range;
 
     /** Ace Editor Options **/
-    editorMode: string; // String or mode object
+    editorMode: string; // string or mode object
     isLoading = false;
     annotationsArray: Array<Annotation> = [];
     annotationChange: Subscription;
@@ -89,6 +94,11 @@ export class CodeEditorAceComponent implements AfterViewInit, OnChanges, OnDestr
     fileFeedbackPerLine: { [line: number]: Feedback } = {};
     editorSession: any;
     markerIds: number[] = [];
+
+    // Icons
+    farFileAlt = faFileAlt;
+    faPlusSquare = faPlusSquare;
+    faCircleNotch = faCircleNotch;
 
     constructor(private repositoryFileService: CodeEditorRepositoryFileService, private fileService: CodeEditorFileService, protected localStorageService: LocalStorageService) {}
 
@@ -181,7 +191,7 @@ export class CodeEditorAceComponent implements AfterViewInit, OnChanges, OnDestr
             this.editor.getEditor().resize();
             this.editor.getEditor().focus();
             // Reset the undo stack after file change, otherwise the user can undo back to the old file
-            this.editor.getEditor().getSession().setUndoManager(new ace.UndoManager());
+            this.editor.getEditor().getSession().setUndoManager(new UndoManager());
             this.displayAnnotations();
 
             // Setup inline feedbacks

@@ -1,5 +1,6 @@
 package de.tum.in.www1.artemis.service;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.slf4j.Logger;
@@ -26,6 +27,22 @@ public class UrlService {
     }
 
     /**
+     * Gets the repository slug from the given repository URL string, see {@link #getRepositorySlugFromUrl}
+     * @param repositoryUrl The repository url as string
+     * @return The repository slug
+     * @throws VersionControlException if the URL is invalid and no repository slug could be extracted
+     */
+    public String getRepositorySlugFromRepositoryUrlString(String repositoryUrl) throws VersionControlException {
+        try {
+            return getRepositorySlugFromUrl(new URL(repositoryUrl));
+        }
+        catch (MalformedURLException e) {
+            log.error("Cannot get repository slug from repository url string {}", repositoryUrl, e);
+            throw new VersionControlException("Repository URL is not a git URL! Can't get repository slug for " + repositoryUrl);
+        }
+    }
+
+    /**
      * Gets the repository slug from the given URL
      *
      * Example 1: https://ga42xab@bitbucket.ase.in.tum.de/scm/EIST2016RME/RMEXERCISE-ga42xab.git --> RMEXERCISE-ga42xab
@@ -37,20 +54,20 @@ public class UrlService {
      * @return The repository slug, i.e. the part of the url that identifies the repository (not the project) without .git in the end
      * @throws VersionControlException if the URL is invalid and no repository slug could be extracted
      */
-    public String getRepositorySlugFromUrl(URL url) throws VersionControlException {
-        // split the URL in parts using the separator "/"
-        final var urlParts = url.getFile().split("/");
-        if (urlParts.length < 1) {
+    private String getRepositorySlugFromUrl(URL url) throws VersionControlException {
+        // split the URL path in components using the separator "/"
+        final var pathComponents = url.getFile().split("/");
+        if (pathComponents.length < 2) {
             throw new VersionControlException("Repository URL is not a git URL! Can't get repository slug for " + url);
         }
+        // Note: pathComponents[] = "" because the path always starts with "/"
         // take the last element
-        String repositorySlug = urlParts[urlParts.length - 1];
+        String repositorySlug = pathComponents[pathComponents.length - 1];
         // if the element includes ".git" ...
         if (repositorySlug.endsWith(".git")) {
             // ... cut out the ending ".git", i.e. the last 4 characters
             repositorySlug = repositorySlug.substring(0, repositorySlug.length() - 4);
         }
-        log.debug("getRepositorySlugFromUrl {} --> {}", url, repositorySlug);
         return repositorySlug;
     }
 
@@ -61,7 +78,7 @@ public class UrlService {
      * @throws VersionControlException if the URL is invalid and no project key could be extracted
      * @return <project key>/<repositorySlug>
      */
-    public String getPathFromRepositoryUrl(VcsRepositoryUrl repositoryUrl) throws VersionControlException {
+    public String getRepositoryPathFromRepositoryUrl(VcsRepositoryUrl repositoryUrl) throws VersionControlException {
         return getRepositoryPathFromUrl(repositoryUrl.getURL());
     }
 
@@ -74,13 +91,15 @@ public class UrlService {
      * @throws VersionControlException if the URL is invalid and no project key could be extracted
      * @return <project key>/<repositorySlug>
      */
-    public String getRepositoryPathFromUrl(URL url) throws VersionControlException {
-        final var urlParts = url.getFile().split("/");
-        if (urlParts.length < 2) {
+    private String getRepositoryPathFromUrl(URL url) throws VersionControlException {
+        // split the URL path in components using the separator "/"
+        final var pathComponents = url.getPath().split("/");
+        if (pathComponents.length < 2) {
             throw new VersionControlException("Repository URL is not a git URL! Can't get repository slug for " + url);
         }
-        final var last = urlParts.length - 1;
-        return urlParts[last - 1] + "/" + urlParts[last].replace(".git", "");
+        // Note: pathComponents[] = "" because the path always starts with "/"
+        final var last = pathComponents.length - 1;
+        return pathComponents[last - 1] + "/" + pathComponents[last].replace(".git", "");
     }
 
     /**
@@ -103,13 +122,18 @@ public class UrlService {
      * @return The project key
      * @throws VersionControlException if the URL is invalid and no project key could be extracted
      */
-    public String getProjectKeyFromUrl(URL url) throws VersionControlException {
-        String[] urlParts = url.getFile().split("/");
-        if (urlParts.length <= 2) {
-            throw new VersionControlException("No project key could be found for " + url.toString());
+    private String getProjectKeyFromUrl(URL url) throws VersionControlException {
+        // split the URL path in components using the separator "/"
+        final var pathComponents = url.getPath().split("/");
+        if (pathComponents.length <= 2) {
+            throw new VersionControlException("No project key could be found for " + url);
         }
-        var projectKey = urlParts[2];
-        log.debug("getProjectKeyFromUrl {} --> {}", url, projectKey);
+        // Note: pathComponents[] = "" because the path always starts with "/"
+        var projectKey = pathComponents[1];
+        if ("scm".equals(pathComponents[1])) {
+            // special case for Bitbucket
+            projectKey = pathComponents[2];
+        }
         return projectKey;
     }
 }

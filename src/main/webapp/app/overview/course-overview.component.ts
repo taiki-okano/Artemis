@@ -1,28 +1,39 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, EmbeddedViewRef, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
 import { Course } from 'app/entities/course.model';
-import { CourseExerciseService, CourseManagementService } from '../course/manage/course-management.service';
+import { CourseManagementService } from '../course/manage/course-management.service';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { CourseScoreCalculationService } from 'app/overview/course-score-calculation.service';
 import { CachingStrategy } from 'app/shared/image/secured-image.component';
 import { TeamService } from 'app/exercises/shared/team/team.service';
 import { TeamAssignmentPayload } from 'app/entities/team.model';
-import { participationStatus } from 'app/exercises/shared/exercise/exercise-utils';
+import { participationStatus } from 'app/exercises/shared/exercise/exercise.utils';
 import { JhiWebsocketService } from 'app/core/websocket/websocket.service';
 import { QuizExercise } from 'app/entities/quiz/quiz-exercise.model';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { ArtemisServerDateService } from 'app/shared/server-date.service';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
+import { faCircleNotch, faSync } from '@fortawesome/free-solid-svg-icons';
+import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 
 const DESCRIPTION_READ = 'isDescriptionRead';
+
+export interface BarControlConfiguration {
+    subject?: Subject<TemplateRef<any>>;
+    useIndentation: boolean;
+}
+
+export interface BarControlConfigurationProvider {
+    controlConfiguration: BarControlConfiguration;
+}
 
 @Component({
     selector: 'jhi-course-overview',
     templateUrl: './course-overview.component.html',
     styleUrls: ['course-overview.scss'],
 })
-export class CourseOverviewComponent implements OnInit, OnDestroy {
+export class CourseOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
     CachingStrategy = CachingStrategy;
     private courseId: number;
     private subscription: Subscription;
@@ -34,6 +45,25 @@ export class CourseOverviewComponent implements OnInit, OnDestroy {
     private teamAssignmentUpdateListener: Subscription;
     private quizExercisesChannel: string;
 
+    // Rendered embedded view for controls in the bar so we can destroy it if needed
+    private controlsEmbeddedView?: EmbeddedViewRef<any>;
+    // Subscription to listen to changes on the control configuration
+    private controlsSubscription?: Subscription;
+    // Subscription to listen for the ng-container for controls to be mounted
+    private vcSubscription?: Subscription;
+    // The current controls template from the sub-route component to render
+    private controls?: TemplateRef<any>;
+    // The current controls configuration from the sub-route component
+    public controlConfiguration?: BarControlConfiguration;
+    // ng-container mount point extracted from our own template so we can render sth in it
+    @ViewChild('controlsViewContainer', { read: ViewContainerRef }) controlsViewContainer: ViewContainerRef;
+    // Using a list query to be able to listen for changes (late mount); need both as this only returns native nodes
+    @ViewChildren('controlsViewContainer') controlsViewContainerAsList: QueryList<ViewContainerRef>;
+
+    // Icons
+    faSync = faSync;
+    faCircleNotch = faCircleNotch;
+
     constructor(
         private courseService: CourseManagementService,
         private courseExerciseService: CourseExerciseService,
@@ -42,7 +72,8 @@ export class CourseOverviewComponent implements OnInit, OnDestroy {
         private teamService: TeamService,
         private jhiWebsocketService: JhiWebsocketService,
         private serverDateService: ArtemisServerDateService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {}
 
     async ngOnInit() {
@@ -59,6 +90,65 @@ export class CourseOverviewComponent implements OnInit, OnDestroy {
         this.subscribeForQuizChanges();
     }
 
+    ngAfterViewInit() {
+        // Check if controls mount point is available, if not, wait for it
+        if (this.controlsViewContainer) {
+            this.tryRenderControls();
+        } else {
+            this.vcSubscription = this.controlsViewContainerAsList.changes.subscribe(() => this.tryRenderControls());
+        }
+    }
+
+    /**
+     * Accepts a component reference of the subcomponent rendered based on the current route.
+     * If it provides a controlsConfiguration, we try to render the controls component
+     * @param componentRef the sub route component that has been mounted into the router outlet
+     */
+    onSubRouteActivate(componentRef: any) {
+        if (componentRef.controlConfiguration) {
+            const provider = componentRef as BarControlConfigurationProvider;
+            this.controlConfiguration = provider.controlConfiguration as BarControlConfiguration;
+
+            // Listen for changes to the control configuration; works for initial config as well
+            this.controlsSubscription =
+                this.controlConfiguration.subject?.subscribe((controls: TemplateRef<any>) => {
+                    this.controls = controls;
+                    this.tryRenderControls();
+                    // Since we might be pulling data upwards during a render cycle, we need to re-run change detection
+                    this.changeDetectorRef.detectChanges();
+                }) || undefined;
+        }
+    }
+
+    /**
+     * Removes the controls component from the DOM and cancels the listener for controls changes.
+     * Called by the router outlet as soon as the currently mounted component is removed
+     */
+    onSubRouteDeactivate() {
+        this.removeCurrentControlsView();
+        this.controls = undefined;
+        this.controlConfiguration = undefined;
+        this.controlsSubscription?.unsubscribe();
+        this.changeDetectorRef.detectChanges();
+    }
+
+    private removeCurrentControlsView() {
+        this.controlsEmbeddedView?.detach();
+        this.controlsEmbeddedView?.destroy();
+    }
+
+    /**
+     * Mounts the controls as specified by the currently mounted sub-route component to the ng-container in the top bar
+     * if all required data is available.
+     */
+    tryRenderControls() {
+        if (this.controlConfiguration && this.controls && this.controlsViewContainer) {
+            this.removeCurrentControlsView();
+            this.controlsEmbeddedView = this.controlsViewContainer.createEmbeddedView(this.controls);
+            this.controlsEmbeddedView.detectChanges();
+        }
+    }
+
     loadCourse(refresh = false) {
         this.refreshingCourse = refresh;
         this.courseService.findOneForDashboard(this.courseId).subscribe(
@@ -70,8 +160,8 @@ export class CourseOverviewComponent implements OnInit, OnDestroy {
             },
             (error: HttpErrorResponse) => {
                 const errorMessage = error.headers.get('X-artemisApp-message')!;
-                const jhiAlert = this.jhiAlertService.error(errorMessage);
-                jhiAlert.msg = errorMessage;
+                const jhiAlert = this.alertService.error(errorMessage);
+                jhiAlert.message = errorMessage;
             },
         );
     }
@@ -83,6 +173,8 @@ export class CourseOverviewComponent implements OnInit, OnDestroy {
         if (this.quizExercisesChannel) {
             this.jhiWebsocketService.unsubscribe(this.quizExercisesChannel);
         }
+        this.controlsSubscription?.unsubscribe();
+        this.vcSubscription?.unsubscribe();
     }
 
     subscribeForQuizChanges() {
@@ -133,7 +225,7 @@ export class CourseOverviewComponent implements OnInit, OnDestroy {
      */
     hasVisibleExams(): boolean {
         for (const exam of this.course?.exams!) {
-            if (moment(exam.visibleDate).isBefore(this.serverDateService.now())) {
+            if (exam.visibleDate && dayjs(exam.visibleDate).isBefore(this.serverDateService.now())) {
                 return true;
             }
         }

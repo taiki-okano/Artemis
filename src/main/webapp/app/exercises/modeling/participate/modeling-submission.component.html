@@ -5,6 +5,7 @@
     <jhi-button
         submitbutton
         class="guided-tour submission-button"
+        id="submit-modeling-submission"
         [disabled]="(!isActive && !isLate) || !submission || !!result || (isLate && !!submission.submitted)"
         [title]="!isLate ? 'entity.action.submit' : 'entity.action.submitDeadlineMissed'"
         (onClick)="submit()"
@@ -38,7 +39,10 @@
                         [diagramType]="modelingExercise.diagramType!"
                         [withExplanation]="true"
                         [(explanation)]="explanation"
+                        [resizeOptions]="resizeOptions"
+                        [savedStatus]="{ isChanged, isSaving }"
                     ></jhi-modeling-editor>
+                    <fa-icon [icon]="faGripLines" class="rg-bottom text-lightgrey"><span></span></fa-icon>
                     <jhi-team-submission-sync
                         *ngIf="modelingExercise.teamMode"
                         [exerciseType]="modelingExercise.type!"
@@ -58,6 +62,7 @@
                             [readOnly]="true"
                             [enablePopups]="false"
                             [displayPoints]="false"
+                            [course]="course"
                             (selectionChanged)="onSelectionChanged($event)"
                             [explanation]="explanation"
                         ></jhi-modeling-assessment>
@@ -74,7 +79,7 @@
                     </p>
                     <ng-container *ngIf="assessmentResult && assessmentResult!.feedbacks && assessmentResult!.feedbacks!.length > 0">
                         <p jhiTranslate="artemisApp.modelingSubmission.assessment.instructions">Select elements in the editor to filter the assessment.</p>
-                        <table class="table">
+                        <table class="table" id="component-feedback-table">
                             <thead class="thead-light">
                                 <tr>
                                     <th jhiTranslate="artemisApp.modelingSubmission.assessment.element">Element</th>
@@ -87,12 +92,11 @@
                                         <span *ngIf="feedback.reference">{{ assessmentsNames[feedback.referenceId!]['type'] }} </span>
                                         <code *ngIf="feedback.reference" class="text-primary">{{ assessmentsNames[feedback.referenceId!]['name'] }}</code
                                         ><br *ngIf="feedback.reference" />
-                                        <span *ngIf="feedback.text" [ngClass]="{ 'text-success': feedback.credits! > 0, 'text-danger': feedback.credits! < 0 }"
-                                            ><strong>Feedback:</strong> {{ feedback.text }}</span
-                                        >
-                                        <span *ngIf="feedback.detailText" [ngClass]="{ 'text-success': feedback.credits! > 0, 'text-danger': feedback.credits! < 0 }"
-                                            ><strong>Feedback:</strong> {{ feedback.detailText }}</span
-                                        >
+                                        <span
+                                            *ngIf="feedback.text || feedback.detailText || feedback.gradingInstruction"
+                                            [ngClass]="{ 'text-success': feedback.credits! > 0, 'text-danger': feedback.credits! < 0 }"
+                                            ><strong>Feedback:</strong> <span [innerHTML]="buildFeedbackTextForReview(feedback)"></span
+                                        ></span>
                                     </td>
                                     <td class="text-center">{{ feedback.credits | number: '1.0-1' }}</td>
                                 </tr>
@@ -108,23 +112,24 @@
                 class="col-xl-8 mt-3 alert unreferencedFeedback"
                 [feedback]="unreferencedFeedback || []"
                 [additional]="true"
+                [course]="course"
             >
             </jhi-additional-feedback>
         </div>
         <div class="row" *ngIf="result">
             <jhi-rating class="mt-2 alert alert-info" [result]="addParticipationToResult(result, participation)"></jhi-rating>
         </div>
-        <jhi-complaint-interactions
+        <jhi-complaint-student-view
             *ngIf="modelingExercise && result"
             [exercise]="modelingExercise"
             [participation]="participation"
             [result]="resultWithComplaint ? resultWithComplaint : result"
         >
-        </jhi-complaint-interactions>
+        </jhi-complaint-student-view>
     </div>
     <!--endregion-->
     <!--region Right Panel-->
-    <fa-icon right-header [icon]="['far', 'list-alt']"></fa-icon>&nbsp;
+    <fa-icon right-header [icon]="farListAlt"></fa-icon>&nbsp;
     <span right-header id="problem-statement" jhiTranslate="artemisApp.modelingSubmission.problemStatement">Problem Statement</span>
     <p right-body class="mb-3 markdown-preview" *ngIf="modelingExercise!.problemStatement">
         <span [innerHTML]="modelingExercise!.problemStatement! | htmlForMarkdown"></span>

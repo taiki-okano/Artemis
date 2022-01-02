@@ -4,18 +4,17 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.tum.in.www1.artemis.domain.Feedback;
-import de.tum.in.www1.artemis.domain.Result;
-import de.tum.in.www1.artemis.domain.User;
+import de.tum.in.www1.artemis.domain.*;
 import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
+import de.tum.in.www1.artemis.domain.enumeration.FeedbackType;
+import de.tum.in.www1.artemis.domain.exam.Exam;
 import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseStudentParticipation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
 import de.tum.in.www1.artemis.repository.*;
@@ -33,8 +32,6 @@ public class ResultService {
 
     private final LtiService ltiService;
 
-    private final ObjectMapper objectMapper;
-
     private final WebsocketMessagingService websocketMessagingService;
 
     private final ComplaintResponseRepository complaintResponseRepository;
@@ -47,19 +44,24 @@ public class ResultService {
 
     private final ComplaintRepository complaintRepository;
 
-    public ResultService(UserRepository userRepository, ResultRepository resultRepository, LtiService ltiService, ObjectMapper objectMapper, FeedbackRepository feedbackRepository,
+    private final AuthorizationCheckService authCheckService;
+
+    private final ExerciseDateService exerciseDateService;
+
+    public ResultService(UserRepository userRepository, ResultRepository resultRepository, LtiService ltiService, FeedbackRepository feedbackRepository,
             WebsocketMessagingService websocketMessagingService, ComplaintResponseRepository complaintResponseRepository, SubmissionRepository submissionRepository,
-            ComplaintRepository complaintRepository, RatingRepository ratingRepository) {
+            ComplaintRepository complaintRepository, RatingRepository ratingRepository, AuthorizationCheckService authCheckService, ExerciseDateService exerciseDateService) {
         this.userRepository = userRepository;
         this.resultRepository = resultRepository;
         this.ltiService = ltiService;
-        this.objectMapper = objectMapper;
         this.websocketMessagingService = websocketMessagingService;
         this.feedbackRepository = feedbackRepository;
         this.complaintResponseRepository = complaintResponseRepository;
         this.submissionRepository = submissionRepository;
         this.complaintRepository = complaintRepository;
         this.ratingRepository = ratingRepository;
+        this.authCheckService = authCheckService;
+        this.exerciseDateService = exerciseDateService;
     }
 
     /**
@@ -85,14 +87,12 @@ public class ResultService {
         // manual feedback is always rated, can be overwritten though in the case of a result for an external submission
         result.setRated(ratedResult);
 
-        result.getFeedbacks().forEach(feedback -> {
-            feedback.setResult(result);
-        });
+        result.getFeedbacks().forEach(feedback -> feedback.setResult(result));
 
         // this call should cascade all feedback relevant changed and save them accordingly
         var savedResult = resultRepository.save(result);
         // The websocket client expects the submission and feedbacks, so we retrieve the result again instead of using the save result.
-        savedResult = resultRepository.findOneWithEagerSubmissionAndFeedback(result.getId());
+        savedResult = resultRepository.findByIdWithEagerSubmissionAndFeedbackElseThrow(result.getId());
 
         // if it is an example result we do not have any participation (isExampleResult can be also null)
         if (Boolean.FALSE.equals(savedResult.isExampleResult()) || savedResult.isExampleResult() == null) {
@@ -180,6 +180,48 @@ public class ResultService {
         List<Feedback> savedFeedbacks = saveFeedbackWithHibernateWorkaround(result, feedbackList);
         result.addFeedbacks(savedFeedbacks);
         return shouldSaveResult(result, shouldSave);
+    }
+
+    /**
+     * Returns a list of feedbacks that is filtered for students depending on the settings and the time.
+     *
+     * @param result    the result for which the feedback elements should be returned
+     * @return the list of filtered feedbacks
+     */
+    public List<Feedback> getFeedbacksForResult(Result result) {
+        Exercise exercise = result.getParticipation().getExercise();
+        boolean filterForStudent = !authCheckService.isAtLeastTeachingAssistantForExercise(exercise);
+
+        List<Feedback> feedbacks = result.getFeedbacks();
+        if (filterForStudent) {
+            if (exercise.isExamExercise()) {
+                Exam exam = exercise.getExerciseGroup().getExam();
+                result.filterSensitiveFeedbacks(!exam.resultsPublished());
+            }
+            else {
+                boolean applyFilter = exerciseDateService.isBeforeDueDate(result.getParticipation())
+                        || (AssessmentType.AUTOMATIC.equals(result.getAssessmentType()) && exerciseDateService.isBeforeLatestDueDate(exercise));
+                result.filterSensitiveFeedbacks(applyFilter);
+            }
+            feedbacks = result.getFeedbacks();
+
+            boolean resultSetAndNonAutomatic = result.getAssessmentType() != null && result.getAssessmentType() != AssessmentType.AUTOMATIC;
+            boolean dueDateNotSetOrNotOver = exercise.getAssessmentDueDate() != null && ZonedDateTime.now().isBefore(exercise.getAssessmentDueDate());
+
+            // A tutor is allowed to access all feedback, but filter for a student the manual feedback if the assessment due date is not over yet
+            if (!exercise.isExamExercise() && resultSetAndNonAutomatic && dueDateNotSetOrNotOver) {
+                // filter all non-automatic feedbacks
+                feedbacks = feedbacks.stream().filter(feedback -> feedback.getType() != null && feedback.getType() == FeedbackType.AUTOMATIC).toList();
+            }
+        }
+        // remove unnecessary data to keep the json payload smaller
+        for (Feedback feedback : feedbacks) {
+            if (feedback.getResult() != null) {
+                feedback.getResult().setSubmission(null);
+                feedback.getResult().setParticipation(null);
+            }
+        }
+        return feedbacks;
     }
 
     @NotNull

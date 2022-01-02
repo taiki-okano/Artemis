@@ -1,15 +1,16 @@
-import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { StatisticsService } from 'app/shared/statistics-graph/statistics.service';
-import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
-import { BaseChartDirective, Label } from 'ng2-charts';
-import { DataSet } from 'app/exercises/quiz/manage/statistics/quiz-statistic/quiz-statistic.component';
 import { TranslateService } from '@ngx-translate/core';
-import * as moment from 'moment';
-import { GraphColors, Graphs, SpanType, StatisticsView } from 'app/entities/statistics.model';
+import dayjs from 'dayjs';
+import { Graphs, SpanType, StatisticsView } from 'app/entities/statistics.model';
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { ngxColor } from 'app/shared/statistics-graph/statistics-average-score-graph.component';
+import { yAxisTickFormatting } from 'app/shared/statistics-graph/statistics-graph.utils';
 
 @Component({
     selector: 'jhi-statistics-graph',
     templateUrl: './statistics-graph.component.html',
+    styleUrls: ['../chart/vertical-bar-chart.scss'],
 })
 export class StatisticsGraphComponent implements OnChanges {
     @Input()
@@ -28,22 +29,26 @@ export class StatisticsGraphComponent implements OnChanges {
     Graphs = Graphs;
 
     // Histogram related properties
-    barChartOptions: ChartOptions = {};
-    barChartType: ChartType = 'bar';
-    lineChartType: ChartType = 'line';
-    labelTitle: string;
     chartName: string;
     barChartLegend = false;
     chartTime: any;
     // Data
-    barChartLabels: Label[] = [];
-    chartData: ChartDataSets[] = [];
+    barChartLabels: string[] = [];
     dataForSpanType: number[];
+
+    // ngx
+    ngxData: any[] = [];
+    readonly ngxColor = ngxColor;
+    tooltipTranslation: string;
+    yScaleMax: number;
+    yAxisTickFormatting = yAxisTickFormatting;
 
     // Left arrow -> decrease, right arrow -> increase
     private currentPeriod = 0;
 
-    @ViewChild(BaseChartDirective) chart: BaseChartDirective;
+    // Icons
+    faArrowLeft = faArrowLeft;
+    faArrowRight = faArrowRight;
 
     constructor(private service: StatisticsService, private translateService: TranslateService) {}
 
@@ -55,54 +60,28 @@ export class StatisticsGraphComponent implements OnChanges {
         this.currentSpan = changes.currentSpan?.currentValue;
         this.barChartLabels = [];
         this.currentPeriod = 0;
-        this.labelTitle = this.translateService.instant(`statistics.${this.graphType.toString().toLowerCase()}Title`);
-        this.chartName = this.translateService.instant(`statistics.${this.graphType.toString().toLowerCase()}`);
+        this.chartName = `statistics.${this.graphType.toString().toLowerCase()}`;
+        this.tooltipTranslation = `statistics.${this.graphType.toString().toLowerCase()}Title`;
         this.initializeChart();
     }
 
     private initializeChart(): void {
         this.createLabels();
-        this.chartData = [
-            {
-                label: this.labelTitle,
-                data: new Array(this.barChartLabels.length).fill(0),
-                backgroundColor: GraphColors.DARK_BLUE,
-                borderColor: GraphColors.DARK_BLUE,
-                hoverBackgroundColor: GraphColors.DARK_BLUE,
-            },
-        ];
-        this.createCharts();
         if (this.statisticsView === StatisticsView.ARTEMIS) {
             this.service.getChartData(this.currentSpan, this.currentPeriod, this.graphType).subscribe((res: number[]) => {
                 this.dataForSpanType = res;
-                this.chartData = [
-                    {
-                        label: this.labelTitle,
-                        data: this.dataForSpanType,
-                        backgroundColor: GraphColors.DARK_BLUE,
-                        borderColor: GraphColors.DARK_BLUE,
-                        hoverBackgroundColor: GraphColors.DARK_BLUE,
-                    },
-                ];
+                this.pushToData();
             });
         } else {
             this.service.getChartDataForContent(this.currentSpan, this.currentPeriod, this.graphType, this.statisticsView, this.entityId!).subscribe((res: number[]) => {
                 this.dataForSpanType = res;
-                this.chartData = [
-                    {
-                        label: this.labelTitle,
-                        data: this.dataForSpanType,
-                        backgroundColor: GraphColors.DARK_BLUE,
-                        borderColor: GraphColors.DARK_BLUE,
-                        hoverBackgroundColor: GraphColors.DARK_BLUE,
-                    },
-                ];
+                this.pushToData();
             });
         }
     }
 
     private createLabels(): void {
-        const now = moment();
+        const now = dayjs();
         let startDate;
         let endDate;
         switch (this.currentSpan) {
@@ -114,13 +93,13 @@ export class StatisticsGraphComponent implements OnChanges {
                 break;
             case SpanType.WEEK:
                 this.barChartLabels = this.getWeekdays();
-                startDate = moment().add(this.currentPeriod, 'weeks').subtract(6, 'days').format('DD.MM.YYYY');
-                endDate = moment().add(this.currentPeriod, 'weeks').format('DD.MM.YYYY');
+                startDate = dayjs().add(this.currentPeriod, 'weeks').subtract(6, 'days').format('DD.MM.YYYY');
+                endDate = dayjs().add(this.currentPeriod, 'weeks').format('DD.MM.YYYY');
                 this.chartTime = startDate + ' - ' + endDate;
                 break;
             case SpanType.MONTH:
-                startDate = moment().subtract(1 - this.currentPeriod, 'months');
-                endDate = moment().subtract(-this.currentPeriod, 'months');
+                startDate = dayjs().subtract(1 - this.currentPeriod, 'months');
+                endDate = dayjs().subtract(-this.currentPeriod, 'months');
                 const daysInMonth = endDate.diff(startDate, 'days');
                 this.barChartLabels = this.getLabelsForMonth(daysInMonth);
                 this.chartTime = now
@@ -130,11 +109,11 @@ export class StatisticsGraphComponent implements OnChanges {
                 break;
             case SpanType.QUARTER:
                 const prefix = this.translateService.instant('calendar_week');
-                startDate = moment().subtract(11 + 12 * -this.currentPeriod, 'weeks');
-                endDate = this.currentPeriod !== 0 ? moment().subtract(12 * -this.currentPeriod, 'weeks') : moment();
+                startDate = dayjs().subtract(11 + 12 * -this.currentPeriod, 'weeks');
+                endDate = this.currentPeriod !== 0 ? dayjs().subtract(12 * -this.currentPeriod, 'weeks') : dayjs();
                 let currentWeek;
                 for (let i = 0; i < 12; i++) {
-                    currentWeek = moment()
+                    currentWeek = dayjs()
                         .subtract(11 + 12 * -this.currentPeriod - i, 'weeks')
                         .isoWeekday(1)
                         .isoWeek();
@@ -150,7 +129,7 @@ export class StatisticsGraphComponent implements OnChanges {
     }
 
     private getMonths(): string[] {
-        const currentMonth = moment().month();
+        const currentMonth = dayjs().month();
         const year = [
             this.translateService.instant('months.january'),
             this.translateService.instant('months.february'),
@@ -175,7 +154,7 @@ export class StatisticsGraphComponent implements OnChanges {
 
         for (let i = 0; i < daysInMonth; i++) {
             days.push(
-                moment()
+                dayjs()
                     .subtract(-this.currentPeriod, 'months')
                     .subtract(daysInMonth - 1 - i, 'days')
                     .format('DD.MM'),
@@ -185,7 +164,7 @@ export class StatisticsGraphComponent implements OnChanges {
     }
 
     private getWeekdays(): string[] {
-        const currentDay = moment().day();
+        const currentDay = dayjs().day();
         const days = [
             this.translateService.instant('weekdays.monday'),
             this.translateService.instant('weekdays.tuesday'),
@@ -200,50 +179,20 @@ export class StatisticsGraphComponent implements OnChanges {
         return back.concat(front);
     }
 
-    private createCharts() {
-        this.barChartOptions = {
-            layout: {
-                padding: {
-                    top: 20,
-                },
-            },
-            responsive: true,
-            hover: {
-                animationDuration: 0,
-            },
-            animation: {
-                duration: 1,
-                onComplete() {
-                    const chartInstance = this.chart,
-                        ctx = chartInstance.ctx;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-
-                    this.data.datasets.forEach(function (dataset: DataSet, j: number) {
-                        const meta = chartInstance.controller.getDatasetMeta(j);
-                        meta.data.forEach(function (bar: any, index: number) {
-                            const data = dataset.data[index];
-                            ctx.fillText(String(data), bar._model.x, bar._model.y - 5);
-                        });
-                    });
-                },
-            },
-            scales: {
-                yAxes: [
-                    {
-                        ticks: {
-                            beginAtZero: true,
-                            min: 0,
-                        },
-                    },
-                ],
-            },
-        };
-    }
-
     public switchTimeSpan(index: boolean): void {
         // eslint-disable-next-line chai-friendly/no-unused-expressions
         index ? (this.currentPeriod += 1) : (this.currentPeriod -= 1);
         this.initializeChart();
+    }
+
+    /**
+     * Converts the data retrieved from the service to dedicated objects that can be interpreted by ngx-charts
+     * and pushes them to ngxData.
+     * Then, computes the upper limit for the y Axis of the chart.
+     * @private
+     */
+    private pushToData(): void {
+        this.ngxData = this.dataForSpanType.map((score, index) => ({ name: this.barChartLabels[index], value: score }));
+        this.yScaleMax = Math.max(3, ...this.dataForSpanType);
     }
 }

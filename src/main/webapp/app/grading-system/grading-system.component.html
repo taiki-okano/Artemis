@@ -12,6 +12,15 @@
             </button>
             <jhi-grading-system-info-modal></jhi-grading-system-info-modal>
         </div>
+        <div class="d-flex">
+            <label class="btn btn-primary me-1 mb-1">
+                <span jhiTranslate="artemisApp.gradingSystem.csv.importButton">Import (.csv)</span>
+                <input type="file" accept=".json,.csv" style="display: none" (change)="onCSVFileSelect($event)" />
+            </label>
+            <button (click)="exportGradingStepsToCsv()" class="btn btn-primary me-1 mb-1" type="button">
+                <span jhiTranslate="artemisApp.gradingSystem.csv.exportButton">Export (.csv)</span>
+            </button>
+        </div>
         <div class="dropdown-container">
             <div class="form-group">
                 <span class="colon-suffix no-flex-shrink">
@@ -81,7 +90,7 @@
             <tbody>
                 <tr *ngFor="let gradeStep of gradingScale.gradeSteps; let i = index" class="grading-scale-table-row">
                     <td>
-                        <input [(ngModel)]="gradeStep.lowerBoundPercentage" type="number" step="0.5" min="0" max="100" required (change)="setPoints(gradeStep, true)" />
+                        <input [(ngModel)]="gradeStep.lowerBoundPercentage" type="number" step="0.5" min="0" required (change)="setPoints(gradeStep, true)" />
                     </td>
                     <td>
                         <input
@@ -89,14 +98,13 @@
                             type="number"
                             step="0.5"
                             min="0"
-                            [max]="maxPoints || 0"
                             [required]="maxPoints != undefined && maxPoints > 0"
                             [disabled]="maxPoints == undefined || maxPoints <= 0"
                             (change)="setPercentage(gradeStep, true)"
                         />
                     </td>
                     <td>
-                        <input [(ngModel)]="gradeStep.upperBoundPercentage" type="number" step="0.5" min="0" max="100" required (change)="setPoints(gradeStep, false)" />
+                        <input [(ngModel)]="gradeStep.upperBoundPercentage" type="number" step="0.5" min="0" required (change)="setPoints(gradeStep, false)" />
                     </td>
                     <td>
                         <input
@@ -104,7 +112,6 @@
                             type="number"
                             step="0.5"
                             min="0"
-                            [max]="maxPoints || 0"
                             [required]="maxPoints != undefined && maxPoints > 0"
                             [disabled]="maxPoints == undefined || maxPoints <= 0"
                             (change)="setPercentage(gradeStep, false)"
@@ -118,7 +125,7 @@
                     </td>
                     <td>
                         <button (click)="deleteGradeStep(i)" type="button" class="btn btn-danger" style="float: right">
-                            <fa-icon [icon]="'times'"></fa-icon> <span jhiTranslate="artemisApp.gradingSystem.delete">Delete</span>
+                            <fa-icon [icon]="faTimes"></fa-icon> <span jhiTranslate="artemisApp.gradingSystem.delete">Delete</span>
                         </button>
                     </td>
                 </tr>
@@ -127,12 +134,12 @@
     </div>
     <div style="margin-bottom: 1em">
         <button (click)="createGradeStep()" class="btn btn-success me-1 mb-1" type="button">
-            <fa-icon [icon]="'plus'"></fa-icon> <span jhiTranslate="artemisApp.gradingSystem.add">Add Grade Step</span>
+            <fa-icon [icon]="faPlus"></fa-icon> <span jhiTranslate="artemisApp.gradingSystem.add">Add Grade Step</span>
         </button>
     </div>
     <div>
         <button (click)="save()" [disabled]="isLoading || !validGradeSteps()" class="btn btn-primary mr-1 mb-1" type="button">
-            <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="artemisApp.gradingSystem.save">Save</span>
+            <fa-icon [icon]="faSave"></fa-icon>&nbsp;<span jhiTranslate="artemisApp.gradingSystem.save">Save</span>
         </button>
         <button
             *ngIf="existingGradingScale"
@@ -145,10 +152,10 @@
             [dialogError]="dialogError$"
             [disabled]="isLoading"
         >
-            <fa-icon [icon]="'times'"> <span jhiTranslate="artemisApp.gradingSystem.delete">Delete</span></fa-icon>
+            <fa-icon [icon]="faTimes"> <span jhiTranslate="artemisApp.gradingSystem.delete">Delete</span></fa-icon>
         </button>
         <div *ngIf="invalidGradeStepsMessage" class="alert alert-warning mt-3">
-            <fa-icon [icon]="'exclamation-triangle'"></fa-icon>
+            <fa-icon [icon]="faExclamationTriangle"></fa-icon>
             <span>
                 {{ invalidGradeStepsMessage }}
             </span>

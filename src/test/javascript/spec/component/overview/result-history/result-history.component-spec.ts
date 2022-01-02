@@ -1,11 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Result } from 'app/entities/result.model';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { ResultHistoryComponent } from 'app/overview/result-history/result-history.component';
-import { MockModule } from 'ng-mocks';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
+import { MockDirective, MockPipe } from 'ng-mocks';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
+import { ArtemisDatePipe } from 'app/shared/pipes/artemis-date.pipe';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { ArtemisTestModule } from '../../../test.module';
+import { faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -19,8 +22,8 @@ describe('ResultHistoryComponent', () => {
         result = new Result();
 
         return TestBed.configureTestingModule({
-            imports: [MockModule(ArtemisSharedModule)],
-            declarations: [ResultHistoryComponent],
+            imports: [ArtemisTestModule],
+            declarations: [ResultHistoryComponent, MockPipe(ArtemisDatePipe), MockDirective(NgbTooltip)],
         })
             .compileComponents()
             .then(() => {
@@ -36,11 +39,11 @@ describe('ResultHistoryComponent', () => {
     it('should return the right values for result score', () => {
         fixture.detectChanges();
         result.score = 85;
-        expect(component.resultIcon(result)).to.equal('check');
+        expect(component.resultIcon(result)).to.equal(faCheck);
         expect(component.resultClass(result)).to.equal('success');
 
         result.score = 50;
-        expect(component.resultIcon(result)).to.equal('times');
+        expect(component.resultIcon(result)).to.equal(faTimes);
         expect(component.resultClass(result)).to.equal('warning');
 
         result.score = 30;

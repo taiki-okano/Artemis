@@ -1,5 +1,7 @@
 package de.tum.in.www1.artemis.domain.quiz;
 
+import static de.tum.in.www1.artemis.domain.enumeration.ExerciseType.QUIZ;
+
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -20,6 +22,7 @@ import de.tum.in.www1.artemis.config.Constants;
 import de.tum.in.www1.artemis.domain.Exercise;
 import de.tum.in.www1.artemis.domain.Result;
 import de.tum.in.www1.artemis.domain.Submission;
+import de.tum.in.www1.artemis.domain.enumeration.ExerciseType;
 import de.tum.in.www1.artemis.domain.participation.Participation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
 import de.tum.in.www1.artemis.domain.view.QuizView;
@@ -196,7 +199,6 @@ public class QuizExercise extends Exercise {
      * @return true if quiz has ended, false otherwise
      */
     @JsonView(QuizView.Before.class)
-    @Override
     public Boolean isEnded() {
         return isStarted() && getRemainingTime() + Constants.QUIZ_GRACE_PERIOD_IN_SECONDS <= 0;
     }
@@ -420,6 +422,11 @@ public class QuizExercise extends Exercise {
         else {
             return participation.getResults();
         }
+    }
+
+    @Override
+    public ExerciseType getExerciseType() {
+        return QUIZ;
     }
 
     /**

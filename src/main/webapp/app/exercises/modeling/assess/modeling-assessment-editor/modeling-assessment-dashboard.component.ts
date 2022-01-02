@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { Course } from 'app/entities/course.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { Subscription } from 'rxjs';
@@ -20,6 +19,9 @@ import { AssessmentType } from 'app/entities/assessment-type.model';
 import { SortService } from 'app/shared/service/sort.service';
 import { Authority } from 'app/shared/constants/authority.constants';
 import { getLinkToSubmissionAssessment } from 'app/utils/navigation.utils';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faEdit, faBan, faFolderOpen, faSort } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-assessment-dashboard',
@@ -54,9 +56,15 @@ export class ModelingAssessmentDashboardComponent implements OnInit, OnDestroy {
     userId: number;
     canOverrideAssessments: boolean;
 
+    // Icons
+    faSort = faSort;
+    faFolderOpen = faFolderOpen;
+    faBan = faBan;
+    faEdit = faEdit;
+
     constructor(
         private route: ActivatedRoute,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private router: Router,
         private courseService: CourseManagementService,
         private exerciseService: ExerciseService,
@@ -64,7 +72,7 @@ export class ModelingAssessmentDashboardComponent implements OnInit, OnDestroy {
         private modelingSubmissionService: ModelingSubmissionService,
         private modelingAssessmentService: ModelingAssessmentService,
         private modalService: NgbModal,
-        private eventManager: JhiEventManager,
+        private eventManager: EventManager,
         private accountService: AccountService,
         private translateService: TranslateService,
         private sortService: SortService,
@@ -93,7 +101,6 @@ export class ModelingAssessmentDashboardComponent implements OnInit, OnDestroy {
                     this.courseId = this.exercise.course ? this.exercise.course.id! : this.exercise.exerciseGroup!.exam!.course!.id!;
                     this.getSubmissions();
                     this.numberOfCorrectionrounds = this.exercise.exerciseGroup ? this.exercise!.exerciseGroup.exam!.numberOfCorrectionRoundsInExam! : 1;
-                    this.setPermissions();
                 } else {
                     // TODO: error message if this is not a modeling exercise
                 }
@@ -147,14 +154,6 @@ export class ModelingAssessmentDashboardComponent implements OnInit, OnDestroy {
 
     getAssessmentRouterLink(participationId: number, submissionId: number): string[] {
         return getLinkToSubmissionAssessment(ExerciseType.MODELING, this.courseId, this.exerciseId, participationId, submissionId, this.examId, this.exerciseGroupId);
-    }
-
-    private setPermissions() {
-        if (this.exercise.course) {
-            this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.course!);
-        } else {
-            this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.exerciseGroup?.exam?.course!);
-        }
     }
 
     /**

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { SERVER_API_URL } from 'app/app.constants';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import { StudentExam } from 'app/entities/student-exam.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -8,16 +7,16 @@ import { QuizSubmission } from 'app/entities/quiz/quiz-submission.model';
 import { catchError, map } from 'rxjs/operators';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
 import { Exam } from 'app/entities/exam.model';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { getLatestSubmissionResult } from 'app/entities/submission.model';
-import { cloneDeep } from 'lodash';
-import { ParticipationType } from 'app/entities/participation/participation.model';
-import { addUserIndependentRepositoryUrl } from 'app/overview/participation-utils';
+import { cloneDeep } from 'lodash-es';
 import { Exercise, ExerciseType } from 'app/entities/exercise.model';
 
 @Injectable({ providedIn: 'root' })
 export class ExamParticipationService {
     public currentlyLoadedStudentExam = new Subject<StudentExam>();
+
+    private examExerciseIds: number[];
 
     public getResourceURL(courseId: number, examId: number): string {
         return `${SERVER_API_URL}api/courses/${courseId}/exams/${examId}`;
@@ -94,7 +93,6 @@ export class ExamParticipationService {
         return this.httpClient.get<StudentExam>(url).pipe(
             map((studentExam: StudentExam) => {
                 const convertedStudentExam = ExamParticipationService.convertStudentExamDateFromServer(studentExam);
-                this.adjustRepositoryUrlsForProgrammingExercises(convertedStudentExam);
                 this.currentlyLoadedStudentExam.next(convertedStudentExam);
                 return convertedStudentExam;
             }),
@@ -106,7 +104,6 @@ export class ExamParticipationService {
         return this.httpClient.get<StudentExam>(url).pipe(
             map((studentExam: StudentExam) => {
                 const convertedStudentExam = ExamParticipationService.convertStudentExamDateFromServer(studentExam);
-                this.adjustRepositoryUrlsForProgrammingExercises(convertedStudentExam);
                 this.currentlyLoadedStudentExam.next(convertedStudentExam);
                 return convertedStudentExam;
             }),
@@ -131,11 +128,11 @@ export class ExamParticipationService {
             }),
             catchError((error: HttpErrorResponse) => {
                 if (error.status === 403 && error.headers.get('x-null-error') === 'error.submissionNotInTime') {
-                    return throwError(new Error('studentExam.submissionNotInTime'));
+                    return throwError(new Error('artemisApp.studentExam.submissionNotInTime'));
                 } else if (error.status === 409 && error.headers.get('x-null-error') === 'error.alreadySubmitted') {
-                    return throwError(new Error('studentExam.alreadySubmitted'));
+                    return throwError(new Error('artemisApp.studentExam.alreadySubmitted'));
                 } else {
-                    return throwError(new Error('studentExam.handInFailed'));
+                    return throwError(new Error('artemisApp.studentExam.handInFailed'));
                 }
             }),
         );
@@ -211,18 +208,17 @@ export class ExamParticipationService {
     private convertStudentExamFromServer(studentExam: StudentExam): StudentExam {
         studentExam.exercises = this.exerciseService.convertExercisesDateFromServer(studentExam.exercises);
         studentExam.exam = ExamParticipationService.convertExamDateFromServer(studentExam.exam);
-        this.adjustRepositoryUrlsForProgrammingExercises(studentExam);
         return studentExam;
     }
 
     private static convertExamDateFromServer(exam?: Exam) {
         if (exam) {
-            exam.visibleDate = exam.visibleDate ? moment(exam.visibleDate) : undefined;
-            exam.startDate = exam.startDate ? moment(exam.startDate) : undefined;
-            exam.endDate = exam.endDate ? moment(exam.endDate) : undefined;
-            exam.publishResultsDate = exam.publishResultsDate ? moment(exam.publishResultsDate) : undefined;
-            exam.examStudentReviewStart = exam.examStudentReviewStart ? moment(exam.examStudentReviewStart) : undefined;
-            exam.examStudentReviewEnd = exam.examStudentReviewEnd ? moment(exam.examStudentReviewEnd) : undefined;
+            exam.visibleDate = exam.visibleDate ? dayjs(exam.visibleDate) : undefined;
+            exam.startDate = exam.startDate ? dayjs(exam.startDate) : undefined;
+            exam.endDate = exam.endDate ? dayjs(exam.endDate) : undefined;
+            exam.publishResultsDate = exam.publishResultsDate ? dayjs(exam.publishResultsDate) : undefined;
+            exam.examStudentReviewStart = exam.examStudentReviewStart ? dayjs(exam.examStudentReviewStart) : undefined;
+            exam.examStudentReviewEnd = exam.examStudentReviewEnd ? dayjs(exam.examStudentReviewEnd) : undefined;
         }
         return exam;
     }
@@ -230,21 +226,6 @@ export class ExamParticipationService {
     private static convertStudentExamDateFromServer(studentExam: StudentExam): StudentExam {
         studentExam.exam = ExamParticipationService.convertExamDateFromServer(studentExam.exam);
         return studentExam;
-    }
-
-    private adjustRepositoryUrlsForProgrammingExercises(studentExam: StudentExam) {
-        // add user independent repositoryUrl to all student participations
-        if (studentExam.exercises) {
-            studentExam.exercises!.forEach((exercise) => {
-                if (exercise.type === ExerciseType.PROGRAMMING && exercise.studentParticipations) {
-                    exercise.studentParticipations!.forEach((studentParticipation) => {
-                        if (studentParticipation.type === ParticipationType.PROGRAMMING) {
-                            addUserIndependentRepositoryUrl(studentParticipation);
-                        }
-                    });
-                }
-            });
-        }
     }
 
     public static getSubmissionForExercise(exercise: Exercise) {
@@ -273,5 +254,13 @@ export class ExamParticipationService {
         } else {
             return 'notSavedOrSubmitted';
         }
+    }
+
+    public getExamExerciseIds(): number[] {
+        return this.examExerciseIds;
+    }
+
+    public setExamExerciseIds(examExerciseIds: number[]) {
+        this.examExerciseIds = examExerciseIds;
     }
 }

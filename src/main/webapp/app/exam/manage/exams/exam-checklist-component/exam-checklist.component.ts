@@ -1,16 +1,17 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { Exam } from 'app/entities/exam.model';
 import { HttpResponse } from '@angular/common/http';
 import { AccountService } from 'app/core/auth/account.service';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { ExamChecklist } from 'app/entities/exam-checklist.model';
 import { filter, map } from 'rxjs/operators';
+import { faEye, faListAlt, faThList, faUser, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-exam-checklist',
     templateUrl: './exam-checklist.component.html',
 })
-export class ExamChecklistComponent implements OnInit {
+export class ExamChecklistComponent implements OnChanges {
     @Input() exam: Exam;
     @Input() getExamRoutesByIdentifier: any;
     @Input() isAtLeastInstructor = false;
@@ -25,9 +26,16 @@ export class ExamChecklistComponent implements OnInit {
     hasOptionalExercises = false;
     countMandatoryExercises = 0;
 
+    // Icons
+    faEye = faEye;
+    faWrench = faWrench;
+    faUser = faUser;
+    faListAlt = faListAlt;
+    faThList = faThList;
+
     constructor(private accountService: AccountService, private examService: ExamManagementService) {}
 
-    ngOnInit() {
+    ngOnChanges() {
         this.checkPointsExercisesEqual();
         this.checkTotalPointsMandatory();
         this.checkAllGroupContainsExercise();

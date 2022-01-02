@@ -38,7 +38,7 @@
                     <label class="form-control-label" jhiTranslate="artemisApp.course.shortName" for="field_shortName">Short Name</label>
                     <input required type="text" class="form-control" name="shortName" id="field_shortName" formControlName="shortName" [readOnly]="course.id" />
                     <ng-container *ngIf="shortName.invalid && (shortName.dirty || shortName.touched)">
-                        <div class="alert alert-danger">
+                        <div *ngIf="(shortName.errors! | keyvalue | removekeys: ['required']).length > 0" class="alert alert-danger">
                             <div *ngFor="let e of shortName.errors! | keyvalue | removekeys: ['required']">
                                 <div [jhiTranslate]="'artemisApp.course.form.shortname' + '.' + e.key"></div>
                             </div>
@@ -90,7 +90,7 @@
                                 <span class="badge bg-primary font-weight-normal m-1 ps-3"
                                     >{{ organization.name
                                     }}<button type="button" class="btn text-light" (click)="removeOrganizationFromCourse(organization)">
-                                        <fa-icon [icon]="'times'"></fa-icon></button
+                                        <fa-icon [icon]="faTimes"></fa-icon></button
                                 ></span>
                             </h5>
                         </div>
@@ -117,7 +117,7 @@
                     />
                     <label class="form-control-label" jhiTranslate="artemisApp.course.testCourse.title" for="field_testCourse"></label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.testCourse.description' | artemisTranslate }}"
@@ -132,12 +132,18 @@
                 <div class="form-group">
                     <label class="form-control-label" for="field_maxPoints" jhiTranslate="artemisApp.course.maxPoints.title"> Maximum number of points for course </label>
                     <fa-icon
-                        [icon]="'exclamation-triangle'"
+                        [icon]="faExclamationTriangle"
                         class="text-warning"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.maxPoints.warning' | artemisTranslate }}"
                     ></fa-icon>
                     <input type="number" class="form-control" name="maxPoints" id="field_maxPoints" min="1" formControlName="maxPoints" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_accuracyOfScores" jhiTranslate="artemisApp.course.accuracyOfScores">
+                        Amount of decimal places used for calculating the scores
+                    </label>
+                    <input required type="number" class="form-control" name="accuracyOfScores" id="field_accuracyOfScores" min="0" max="5" formControlName="accuracyOfScores" />
                 </div>
                 <div *jhiHasAnyAuthority="'ROLE_ADMIN'">
                     <div *ngIf="!course.id" class="form-check">
@@ -154,7 +160,7 @@
                             >Customize Group Names</label
                         >
                         <fa-icon
-                            [icon]="'question-circle'"
+                            [icon]="faQuestionCircle"
                             class="text-secondary"
                             placement="top"
                             ngbTooltip="{{ 'artemisApp.course.customizeGroupNames.description' | artemisTranslate }}"
@@ -200,7 +206,7 @@
                     />
                     <label class="form-control-label" jhiTranslate="artemisApp.course.complaintsEnabled.title" for="field_maxComplaintSettingEnabled">Enable Complaints</label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.complaintsEnabled.description' | artemisTranslate }}"
@@ -211,7 +217,7 @@
                         Maximum amount of complaints per student
                     </label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.maxComplaints.description' | artemisTranslate }}"
@@ -223,7 +229,7 @@
                         >Maximum amount of complaints per team</label
                     >
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.maxTeamComplaints.description' | artemisTranslate }}"
@@ -235,7 +241,7 @@
                         Deadline for complaints in days after result date
                     </label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.maxComplaintTimeDays.description' | artemisTranslate }}"
@@ -256,7 +262,7 @@
                         >Enable More Feedback Requests</label
                     >
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.requestMoreFeedbackEnabled.description' | artemisTranslate }}"
@@ -267,7 +273,7 @@
                         Deadline for more feedback requests in days after result date
                     </label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.maxRequestMoreFeedbackTimeDays.description' | artemisTranslate }}"
@@ -285,7 +291,7 @@
                     <input type="checkbox" class="form-check-input" name="postsEnabled" id="field_postsEnabled" formControlName="postsEnabled" />
                     <label class="form-control-label" jhiTranslate="artemisApp.course.postsEnabled.title" for="field_postsEnabled">Enable Questions and Answers</label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.postsEnabled.description' | artemisTranslate }}"
@@ -303,7 +309,7 @@
                     />
                     <label class="form-control-label" jhiTranslate="artemisApp.course.onlineCourse.title" for="field_onlineCourse">Online Course</label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.onlineCourse.description' | artemisTranslate }}"
@@ -320,7 +326,7 @@
                     />
                     <label class="form-control-label" jhiTranslate="artemisApp.course.registrationEnabled.title" for="field_registrationEnabled">Registration Enabled</label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.registrationEnabled.description' | artemisTranslate }}"
@@ -341,7 +347,7 @@
                     <input type="checkbox" class="form-check-input" [checked]="course.presentationScore !== 0" (change)="this.changePresentationScoreInput()" />
                     <label class="form-control-label" jhiTranslate="artemisApp.course.presentationScoreEnabled.title">Presentation Score Enabled</label>
                     <fa-icon
-                        [icon]="'question-circle'"
+                        [icon]="faQuestionCircle"
                         class="text-secondary"
                         placement="top"
                         ngbTooltip="{{ 'artemisApp.course.presentationScoreEnabled.description' | artemisTranslate }}"
@@ -354,14 +360,14 @@
             </div>
             <div class="mt-3 d-flex">
                 <button type="button" id="cancel-save" class="btn btn-secondary" (click)="previousState()">
-                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                    <fa-icon [icon]="faBan"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
                 </button>
                 <span *ngIf="courseForm.invalid; else saveButtonTpl" data-toggle="tooltip" title="Please fill in all required fields." placement="top">
                     <ng-container *ngTemplateOutlet="saveButtonTpl"></ng-container>
                 </span>
                 <ng-template #saveButtonTpl>
                     <button type="submit" id="save-entity" [disabled]="courseForm.invalid || isSaving" class="btn btn-primary ms-2">
-                        <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                        <fa-icon [icon]="faSave"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
                     </button>
                 </ng-template>
             </div>

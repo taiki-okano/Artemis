@@ -4,12 +4,14 @@ import static de.tum.in.www1.artemis.web.rest.util.ResponseUtil.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import de.tum.in.www1.artemis.domain.*;
+import de.tum.in.www1.artemis.domain.participation.Participation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
 import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.security.Role;
@@ -145,6 +147,7 @@ public abstract class AssessmentResource {
         else {
             result = assessmentService.saveManualAssessment(submission, feedbacks, submission.getLatestResult().getId());
         }
+        result = resultRepository.submitResult(result, exercise, Optional.empty());
         return ResponseEntity.ok(result);
     }
 
@@ -214,11 +217,11 @@ public abstract class AssessmentResource {
         // check authentication
         Submission submission = submissionRepository.findByIdWithResultsElseThrow(submissionId);
         Result result = resultRepository.findByIdWithEagerFeedbacksElseThrow(resultId);
-        StudentParticipation studentParticipation = (StudentParticipation) submission.getParticipation();
-        if (!studentParticipation.getId().equals(participationId)) {
+        Participation participation = submission.getParticipation();
+        if (!participation.getId().equals(participationId)) {
             return badRequest("participationId", "400", "participationId in path does not match the id of the participation to submission " + submissionId + " !");
         }
-        Exercise exercise = exerciseRepository.findByIdElseThrow(studentParticipation.getExercise().getId());
+        Exercise exercise = exerciseRepository.findByIdElseThrow(participation.getExercise().getId());
         authCheckService.checkHasAtLeastRoleForExerciseElseThrow(Role.INSTRUCTOR, exercise, null);
 
         if (!submission.getResults().contains(result)) {

@@ -2,7 +2,6 @@ package de.tum.in.www1.artemis.service;
 
 import static de.tum.in.www1.artemis.web.rest.errors.AccessForbiddenException.NOT_ALLOWED;
 
-import java.security.Principal;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -59,20 +58,6 @@ public class AuthorizationCheckService {
     }
 
     /**
-     * Checks if the currently logged in user is at least an editor in the course of the given exercise.
-     * The course is identified from either {@link Exercise#course(Course)} or {@link Exam#getCourse()}
-     * Throws an AccessForbiddenException if the user has no access which returns a 403
-     *
-     * @param exercise belongs to a course that will be checked for permission rights
-     * @param user the user whose permissions should be checked
-     */
-    private void checkIsAtLeastEditorForExerciseElseThrow(@NotNull Exercise exercise, @Nullable User user) {
-        if (!isAtLeastEditorInCourse(exercise.getCourseViaExerciseGroupOrCourseMember(), user)) {
-            throw new AccessForbiddenException("Exercise", exercise.getId());
-        }
-    }
-
-    /**
      * Checks if the passed user is at least an editor in the given course.
      * Throws an AccessForbiddenException if the user has no access which returns a 403
      *
@@ -126,20 +111,6 @@ public class AuthorizationCheckService {
     }
 
     /**
-     * Checks if the currently logged in user is at least a teaching assistant in the course of the given exercise.
-     * The course is identified from either {@link Exercise#course(Course)} or {@link Exam#getCourse()}
-     * Throws an AccessForbiddenException if the user has no access which returns a 403
-     *
-     * @param exercise belongs to a course that will be checked for permission rights
-     * @param user the user whose permissions should be checked
-     */
-    private void checkIsAtLeastTeachingAssistantForExerciseElseThrow(@NotNull Exercise exercise, @Nullable User user) {
-        if (!isAtLeastTeachingAssistantInCourse(exercise.getCourseViaExerciseGroupOrCourseMember(), user)) {
-            throw new AccessForbiddenException("Exercise", exercise.getId());
-        }
-    }
-
-    /**
      * Checks if the passed user is at least a teaching assistant in the course of the given exercise.
      * The course is identified from {@link Exercise#getCourseViaExerciseGroupOrCourseMember()}
      *
@@ -163,20 +134,6 @@ public class AuthorizationCheckService {
      */
     public boolean isAtLeastStudentForExercise(@NotNull Exercise exercise) {
         return isAtLeastStudentForExercise(exercise, null);
-    }
-
-    /**
-     * Checks if the passed user is at least a student in the course of the given exercise.
-     * The course is identified from {@link Exercise#getCourseViaExerciseGroupOrCourseMember()}
-     * Throws an AccessForbiddenException if the user has no access which returns a 403
-     *
-     * @param exercise the exercise that needs to be checked
-     * @param user the user whose permissions should be checked
-     */
-    private void checkIsAtLeastStudentForExerciseElseThrow(@NotNull Exercise exercise, @Nullable User user) {
-        if (!isAtLeastStudentForExercise(exercise, user)) {
-            throw new AccessForbiddenException("Exercise", exercise.getId());
-        }
     }
 
     /**
@@ -274,20 +231,19 @@ public class AuthorizationCheckService {
     }
 
     /**
-     * checks if the currently logged in user is at least an instructor in the course of the given exercise.
+     * Convenience method: Checks if the passed user has at least the given role for the given lecture.
      * Throws an AccessForbiddenException if the user has no access which returns a 403
      *
-     * @param exercise belongs to a course that will be checked for permission rights
-     * @param user the user whose permissions should be checked (can be null)
+     * @param role the role that should be checked
+     * @param lecture belongs to a course that will be checked for permission rights
+     * @param user the user whose permissions should be checked
      */
-    private void checkIsAtLeastInstructorForExerciseElseThrow(@NotNull Exercise exercise, @Nullable User user) {
-        if (!isAtLeastInstructorForExercise(exercise, user)) {
-            throw new AccessForbiddenException("Exercise", exercise.getId());
-        }
+    public void checkHasAtLeastRoleForLectureElseThrow(@NotNull Role role, @NotNull Lecture lecture, @Nullable User user) {
+        checkHasAtLeastRoleInCourseElseThrow(role, lecture.getCourse(), user);
     }
 
     /**
-     * Checks if the passed user has at least the given role for the given exercise.
+     * Convenience method: Checks if the passed user has at least the given role for the given exercise.
      * Throws an AccessForbiddenException if the user has no access which returns a 403
      *
      * @param role the role that should be checked
@@ -295,17 +251,7 @@ public class AuthorizationCheckService {
      * @param user the user whose permissions should be checked
      */
     public void checkHasAtLeastRoleForExerciseElseThrow(@NotNull Role role, @NotNull Exercise exercise, @Nullable User user) {
-        // Note: the consumer is necessary to get an exhaustive check for the switch expression here, also see https://stackoverflow.com/questions/66204407
-        Consumer<User> consumer = switch (role) {
-            case ADMIN -> this::checkIsAdminElseThrow;
-            case INSTRUCTOR -> userOrNull -> checkIsAtLeastInstructorForExerciseElseThrow(exercise, userOrNull);
-            case EDITOR -> userOrNull -> checkIsAtLeastEditorForExerciseElseThrow(exercise, userOrNull);
-            case TEACHING_ASSISTANT -> userOrNull -> checkIsAtLeastTeachingAssistantForExerciseElseThrow(exercise, userOrNull);
-            case STUDENT -> userOrNull -> checkIsAtLeastStudentForExerciseElseThrow(exercise, userOrNull);
-            // anonymous users never have access to exercises, so we have to throw an exception
-            case ANONYMOUS -> throw new IllegalArgumentException("The role anonymous does not make sense in this context");
-        };
-        consumer.accept(user);
+        checkHasAtLeastRoleInCourseElseThrow(role, exercise.getCourseViaExerciseGroupOrCourseMember(), user);
     }
 
     /**
@@ -452,6 +398,18 @@ public class AuthorizationCheckService {
      * checks if the currently logged in user is owner of the given participation
      *
      * @param participation the participation that needs to be checked
+     * @throws AccessForbiddenException if active user isn't owner of participation
+     */
+    public void isOwnerOfParticipationElseThrow(@NotNull StudentParticipation participation) throws AccessForbiddenException {
+        if (!isOwnerOfParticipation(participation)) {
+            throw new AccessForbiddenException("participation", participation.getId());
+        }
+    }
+
+    /**
+     * checks if the currently logged in user is owner of the given participation
+     *
+     * @param participation the participation that needs to be checked
      * @param user the user whose permissions should be checked
      * @return true, if user is student is owner of this participation, otherwise false
      */
@@ -489,17 +447,6 @@ public class AuthorizationCheckService {
      */
     public boolean isStudentInTeam(@NotNull Course course, String teamShortName, @NotNull User user) {
         return userRepository.findAllInTeam(course.getId(), teamShortName).contains(user);
-    }
-
-    /**
-     * Method used to check whether the user of the websocket message is owner of this participation
-     *
-     * @param participation participation to check the rights for
-     * @param principal     a representation of the currently logged in user
-     * @return true, if user is student is owner of this participation, otherwise false
-     */
-    public boolean isOwnerOfParticipation(@NotNull StudentParticipation participation, @NotNull Principal principal) {
-        return participation.getParticipant() != null && participation.isOwnedBy(principal.getName());
     }
 
     /**
@@ -639,10 +586,10 @@ public class AuthorizationCheckService {
      *
      * @param exercise Exercise of the submission
      * @param user User the requests the assessment
-     * @param resultId Id of the result he wants to assess
+     * @param resultId of the result the teaching assistant wants to assess
      * @return true if caller is allowed to assess submissions
      */
-    public boolean isAllowedToAssesExercise(Exercise exercise, User user, Long resultId) {
+    public boolean isAllowedToAssessExercise(Exercise exercise, User user, Long resultId) {
         return this.isAtLeastTeachingAssistantForExercise(exercise, user) && (resultId == null || isAtLeastInstructorForExercise(exercise, user));
     }
 
@@ -651,4 +598,11 @@ public class AuthorizationCheckService {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
     }
+
+    public void checkIsAllowedToAssessExerciseElseThrow(Exercise exercise, User user, Long resultId) {
+        if (!isAllowedToAssessExercise(exercise, user, resultId)) {
+            throw new AccessForbiddenException("You are not allowed to assess this exercise!");
+        }
+    }
+
 }

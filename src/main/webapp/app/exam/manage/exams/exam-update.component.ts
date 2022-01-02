@@ -4,13 +4,13 @@ import { Exam } from 'app/entities/exam.model';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { Course } from 'app/entities/course.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { onError } from 'app/shared/util/global.utils';
 import { ArtemisNavigationUtilService } from 'app/utils/navigation.utils';
-
+import { faBan, faExclamationTriangle, faSave } from '@fortawesome/free-solid-svg-icons';
 @Component({
     selector: 'jhi-exam-update',
     templateUrl: './exam-update.component.html',
@@ -20,10 +20,15 @@ export class ExamUpdateComponent implements OnInit {
     course: Course;
     isSaving: boolean;
 
+    // Icons
+    faSave = faSave;
+    faBan = faBan;
+    faExclamationTriangle = faExclamationTriangle;
+
     constructor(
         private route: ActivatedRoute,
         private examManagementService: ExamManagementService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private courseManagementService: CourseManagementService,
         private navigationUtilService: ArtemisNavigationUtilService,
     ) {}
@@ -36,7 +41,7 @@ export class ExamUpdateComponent implements OnInit {
                     this.exam.course = response.body!;
                     this.course = response.body!;
                 },
-                (err: HttpErrorResponse) => onError(this.jhiAlertService, err),
+                (err: HttpErrorResponse) => onError(this.alertService, err),
             );
             if (!this.exam.gracePeriod) {
                 this.exam.gracePeriod = 180;
@@ -78,7 +83,7 @@ export class ExamUpdateComponent implements OnInit {
     }
 
     private onSaveError(error: HttpErrorResponse) {
-        onError(this.jhiAlertService, error);
+        onError(this.alertService, error);
         this.isSaving = false;
     }
 
@@ -103,11 +108,11 @@ export class ExamUpdateComponent implements OnInit {
     }
 
     get isValidStartDate(): boolean {
-        return this.exam.startDate !== undefined && moment(this.exam.startDate).isAfter(this.exam.visibleDate);
+        return this.exam.startDate !== undefined && dayjs(this.exam.startDate).isAfter(this.exam.visibleDate);
     }
 
     get isValidEndDate(): boolean {
-        return this.exam.endDate !== undefined && moment(this.exam.endDate).isAfter(this.exam.startDate);
+        return this.exam.endDate !== undefined && dayjs(this.exam.endDate).isAfter(this.exam.startDate);
     }
 
     get isValidPublishResultsDate(): boolean {
@@ -115,8 +120,8 @@ export class ExamUpdateComponent implements OnInit {
         if (!this.exam.publishResultsDate) {
             return true;
         }
-        // check for undefined because undefined is otherwise treated as the now moment by moment.js
-        return this.exam.endDate !== undefined && moment(this.exam.publishResultsDate).isAfter(this.exam.endDate);
+        // check for undefined because undefined is otherwise treated as the now dayjs
+        return this.exam.endDate !== undefined && dayjs(this.exam.publishResultsDate).isAfter(this.exam.endDate);
     }
 
     get isValidExamStudentReviewStart(): boolean {
@@ -124,16 +129,16 @@ export class ExamUpdateComponent implements OnInit {
         if (!this.exam.examStudentReviewStart) {
             return true;
         }
-        // check for undefined because undefined is otherwise treated as the now moment by moment.js
-        return this.exam.publishResultsDate !== undefined && moment(this.exam.examStudentReviewStart).isAfter(this.exam.publishResultsDate);
+        // check for undefined because undefined is otherwise treated as the now dayjs
+        return this.exam.publishResultsDate !== undefined && dayjs(this.exam.examStudentReviewStart).isAfter(this.exam.publishResultsDate);
     }
 
     get isValidExamStudentReviewEnd(): boolean {
-        // allow instructors to set examStudentReviewEnd later
+        // checks whether the end date can be undefined depending on if there is an undefined or manually deleted start date
         if (!this.exam.examStudentReviewEnd) {
-            return true;
+            return !this.exam.examStudentReviewStart || !this.exam.examStudentReviewStart.isValid();
         }
-        // check for undefined because undefined is otherwise treated as the now moment by moment.js
-        return this.exam.examStudentReviewStart !== undefined && moment(this.exam.examStudentReviewEnd).isAfter(this.exam.examStudentReviewStart);
+        // check for undefined because undefined is otherwise treated as the now dayjs
+        return this.exam.examStudentReviewStart !== undefined && dayjs(this.exam.examStudentReviewEnd).isAfter(this.exam.examStudentReviewStart);
     }
 }

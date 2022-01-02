@@ -8,21 +8,18 @@ const courseManagementRequests = artemis.requests.courseManagement;
 
 // Pageobjects
 const navigationBar = artemis.pageobjects.navigationBar;
-const courseManagement = artemis.pageobjects.courseManagement;
-const examManagement = artemis.pageobjects.examManagement;
-
-// Common primitives
-const uid = generateUUID();
-const courseName = 'Cypress course' + uid;
-const courseShortName = 'cypress' + uid;
+const courseManagement = artemis.pageobjects.course.management;
+const examManagement = artemis.pageobjects.exam.management;
+const creationPage = artemis.pageobjects.exam.creation;
 
 describe('Exam creation/deletion', () => {
     let course: any;
     let examTitle: string;
+    let examId: string;
 
     before(() => {
         cy.login(artemis.users.getAdmin());
-        courseManagementRequests.createCourse(courseName, courseShortName).then((response) => {
+        courseManagementRequests.createCourse().then((response) => {
             course = response.body;
         });
     });
@@ -33,9 +30,8 @@ describe('Exam creation/deletion', () => {
     });
 
     it('Creates an exam', function () {
-        const creationPage = artemis.pageobjects.examCreation;
         navigationBar.openCourseManagement();
-        courseManagement.openExamsOfCourse(courseName, courseShortName);
+        courseManagement.openExamsOfCourse(course.shortName);
 
         examManagement.createNewExam();
         creationPage.setTitle(examTitle);
@@ -49,20 +45,25 @@ describe('Exam creation/deletion', () => {
         creationPage.setEndText('Cypress exam end text');
         creationPage.setConfirmationStartText('Cypress exam confirmation start text');
         creationPage.setConfirmationEndText('Cypress exam confirmation end text');
-        creationPage.submit().its('response.statusCode').should('eq', 201);
+        creationPage.submit().then((examResponse: any) => {
+            examId = examResponse.response.body.id;
+            expect(examResponse.response.statusCode).to.eq(201);
+        });
         examManagement.getExamRowRoot(examTitle).should('be.visible');
     });
 
     describe('Exam deletion', () => {
         beforeEach(() => {
             const exam = new CypressExamBuilder(course).title(examTitle).build();
-            courseManagementRequests.createExam(exam);
+            courseManagementRequests.createExam(exam).then((examResponse) => {
+                examId = examResponse.body.id;
+            });
         });
 
         it('Deletes an existing exam', () => {
             navigationBar.openCourseManagement();
-            courseManagement.openExamsOfCourse(courseName, courseShortName);
-            examManagement.deleteExam(examTitle);
+            courseManagement.openExamsOfCourse(course.shortName);
+            examManagement.deleteExam(examId, examTitle);
             examManagement.getExamSelector(examTitle).should('not.exist');
         });
     });

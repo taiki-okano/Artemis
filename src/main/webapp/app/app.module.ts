@@ -1,7 +1,6 @@
-import './vendor';
-
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { ServiceWorkerModule } from '@angular/service-worker';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ArtemisSystemNotificationModule } from 'app/shared/notification/system-notification/system-notification.module';
 import { NavbarComponent } from 'app/shared/layouts/navbar/navbar.component';
@@ -23,15 +22,17 @@ import { GuidedTourModule } from 'app/guided-tour/guided-tour.module';
 import { ArtemisComplaintsModule } from 'app/complaints/complaints.module';
 import { ArtemisHomeModule } from 'app/home/home.module';
 import { OrionOutdatedComponent } from 'app/shared/orion/outdated-plugin-warning/orion-outdated.component';
-import { ArtemisTeamModule } from 'app/exercises/shared/team/team.module';
 import { LoadingNotificationComponent } from 'app/shared/notification/loading-notification/loading-notification.component';
 import { NotificationPopupComponent } from 'app/shared/notification/notification-popup/notification-popup.component';
+import { UserSettingsModule } from 'app/shared/user-settings/user-settings.module';
 
 // NOTE: this module should only include the most important modules for normal users, all course management, admin and account functionality should be lazy loaded if possible
 @NgModule({
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
+        // This enables service worker (PWA)
+        ServiceWorkerModule.register('ngsw-worker.js', { enabled: true }),
         ArtemisSharedModule,
         ArtemisCoreModule,
         ArtemisHomeModule,
@@ -39,11 +40,11 @@ import { NotificationPopupComponent } from 'app/shared/notification/notification
         ArtemisConnectionNotificationModule,
         GuidedTourModule,
         ArtemisLegalModule,
-        ArtemisTeamModule,
         ArtemisCoursesModule,
         ArtemisSystemNotificationModule,
         ArtemisComplaintsModule,
         ArtemisHeaderExercisePageWithDetailsModule,
+        UserSettingsModule,
     ],
     declarations: [
         JhiMainComponent,

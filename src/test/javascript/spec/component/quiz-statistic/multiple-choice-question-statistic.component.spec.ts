@@ -17,6 +17,8 @@ import { MultipleChoiceQuestion } from 'app/entities/quiz/multiple-choice-questi
 import { MultipleChoiceQuestionStatistic } from 'app/entities/quiz/multiple-choice-question-statistic.model';
 import { AnswerCounter } from 'app/entities/quiz/answer-counter.model';
 import { AnswerOption } from 'app/entities/quiz/answer-option.model';
+import { MockProvider } from 'ng-mocks';
+import { ChangeDetectorRef } from '@angular/core';
 
 const route = { params: of({ courseId: 3, exerciseId: 22, questionId: 1 }) };
 const answerOption1 = { id: 5 } as AnswerOption;
@@ -31,8 +33,8 @@ describe('QuizExercise Multiple Choice Question Statistic Component', () => {
     let fixture: ComponentFixture<MultipleChoiceQuestionStatisticComponent>;
     let quizService: QuizExerciseService;
     let accountService: AccountService;
-    let accountSpy: jasmine.Spy;
-    let quizServiceFindSpy: jasmine.Spy;
+    let accountSpy: jest.SpyInstance;
+    let quizServiceFindSpy: jest.SpyInstance;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -44,6 +46,7 @@ describe('QuizExercise Multiple Choice Question Statistic Component', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: AccountService, useClass: MockAccountService },
+                MockProvider(ChangeDetectorRef),
             ],
         })
             .overrideTemplate(MultipleChoiceQuestionStatisticComponent, '')
@@ -53,7 +56,7 @@ describe('QuizExercise Multiple Choice Question Statistic Component', () => {
                 comp = fixture.componentInstance;
                 quizService = fixture.debugElement.injector.get(QuizExerciseService);
                 accountService = fixture.debugElement.injector.get(AccountService);
-                quizServiceFindSpy = spyOn(quizService, 'find').and.returnValue(of(new HttpResponse({ body: quizExercise })));
+                quizServiceFindSpy = jest.spyOn(quizService, 'find').mockReturnValue(of(new HttpResponse({ body: quizExercise })));
             });
     });
 
@@ -63,8 +66,8 @@ describe('QuizExercise Multiple Choice Question Statistic Component', () => {
 
     describe('OnInit', function () {
         it('should call functions on Init', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(true);
-            const loadQuizSpy = spyOn(comp, 'loadQuiz');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            const loadQuizSpy = jest.spyOn(comp, 'loadQuiz');
             comp.websocketChannelForData = '';
 
             comp.ngOnInit();
@@ -76,8 +79,8 @@ describe('QuizExercise Multiple Choice Question Statistic Component', () => {
         });
 
         it('should not load Quiz if not authorised', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(false);
-            const loadQuizSpy = spyOn(comp, 'loadQuiz');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(false);
+            const loadQuizSpy = jest.spyOn(comp, 'loadQuiz');
 
             comp.ngOnInit();
 
@@ -89,11 +92,11 @@ describe('QuizExercise Multiple Choice Question Statistic Component', () => {
 
     describe('loadLayout', function () {
         it('should call functions from loadLayout', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(true);
-            const resetLabelsSpy = spyOn(comp, 'resetLabelsColors');
-            const addLastBarSpy = spyOn(comp, 'addLastBarLayout');
-            const loadInvalidLayoutSpy = spyOn(comp, 'loadInvalidLayout');
-            const loadSolutionSpy = spyOn(comp, 'loadSolutionLayout');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            const resetLabelsSpy = jest.spyOn(comp, 'resetLabelsColors');
+            const addLastBarSpy = jest.spyOn(comp, 'addLastBarLayout');
+            const loadInvalidLayoutSpy = jest.spyOn(comp, 'loadInvalidLayout');
+            const loadSolutionSpy = jest.spyOn(comp, 'loadSolutionLayout');
 
             comp.ngOnInit();
             comp.loadLayout();
@@ -107,10 +110,10 @@ describe('QuizExercise Multiple Choice Question Statistic Component', () => {
 
     describe('loadData', function () {
         it('should call functions from loadData', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(true);
-            const resetDataSpy = spyOn(comp, 'resetData');
-            const addDataSpy = spyOn(comp, 'addData');
-            const updateDataSpy = spyOn(comp, 'updateData');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            const resetDataSpy = jest.spyOn(comp, 'resetData');
+            const addDataSpy = jest.spyOn(comp, 'addData');
+            const updateDataSpy = jest.spyOn(comp, 'updateData');
 
             comp.ngOnInit();
             comp.loadData();

@@ -1,9 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { TextExercise } from 'app/entities/text-exercise.model';
 import { TextExerciseService } from './text-exercise.service';
-import { CourseExerciseService, CourseManagementService } from '../../../../course/manage/course-management.service';
+import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ExerciseComponent } from 'app/exercises/shared/exercise/exercise.component';
@@ -13,6 +12,10 @@ import { AccountService } from 'app/core/auth/account.service';
 import { SortService } from 'app/shared/service/sort.service';
 import { TextExerciseImportComponent } from 'app/exercises/text/manage/text-exercise-import.component';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faPlus, faSort } from '@fortawesome/free-solid-svg-icons';
+import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 
 @Component({
     selector: 'jhi-text-exercise',
@@ -20,6 +23,11 @@ import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service'
 })
 export class TextExerciseComponent extends ExerciseComponent {
     @Input() textExercises: TextExercise[];
+    filteredTextExercises: TextExercise[];
+
+    // Icons
+    faSort = faSort;
+    faPlus = faPlus;
 
     constructor(
         public exerciseService: ExerciseService,
@@ -29,14 +37,15 @@ export class TextExerciseComponent extends ExerciseComponent {
         private router: Router,
         courseService: CourseManagementService,
         translateService: TranslateService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private sortService: SortService,
-        eventManager: JhiEventManager,
+        eventManager: EventManager,
         route: ActivatedRoute,
         private accountService: AccountService,
     ) {
         super(courseService, translateService, route, eventManager);
         this.textExercises = [];
+        this.filteredTextExercises = [];
     }
 
     protected loadExercises(): void {
@@ -47,14 +56,18 @@ export class TextExerciseComponent extends ExerciseComponent {
                 // reconnect exercise with course
                 this.textExercises.forEach((exercise) => {
                     exercise.course = this.course;
-                    exercise.isAtLeastTutor = this.accountService.isAtLeastTutorInCourse(exercise.course);
-                    exercise.isAtLeastEditor = this.accountService.isAtLeastEditorInCourse(exercise.course);
-                    exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(exercise.course);
+                    this.accountService.setAccessRightsForExercise(exercise);
                 });
+                this.applyFilter();
                 this.emitExerciseCount(this.textExercises.length);
             },
-            (res: HttpErrorResponse) => onError(this.jhiAlertService, res),
+            (res: HttpErrorResponse) => onError(this.alertService, res),
         );
+    }
+
+    protected applyFilter(): void {
+        this.filteredTextExercises = this.textExercises.filter((exercise) => this.filter.matchesExercise(exercise));
+        this.emitFilteredExerciseCount(this.filteredTextExercises.length);
     }
 
     /**
@@ -72,6 +85,7 @@ export class TextExerciseComponent extends ExerciseComponent {
 
     sortRows() {
         this.sortService.sortByProperty(this.textExercises, this.predicate, this.reverse);
+        this.applyFilter();
     }
 
     /**

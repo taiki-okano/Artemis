@@ -1,5 +1,5 @@
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import * as chai from 'chai';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -35,6 +35,7 @@ describe('VideoUnitComponent', () => {
             imports: [BrowserModule],
             declarations: [
                 VideoUnitComponent,
+                SafeResourceUrlPipe,
                 MockComponent(FaIconComponent),
                 MockPipe(ArtemisTranslatePipe),
                 MockPipe(ArtemisDatePipe),

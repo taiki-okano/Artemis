@@ -35,7 +35,7 @@
                 </div>
                 <div class="form-group-narrow">
                     <label class="form-control-label" jhiTranslate="artemisApp.exercise.notificationText" for="field_notification_text">Notification Text</label>
-                    <input minlength="3" type="text" class="form-control" name="notificationtText" id="field_notification_text" [(ngModel)]="notificationText" />
+                    <input minlength="3" type="text" class="form-control" name="notificationText" id="field_notification_text" [(ngModel)]="notificationText" />
                 </div>
                 <form name="editForm" role="form" novalidate (ngSubmit)="saveAll()">
                     <div class="form-group-narrow mt-2">
@@ -46,8 +46,8 @@
                             <jhi-help-icon placement="top" text="artemisApp.programmingExercise.timeline.timelineTooltip"></jhi-help-icon>
                         </div>
                         <jhi-programming-exercise-lifecycle id="timeline" [exercise]="newProgrammingExercise" [isExamMode]="false"></jhi-programming-exercise-lifecycle>
-                        <jhi-button class="text-center" id="save-entity" [icon]="'save'" [title]="'entity.action.save'" [isLoading]="isSaving">
-                            <fa-icon [icon]="'save'"></fa-icon>
+                        <jhi-button class="text-center" id="save-entity" [icon]="faSave" [title]="'entity.action.save'" [isLoading]="isSaving">
+                            <fa-icon [icon]="faSave"></fa-icon>
                             <span jhiTranslate="entity.action.save">Save</span>
                         </jhi-button>
                     </div>

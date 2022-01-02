@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
-import { MomentModule } from 'ngx-moment';
-import { AceEditorModule } from 'ng2-ace-editor';
+import { AceEditorModule } from 'app/shared/markdown-editor/ace-editor/ace-editor.module';
 import { TreeviewModule } from 'ngx-treeview';
 import { CodeEditorBuildOutputComponent } from 'app/exercises/programming/shared/code-editor/build-output/code-editor-build-output.component';
 import { CodeEditorGridComponent } from 'app/exercises/programming/shared/code-editor/layout/code-editor-grid.component';
@@ -26,7 +25,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 @NgModule({
     imports: [
         AceEditorModule,
-        MomentModule,
         NgbModule,
         ArtemisSharedModule,
         FeatureToggleModule,

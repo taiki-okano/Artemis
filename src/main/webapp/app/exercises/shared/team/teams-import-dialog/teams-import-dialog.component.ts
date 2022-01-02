@@ -1,15 +1,16 @@
 import { Component, Input, ViewChild, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { TeamService } from 'app/exercises/shared/team/team.service';
 import { Team, TeamImportStrategyType as ImportStrategy } from 'app/entities/team.model';
 import { Exercise } from 'app/entities/exercise.model';
 import { ActionType } from 'app/shared/delete-dialog/delete-dialog.model';
-import { flatMap } from 'lodash';
+import { flatMap } from 'lodash-es';
 import { User } from 'app/core/user/user.model';
+import { faBan, faCircleNotch, faSpinner, faUpload } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-teams-import-dialog',
@@ -55,7 +56,13 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
     private dialogErrorSource = new Subject<string>();
     dialogError$ = this.dialogErrorSource.asObservable();
 
-    constructor(private teamService: TeamService, private activeModal: NgbActiveModal, private jhiAlertService: JhiAlertService) {}
+    // Icons
+    faBan = faBan;
+    faSpinner = faSpinner;
+    faCircleNotch = faCircleNotch;
+    faUpload = faUpload;
+
+    constructor(private teamService: TeamService, private activeModal: NgbActiveModal, private alertService: AlertService) {}
 
     /**
      * Life cycle hook to indicate component creation is done
@@ -333,7 +340,7 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
         this.isImporting = false;
 
         setTimeout(() => {
-            this.jhiAlertService.success('artemisApp.team.importSuccess', { numberOfImportedTeams: this.numberOfTeamsToBeImported });
+            this.alertService.success('artemisApp.team.importSuccess', { numberOfImportedTeams: this.numberOfTeamsToBeImported });
         }, 500);
     }
 
@@ -355,7 +362,7 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
                 this.onStudentsAppearMultipleTimesError(students);
                 break;
             default:
-                this.jhiAlertService.error('artemisApp.team.importError');
+                this.alertService.error('artemisApp.team.importError');
                 break;
         }
         this.isImporting = false;
@@ -372,11 +379,11 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
         const notFoundRegistrationNumbers = registrationNumbers;
         const notFoundLogins = logins;
         if (notFoundRegistrationNumbers.length > 0) {
-            this.jhiAlertService.error('artemisApp.team.errors.registrationNumbersNotFound', { registrationNumbers: notFoundRegistrationNumbers });
+            this.alertService.error('artemisApp.team.errors.registrationNumbersNotFound', { registrationNumbers: notFoundRegistrationNumbers });
             this.conflictingRegistrationNumbersSet = this.addArrayToSet(this.conflictingRegistrationNumbersSet, notFoundRegistrationNumbers);
         }
         if (notFoundLogins.length > 0) {
-            this.jhiAlertService.error('artemisApp.team.errors.loginsNotFound', { logins: notFoundLogins });
+            this.alertService.error('artemisApp.team.errors.loginsNotFound', { logins: notFoundLogins });
             this.conflictingLoginsSet = this.addArrayToSet(this.conflictingLoginsSet, notFoundLogins);
         }
     }
@@ -394,7 +401,7 @@ export class TeamsImportDialogComponent implements OnInit, OnDestroy {
             this.conflictingLoginsSet = this.addArrayToSet(this.conflictingLoginsSet, studentLoginsAlreadyExistingInOtherTeams);
             const studentRegistrationNumbersAlreadyExistingInOtherTeams = studentsAppearMultipleTimes.map((student) => student.second);
             this.conflictingRegistrationNumbersSet = this.addArrayToSet(this.conflictingRegistrationNumbersSet, studentRegistrationNumbersAlreadyExistingInOtherTeams);
-            this.jhiAlertService.error('artemisApp.team.errors.studentsAppearMultipleTimes', {
+            this.alertService.error('artemisApp.team.errors.studentsAppearMultipleTimes', {
                 students: studentsAppearMultipleTimes.map((student) => `${student.first}:${student.second}`).join(','),
             });
         }

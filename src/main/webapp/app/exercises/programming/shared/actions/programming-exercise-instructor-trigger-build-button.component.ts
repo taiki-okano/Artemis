@@ -4,18 +4,22 @@ import { ProgrammingExerciseTriggerBuildButtonComponent } from './programming-ex
 import { ProgrammingSubmissionService } from 'app/exercises/programming/participate/programming-submission.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ParticipationWebsocketService } from 'app/overview/participation-websocket.service';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { SubmissionType } from 'app/entities/submission.model';
 import { ConfirmAutofocusModalComponent } from 'app/shared/components/confirm-autofocus-button.component';
+import { faRedo } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-programming-exercise-instructor-trigger-build-button',
     templateUrl: './programming-exercise-trigger-build-button.component.html',
 })
 export class ProgrammingExerciseInstructorTriggerBuildButtonComponent extends ProgrammingExerciseTriggerBuildButtonComponent {
+    // Icons
+    faRedo = faRedo;
+
     constructor(
         submissionService: ProgrammingSubmissionService,
-        alertService: JhiAlertService,
+        alertService: AlertService,
         participationWebsocketService: ParticipationWebsocketService,
         private translateService: TranslateService,
         private modalService: NgbModal,

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +19,12 @@ import de.tum.in.www1.artemis.domain.enumeration.RepositoryType;
 import de.tum.in.www1.artemis.domain.participation.AbstractBaseProgrammingExerciseParticipation;
 import de.tum.in.www1.artemis.domain.participation.SolutionProgrammingExerciseParticipation;
 import de.tum.in.www1.artemis.domain.participation.TemplateProgrammingExerciseParticipation;
+import de.tum.in.www1.artemis.domain.submissionpolicy.SubmissionPolicy;
 import de.tum.in.www1.artemis.exception.ContinuousIntegrationException;
 import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.service.FileService;
 import de.tum.in.www1.artemis.service.StaticCodeAnalysisService;
+import de.tum.in.www1.artemis.service.UrlService;
 import de.tum.in.www1.artemis.service.connectors.ContinuousIntegrationService;
 import de.tum.in.www1.artemis.service.connectors.GitService;
 import de.tum.in.www1.artemis.service.connectors.VersionControlService;
@@ -59,11 +60,16 @@ public class ProgrammingExerciseImportService {
 
     private final AuxiliaryRepositoryRepository auxiliaryRepositoryRepository;
 
+    private final SubmissionPolicyRepository submissionPolicyRepository;
+
+    private final UrlService urlService;
+
     public ProgrammingExerciseImportService(ExerciseHintRepository exerciseHintRepository, Optional<VersionControlService> versionControlService,
             Optional<ContinuousIntegrationService> continuousIntegrationService, ProgrammingExerciseParticipationService programmingExerciseParticipationService,
             ProgrammingExerciseTestCaseRepository programmingExerciseTestCaseRepository, StaticCodeAnalysisCategoryRepository staticCodeAnalysisCategoryRepository,
             ProgrammingExerciseRepository programmingExerciseRepository, ProgrammingExerciseService programmingExerciseService, GitService gitService, FileService fileService,
-            UserRepository userRepository, StaticCodeAnalysisService staticCodeAnalysisService, AuxiliaryRepositoryRepository auxiliaryRepositoryRepository) {
+            UserRepository userRepository, StaticCodeAnalysisService staticCodeAnalysisService, AuxiliaryRepositoryRepository auxiliaryRepositoryRepository,
+            SubmissionPolicyRepository submissionPolicyRepository, UrlService urlService) {
         this.exerciseHintRepository = exerciseHintRepository;
         this.versionControlService = versionControlService;
         this.continuousIntegrationService = continuousIntegrationService;
@@ -77,6 +83,8 @@ public class ProgrammingExerciseImportService {
         this.userRepository = userRepository;
         this.staticCodeAnalysisService = staticCodeAnalysisService;
         this.auxiliaryRepositoryRepository = auxiliaryRepositoryRepository;
+        this.submissionPolicyRepository = submissionPolicyRepository;
+        this.urlService = urlService;
     }
 
     /**
@@ -102,8 +110,9 @@ public class ProgrammingExerciseImportService {
         // Set values we don't want to copy to null
         setupExerciseForImport(newExercise);
 
-        programmingExerciseParticipationService.setupInitialSolutionParticipation(newExercise);
+        // Note: same order as when creating an exercise
         programmingExerciseParticipationService.setupInitialTemplateParticipation(newExercise);
+        programmingExerciseParticipationService.setupInitialSolutionParticipation(newExercise);
         setupTestRepository(newExercise);
         programmingExerciseService.initParticipations(newExercise);
 
@@ -125,6 +134,8 @@ public class ProgrammingExerciseImportService {
             newExercise.setMode(ExerciseMode.INDIVIDUAL);
             newExercise.setTeamAssignmentConfig(null);
         }
+
+        importSubmissionPolicy(newExercise);
 
         // Re-adding auxiliary repositories
         List<AuxiliaryRepository> auxiliaryRepositoriesToBeImported = templateExercise.getAuxiliaryRepositories();
@@ -153,12 +164,13 @@ public class ProgrammingExerciseImportService {
         // First, create a new project for our imported exercise
         versionControlService.get().createProjectForExercise(newExercise);
         // Copy all repositories
-        final var reposToCopy = List.of(Pair.of(RepositoryType.TEMPLATE, templateExercise.getTemplateRepositoryName()),
-                Pair.of(RepositoryType.SOLUTION, templateExercise.getSolutionRepositoryName()), Pair.of(RepositoryType.TESTS, templateExercise.getTestRepositoryName()));
+        var templateRepoName = urlService.getRepositorySlugFromRepositoryUrlString(templateExercise.getTemplateRepositoryUrl());
+        var testRepoName = urlService.getRepositorySlugFromRepositoryUrlString(templateExercise.getTestRepositoryUrl());
+        var solutionRepoName = urlService.getRepositorySlugFromRepositoryUrlString(templateExercise.getSolutionRepositoryUrl());
 
-        for (Pair<RepositoryType, String> repo : reposToCopy) {
-            versionControlService.get().copyRepository(sourceProjectKey, repo.getSecond(), targetProjectKey, repo.getFirst().getName());
-        }
+        versionControlService.get().copyRepository(sourceProjectKey, templateRepoName, targetProjectKey, RepositoryType.TEMPLATE.getName());
+        versionControlService.get().copyRepository(sourceProjectKey, solutionRepoName, targetProjectKey, RepositoryType.SOLUTION.getName());
+        versionControlService.get().copyRepository(sourceProjectKey, testRepoName, targetProjectKey, RepositoryType.TESTS.getName());
 
         List<AuxiliaryRepository> auxiliaryRepositories = templateExercise.getAuxiliaryRepositories();
         for (int i = 0; i < auxiliaryRepositories.size(); i++) {
@@ -199,7 +211,7 @@ public class ProgrammingExerciseImportService {
         final var solutionParticipation = newExercise.getSolutionParticipation();
         final var targetExerciseProjectKey = newExercise.getProjectKey();
 
-        // Clone all build plans, enable them and setup the initial participations, i.e. setting the correct repo URLs and
+        // Clone all build plans, enable them and set up the initial participations, i.e. setting the correct repo URLs and
         // running the plan for the first time
         cloneAndEnableAllBuildPlans(templateExercise, newExercise);
 
@@ -219,7 +231,7 @@ public class ProgrammingExerciseImportService {
     private void updatePlanRepositoriesInBuildPlans(ProgrammingExercise newExercise, TemplateProgrammingExerciseParticipation templateParticipation,
             SolutionProgrammingExerciseParticipation solutionParticipation, String targetExerciseProjectKey, String oldExerciseRepoUrl, String oldSolutionRepoUrl,
             String oldTestRepoUrl, List<AuxiliaryRepository> oldBuildPlanAuxiliaryRepositories) {
-        // update 2 repositories for the template (BASE) build plan --> adapt the triggers so that only the assignment repo (and not the tests repo) will trigger the BASE build
+        // update 2 repositories for the template (BASE) build plan --> adapt the triggers so that only the assignment repo (and not the tests' repo) will trigger the BASE build
         // plan
         continuousIntegrationService.get().updatePlanRepository(targetExerciseProjectKey, templateParticipation.getBuildPlanId(), ASSIGNMENT_REPO_NAME, targetExerciseProjectKey,
                 newExercise.getTemplateRepositoryUrl(), oldExerciseRepoUrl, Optional.of(List.of(ASSIGNMENT_REPO_NAME)));
@@ -311,6 +323,21 @@ public class ProgrammingExerciseImportService {
             staticCodeAnalysisCategoryRepository.save(categoryCopy);
             return categoryCopy;
         }).collect(Collectors.toSet()));
+    }
+
+    /**
+     * Persists the submission policy of the new exercise. We ensure that the submission policy does not
+     * have any id or programming exercise set.
+     *
+     * @param newExercise containing the submission policy to persist
+     */
+    private void importSubmissionPolicy(ProgrammingExercise newExercise) {
+        if (newExercise.getSubmissionPolicy() != null) {
+            SubmissionPolicy newSubmissionPolicy = newExercise.getSubmissionPolicy();
+            newSubmissionPolicy.setId(null);
+            newSubmissionPolicy.setProgrammingExercise(null);
+            newExercise.setSubmissionPolicy(submissionPolicyRepository.save(newSubmissionPolicy));
+        }
     }
 
     /**

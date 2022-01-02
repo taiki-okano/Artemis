@@ -4,25 +4,28 @@ import static de.tum.in.www1.artemis.config.Constants.MAX_NUMBER_OF_LOCKED_SUBMI
 import static de.tum.in.www1.artemis.web.rest.util.ResponseUtil.forbidden;
 import static java.util.stream.Collectors.toList;
 
-import java.security.Principal;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import de.tum.in.www1.artemis.domain.*;
-import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
-import de.tum.in.www1.artemis.domain.enumeration.ComplaintType;
-import de.tum.in.www1.artemis.domain.enumeration.FeedbackType;
-import de.tum.in.www1.artemis.domain.enumeration.SubmissionType;
+import de.tum.in.www1.artemis.domain.enumeration.*;
 import de.tum.in.www1.artemis.domain.participation.Participation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
 import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.service.exam.ExamDateService;
+import de.tum.in.www1.artemis.web.rest.dto.PageableSearchDTO;
+import de.tum.in.www1.artemis.web.rest.dto.SearchResultPageDTO;
 import de.tum.in.www1.artemis.web.rest.dto.SubmissionWithComplaintDTO;
 import de.tum.in.www1.artemis.web.rest.errors.AccessForbiddenException;
 import de.tum.in.www1.artemis.web.rest.errors.BadRequestAlertException;
@@ -33,6 +36,8 @@ public class SubmissionService {
     private final Logger log = LoggerFactory.getLogger(SubmissionService.class);
 
     private final ExamDateService examDateService;
+
+    private final ExerciseDateService exerciseDateService;
 
     private final CourseRepository courseRepository;
 
@@ -56,8 +61,8 @@ public class SubmissionService {
 
     public SubmissionService(SubmissionRepository submissionRepository, UserRepository userRepository, AuthorizationCheckService authCheckService,
             ResultRepository resultRepository, StudentParticipationRepository studentParticipationRepository, ParticipationService participationService,
-            FeedbackRepository feedbackRepository, ExamDateService examDateService, CourseRepository courseRepository, ParticipationRepository participationRepository,
-            ComplaintRepository complaintRepository) {
+            FeedbackRepository feedbackRepository, ExamDateService examDateService, ExerciseDateService exerciseDateService, CourseRepository courseRepository,
+            ParticipationRepository participationRepository, ComplaintRepository complaintRepository) {
         this.submissionRepository = submissionRepository;
         this.userRepository = userRepository;
         this.authCheckService = authCheckService;
@@ -66,6 +71,7 @@ public class SubmissionService {
         this.participationService = participationService;
         this.feedbackRepository = feedbackRepository;
         this.examDateService = examDateService;
+        this.exerciseDateService = exerciseDateService;
         this.courseRepository = courseRepository;
         this.participationRepository = participationRepository;
         this.complaintRepository = complaintRepository;
@@ -152,7 +158,7 @@ public class SubmissionService {
         List<T> submissions;
         if (examMode) {
             var participations = this.studentParticipationRepository.findAllByParticipationExerciseIdAndResultAssessorAndCorrectionRoundIgnoreTestRuns(exerciseId, tutor);
-            submissions = participations.stream().map(StudentParticipation::findLatesLegalOrIllegalSubmission).filter(Optional::isPresent).map(Optional::get)
+            submissions = participations.stream().map(StudentParticipation::findLatestLegalOrIllegalSubmission).filter(Optional::isPresent).map(Optional::get)
                     .map(submission -> (T) submission)
                     .filter(submission -> submission.getResults().size() - 1 >= correctionRound && submission.getResults().get(correctionRound) != null).collect(toList());
         }
@@ -176,9 +182,7 @@ public class SubmissionService {
      * @return a submission without any manual result or an empty Optional if no submission without manual result could be found
      */
     public Optional<Submission> getRandomSubmissionEligibleForNewAssessment(Exercise exercise, boolean examMode, int correctionRound) {
-        Random random = new Random();
-        List<StudentParticipation> participations;
-
+        final List<StudentParticipation> participations;
         if (examMode) {
             // Get all participations of submissions that are submitted and do not already have a manual result or belong to test run submissions.
             // No manual result means that no user has started an assessment for the corresponding submission yet.
@@ -186,13 +190,14 @@ public class SubmissionService {
                     correctionRound);
         }
         else {
-            // Get all participations of submissions that are submitted and do not already have a manual result. No manual result means that no user has started an assessment for
-            // the
-            // corresponding submission yet.
-            participations = studentParticipationRepository.findByExerciseIdWithLatestSubmissionWithoutManualResults(exercise.getId());
+            // Get all participations of submissions that are submitted and do not already have a manual result.
+            // No manual result means that no user has started an assessment for the corresponding submission yet.
+            // Does not fetch participations for which the due date has not yet passed.
+            participations = studentParticipationRepository.findByExerciseIdWithLatestSubmissionWithoutManualResultsWithPassedIndividualDueDate(exercise.getId(),
+                    ZonedDateTime.now());
         }
 
-        List<Submission> submissionsWithoutResult = participations.stream().map(Participation::findLatesLegalOrIllegalSubmission).filter(Optional::isPresent).map(Optional::get)
+        List<Submission> submissionsWithoutResult = participations.stream().map(Participation::findLatestLegalOrIllegalSubmission).filter(Optional::isPresent).map(Optional::get)
                 .collect(toList());
 
         if (correctionRound > 0) {
@@ -202,14 +207,16 @@ public class SubmissionService {
                     .filter(submission -> !submission.getResultForCorrectionRound(correctionRound - 1).getAssessor().equals(userRepository.getUser())).collect(Collectors.toList());
         }
 
+        if (exercise.getDueDate() != null) {
+            submissionsWithoutResult = selectOnlySubmissionsBeforeDueDate(submissionsWithoutResult);
+        }
+
         if (submissionsWithoutResult.isEmpty()) {
             return Optional.empty();
         }
-
-        submissionsWithoutResult = selectOnlySubmissionsBeforeDueDateOrAll(submissionsWithoutResult, exercise.getDueDate());
-
-        var submissionWithoutResult = submissionsWithoutResult.get(random.nextInt(submissionsWithoutResult.size()));
-        return Optional.of(submissionWithoutResult);
+        else {
+            return Optional.of(submissionsWithoutResult.get(ThreadLocalRandom.current().nextInt(submissionsWithoutResult.size())));
+        }
     }
 
     /**
@@ -516,24 +523,27 @@ public class SubmissionService {
      * Filters the submissions to contain only in-time submissions if there are any.
      * If not, the original list is returned.
      * @param submissions The submissions to filter
-     * @param dueDate The due-date to filter by
      * @param <T> Placeholder for subclass of {@link Submission} e.g. {@link TextSubmission}
      * @return The filtered list of submissions
      */
-    protected <T extends Submission> List<T> selectOnlySubmissionsBeforeDueDateOrAll(List<T> submissions, ZonedDateTime dueDate) {
-        if (dueDate == null) {
-            // this is an edge case, then basically all submissions are before due date
-            return submissions;
-        }
-
-        boolean hasInTimeSubmissions = submissions.stream().anyMatch(submission -> submission.getSubmissionDate() != null && submission.getSubmissionDate().isBefore(dueDate));
-        if (hasInTimeSubmissions) {
-            return submissions.stream().filter(submission -> submission.getSubmissionDate() != null && submission.getSubmissionDate().isBefore(dueDate))
-                    .collect(Collectors.toList());
+    protected <T extends Submission> List<T> selectOnlySubmissionsBeforeDueDate(List<T> submissions) {
+        final List<T> submissionsBeforeDueDate = submissions.stream().filter(this::isBeforeDueDate).toList();
+        if (!submissionsBeforeDueDate.isEmpty()) {
+            return submissionsBeforeDueDate;
         }
         else {
             return submissions;
         }
+    }
+
+    /**
+     * Checks if the submission was created before the due date of the exercise.
+     * @param submission a student’s submission
+     * @return true, if the submission date was before the due date or the exercise has no due date.
+     */
+    private boolean isBeforeDueDate(Submission submission) {
+        return exerciseDateService.getDueDate(submission.getParticipation())
+                .map(dueDate -> submission.getSubmissionDate() != null && submission.getSubmissionDate().isBefore(dueDate)).orElse(true);
     }
 
     /**
@@ -598,31 +608,59 @@ public class SubmissionService {
      * This method gets all complaints of an exercise and returns them together with their corresponding submission in a DTO
      *
      * @param exerciseId the exerciseId of the exercise of which the complaints are fetched
-     * @param principal the current user
      * @param isAtLeastInstructor if the user is an instructor
      * @return a list of DTOs containing a complaint and its submission
      */
-    public List<SubmissionWithComplaintDTO> getSubmissionsWithComplaintsForExercise(Long exerciseId, Principal principal, boolean isAtLeastInstructor) {
-        List<SubmissionWithComplaintDTO> submissionWithComplaintDTOs = new ArrayList<>();
-
+    public List<SubmissionWithComplaintDTO> getSubmissionsWithComplaintsForExercise(Long exerciseId, boolean isAtLeastInstructor) {
         // get all complaints which belong to the exercise
         List<Complaint> complaints = complaintRepository.getAllComplaintsByExerciseIdAndComplaintType(exerciseId, ComplaintType.COMPLAINT);
-        var complaintMap = complaints.stream().collect(Collectors.toMap(complaint -> complaint.getResult().getId(), value -> value));
 
-        if (complaints.isEmpty()) {
-            return submissionWithComplaintDTOs;
+        if (!isAtLeastInstructor) {
+            complaints = complaints.stream().filter(complaint -> !userRepository.getUser().equals(complaint.getResult().getAssessor())).toList();
         }
-        // get the ids of all results which have a complaint, and with those fetch all their submissions
-        List<Long> submissionIds = complaints.stream().map(complaint -> complaint.getResult().getSubmission().getId()).collect(toList());
-        List<Submission> submissions = submissionRepository.findBySubmissionIdsWithEagerResults(submissionIds);
 
-        // add each submission with its complaint to the DTO
-        submissions.stream().filter(submission -> submission.getResultWithComplaint() != null).forEach(submission -> {
-            // get the complaint which belongs to the submission
-            Complaint complaintOfSubmission = complaintMap.get(submission.getResultWithComplaint().getId());
-            prepareComplaintAndSubmission(complaintOfSubmission, submission);
-            submissionWithComplaintDTOs.add(new SubmissionWithComplaintDTO(submission, complaintOfSubmission));
-        });
+        return getSubmissionsWithComplaintsFromComplaints(complaints);
+    }
+
+    /**
+     * This method gets all more feature requests of an exercise and returns them together with their corresponding submission in a DTO
+     *
+     * @param exerciseId the exerciseId of the exercise of which the complaints are fetched
+     * @return a list of DTOs containing a complaint and its submission
+     */
+    public List<SubmissionWithComplaintDTO> getSubmissionsWithMoreFeedbackRequestsForExercise(Long exerciseId) {
+        // get all requests which belong to the exercise
+        List<Complaint> requests = complaintRepository.getAllComplaintsByExerciseIdAndComplaintType(exerciseId, ComplaintType.MORE_FEEDBACK);
+
+        requests = requests.stream().filter(complaint -> complaint.getResult().getAssessor() == null || complaint.getResult().getAssessor().equals(userRepository.getUser()))
+                .toList();
+
+        return getSubmissionsWithComplaintsFromComplaints(requests);
+    }
+
+    /**
+     * Splits a list of complaints into a DTO containing the corresponding complaint and its submission
+     *
+     * @param complaints the list of complaints that should be split
+     * @return the list of DTOs
+     */
+    private List<SubmissionWithComplaintDTO> getSubmissionsWithComplaintsFromComplaints(List<Complaint> complaints) {
+        List<SubmissionWithComplaintDTO> submissionWithComplaintDTOs = new ArrayList<>();
+
+        if (!complaints.isEmpty()) {
+            var complaintMap = complaints.stream().collect(Collectors.toMap(complaint -> complaint.getResult().getId(), value -> value));
+            // get the ids of all results which have a complaint, and with those fetch all their submissions
+            List<Long> submissionIds = complaints.stream().map(complaint -> complaint.getResult().getSubmission().getId()).collect(toList());
+            List<Submission> submissions = submissionRepository.findBySubmissionIdsWithEagerResults(submissionIds);
+
+            // add each submission with its complaint to the DTO
+            submissions.stream().filter(submission -> submission.getResultWithComplaint() != null).forEach(submission -> {
+                // get the complaint which belongs to the submission
+                Complaint complaintOfSubmission = complaintMap.get(submission.getResultWithComplaint().getId());
+                prepareComplaintAndSubmission(complaintOfSubmission, submission);
+                submissionWithComplaintDTOs.add(new SubmissionWithComplaintDTO(submission, complaintOfSubmission));
+            });
+        }
 
         return submissionWithComplaintDTOs;
     }
@@ -640,5 +678,37 @@ public class SubmissionService {
         StudentParticipation submissionsParticipation = (StudentParticipation) submission.getParticipation();
         submissionsParticipation.setParticipant(null);
         submissionsParticipation.setExercise(null);
+    }
+
+    /**
+     * Search for all submissions fitting a {@link PageableSearchDTO search query}. The result is paged,
+     * meaning that there is only a predefined portion of the result returned to the user, so that the server doesn't
+     * have to send hundreds/thousands of submissions if there are that many in Artemis.
+     *
+     * @param search     DTO containing the search term and information required for pagination and sorting
+     * @param exerciseId Id of the exercise the submissions belongs to
+     * @return A wrapper object containing a list of all found submissions and the total number of pages
+     */
+    public SearchResultPageDTO<Submission> getSubmissionsOnPageWithSize(PageableSearchDTO<String> search, Long exerciseId) {
+        Sort sorting = Sort.by(StudentParticipation.StudentParticipationSearchColumn.valueOf(search.getSortedColumn()).getMappedColumnName());
+        sorting = search.getSortingOrder() == SortingOrder.ASCENDING ? sorting.ascending() : sorting.descending();
+        PageRequest sorted = PageRequest.of(search.getPage() - 1, search.getPageSize(), sorting);
+        String searchTerm = search.getSearchTerm();
+
+        Page<StudentParticipation> studentParticipationPage = studentParticipationRepository.findAllWithEagerSubmissionsAndEagerResultsByExerciseId(exerciseId, searchTerm, sorted);
+
+        List<Submission> submissions = new ArrayList<>();
+
+        for (StudentParticipation participation : studentParticipationPage.getContent()) {
+            Optional<Submission> optionalSubmission = participation.findLatestSubmission();
+
+            if (!optionalSubmission.isEmpty()) {
+                submissions.add(optionalSubmission.get());
+            }
+        }
+
+        final Page<Submission> submissionPage = new PageImpl<>(submissions, sorted, submissions.size());
+
+        return new SearchResultPageDTO<>(submissionPage.getContent(), studentParticipationPage.getTotalPages());
     }
 }

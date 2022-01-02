@@ -21,16 +21,12 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { FormDateTimePickerModule } from 'app/shared/date-time-picker/date-time-picker.module';
 import { ArtemisSharedComponentModule } from 'app/shared/components/shared-component.module';
 import { ArtemisMarkdownEditorModule } from 'app/shared/markdown-editor/markdown-editor.module';
-import { MomentModule } from 'ngx-moment';
 import { DurationPipe } from 'app/shared/pipes/artemis-duration.pipe';
-import { StudentsExamImportDialogComponent } from 'app/exam/manage/students/students-exam-import-dialog/students-exam-import-dialog.component';
-import { StudentsExamImportButtonComponent } from 'app/exam/manage/students/students-exam-import-dialog/students-exam-import-button.component';
 import { StudentExamStatusComponent } from 'app/exam/manage/student-exams/student-exam-status.component';
 import { StudentExamSummaryComponent } from 'app/exam/manage/student-exams/student-exam-summary.component';
 import { ArtemisParticipationSummaryModule } from 'app/exam/participate/summary/exam-participation-summary.module';
 import { ExamExerciseRowButtonsComponent } from 'app/exercises/shared/exam-exercise-row-buttons/exam-exercise-row-buttons.component';
 import { ArtemisProgrammingExerciseStatusModule } from 'app/exercises/programming/manage/status/programming-exercise-status.module';
-import { ProgrammingExerciseUtilsModule } from 'app/exercises/programming/shared/utils/programming-exercise-utils.module';
 import { TestRunManagementComponent } from 'app/exam/manage/test-runs/test-run-management.component';
 import { CreateTestRunModalComponent } from 'app/exam/manage/test-runs/create-test-run-modal.component';
 import { ArtemisMarkdownModule } from 'app/shared/markdown.module';
@@ -46,12 +42,15 @@ import { QuizExerciseGroupCellComponent } from './exercise-groups/quiz-exercise-
 import { ArtemisTextSubmissionAssessmentModule } from 'app/exercises/text/assess/text-submission-assessment.module';
 import { StudentExamDetailTableRowComponent } from 'app/exam/manage/student-exams/student-exam-detail-table-row/student-exam-detail-table-row.component';
 import { ExampleSubmissionsModule } from 'app/exercises/shared/example-submission/example-submissions.module';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { UserImportModule } from 'app/shared/import/user-import.module';
 
 const ENTITY_STATES = [...examManagementState];
 
 @NgModule({
     // TODO: For better modularization we could define an exercise module with the corresponding exam routes
     imports: [
+        NgxChartsModule,
         RouterModule.forChild(ENTITY_STATES),
         ArtemisTextExerciseModule,
         ArtemisExamScoresModule,
@@ -65,15 +64,14 @@ const ENTITY_STATES = [...examManagementState];
         ArtemisFileUploadExerciseManagementModule,
         ArtemisProgrammingExerciseManagementModule,
         ArtemisQuizManagementModule,
-        MomentModule,
         ArtemisParticipationSummaryModule,
         ArtemisProgrammingExerciseStatusModule,
-        ProgrammingExerciseUtilsModule,
         ArtemisMarkdownModule,
         ArtemisTutorParticipationGraphModule,
         ArtemisExamParticipantScoresModule,
         ArtemisTextSubmissionAssessmentModule,
         ExampleSubmissionsModule,
+        UserImportModule,
     ],
     declarations: [
         ExamManagementComponent,
@@ -87,8 +85,6 @@ const ENTITY_STATES = [...examManagementState];
         StudentExamsComponent,
         TestRunManagementComponent,
         CreateTestRunModalComponent,
-        StudentsExamImportDialogComponent,
-        StudentsExamImportButtonComponent,
         StudentExamDetailComponent,
         DurationPipe,
         StudentExamSummaryComponent,

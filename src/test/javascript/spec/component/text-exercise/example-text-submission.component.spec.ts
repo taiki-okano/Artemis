@@ -1,4 +1,4 @@
-import { HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -6,7 +6,7 @@ import { ActivatedRoute, ActivatedRouteSnapshot, convertToParamMap } from '@angu
 import { TranslateService } from '@ngx-translate/core';
 import { AssessmentInstructionsComponent } from 'app/assessment/assessment-instructions/assessment-instructions/assessment-instructions.component';
 import { ExampleSubmission } from 'app/entities/example-submission.model';
-import { Feedback } from 'app/entities/feedback.model';
+import { Feedback, FeedbackCorrectionErrorType } from 'app/entities/feedback.model';
 import { Result } from 'app/entities/result.model';
 import { TextBlock } from 'app/entities/text-block.model';
 import { TextExercise } from 'app/entities/text-exercise.model';
@@ -24,9 +24,11 @@ import { ResizeableContainerComponent } from 'app/shared/resizeable-container/re
 import { ScoreDisplayComponent } from 'app/shared/score-display/score-display.component';
 import { MockComponent, MockPipe, MockProvider } from 'ng-mocks';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { ArtemisTestModule } from '../../test.module';
+import { TextBlockRef } from 'app/entities/text-block-ref.model';
+import { UnreferencedFeedbackComponent } from 'app/exercises/shared/unreferenced-feedback/unreferenced-feedback.component';
 
 describe('ExampleTextSubmissionComponent', () => {
     let fixture: ComponentFixture<ExampleTextSubmissionComponent>;
@@ -44,14 +46,14 @@ describe('ExampleTextSubmissionComponent', () => {
     let submission: TextSubmission;
     let activatedRouteSnapshot: ActivatedRouteSnapshot;
 
-    beforeEach(async () => {
+    beforeEach(() => {
         const route: ActivatedRoute = {
             snapshot: {
                 paramMap: convertToParamMap({}),
                 queryParamMap: convertToParamMap({}),
             },
         } as any;
-        await TestBed.configureTestingModule({
+        TestBed.configureTestingModule({
             imports: [ArtemisTestModule, FormsModule],
             declarations: [
                 ExampleTextSubmissionComponent,
@@ -59,6 +61,7 @@ describe('ExampleTextSubmissionComponent', () => {
                 MockComponent(ScoreDisplayComponent),
                 MockComponent(TextAssessmentAreaComponent),
                 MockComponent(AssessmentInstructionsComponent),
+                MockComponent(UnreferencedFeedbackComponent),
                 MockPipe(ArtemisTranslatePipe),
                 MockComponent(AlertComponent),
             ],
@@ -90,13 +93,17 @@ describe('ExampleTextSubmissionComponent', () => {
         submission.id = SUBMISSION_ID;
     });
 
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     it('should fetch example submission with result for existing example submission and switch to edit state', async () => {
         // GIVEN
         // @ts-ignore
         activatedRouteSnapshot.paramMap.params = { exerciseId: EXERCISE_ID, exampleSubmissionId: EXAMPLE_SUBMISSION_ID };
-        spyOn(exerciseService, 'find').and.returnValue(httpResponse(exercise));
-        spyOn(exampleSubmissionService, 'get').and.returnValue(httpResponse(exampleSubmission));
-        spyOn(assessmentsService, 'getExampleResult').and.returnValue(of(result));
+        jest.spyOn(exerciseService, 'find').mockReturnValue(httpResponse(exercise));
+        jest.spyOn(exampleSubmissionService, 'get').mockReturnValue(httpResponse(exampleSubmission));
+        jest.spyOn(assessmentsService, 'getExampleResult').mockReturnValue(of(result));
 
         // WHEN
         await comp.ngOnInit();
@@ -108,13 +115,13 @@ describe('ExampleTextSubmissionComponent', () => {
         expect(comp.state.constructor.name).toEqual('EditState');
     });
 
-    it('should fetch only fetch exercise for new example submission and stay in new state', async () => {
+    it('should only fetch exercise for new example submission and stay in new state', async () => {
         // GIVEN
         // @ts-ignore
         activatedRouteSnapshot.paramMap.params = { exerciseId: EXERCISE_ID, exampleSubmissionId: 'new' };
-        spyOn(exerciseService, 'find').and.returnValue(httpResponse(exercise));
-        spyOn(exampleSubmissionService, 'get').and.stub();
-        spyOn(assessmentsService, 'getExampleResult').and.stub();
+        jest.spyOn(exerciseService, 'find').mockReturnValue(httpResponse(exercise));
+        jest.spyOn(exampleSubmissionService, 'get').mockImplementation();
+        jest.spyOn(assessmentsService, 'getExampleResult').mockImplementation();
 
         // WHEN
         await comp.ngOnInit();
@@ -131,19 +138,15 @@ describe('ExampleTextSubmissionComponent', () => {
         // @ts-ignore
         activatedRouteSnapshot.paramMap.params = { exerciseId: EXERCISE_ID, exampleSubmissionId: EXAMPLE_SUBMISSION_ID };
         await comp.ngOnInit();
-        comp.isAtLeastInstructor = true;
         comp.exercise = exercise;
+        comp.exercise!.isAtLeastInstructor = true;
         comp.exampleSubmission = exampleSubmission;
         comp.submission = submission;
-        spyOn(assessmentsService, 'getExampleResult').and.returnValue(of(result));
-        of();
 
         // WHEN
-        fixture.detectChanges();
         await comp.startAssessment();
 
         // THEN
-        expect(assessmentsService.getExampleResult).toHaveBeenCalledWith(EXERCISE_ID, SUBMISSION_ID);
         expect(comp.state.constructor.name).toEqual('NewAssessmentState');
     });
 
@@ -152,8 +155,8 @@ describe('ExampleTextSubmissionComponent', () => {
         // @ts-ignore
         activatedRouteSnapshot.paramMap.params = { exerciseId: EXERCISE_ID, exampleSubmissionId: EXAMPLE_SUBMISSION_ID };
         await comp.ngOnInit();
-        comp.isAtLeastInstructor = true;
         comp.exercise = exercise;
+        comp.exercise!.isAtLeastEditor = true;
         comp.exampleSubmission = exampleSubmission;
         comp.submission = submission;
         const textBlock1 = new TextBlock();
@@ -167,6 +170,7 @@ describe('ExampleTextSubmissionComponent', () => {
         textBlock2.setTextFromSubmission(submission);
         textBlock2.computeId();
         submission.blocks = [textBlock1, textBlock2];
+        submission.text = '123456789';
         comp.result = result;
         const feedback = Feedback.forText(textBlock1, 0, 'Test');
         result.feedbacks = [feedback];
@@ -174,7 +178,7 @@ describe('ExampleTextSubmissionComponent', () => {
         comp.state.assess();
         comp['prepareTextBlocksAndFeedbacks']();
         comp.validateFeedback();
-        spyOn(assessmentsService, 'saveExampleAssessment').and.returnValue(httpResponse(result));
+        jest.spyOn(assessmentsService, 'saveExampleAssessment').mockReturnValue(httpResponse(result));
 
         // WHEN
         fixture.detectChanges();
@@ -186,8 +190,8 @@ describe('ExampleTextSubmissionComponent', () => {
 
     it('editing submission from assessment state switches state', fakeAsync(() => {
         // GIVEN
-        comp.isAtLeastEditor = true;
         comp.exercise = exercise;
+        comp.exercise!.isAtLeastEditor = true;
         comp.exampleSubmission = exampleSubmission;
         comp.submission = submission;
         const textBlock1 = new TextBlock();
@@ -201,13 +205,14 @@ describe('ExampleTextSubmissionComponent', () => {
         textBlock2.setTextFromSubmission(submission);
         textBlock2.computeId();
         submission.blocks = [textBlock1, textBlock2];
+        submission.text = '123456789';
         comp.result = result;
         const feedback = Feedback.forText(textBlock1, 0, 'Test');
         result.feedbacks = [feedback];
         comp.state = State.forExistingAssessmentWithContext(comp);
         comp['prepareTextBlocksAndFeedbacks']();
         comp.validateFeedback();
-        spyOn(assessmentsService, 'deleteExampleFeedback').and.returnValue(httpResponse(null));
+        jest.spyOn(assessmentsService, 'deleteExampleAssessment').mockReturnValue(of(undefined));
 
         // WHEN
         fixture.detectChanges();
@@ -217,9 +222,11 @@ describe('ExampleTextSubmissionComponent', () => {
 
         // THEN
         expect(comp.state.constructor.name).toEqual('EditState');
-        expect(assessmentsService.deleteExampleFeedback).toHaveBeenCalledWith(EXERCISE_ID, EXAMPLE_SUBMISSION_ID);
+        expect(assessmentsService.deleteExampleAssessment).toHaveBeenCalledWith(EXERCISE_ID, EXAMPLE_SUBMISSION_ID);
         expect(comp.submission?.blocks).toBeUndefined();
-        expect(comp.result?.feedbacks).toBeUndefined();
+        expect(comp.submission?.results).toBeUndefined();
+        expect(comp.submission?.latestResult).toBeUndefined();
+        expect(comp.result).toBeUndefined();
         expect(comp.textBlockRefs).toHaveLength(0);
         expect(comp.unusedTextBlockRefs).toHaveLength(0);
     }));
@@ -230,8 +237,8 @@ describe('ExampleTextSubmissionComponent', () => {
         activatedRouteSnapshot.paramMap.params = { exerciseId: EXERCISE_ID, exampleSubmissionId: EXAMPLE_SUBMISSION_ID };
         // @ts-ignore
         activatedRouteSnapshot.queryParamMap.params = { toComplete: true };
-        spyOn(exerciseService, 'find').and.returnValue(httpResponse(exercise));
-        spyOn(exampleSubmissionService, 'get').and.returnValue(httpResponse(exampleSubmission));
+        jest.spyOn(exerciseService, 'find').mockReturnValue(httpResponse(exercise));
+        jest.spyOn(exampleSubmissionService, 'get').mockReturnValue(httpResponse(exampleSubmission));
         const textBlock1 = new TextBlock();
         textBlock1.startIndex = 0;
         textBlock1.endIndex = 4;
@@ -243,14 +250,15 @@ describe('ExampleTextSubmissionComponent', () => {
         textBlock2.setTextFromSubmission(submission);
         textBlock2.computeId();
         submission.blocks = [textBlock1, textBlock2];
-        spyOn(assessmentsService, 'getExampleResult').and.returnValue(of(result));
+        submission.text = '123456789';
+        jest.spyOn(assessmentsService, 'getExampleResult').mockReturnValue(of(result));
         await comp.ngOnInit();
 
         comp.textBlockRefs[0].initFeedback();
         comp.textBlockRefs[0].feedback!.credits = 2;
         comp.validateFeedback();
         const tutorParticipationService = fixture.debugElement.injector.get(TutorParticipationService);
-        spyOn(tutorParticipationService, 'assessExampleSubmission').and.returnValue(httpResponse(null));
+        jest.spyOn(tutorParticipationService, 'assessExampleSubmission').mockReturnValue(httpResponse(null));
 
         // WHEN
         fixture.detectChanges();
@@ -262,6 +270,50 @@ describe('ExampleTextSubmissionComponent', () => {
         expect(assessmentsService.getExampleResult).toHaveBeenCalledWith(EXERCISE_ID, SUBMISSION_ID);
         expect(tutorParticipationService.assessExampleSubmission).toHaveBeenCalled();
     });
+
+    it('when wrong tutor assessment, upon server response should mark feedback as incorrect', fakeAsync(() => {
+        // GIVEN
+        const textBlockRefA = TextBlockRef.new();
+        textBlockRefA.block!.id = 'ID';
+        const feedbackA = new Feedback();
+        feedbackA.reference = textBlockRefA.block!.id;
+        feedbackA.detailText = 'feedbackA';
+        textBlockRefA.feedback = feedbackA;
+
+        const textBlockRefB = TextBlockRef.new();
+        const feedbackB = new Feedback();
+        feedbackB.detailText = 'feebbackB';
+        textBlockRefB.feedback = feedbackB;
+
+        comp.textBlockRefs = [textBlockRefA, textBlockRefB];
+
+        expect(feedbackA.correctionStatus).toBeUndefined;
+        expect(feedbackB.correctionStatus).toBeUndefined;
+
+        const tutorParticipationService = fixture.debugElement.injector.get(TutorParticipationService);
+        const feedbackError = {
+            reference: feedbackA.reference,
+            type: FeedbackCorrectionErrorType.INCORRECT_SCORE,
+        };
+        const errorResponse = new HttpErrorResponse({
+            error: { title: JSON.stringify({ errors: [feedbackError] }) },
+            headers: new HttpHeaders().append('x-artemisapp-error', 'error.invalid_assessment'),
+            status: 400,
+        });
+
+        jest.spyOn(tutorParticipationService, 'assessExampleSubmission').mockReturnValue(throwError(() => errorResponse));
+
+        // WHEN
+        comp.ngOnInit();
+        tick();
+
+        comp.checkAssessment();
+        tick();
+
+        // THEN
+        expect(feedbackA.correctionStatus).toEqual(FeedbackCorrectionErrorType.INCORRECT_SCORE);
+        expect(feedbackB.correctionStatus).toEqual('CORRECT');
+    }));
 
     const httpResponse = (body: any) => of(new HttpResponse({ body }));
 });

@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Organization } from 'app/entities/organization.model';
-import { UserService } from 'app/core/user/user.service';
 import { OrganizationManagementService } from 'app/admin/organization-management/organization-management.service';
-import { JhiAlertService } from 'ng-jhipster';
 import { Subject } from 'rxjs';
+import { faEye, faPlus, faTimes, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-organization-management',
@@ -16,15 +15,21 @@ export class OrganizationManagementComponent implements OnInit {
     private dialogErrorSource = new Subject<string>();
     dialogError$ = this.dialogErrorSource.asObservable();
 
-    constructor(private organizationService: OrganizationManagementService, private userService: UserService, private alertService: JhiAlertService) {}
+    // Icons
+    faPlus = faPlus;
+    faTimes = faTimes;
+    faEye = faEye;
+    faWrench = faWrench;
+
+    constructor(private organizationService: OrganizationManagementService) {}
 
     ngOnInit(): void {
         this.organizationService.getOrganizations().subscribe((organizations) => {
             this.organizations = organizations;
-            this.organizationService.getNumberOfUsersAndCoursesOfOrganizations().subscribe((data) => {
-                for (let i = 0; i < data.length; i++) {
-                    this.organizations[i].numberOfUsers = data[i].numberOfUsers;
-                    this.organizations[i].numberOfCourses = data[i].numberOfCourses;
+            this.organizationService.getNumberOfUsersAndCoursesOfOrganizations().subscribe((organizationCountDtos) => {
+                for (let i = 0; i < organizationCountDtos.length; i++) {
+                    this.organizations[i].numberOfUsers = organizationCountDtos[i].numberOfUsers;
+                    this.organizations[i].numberOfCourses = organizationCountDtos[i].numberOfCourses;
                 }
             });
         });

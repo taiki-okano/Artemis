@@ -4,9 +4,9 @@
         <span class="me-2"> {{ 'artemisApp.exercise.releaseDate' | artemisTranslate }}: {{ (exercise!.releaseDate | artemisDate) || 'N/A' }} </span>
         <span [ngClass]="exerciseStatusBadge" class="badge">{{ exercise!.releaseDate | artemisTimeAgo }} </span>
     </h4>
-    <h4 *ngIf="exercise?.dueDate">
-        <span class="me-2"> {{ 'artemisApp.exercise.dueDate' | artemisTranslate }}: {{ (exercise!.dueDate | artemisDate) || 'N/A' }} </span>
-        <span [ngClass]="exerciseStatusBadge" class="badge"> {{ exercise!.dueDate | artemisTimeAgo }} </span>
+    <h4 *ngIf="dueDate">
+        <span class="me-2"> {{ 'artemisApp.exercise.dueDate' | artemisTranslate }}: {{ (dueDate | artemisDate) || 'N/A' }} </span>
+        <span [ngClass]="exerciseStatusBadge" class="badge"> {{ dueDate | artemisTimeAgo }} </span>
     </h4>
     <h4 *ngIf="exercise?.assessmentDueDate">
         <span class="me-2"> {{ 'artemisApp.exercise.assessmentDueDate' | artemisTranslate }}: {{ (exercise!.assessmentDueDate | artemisDate) || 'N/A' }} </span>
@@ -73,6 +73,7 @@
                             [showTestDetails]="isTmpOrSolutionProgrParticipation"
                         ></jhi-result>
                         <span
+                            *ngIf="exercise?.isAtLeastInstructor"
                             class="badge"
                             style="border-radius: 0px"
                             jhiDeleteButton
@@ -83,7 +84,7 @@
                             (delete)="deleteResult(result.submission, result)"
                             [dialogError]="dialogError$"
                         >
-                            <fa-icon [icon]="'times'"></fa-icon>
+                            <fa-icon [icon]="faTimes"></fa-icon>
                             {{ 'artemisApp.result.delete.buttonText' | artemisTranslate }}
                         </span>
                     </div>
@@ -134,7 +135,7 @@
                 </div>
             </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column prop="id" [minWidth]="120" [width]="120">
+        <ngx-datatable-column prop="id" [minWidth]="120" [width]="120" *ngIf="exercise?.isAtLeastInstructor">
             <ng-template ngx-datatable-header-template>
                 <span jhiTranslate="artemisApp.participation.participationSubmission.action"></span>
             </ng-template>
@@ -147,7 +148,7 @@
                     (delete)="deleteSubmission(value)"
                     [dialogError]="dialogError$"
                 >
-                    <fa-icon [icon]="'times'"></fa-icon>
+                    <fa-icon [icon]="faTimes"></fa-icon>
                 </button>
             </ng-template>
         </ngx-datatable-column>

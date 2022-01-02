@@ -129,6 +129,17 @@ public class Result extends DomainObject {
     }
 
     /**
+     * Sets the resultString attribute
+     *
+     * @param totalPoints total amount of points between 0 and maxPoints
+     * @param maxPoints   maximum points reachable at corresponding exercise
+     * @param course      the course that specifies the accuracy of the score
+     */
+    public void setResultString(double totalPoints, double maxPoints, Course course) {
+        resultString = createResultString(totalPoints, maxPoints, course);
+    }
+
+    /**
      * Builds the resultString attribute
      *
      * @param totalPoints total amount of scored points
@@ -136,7 +147,19 @@ public class Result extends DomainObject {
      * @return String with result string in this format "2 of 13 points"
      */
     public String createResultString(double totalPoints, double maxPoints) {
-        double pointsRounded = round(totalPoints);
+        return createResultString(totalPoints, maxPoints, participation.getExercise().getCourseViaExerciseGroupOrCourseMember());
+    }
+
+    /**
+     * Builds the resultString attribute, e.g. "4.2 of 69 points"
+     *
+     * @param totalPoints total amount of scored points
+     * @param maxPoints   maximum score reachable at corresponding exercise
+     * @param course      the course that specifies the accuracy of the score
+     * @return String with result string in this format "2 of 13 points"
+     */
+    public String createResultString(double totalPoints, double maxPoints, Course course) {
+        double pointsRounded = roundScoreSpecifiedByCourseSettings(totalPoints, course);
         DecimalFormat formatter = new DecimalFormat("#.#");
         return formatter.format(pointsRounded) + " of " + formatter.format(maxPoints) + " points";
     }
@@ -220,8 +243,24 @@ public class Result extends DomainObject {
     public void setScore(Double score) {
         if (score != null) {
             // We need to round the score to four decimal places to have a score of 99.999999 to be rounded to 100.0.
-            // Otherwise a result would not be successful.
+            // Otherwise, a result would not be successful.
             this.score = roundToNDecimalPlaces(score, 4);
+            this.successful = this.score >= 100.0;
+        }
+    }
+
+    /**
+     * 1. set score and round it to the specified accuracy in the course
+     * 2. set successful = true, if score >= 100 or false if not
+     *
+     * @param score new score
+     * @param course the course that specifies the accuracy
+     */
+    public void setScore(Double score, Course course) {
+        if (score != null) {
+            // We need to round the score to four decimal places to have a score of 99.999999 to be rounded to 100.0.
+            // Otherwise, a result would not be successful.
+            this.score = roundScoreSpecifiedByCourseSettings(score, course);
             this.successful = this.score >= 100.0;
         }
     }
@@ -234,6 +273,17 @@ public class Result extends DomainObject {
      */
     public void setScore(double totalPoints, double maxPoints) {
         setScore(totalPoints / maxPoints * 100);
+    }
+
+    /**
+     * calculates and sets the score attribute and accordingly the successful flag
+     *
+     * @param totalPoints total amount of points between 0 and maxPoints
+     * @param maxPoints   maximum points reachable at corresponding exercise
+     * @param course the course that specifies the accuracy
+     */
+    public void setScore(double totalPoints, double maxPoints, Course course) {
+        setScore(totalPoints / maxPoints * 100, course);
     }
 
     public Boolean isRated() {
@@ -510,5 +560,67 @@ public class Result extends DomainObject {
     public String toString() {
         return "Result{" + "id=" + getId() + ", resultString='" + resultString + '\'' + ", completionDate=" + completionDate + ", successful=" + successful + ", score=" + score
                 + ", rated=" + rated + ", hasFeedback=" + hasFeedback + ", assessmentType=" + assessmentType + ", hasComplaint=" + hasComplaint + '}';
+    }
+
+    /**
+     * Calculates the total score for programming exercises. Do not use it for other exercise types
+     * @return calculated totalScore
+     */
+    public Double calculateTotalPointsForProgrammingExercises() {
+        double totalPoints = 0.0;
+        double scoreAutomaticTests = 0.0;
+        ProgrammingExercise programmingExercise = (ProgrammingExercise) getParticipation().getExercise();
+        List<Feedback> feedbacks = getFeedbacks();
+        var gradingInstructions = new HashMap<Long, Integer>(); // { instructionId: noOfEncounters }
+
+        for (Feedback feedback : feedbacks) {
+            if (feedback.getGradingInstruction() != null) {
+                totalPoints = feedback.computeTotalScore(totalPoints, gradingInstructions);
+            }
+            else {
+                /*
+                 * In case no structured grading instruction was applied on the assessment model we just sum the feedback credit. We differentiate between automatic test and
+                 * automatic SCA feedback (automatic test feedback has to be capped)
+                 */
+                if (feedback.getType() == FeedbackType.AUTOMATIC && !feedback.isStaticCodeAnalysisFeedback()) {
+                    scoreAutomaticTests += Objects.requireNonNullElse(feedback.getCredits(), 0.0);
+                }
+                else {
+                    totalPoints += Objects.requireNonNullElse(feedback.getCredits(), 0.0);
+                }
+            }
+        }
+        /*
+         * Calculated score from automatic test feedbacks, is capped to max points + bonus points, see also see {@link ProgrammingExerciseGradingService#updateScore}
+         */
+        double maxPoints = programmingExercise.getMaxPoints() + Optional.ofNullable(programmingExercise.getBonusPoints()).orElse(0.0);
+        if (scoreAutomaticTests > maxPoints) {
+            scoreAutomaticTests = maxPoints;
+        }
+        totalPoints += scoreAutomaticTests;
+        // Make sure to not give negative points
+        if (totalPoints < 0) {
+            totalPoints = 0;
+        }
+        // Make sure to not give more than maxPoints
+        if (totalPoints > maxPoints) {
+            totalPoints = maxPoints;
+        }
+        return totalPoints;
+    }
+
+    /**
+     * calculates the score and the result string for programming exercises
+     * @param maxPoints the max points of the exercise
+     */
+    public void calculateScoreForProgrammingExercise(Double maxPoints) {
+        double totalPoints = calculateTotalPointsForProgrammingExercises();
+        setScore(totalPoints, maxPoints);
+
+        // Result string has following structure e.g: "1 of 13 passed, 2 issues, 10 of 100 points"
+        // The last part of the result string has to be updated, as the points the student has achieved have changed
+        String[] resultStringParts = getResultString().split(", ");
+        resultStringParts[resultStringParts.length - 1] = createResultString(totalPoints, maxPoints);
+        setResultString(String.join(", ", resultStringParts));
     }
 }

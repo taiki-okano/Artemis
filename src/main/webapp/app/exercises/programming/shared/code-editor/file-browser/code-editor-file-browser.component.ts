@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, O
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of, Subscription, throwError } from 'rxjs';
 import { catchError, map as rxMap, switchMap, tap } from 'rxjs/operators';
-import { compose, filter, fromPairs, toPairs } from 'lodash/fp';
+import { fromPairs, toPairs } from 'lodash-es';
 import { TreeviewComponent, TreeviewConfig, TreeviewHelper, TreeviewItem } from 'ngx-treeview';
 import { Interactable } from '@interactjs/core/Interactable';
 import interact from 'interactjs';
@@ -22,6 +22,7 @@ import { CodeEditorStatusComponent } from 'app/exercises/programming/shared/code
 import { CodeEditorFileBrowserDeleteComponent } from 'app/exercises/programming/shared/code-editor/file-browser/code-editor-file-browser-delete';
 import { IFileDeleteDelegate } from 'app/exercises/programming/shared/code-editor/file-browser/code-editor-file-browser-on-file-delete-delegate';
 import { supportedTextFileExtensions } from 'app/exercises/programming/shared/code-editor/file-browser/supported-file-extensions';
+import { faAngleDoubleDown, faAngleDoubleUp, faChevronLeft, faChevronRight, faCircleNotch, faFile, faFolder, faFolderOpen, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 export type InteractableEvent = {
     // Click event object; contains target information
@@ -84,6 +85,8 @@ export class CodeEditorFileBrowserComponent implements OnInit, OnChanges, AfterV
     filesTreeViewItem: TreeviewItem[];
     compressFolders = true;
 
+    collapsed = false;
+
     @ViewChild('renamingInput', { static: false }) renamingInput: ElementRef;
     @ViewChild('creatingInput', { static: false }) creatingInput: ElementRef;
 
@@ -108,6 +111,17 @@ export class CodeEditorFileBrowserComponent implements OnInit, OnChanges, AfterV
 
     gitConflictState: GitConflictState;
     conflictSubscription: Subscription;
+
+    // Icons
+    faPlus = faPlus;
+    faFolderOpen = faFolderOpen;
+    faFolder = faFolder;
+    faChevronRight = faChevronRight;
+    faChevronLeft = faChevronLeft;
+    faCircleNotch = faCircleNotch;
+    faFile = faFile;
+    faAngleDoubleUp = faAngleDoubleUp;
+    faAngleDoubleDown = faAngleDoubleDown;
 
     set selectedFile(file: string | undefined) {
         this.selectedFileValue = file;
@@ -375,6 +389,7 @@ export class CodeEditorFileBrowserComponent implements OnInit, OnChanges, AfterV
      * @param event
      */
     toggleEditorCollapse(event: any) {
+        this.collapsed = !this.collapsed;
         this.onToggleCollapse.emit({ event, horizontal: true, interactable: this.interactResizable });
     }
 
@@ -488,20 +503,19 @@ export class CodeEditorFileBrowserComponent implements OnInit, OnChanges, AfterV
     loadFiles = (): Observable<{ [fileName: string]: FileType }> => {
         return this.repositoryFileService.getRepositoryContent().pipe(
             rxMap((files) =>
-                compose(
-                    fromPairs,
-                    // Filter root folder
-                    filter(([value]) => value),
-                    // Filter Readme file that was historically in the student's assignment repo
-                    filter(([value]) => !value.includes('README.md')),
-                    // Remove binary files as they can't be displayed in an editor
-                    filter(([filename]) => {
-                        const fileSplit = filename.split('.');
-                        // Either the file has no ending or the file ending is allowed
-                        return fileSplit.length === 1 || supportedTextFileExtensions.includes(fileSplit.pop()!);
-                    }),
-                    toPairs,
-                )(files),
+                fromPairs(
+                    toPairs(files)
+                        // Remove binary files as they can't be displayed in an editor
+                        .filter(([filename]) => {
+                            const fileSplit = filename.split('.');
+                            // Either the file has no ending or the file ending is allowed
+                            return fileSplit.length === 1 || supportedTextFileExtensions.includes(fileSplit.pop()!);
+                        })
+                        // Filter Readme file that was historically in the student's assignment repo
+                        .filter(([value]) => !value.includes('README.md'))
+                        // Filter root folder
+                        .filter(([value]) => value),
+                ),
             ),
             catchError(() => throwError('couldNotBeRetrieved')),
         );
@@ -510,18 +524,17 @@ export class CodeEditorFileBrowserComponent implements OnInit, OnChanges, AfterV
     loadFilesWithInformationAboutChange(): Observable<{ [fileName: string]: boolean }> {
         return this.repositoryFileService.getFilesWithInformationAboutChange().pipe(
             rxMap((files) =>
-                compose(
-                    fromPairs,
-                    // Filter Readme file that was historically in the student's assignment repo
-                    filter(([value]) => !value.includes('README.md')),
-                    // Remove binary files as they can't be displayed in an editor
-                    filter(([filename]) => {
-                        const fileSplit = filename.split('.');
-                        // Either the file has no ending or the file ending is allowed
-                        return fileSplit.length === 1 || supportedTextFileExtensions.includes(fileSplit.pop()!);
-                    }),
-                    toPairs,
-                )(files),
+                fromPairs(
+                    toPairs(files)
+                        // Remove binary files as they can't be displayed in an editor
+                        .filter(([filename]) => {
+                            const fileSplit = filename.split('.');
+                            // Either the file has no ending or the file ending is allowed
+                            return fileSplit.length === 1 || supportedTextFileExtensions.includes(fileSplit.pop()!);
+                        })
+                        // Filter Readme file that was historically in the student's assignment repo
+                        .filter(([value]) => !value.includes('README.md')),
+                ),
             ),
             catchError(() => throwError('couldNotBeRetrieved')),
         );

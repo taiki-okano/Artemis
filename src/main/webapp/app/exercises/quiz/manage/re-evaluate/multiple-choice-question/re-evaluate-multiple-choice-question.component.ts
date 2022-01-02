@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ArtemisMarkdownService } from 'app/shared/markdown.service';
 import { AnswerOption } from 'app/entities/quiz/answer-option.model';
 import { MultipleChoiceQuestion } from 'app/entities/quiz/multiple-choice-question.model';
 import { CorrectOptionCommand } from 'app/shared/markdown-editor/domainCommands/correctOptionCommand';
 import { IncorrectOptionCommand } from 'app/shared/markdown-editor/domainCommands/incorrectOptionCommand';
 import { escapeStringForUseInRegex } from 'app/shared/util/global.utils';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { EditorMode } from 'app/shared/markdown-editor/markdown-editor.component';
+import { generateTextHintExplanation, parseTextHintExplanation } from 'app/shared/util/markdown.util';
+import { faArrowsAltV, faChevronDown, faChevronUp, faTrash, faUndo } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-re-evaluate-multiple-choice-question',
@@ -34,11 +35,12 @@ export class ReEvaluateMultipleChoiceQuestionComponent {
     @Input()
     backupQuestion: MultipleChoiceQuestion;
 
-    /**
-     * Constructs the re-evaluate component.
-     * @param artemisMarkdown the ArtemisMarkdownService
-     */
-    constructor(private artemisMarkdown: ArtemisMarkdownService) {}
+    // Icons
+    faTrash = faTrash;
+    faUndo = faUndo;
+    faChevronUp = faChevronUp;
+    faChevronDown = faChevronDown;
+    faArrowsAltV = faArrowsAltV;
 
     /**
      * generate the question using the markdown service
@@ -47,7 +49,7 @@ export class ReEvaluateMultipleChoiceQuestionComponent {
      */
     getQuestionText(question: MultipleChoiceQuestion): string {
         const questionToSet = { text: question.text, hint: question.hint, explanation: question.explanation };
-        return this.artemisMarkdown.generateTextHintExplanation(questionToSet);
+        return generateTextHintExplanation(questionToSet);
     }
 
     /**
@@ -55,7 +57,8 @@ export class ReEvaluateMultipleChoiceQuestionComponent {
      * @param {string} text
      */
     onQuestionChange(text: string): void {
-        ArtemisMarkdownService.parseTextHintExplanation(text, this.question);
+        parseTextHintExplanation(text, this.question);
+        this.questionUpdated.emit();
     }
 
     /**
@@ -68,6 +71,7 @@ export class ReEvaluateMultipleChoiceQuestionComponent {
             return answerOption.id === answer.id;
         });
         this.parseAnswerMarkdown(text, this.question.answerOptions![answerIndex!]);
+        this.questionUpdated.emit();
     }
 
     /**
@@ -82,7 +86,7 @@ export class ReEvaluateMultipleChoiceQuestionComponent {
      * @param answer {AnswerOption}  is the AnswerOption, which the Markdown-field presents
      */
     generateAnswerMarkdown(answer: AnswerOption): string {
-        return (answer.isCorrect ? CorrectOptionCommand.identifier : IncorrectOptionCommand.identifier) + ' ' + this.artemisMarkdown.generateTextHintExplanation(answer);
+        return (answer.isCorrect ? CorrectOptionCommand.identifier : IncorrectOptionCommand.identifier) + ' ' + generateTextHintExplanation(answer);
     }
 
     /**
@@ -98,21 +102,21 @@ export class ReEvaluateMultipleChoiceQuestionComponent {
      * @param answer {AnswerOption} the answer, where to save the result
      */
     parseAnswerMarkdown(text: string, answer: AnswerOption) {
-        const answerParts = this.splitByCorrectIncorrectTag(text);
+        const answerParts = ReEvaluateMultipleChoiceQuestionComponent.splitByCorrectIncorrectTag(text);
         // Find the box (text in-between the parts)
         const answerOptionText = answerParts[1];
         const startOfThisPart = text.indexOf(answerOptionText);
         const box = text.substring(0, startOfThisPart);
         // Check if box says this answer option is correct or not
         answer.isCorrect = box === CorrectOptionCommand.identifier;
-        ArtemisMarkdownService.parseTextHintExplanation(answerOptionText, answer);
+        parseTextHintExplanation(answerOptionText, answer);
     }
 
     /**
      * Split text by [correct] and [wrong]
      * @param text
      */
-    private splitByCorrectIncorrectTag(text: string): string[] {
+    private static splitByCorrectIncorrectTag(text: string): string[] {
         const stringForSplit = escapeStringForUseInRegex(`${CorrectOptionCommand.identifier}`) + '|' + escapeStringForUseInRegex(`${IncorrectOptionCommand.identifier}`);
         const splitRegExp = new RegExp(stringForSplit, 'g');
         return text.split(splitRegExp);

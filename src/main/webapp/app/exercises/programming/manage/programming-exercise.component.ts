@@ -1,6 +1,5 @@
 import { Component, ContentChild, Input, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
 import { ProgrammingExerciseService } from './services/programming-exercise.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,13 +12,19 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ProgrammingExerciseImportComponent } from 'app/exercises/programming/manage/programming-exercise-import.component';
 import { FeatureToggle } from 'app/shared/feature-toggle/feature-toggle.service';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
-import { CourseExerciseService, CourseManagementService } from 'app/course/manage/course-management.service';
-import { ProgrammingExerciseSimulationUtils } from 'app/exercises/programming/shared/utils/programming-exercise-simulation-utils';
+import { CourseManagementService } from 'app/course/manage/course-management.service';
+import { ProgrammingExerciseSimulationUtils } from 'app/exercises/programming/shared/utils/programming-exercise-simulation.utils';
 import { SortService } from 'app/shared/service/sort.service';
-import { getCourseFromExercise } from 'app/entities/exercise.model';
 import { ProgrammingExerciseEditSelectedComponent } from 'app/exercises/programming/manage/programming-exercise-edit-selected.component';
 import { ProgrammingAssessmentRepoExportDialogComponent } from 'app/exercises/programming/assess/repo-export/programming-assessment-repo-export-dialog.component';
 import { ProgrammingExerciseParticipationType } from 'app/entities/programming-exercise-participation.model';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { createBuildPlanUrl } from 'app/exercises/programming/shared/utils/programming-exercise.utils';
+import { ProfileService } from 'app/shared/layouts/profiles/profile.service';
+import { ConsistencyCheckComponent } from 'app/shared/consistency-check/consistency-check.component';
+import { faBook, faCheckDouble, faDownload, faFileSignature, faListAlt, faPencilAlt, faPlus, faSort, faTable, faTimes, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 
 @Component({
     selector: 'jhi-programming-exercise',
@@ -27,6 +32,7 @@ import { ProgrammingExerciseParticipationType } from 'app/entities/programming-e
 })
 export class ProgrammingExerciseComponent extends ExerciseComponent implements OnInit, OnDestroy {
     @Input() programmingExercises: ProgrammingExercise[];
+    filteredProgrammingExercises: ProgrammingExercise[];
     readonly ActionType = ActionType;
     FeatureToggle = FeatureToggle;
     selectedProgrammingExercises: ProgrammingExercise[];
@@ -38,20 +44,36 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
     @ContentChild('overrideGenerateAndImportButton') overrideGenerateAndImportButton: TemplateRef<any>;
     @ContentChild('overrideRepositoryAndBuildPlan') overrideRepositoryAndBuildPlan: TemplateRef<any>;
     @ContentChild('overrideButtons') overrideButtons: TemplateRef<any>;
+    private buildPlanLinkTemplate: string;
+
+    // Icons
+    faSort = faSort;
+    faPlus = faPlus;
+    faDownload = faDownload;
+    faTimes = faTimes;
+    faBook = faBook;
+    faWrench = faWrench;
+    faCheckDouble = faCheckDouble;
+    faUsers = faUsers;
+    faTable = faTable;
+    faListAlt = faListAlt;
+    faPencilAlt = faPencilAlt;
+    faFileSignature = faFileSignature;
 
     constructor(
         private programmingExerciseService: ProgrammingExerciseService,
         private courseExerciseService: CourseExerciseService,
         public exerciseService: ExerciseService,
         private accountService: AccountService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private modalService: NgbModal,
         private router: Router,
         private programmingExerciseSimulationUtils: ProgrammingExerciseSimulationUtils,
         private sortService: SortService,
+        private profileService: ProfileService,
         courseService: CourseManagementService,
         translateService: TranslateService,
-        eventManager: JhiEventManager,
+        eventManager: EventManager,
         route: ActivatedRoute,
     ) {
         super(courseService, translateService, route, eventManager);
@@ -67,17 +89,40 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
         this.courseExerciseService.findAllProgrammingExercisesForCourse(this.courseId).subscribe(
             (res: HttpResponse<ProgrammingExercise[]>) => {
                 this.programmingExercises = res.body!;
+                this.profileService.getProfileInfo().subscribe((profileInfo) => {
+                    this.buildPlanLinkTemplate = profileInfo.buildPlanURLTemplate;
+                });
                 // reconnect exercise with course
                 this.programmingExercises.forEach((exercise) => {
                     exercise.course = this.course;
-                    exercise.isAtLeastTutor = this.accountService.isAtLeastTutorInCourse(getCourseFromExercise(exercise));
-                    exercise.isAtLeastEditor = this.accountService.isAtLeastEditorInCourse(getCourseFromExercise(exercise));
-                    exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(getCourseFromExercise(exercise));
+                    this.accountService.setAccessRightsForExercise(exercise);
+                    if (exercise.projectKey) {
+                        if (exercise.solutionParticipation!.buildPlanId) {
+                            exercise.solutionParticipation!.buildPlanUrl = createBuildPlanUrl(
+                                this.buildPlanLinkTemplate,
+                                exercise.projectKey,
+                                exercise.solutionParticipation!.buildPlanId,
+                            );
+                        }
+                        if (exercise.templateParticipation!.buildPlanId) {
+                            exercise.templateParticipation!.buildPlanUrl = createBuildPlanUrl(
+                                this.buildPlanLinkTemplate,
+                                exercise.projectKey,
+                                exercise.templateParticipation!.buildPlanId,
+                            );
+                        }
+                    }
                 });
+                this.applyFilter();
                 this.emitExerciseCount(this.programmingExercises.length);
             },
-            (res: HttpErrorResponse) => onError(this.jhiAlertService, res),
+            (res: HttpErrorResponse) => onError(this.alertService, res),
         );
+    }
+
+    protected applyFilter(): void {
+        this.filteredProgrammingExercises = this.programmingExercises.filter((exercise) => this.filter.matchesExercise(exercise));
+        this.emitFilteredExerciseCount(this.filteredProgrammingExercises.length);
     }
 
     trackId(index: number, item: ProgrammingExercise) {
@@ -119,6 +164,7 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
 
     sortRows() {
         this.sortService.sortByProperty(this.programmingExercises, this.predicate, this.reverse);
+        this.applyFilter();
     }
 
     openImportModal() {
@@ -141,9 +187,8 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
     }
 
     toggleAllProgrammingExercises() {
-        if (this.allChecked) {
-            this.selectedProgrammingExercises = [];
-        } else {
+        this.selectedProgrammingExercises = [];
+        if (!this.allChecked) {
             this.selectedProgrammingExercises = this.selectedProgrammingExercises.concat(this.programmingExercises);
         }
         this.allChecked = !this.allChecked;
@@ -170,6 +215,14 @@ export class ProgrammingExerciseComponent extends ExerciseComponent implements O
             backdrop: 'static',
         });
         modalRef.componentInstance.selectedProgrammingExercises = this.selectedProgrammingExercises;
+    }
+
+    /**
+     * Opens modal and executes a consistency check for the selected exercises
+     */
+    checkConsistencies() {
+        const modalRef = this.modalService.open(ConsistencyCheckComponent, { keyboard: true, size: 'lg' });
+        modalRef.componentInstance.exercisesToCheck = this.selectedProgrammingExercises;
     }
 
     // ################## ONLY FOR LOCAL TESTING PURPOSE -- START ##################

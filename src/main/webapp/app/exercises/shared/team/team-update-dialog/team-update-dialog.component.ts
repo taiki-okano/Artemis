@@ -7,11 +7,12 @@ import { ParticipationService } from 'app/exercises/shared/participation/partici
 import { TeamService } from 'app/exercises/shared/team/team.service';
 import { Team } from 'app/entities/team.model';
 import { User } from 'app/core/user/user.model';
-import { cloneDeep, isEmpty, omit } from 'lodash';
+import { cloneDeep, isEmpty, omit } from 'lodash-es';
 import { TeamAssignmentConfig } from 'app/entities/team-assignment-config.model';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { Exercise } from 'app/entities/exercise.model';
 import { shortNamePattern } from 'app/shared/constants/input.constants';
+import { faBan, faExclamationTriangle, faSave, faSpinner, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 export type StudentTeamConflict = { studentLogin: string; teamId: string };
 
@@ -46,6 +47,14 @@ export class TeamUpdateDialogComponent implements OnInit {
     private shortNameValidator = new Subject<string>();
     readonly shortNameAlreadyTakenErrorCode = 'alreadyTaken';
     readonly shortNamePattern = shortNamePattern; // must start with a letter and cannot contain special characters
+
+    // Icons
+    faSave = faSave;
+    faBan = faBan;
+    faSpinner = faSpinner;
+    faExclamationTriangle = faExclamationTriangle;
+    faTrashAlt = faTrashAlt;
+
     constructor(private participationService: ParticipationService, private teamService: TeamService, private activeModal: NgbActiveModal) {}
 
     /**

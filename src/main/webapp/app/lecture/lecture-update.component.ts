@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { LectureService } from './lecture.service';
 import { CourseManagementService } from '../course/manage/course-management.service';
 import { Lecture } from 'app/entities/lecture.model';
@@ -11,6 +11,7 @@ import { Course } from 'app/entities/course.model';
 import { KatexCommand } from 'app/shared/markdown-editor/commands/katex.command';
 import { onError } from 'app/shared/util/global.utils';
 import { ArtemisNavigationUtilService } from 'app/utils/navigation.utils';
+import { faBan, faSave } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-lecture-update',
@@ -28,8 +29,12 @@ export class LectureUpdateComponent implements OnInit {
 
     domainCommandsDescription = [new KatexCommand()];
 
+    // Icons
+    faSave = faSave;
+    faBan = faBan;
+
     constructor(
-        protected jhiAlertService: JhiAlertService,
+        protected alertService: AlertService,
         protected lectureService: LectureService,
         protected courseService: CourseManagementService,
         protected activatedRoute: ActivatedRoute,
@@ -100,6 +105,6 @@ export class LectureUpdateComponent implements OnInit {
      */
     protected onSaveError(error: HttpErrorResponse) {
         this.isSaving = false;
-        onError(this.jhiAlertService, error);
+        onError(this.alertService, error);
     }
 }

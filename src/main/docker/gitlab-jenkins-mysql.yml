@@ -32,11 +32,11 @@ services:
             artemis:
                 ipv4_address: 172.33.0.3
     mysql:
-        command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
+        command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --collation-server=utf8mb4_unicode_ci --explicit_defaults_for_timestamp
         environment:
             - MYSQL_ALLOW_EMPTY_PASSWORD=yes
             - MYSQL_DATABASE=Artemis
-        image: mysql:8.0.23
+        image: mysql:8.0.27
         ports:
             - 3306:3306
         volumes:

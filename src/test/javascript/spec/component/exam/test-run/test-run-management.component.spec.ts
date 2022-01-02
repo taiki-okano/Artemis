@@ -18,17 +18,18 @@ import { TestRunManagementComponent } from 'app/exam/manage/test-runs/test-run-m
 import { AlertErrorComponent } from 'app/shared/alert/alert-error.component';
 import { AlertComponent } from 'app/shared/alert/alert.component';
 import { DeleteButtonDirective } from 'app/shared/delete-dialog/delete-button.directive';
+import { TranslateDirective } from 'app/shared/language/translate.directive';
 import { ArtemisDatePipe } from 'app/shared/pipes/artemis-date.pipe';
 import { ArtemisDurationFromSecondsPipe } from 'app/shared/pipes/artemis-duration-from-seconds.pipe';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { SortService } from 'app/shared/service/sort.service';
-import { JhiAlertService, JhiSortDirective, JhiTranslateDirective } from 'ng-jhipster';
 import { MockComponent, MockDirective, MockModule, MockPipe } from 'ng-mocks';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { of, throwError } from 'rxjs';
-import * as sinon from 'sinon';
 import { MockSyncStorage } from '../../../helpers/mocks/service/mock-sync-storage.service';
 import { MockTranslateService } from '../../../helpers/mocks/service/mock-translate.service';
+import { SortDirective } from 'app/shared/sort/sort.directive';
+import { AlertService } from 'app/core/util/alert.service';
 
 describe('Test Run Management Component', () => {
     let component: TestRunManagementComponent;
@@ -36,6 +37,7 @@ describe('Test Run Management Component', () => {
     let examManagementService: ExamManagementService;
     let accountService: AccountService;
     let modalService: NgbModal;
+    let userSpy: jest.SpyInstance;
 
     const course = { id: 1, isAtLeastInstructor: true } as Course;
     const exam = { id: 1, course, started: true } as Exam;
@@ -57,7 +59,7 @@ describe('Test Run Management Component', () => {
                 MockPipe(ArtemisTranslatePipe),
                 MockPipe(ArtemisDurationFromSecondsPipe),
                 MockPipe(ArtemisDatePipe),
-                MockDirective(JhiSortDirective),
+                MockDirective(SortDirective),
                 MockDirective(DeleteButtonDirective),
             ],
             providers: [
@@ -65,7 +67,7 @@ describe('Test Run Management Component', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: ActivatedRoute, useValue: route },
-                MockDirective(JhiTranslateDirective),
+                MockDirective(TranslateDirective),
             ],
         })
             .compileComponents()
@@ -75,25 +77,27 @@ describe('Test Run Management Component', () => {
                 examManagementService = TestBed.inject(ExamManagementService);
                 accountService = TestBed.inject(AccountService);
                 modalService = modalService = TestBed.inject(NgbModal);
-                spyOn(examManagementService, 'find').and.returnValue(of(new HttpResponse({ body: exam })));
-                spyOn(examManagementService, 'findAllTestRunsForExam').and.returnValue(of(new HttpResponse({ body: studentExams })));
-                spyOn(accountService, 'fetch').and.returnValue(of(new HttpResponse({ body: user })));
-                spyOn(accountService, 'isAtLeastInstructorInCourse').and.returnValue(true);
-                spyOn(examManagementService, 'deleteTestRun').and.returnValue(of(new HttpResponse({ body: {} })));
+                jest.spyOn(examManagementService, 'find').mockReturnValue(of(new HttpResponse({ body: exam })));
+                jest.spyOn(examManagementService, 'findAllTestRunsForExam').mockReturnValue(of(new HttpResponse({ body: studentExams })));
+                userSpy = jest.spyOn(accountService, 'identity').mockReturnValue(Promise.resolve(user));
+                jest.spyOn(accountService, 'isAtLeastInstructorInCourse').mockReturnValue(true);
+                jest.spyOn(examManagementService, 'deleteTestRun').mockReturnValue(of(new HttpResponse({ body: {} })));
             });
     });
 
     afterEach(() => {
-        sinon.restore();
+        jest.restoreAllMocks();
     });
 
     describe('onInit', () => {
         it('should fetch exam with test runs and user on init', fakeAsync(() => {
             fixture.detectChanges();
 
+            tick();
+
             expect(examManagementService.find).toHaveBeenCalledWith(course.id!, exam.id!, false, true);
             expect(examManagementService.findAllTestRunsForExam).toHaveBeenCalledWith(course.id!, exam.id!);
-            expect(accountService.fetch).toHaveBeenCalledWith();
+            expect(userSpy).toHaveBeenCalledTimes(1);
 
             expect(component.exam).toEqual(exam);
             expect(component.isExamStarted).toEqual(exam.started!);
@@ -124,8 +128,8 @@ describe('Test Run Management Component', () => {
 
             const componentInstance = { title: String, text: String };
             const result = new Promise((resolve) => resolve({} as StudentExam));
-            spyOn(modalService, 'open').and.returnValue(<NgbModalRef>{ componentInstance, result });
-            spyOn(examManagementService, 'createTestRun').and.returnValue(of(new HttpResponse({ body: { id: 3, user: { id: 90 }, exercises: [exercise] } as StudentExam })));
+            jest.spyOn(modalService, 'open').mockReturnValue(<NgbModalRef>{ componentInstance, result });
+            jest.spyOn(examManagementService, 'createTestRun').mockReturnValue(of(new HttpResponse({ body: { id: 3, user: { id: 90 }, exercises: [exercise] } as StudentExam })));
             fixture.detectChanges();
 
             expect(component.examContainsExercises).toBeTruthy();
@@ -137,7 +141,7 @@ describe('Test Run Management Component', () => {
         });
 
         it('should correctly catch error after creating test run', () => {
-            const alertService = TestBed.inject(JhiAlertService);
+            const alertService = TestBed.inject(AlertService);
             const exercise = { id: 1 } as Exercise;
             const exerciseGroup = { id: 1, exercises: [exercise] } as ExerciseGroup;
             exam.exerciseGroups = [exerciseGroup];
@@ -145,9 +149,9 @@ describe('Test Run Management Component', () => {
 
             const componentInstance = { title: String, text: String };
             const result = new Promise((resolve) => resolve({} as StudentExam));
-            spyOn(modalService, 'open').and.returnValue(<NgbModalRef>{ componentInstance, result });
-            spyOn(examManagementService, 'createTestRun').and.returnValue(throwError(httpError));
-            spyOn(alertService, 'error');
+            jest.spyOn(modalService, 'open').mockReturnValue(<NgbModalRef>{ componentInstance, result });
+            jest.spyOn(examManagementService, 'createTestRun').mockReturnValue(throwError(httpError));
+            jest.spyOn(alertService, 'error');
             fixture.detectChanges();
 
             expect(component.examContainsExercises).toBeTruthy();
@@ -166,17 +170,18 @@ describe('Test Run Management Component', () => {
             expect(component.testRunCanBeAssessed).toBeFalsy();
         });
 
-        it('should be able to assess test run', () => {
+        it('should be able to assess test run', fakeAsync(() => {
             studentExams[0].submitted = true;
             fixture.detectChanges();
+            tick();
             expect(component.testRunCanBeAssessed).toBeTruthy();
-        });
+        }));
     });
 
     describe('sort rows', () => {
         it('should forward request to ', fakeAsync(() => {
             const sortService = TestBed.inject(SortService);
-            spyOn(sortService, 'sortByProperty').and.returnValue(studentExams);
+            jest.spyOn(sortService, 'sortByProperty').mockReturnValue(studentExams);
             fixture.detectChanges();
 
             component.sortRows();

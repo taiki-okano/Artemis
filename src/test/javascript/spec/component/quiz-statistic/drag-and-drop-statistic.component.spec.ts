@@ -17,6 +17,8 @@ import { DragAndDropQuestionStatisticComponent } from 'app/exercises/quiz/manage
 import { DropLocation } from 'app/entities/quiz/drop-location.model';
 import { DragAndDropQuestionStatistic } from 'app/entities/quiz/drag-and-drop-question-statistic.model';
 import { DropLocationCounter } from 'app/entities/quiz/drop-location-counter.model';
+import { MockProvider } from 'ng-mocks';
+import { ChangeDetectorRef } from '@angular/core';
 
 const route = { params: of({ courseId: 2, exerciseId: 42, questionId: 1 }) };
 const dropLocation1 = { posX: 5, invalid: false, tempID: 1 } as DropLocation;
@@ -32,8 +34,8 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
     let fixture: ComponentFixture<DragAndDropQuestionStatisticComponent>;
     let quizService: QuizExerciseService;
     let accountService: AccountService;
-    let accountSpy: jasmine.Spy;
-    let quizServiceFindSpy: jasmine.Spy;
+    let accountSpy: jest.SpyInstance;
+    let quizServiceFindSpy: jest.SpyInstance;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -45,6 +47,7 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: AccountService, useClass: MockAccountService },
+                MockProvider(ChangeDetectorRef),
             ],
         })
             .overrideTemplate(DragAndDropQuestionStatisticComponent, '')
@@ -54,7 +57,7 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
                 comp = fixture.componentInstance;
                 quizService = fixture.debugElement.injector.get(QuizExerciseService);
                 accountService = fixture.debugElement.injector.get(AccountService);
-                quizServiceFindSpy = spyOn(quizService, 'find').and.returnValue(of(new HttpResponse({ body: quizExercise })));
+                quizServiceFindSpy = jest.spyOn(quizService, 'find').mockReturnValue(of(new HttpResponse({ body: quizExercise })));
             });
     });
 
@@ -64,8 +67,8 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
 
     describe('OnInit', function () {
         it('should call functions on Init', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(true);
-            const loadQuizSpy = spyOn(comp, 'loadQuiz');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            const loadQuizSpy = jest.spyOn(comp, 'loadQuiz');
             comp.websocketChannelForData = '';
 
             comp.ngOnInit();
@@ -77,8 +80,8 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
         });
 
         it('should not load Quiz if not authorised', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(false);
-            const loadQuizSpy = spyOn(comp, 'loadQuiz');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(false);
+            const loadQuizSpy = jest.spyOn(comp, 'loadQuiz');
 
             comp.ngOnInit();
 
@@ -90,11 +93,11 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
 
     describe('loadLayout', function () {
         it('should call functions from loadLayout', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(true);
-            const orderDropLocationSpy = spyOn(comp, 'orderDropLocationByPos');
-            const resetLabelsSpy = spyOn(comp, 'resetLabelsColors');
-            const addLastBarSpy = spyOn(comp, 'addLastBarLayout');
-            const loadInvalidLayoutSpy = spyOn(comp, 'loadInvalidLayout');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            const orderDropLocationSpy = jest.spyOn(comp, 'orderDropLocationByPos');
+            const resetLabelsSpy = jest.spyOn(comp, 'resetLabelsColors');
+            const addLastBarSpy = jest.spyOn(comp, 'addLastBarLayout');
+            const loadInvalidLayoutSpy = jest.spyOn(comp, 'loadInvalidLayout');
 
             comp.ngOnInit();
             comp.loadLayout();
@@ -108,9 +111,9 @@ describe('QuizExercise Drag And Drop Question Statistic Component', () => {
 
     describe('loadData', function () {
         it('should call functions from loadData', () => {
-            accountSpy = spyOn(accountService, 'hasAnyAuthorityDirect').and.returnValue(true);
-            const resetDataSpy = spyOn(comp, 'resetData');
-            const updateDataSpy = spyOn(comp, 'updateData');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            const resetDataSpy = jest.spyOn(comp, 'resetData');
+            const updateDataSpy = jest.spyOn(comp, 'updateData');
 
             comp.ngOnInit();
             comp.loadData();

@@ -18,8 +18,8 @@
                         #loginInput="ngModel"
                         [(ngModel)]="user.login"
                         required
-                        minlength="1"
-                        maxlength="50"
+                        [minLength]="USERNAME_MIN_LENGTH"
+                        [maxLength]="USERNAME_MAX_LENGTH"
                         pattern="^[_.@A-Za-z0-9-]*$"
                     />
 
@@ -78,14 +78,19 @@
                         name="password"
                         id="password"
                         placeholder="{{ 'global.menu.account.password' | artemisTranslate }}"
-                        minlength="8"
-                        maxlength="100"
+                        [minLength]="PASSWORD_MIN_LENGTH"
+                        [maxLength]="PASSWORD_MAX_LENGTH"
                         #password="ngModel"
                         [(ngModel)]="user.password"
                     />
                     <div *ngIf="password.dirty && password.invalid">
-                        <small class="form-text text-danger" *ngIf="password.errors?.maxlength" [translateValues]="{ max: 100 }" jhiTranslate="userManagement.passwordConstraints">
-                            The password has to contain 8-100 characters!
+                        <small
+                            class="form-text text-danger"
+                            *ngIf="password.errors?.maxlength"
+                            jhiTranslate="userManagement.passwordConstraints"
+                            [translateValues]="{ min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }"
+                        >
+                            The password has to contain 8-50 characters!
                         </small>
                     </div>
                 </div>
@@ -110,7 +115,7 @@
                                 <span class="badge bg-primary font-weight-normal m-1 ps-3"
                                     >{{ organization.name
                                     }}<button type="button" class="btn text-light" (click)="removeOrganizationFromUser(organization)">
-                                        <fa-icon [icon]="'times'"></fa-icon></button
+                                        <fa-icon [icon]="faTimes"></fa-icon></button
                                 ></span>
                             </h5>
                         </div>
@@ -157,10 +162,10 @@
             </div>
             <div>
                 <button type="button" class="btn btn-secondary" (click)="previousState()">
-                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                    <fa-icon [icon]="faBan"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
                 </button>
                 <button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
-                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                    <fa-icon [icon]="faSave"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
                 </button>
             </div>
         </form>

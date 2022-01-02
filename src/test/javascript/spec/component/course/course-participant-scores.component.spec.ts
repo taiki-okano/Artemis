@@ -1,22 +1,18 @@
 import { CourseParticipantScoresComponent } from 'app/course/course-participant-scores/course-participant-scores.component';
-import * as sinonChai from 'sinon-chai';
-import * as sinon from 'sinon';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MockComponent, MockPipe, MockProvider } from 'ng-mocks';
 import { of } from 'rxjs';
 import { AlertComponent } from 'app/shared/alert/alert.component';
 import { ActivatedRoute } from '@angular/router';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ParticipantScoreAverageDTO, ParticipantScoreDTO, ParticipantScoresService } from 'app/shared/participant-scores/participant-scores.service';
-import * as chai from 'chai';
 import { HttpResponse } from '@angular/common/http';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { GradingSystemService } from 'app/grading-system/grading-system.service';
 import { GradingScale } from 'app/entities/grading-scale.model';
-
-chai.use(sinonChai);
-const expect = chai.expect;
+import { Course } from 'app/entities/course.model';
+import { CourseManagementService } from 'app/course/manage/course-management.service';
 
 @Component({ selector: 'jhi-participant-scores-tables-container', template: '<div></div>' })
 class ParticipantScoresTableContainerStubComponent {
@@ -31,11 +27,13 @@ class ParticipantScoresTableContainerStubComponent {
     @Input()
     avgRatedScore = 0;
     @Input()
-    avgGrade?: String;
+    avgGrade?: string;
     @Input()
-    avgRatedGrade?: String;
+    avgRatedGrade?: string;
     @Input()
     isBonus = false;
+    @Input()
+    course?: Course;
     @Output()
     reload = new EventEmitter<void>();
 }
@@ -49,8 +47,9 @@ describe('CourseParticipantScores', () => {
             declarations: [CourseParticipantScoresComponent, ParticipantScoresTableContainerStubComponent, MockPipe(ArtemisTranslatePipe), MockComponent(AlertComponent)],
             providers: [
                 MockProvider(ParticipantScoresService),
-                MockProvider(JhiAlertService),
+                MockProvider(AlertService),
                 MockProvider(GradingSystemService),
+                MockProvider(CourseManagementService),
                 {
                     provide: ActivatedRoute,
                     useValue: { params: of({ courseId: 1 }) },
@@ -65,19 +64,24 @@ describe('CourseParticipantScores', () => {
     });
 
     afterEach(function () {
-        sinon.restore();
+        jest.restoreAllMocks();
     });
 
     it('should initialize', () => {
         fixture.detectChanges();
-        expect(component).to.be.ok;
+        expect(component).toBeDefined();
     });
 
     it('should load date when initialized', () => {
         const participantScoreService = TestBed.inject(ParticipantScoresService);
         const gradingSystemService = TestBed.inject(GradingSystemService);
+        const courseManagementService = TestBed.inject(CourseManagementService);
 
-        // stub find all of course
+        const course = new Course();
+        course.accuracyOfScores = 1;
+        jest.spyOn(courseManagementService, 'find').mockReturnValue(of(new HttpResponse({ body: course })));
+
+        // Spy find all of course
         const participantScoreDTO = new ParticipantScoreDTO();
         participantScoreDTO.id = 1;
         participantScoreDTO.userName = 'test';
@@ -85,8 +89,8 @@ describe('CourseParticipantScores', () => {
             body: [participantScoreDTO],
             status: 200,
         });
-        const findAllOfCourseStub = sinon.stub(participantScoreService, 'findAllOfCourse').returns(of(findAllOfCourseResponse));
-        // stub find average of course
+        const findAllOfCourseSpy = jest.spyOn(participantScoreService, 'findAllOfCourse').mockReturnValue(of(findAllOfCourseResponse));
+        // Spy find average of course
         const participantScoreAverageDTO = new ParticipantScoreAverageDTO();
         participantScoreAverageDTO.userName = 'test';
         participantScoreAverageDTO.averageScore = 10;
@@ -94,31 +98,31 @@ describe('CourseParticipantScores', () => {
             body: [participantScoreAverageDTO],
             status: 200,
         });
-        const findAverageOfCoursePerParticipantStub = sinon
-            .stub(participantScoreService, 'findAverageOfCoursePerParticipant')
-            .returns(of(findAverageOfCoursePerParticipantResponse));
-        // stub find average of course
+        const findAverageOfCoursePerParticipantSpy = jest
+            .spyOn(participantScoreService, 'findAverageOfCoursePerParticipant')
+            .mockReturnValue(of(findAverageOfCoursePerParticipantResponse));
+        // Spy find average of course
         const findAverageOfCourseResponse: HttpResponse<number> = new HttpResponse({
             body: 99,
             status: 200,
         });
-        const findAverageOfCourseStub = sinon.stub(participantScoreService, 'findAverageOfCourse').returns(of(findAverageOfCourseResponse));
+        const findAverageOfCourseSpy = jest.spyOn(participantScoreService, 'findAverageOfCourse').mockReturnValue(of(findAverageOfCourseResponse));
 
         const gradingScaleResponseForCourse: HttpResponse<GradingScale> = new HttpResponse({
             body: new GradingScale(),
             status: 200,
         });
-        const findGradingScaleForCourseStub = sinon.stub(gradingSystemService, 'findGradingScaleForCourse').returns(of(gradingScaleResponseForCourse));
+        const findGradingScaleForCourseSpy = jest.spyOn(gradingSystemService, 'findGradingScaleForCourse').mockReturnValue(of(gradingScaleResponseForCourse));
 
         fixture.detectChanges();
 
-        expect(component.participantScores).to.deep.equal([participantScoreDTO]);
-        expect(component.participantScoresAverage).to.deep.equal([participantScoreAverageDTO]);
-        expect(component.avgScore).to.equal(99);
-        expect(component.avgRatedScore).to.equal(99);
-        expect(findAllOfCourseStub).to.have.been.called;
-        expect(findAverageOfCoursePerParticipantStub).to.have.been.called;
-        expect(findAverageOfCourseStub).to.have.been.called;
-        expect(findGradingScaleForCourseStub).to.have.been.called;
+        expect(component.participantScores).toEqual([participantScoreDTO]);
+        expect(component.participantScoresAverage).toEqual([participantScoreAverageDTO]);
+        expect(component.avgScore).toEqual(99);
+        expect(component.avgRatedScore).toEqual(99);
+        expect(findAllOfCourseSpy).toHaveBeenCalled();
+        expect(findAverageOfCoursePerParticipantSpy).toHaveBeenCalled();
+        expect(findAverageOfCourseSpy).toHaveBeenCalled();
+        expect(findGradingScaleForCourseSpy).toHaveBeenCalled();
     });
 });

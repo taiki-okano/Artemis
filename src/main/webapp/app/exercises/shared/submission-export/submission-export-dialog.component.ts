@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
@@ -8,7 +8,7 @@ import { Exercise, ExerciseType } from 'app/entities/exercise.model';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
 import { SubmissionExportOptions, SubmissionExportService } from './submission-export.service';
 import { downloadZipFileFromResponse } from 'app/shared/util/download.util';
-import { AccountService } from 'app/core/auth/account.service';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-exercise-submission-export-dialog',
@@ -24,12 +24,14 @@ export class SubmissionExportDialogComponent implements OnInit {
     submissionExportOptions: SubmissionExportOptions;
     isLoading = false;
 
+    // Icons
+    faCircleNotch = faCircleNotch;
+
     constructor(
         private exerciseService: ExerciseService,
         private submissionExportService: SubmissionExportService,
         public activeModal: NgbActiveModal,
-        private jhiAlertService: JhiAlertService,
-        private accountService: AccountService,
+        private alertService: AlertService,
     ) {}
 
     ngOnInit() {
@@ -46,13 +48,9 @@ export class SubmissionExportDialogComponent implements OnInit {
             .pipe(
                 tap(({ body: exercise }) => {
                     this.exercise = exercise!;
-                    // TODO workaround since find does not support exam exercise permissions properly
-                    if (this.exercise.exerciseGroup?.exam?.course) {
-                        this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.exerciseGroup?.exam?.course!);
-                    }
                 }),
                 catchError((err) => {
-                    this.jhiAlertService.error(err);
+                    this.alertService.error(err);
                     this.clear();
                     return of(null);
                 }),
@@ -74,7 +72,7 @@ export class SubmissionExportDialogComponent implements OnInit {
     }
 
     handleExportResponse = (response: HttpResponse<Blob>) => {
-        this.jhiAlertService.success('instructorDashboard.exportSubmissions.successMessage');
+        this.alertService.success('instructorDashboard.exportSubmissions.successMessage');
         this.activeModal.dismiss(true);
         this.exportInProgress = false;
         downloadZipFileFromResponse(response);

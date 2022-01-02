@@ -1,6 +1,5 @@
 import { AfterViewChecked, Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { Router } from '@angular/router';
 import { User } from 'app/core/user/user.model';
 import { Credentials } from 'app/core/auth/auth-jwt.service';
@@ -15,6 +14,9 @@ import { ProfileService } from 'app/shared/layouts/profiles/profile.service';
 import { StateStorageService } from 'app/core/auth/state-storage.service';
 import { ProfileInfo } from 'app/shared/layouts/profiles/profile-info.model';
 import { PASSWORD_MIN_LENGTH, USERNAME_MIN_LENGTH } from 'app/app.constants';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { AlertService } from 'app/core/util/alert.service';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-home',
@@ -53,6 +55,9 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     profileInfo: ProfileInfo | undefined = undefined;
     showResetPasswordLink = false;
 
+    // Icons
+    faCircleNotch = faCircleNotch;
+
     constructor(
         private router: Router,
         private accountService: AccountService,
@@ -60,12 +65,12 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         private stateStorageService: StateStorageService,
         private elementRef: ElementRef,
         private renderer: Renderer2,
-        private eventManager: JhiEventManager,
+        private eventManager: EventManager,
         private guidedTourService: GuidedTourService,
         private orionConnectorService: OrionConnectorService,
         private modalService: NgbModal,
         private profileService: ProfileService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
     ) {}
 
     ngOnInit() {
@@ -128,7 +133,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
         // If the session expired or similar display a warning
         if (this.loginService.lastLogoutWasForceful()) {
-            this.jhiAlertService.error('home.errors.sessionExpired');
+            this.alertService.error('home.errors.sessionExpired');
         }
     }
 
@@ -184,7 +189,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
             const redirect = this.stateStorageService.getUrl();
             if (redirect && redirect !== '') {
                 this.stateStorageService.storeUrl('');
-                this.router.navigate([redirect]);
+                this.router.navigateByUrl(redirect);
             } else {
                 // TODO: Remove redirect after summer 2021 term. New deep links should no longer use /#.
                 const url = this.router.url.startsWith('/#') ? this.router.url.substr(2) : 'courses';

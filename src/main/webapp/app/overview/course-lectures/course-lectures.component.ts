@@ -1,20 +1,22 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Course } from 'app/entities/course.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { Lecture } from 'app/entities/lecture.model';
 import { CourseScoreCalculationService } from 'app/overview/course-score-calculation.service';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
+import { faAngleDown, faAngleUp, faSortAmountDown, faSortAmountUp } from '@fortawesome/free-solid-svg-icons';
+import { BarControlConfiguration, BarControlConfigurationProvider } from 'app/overview/course-overview.component';
 
 @Component({
     selector: 'jhi-course-lectures',
     templateUrl: './course-lectures.component.html',
     styleUrls: ['../course-overview.scss'],
 })
-export class CourseLecturesComponent implements OnInit, OnDestroy {
+export class CourseLecturesComponent implements OnInit, OnDestroy, AfterViewInit, BarControlConfigurationProvider {
     public readonly DUE_DATE_ASC = 1;
     public readonly DUE_DATE_DESC = -1;
     private courseId: number;
@@ -26,6 +28,20 @@ export class CourseLecturesComponent implements OnInit, OnDestroy {
     public weeklyLecturesGrouped: object;
 
     public exerciseCountMap: Map<string, number>;
+
+    // Icons
+    faSortAmountUp = faSortAmountUp;
+    faSortAmountDown = faSortAmountDown;
+    faAngleUp = faAngleUp;
+    faAngleDown = faAngleDown;
+
+    // The extracted controls template from our template to be rendered in the top bar of "CourseOverviewComponent"
+    @ViewChild('controls', { static: false }) private controls: TemplateRef<any>;
+    // Provides the control configuration to be read and used by "CourseOverviewComponent"
+    public readonly controlConfiguration: BarControlConfiguration = {
+        subject: new Subject<TemplateRef<any>>(),
+        useIndentation: true,
+    };
 
     constructor(
         private courseService: CourseManagementService,
@@ -56,6 +72,13 @@ export class CourseLecturesComponent implements OnInit, OnDestroy {
         });
     }
 
+    ngAfterViewInit(): void {
+        // Send our controls template to parent so it will be rendered in the top bar
+        if (this.controls) {
+            this.controlConfiguration.subject!.next(this.controls);
+        }
+    }
+
     ngOnDestroy(): void {
         this.translateSubscription.unsubscribe();
         this.courseUpdatesSubscription.unsubscribe();
@@ -75,20 +98,20 @@ export class CourseLecturesComponent implements OnInit, OnDestroy {
         const sortedLectures = this.sortLectures(courseLectures, selectedOrder);
         const notAssociatedLectures: Lecture[] = [];
         sortedLectures.forEach((lecture) => {
-            const dateValue = lecture.startDate ? moment(lecture.startDate) : undefined;
+            const dateValue = lecture.startDate ? dayjs(lecture.startDate) : undefined;
             if (!dateValue) {
                 notAssociatedLectures.push(lecture);
                 return;
             }
-            const dateIndex = dateValue ? moment(dateValue).startOf('week').format('YYYY-MM-DD') : 'NoDate';
+            const dateIndex = dateValue ? dayjs(dateValue).startOf('week').format('YYYY-MM-DD') : 'NoDate';
             if (!groupedLectures[dateIndex]) {
                 indexKeys.push(dateIndex);
                 if (dateValue) {
                     groupedLectures[dateIndex] = {
-                        start: moment(dateValue).startOf('week'),
-                        end: moment(dateValue).endOf('week'),
-                        isCollapsed: dateValue.isBefore(moment(), 'week') || dateValue.isAfter(moment(), 'week'),
-                        isCurrentWeek: dateValue.isSame(moment(), 'week'),
+                        start: dayjs(dateValue).startOf('week'),
+                        end: dayjs(dateValue).endOf('week'),
+                        isCollapsed: dateValue.isBefore(dayjs(), 'week') || dateValue.isAfter(dayjs(), 'week'),
+                        isCurrentWeek: dateValue.isSame(dayjs(), 'week'),
                         lectures: [],
                     };
                 } else {
@@ -120,8 +143,8 @@ export class CourseLecturesComponent implements OnInit, OnDestroy {
 
     private sortLectures(lectures: Lecture[], selectedOrder: number): Lecture[] {
         return lectures.sort((a, b) => {
-            const aValue = a.startDate ? a.startDate.valueOf() : moment().valueOf();
-            const bValue = b.startDate ? b.startDate.valueOf() : moment().valueOf();
+            const aValue = a.startDate ? a.startDate.valueOf() : dayjs().valueOf();
+            const bValue = b.startDate ? b.startDate.valueOf() : dayjs().valueOf();
 
             return selectedOrder * (aValue - bValue);
         });

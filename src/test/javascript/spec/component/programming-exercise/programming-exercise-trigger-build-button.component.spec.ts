@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { JhiLanguageHelper } from 'app/core/language/language.helper';
 import { AccountService } from 'app/core/auth/account.service';
@@ -9,7 +9,7 @@ import { ChangeDetectorRef, DebugElement } from '@angular/core';
 import { SinonStub, stub } from 'sinon';
 import { of, Subject } from 'rxjs';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { ArtemisTestModule } from '../../test.module';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockParticipationWebsocketService } from '../../helpers/mocks/service/mock-participation-websocket.service';
@@ -23,6 +23,9 @@ import { triggerChanges } from '../../helpers/utils/general.utils';
 import { InitializationState } from 'app/entities/participation/participation.model';
 import { ProgrammingExerciseStudentTriggerBuildButtonComponent } from 'app/exercises/programming/shared/actions/programming-exercise-student-trigger-build-button.component';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
+import { AssessmentType } from 'app/entities/assessment-type.model';
+import { MockModule } from 'ng-mocks';
+import { ClipboardModule } from 'ngx-clipboard';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -41,10 +44,10 @@ describe('TriggerBuildButtonSpec', () => {
 
     const exercise = { id: 20 } as Exercise;
     const student = { id: 99 };
-    const gradedResult1 = { id: 10, rated: true, completionDate: moment('2019-06-06T22:15:29.203+02:00') } as Result;
-    const gradedResult2 = { id: 11, rated: true, completionDate: moment('2019-06-06T22:17:29.203+02:00') } as Result;
-    const ungradedResult1 = { id: 12, rated: false, completionDate: moment('2019-06-06T22:25:29.203+02:00') } as Result;
-    const ungradedResult2 = { id: 13, rated: false, completionDate: moment('2019-06-06T22:32:29.203+02:00') } as Result;
+    const gradedResult1 = { id: 10, rated: true, completionDate: dayjs('2019-06-06T22:15:29.203+02:00') } as Result;
+    const gradedResult2 = { id: 11, rated: true, completionDate: dayjs('2019-06-06T22:17:29.203+02:00') } as Result;
+    const ungradedResult1 = { id: 12, rated: false, completionDate: dayjs('2019-06-06T22:25:29.203+02:00') } as Result;
+    const ungradedResult2 = { id: 13, rated: false, completionDate: dayjs('2019-06-06T22:32:29.203+02:00') } as Result;
     const results = [gradedResult2, ungradedResult1, gradedResult1, ungradedResult2] as Result[];
     const participation = { id: 1, exercise, results, student } as any;
 
@@ -52,7 +55,7 @@ describe('TriggerBuildButtonSpec', () => {
 
     beforeEach(async () => {
         return TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(), ArtemisTestModule, ArtemisProgrammingExerciseActionsModule],
+            imports: [TranslateModule.forRoot(), MockModule(ClipboardModule), ArtemisTestModule, ArtemisProgrammingExerciseActionsModule],
             providers: [
                 JhiLanguageHelper,
                 ChangeDetectorRef,
@@ -151,5 +154,18 @@ describe('TriggerBuildButtonSpec', () => {
         fixture.detectChanges();
         triggerButton = getTriggerButton();
         expect(triggerButton).not.to.exist;
+    });
+
+    it('should set the latest result correctly to manual', () => {
+        gradedResult1.assessmentType = AssessmentType.AUTOMATIC;
+        gradedResult2.assessmentType = AssessmentType.MANUAL;
+
+        comp.participation = { ...participation, results: [gradedResult1, gradedResult2], initializationState: InitializationState.INITIALIZED };
+        comp.exercise = { id: 5, dueDate: dayjs().subtract(1, 'day') } as ProgrammingExercise;
+
+        triggerChanges(comp, { property: 'participation', currentValue: comp.participation });
+        fixture.detectChanges();
+
+        expect(comp.lastResultIsManual).to.be.true;
     });
 });

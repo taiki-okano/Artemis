@@ -6,7 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { JhiWebsocketService } from 'app/core/websocket/websocket.service';
 import { ComplaintType } from 'app/entities/complaint.model';
-import { Feedback } from 'app/entities/feedback.model';
+import { Feedback, buildFeedbackTextForReview } from 'app/entities/feedback.model';
 import { ModelingExercise, UMLDiagramType } from 'app/entities/modeling-exercise.model';
 import { ModelingSubmission } from 'app/entities/modeling-submission.model';
 import { StudentParticipation } from 'app/entities/participation/student-participation.model';
@@ -16,22 +16,26 @@ import { ModelingAssessmentService } from 'app/exercises/modeling/assess/modelin
 import { ModelingSubmissionService } from 'app/exercises/modeling/participate/modeling-submission.service';
 import { ModelingEditorComponent } from 'app/exercises/modeling/shared/modeling-editor.component';
 import { ApollonDiagramService } from 'app/exercises/quiz/manage/apollon-diagrams/apollon-diagram.service';
-import { participationStatus } from 'app/exercises/shared/exercise/exercise-utils';
+import { hasExerciseDueDatePassed, participationStatus } from 'app/exercises/shared/exercise/exercise.utils';
+import { addParticipationToResult, getUnreferencedFeedback } from 'app/exercises/shared/result/result.utils';
 import { ResultService } from 'app/exercises/shared/result/result.service';
 import { TextEditorService } from 'app/exercises/text/participate/text-editor.service';
 import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
 import { modelingTour } from 'app/guided-tour/tours/modeling-tour';
 import { ParticipationWebsocketService } from 'app/overview/participation-websocket.service';
 import { ButtonType } from 'app/shared/components/button.component';
+import { AUTOSAVE_CHECK_INTERVAL, AUTOSAVE_EXERCISE_INTERVAL, AUTOSAVE_TEAM_EXERCISE_INTERVAL } from 'app/shared/constants/exercise-exam-constants';
 import { ComponentCanDeactivate } from 'app/shared/guard/can-deactivate.model';
 import { stringifyIgnoringFields } from 'app/shared/util/utils';
-import { omit } from 'lodash';
-import * as moment from 'moment';
-import { JhiAlertService } from 'ng-jhipster';
-import { Subject } from 'rxjs';
-import { Subscription } from 'rxjs';
-import { addParticipationToResult, getUnreferencedFeedback } from 'app/exercises/shared/result/result-utils';
-import { AUTOSAVE_CHECK_INTERVAL, AUTOSAVE_EXERCISE_INTERVAL, AUTOSAVE_TEAM_EXERCISE_INTERVAL } from 'app/shared/constants/exercise-exam-constants';
+import { Subject, Subscription } from 'rxjs';
+import { omit } from 'lodash-es';
+import dayjs from 'dayjs';
+import { AlertService } from 'app/core/util/alert.service';
+import { getCourseFromExercise } from 'app/entities/exercise.model';
+import { Course } from 'app/entities/course.model';
+import { getNamesForAssessments } from '../assess/modeling-assessment.util';
+import { faGripLines } from '@fortawesome/free-solid-svg-icons';
+import { faListAlt } from '@fortawesome/free-regular-svg-icons';
 
 @Component({
     selector: 'jhi-modeling-submission',
@@ -49,6 +53,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
 
     participation: StudentParticipation;
     modelingExercise: ModelingExercise;
+    course?: Course;
     result?: Result;
     resultWithComplaint?: Result;
 
@@ -64,6 +69,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
     umlModel: UMLModel; // input model for Apollon
     hasElements = false; // indicates if the current model has at least one element
     isSaving: boolean;
+    isChanged: boolean;
     retryStarted = false;
     autoSaveInterval: number;
     autoSaveTimer: number;
@@ -84,13 +90,19 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
     private submissionChange = new Subject<ModelingSubmission>();
     submissionObservable = this.submissionChange.asObservable();
 
+    resizeOptions = { verticalResize: true };
+
+    // Icons
+    faGripLines = faGripLines;
+    farListAlt = faListAlt;
+
     constructor(
         private jhiWebsocketService: JhiWebsocketService,
         private apollonDiagramService: ApollonDiagramService,
         private modelingSubmissionService: ModelingSubmissionService,
         private modelingAssessmentService: ModelingAssessmentService,
         private resultService: ResultService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private route: ActivatedRoute,
         private modalService: NgbModal,
         private translateService: TranslateService,
@@ -130,7 +142,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
     // Updates component with the given modeling submission
     private updateModelingSubmission(modelingSubmission: ModelingSubmission) {
         if (!modelingSubmission) {
-            this.jhiAlertService.error('artemisApp.apollonDiagram.submission.noSubmission');
+            this.alertService.error('artemisApp.apollonDiagram.submission.noSubmission');
         }
 
         this.submission = modelingSubmission;
@@ -145,6 +157,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
         this.participation.submissions = [<ModelingSubmission>omit(modelingSubmission, 'participation')];
 
         this.modelingExercise = this.participation.exercise as ModelingExercise;
+        this.course = getCourseFromExercise(this.modelingExercise);
         this.modelingExercise.studentParticipations = [this.participation];
         this.examMode = !!this.modelingExercise.exerciseGroup;
         this.modelingExercise.participationStatus = participationStatus(this.modelingExercise);
@@ -156,8 +169,8 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
             this.modelingExercise &&
             !!this.modelingExercise.dueDate &&
             !!this.participation.initializationDate &&
-            moment(this.participation.initializationDate).isAfter(this.modelingExercise.dueDate);
-        this.isAfterAssessmentDueDate = !this.modelingExercise.assessmentDueDate || moment().isAfter(this.modelingExercise.assessmentDueDate);
+            dayjs(this.participation.initializationDate).isAfter(this.modelingExercise.dueDate);
+        this.isAfterAssessmentDueDate = !this.modelingExercise.assessmentDueDate || dayjs().isAfter(this.modelingExercise.assessmentDueDate);
         if (this.submission.model) {
             this.umlModel = JSON.parse(this.submission.model);
             this.hasElements = this.umlModel.elements && this.umlModel.elements.length !== 0;
@@ -216,7 +229,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
                         this.prepareAssessmentData();
                     });
                 }
-                this.jhiAlertService.info('artemisApp.modelingEditor.autoSubmit');
+                this.alertService.info('artemisApp.modelingEditor.autoSubmit');
             }
         });
     }
@@ -234,7 +247,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
                 this.assessmentResult = newResult;
                 this.assessmentResult = this.modelingAssessmentService.convertResult(newResult);
                 this.prepareAssessmentData();
-                this.jhiAlertService.info('artemisApp.modelingEditor.newAssessment');
+                this.alertService.info('artemisApp.modelingEditor.newAssessment');
             }
         });
     }
@@ -248,7 +261,8 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
         // auto save of submission if there are changes
         this.autoSaveInterval = window.setInterval(() => {
             this.autoSaveTimer++;
-            if (this.autoSaveTimer >= AUTOSAVE_EXERCISE_INTERVAL && !this.canDeactivate()) {
+            this.isChanged = !this.canDeactivate();
+            if (this.autoSaveTimer >= AUTOSAVE_EXERCISE_INTERVAL && this.isChanged) {
                 this.saveDiagram();
             }
         }, AUTOSAVE_CHECK_INTERVAL);
@@ -259,7 +273,8 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
      */
     private setupSubmissionStreamForTeam(): void {
         this.teamSyncInterval = window.setInterval(() => {
-            if (!this.canDeactivate()) {
+            this.isChanged = !this.canDeactivate();
+            if (this.isChanged) {
                 // make sure this.submission includes the newest content of the apollon editor
                 this.updateSubmissionWithCurrentValues();
                 // notify the team sync component to send this.submission to the server (and all online team members)
@@ -285,7 +300,6 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
                     this.submission.participation!.submissions = [this.submission];
                     this.participationWebsocketService.addParticipation(this.submission.participation as StudentParticipation, this.modelingExercise);
                     this.result = getLatestSubmissionResult(this.submission);
-                    this.jhiAlertService.success('artemisApp.modelingEditor.saveSuccessful');
                     this.onSaveSuccess();
                 },
                 (error: HttpErrorResponse) => this.onSaveError(error),
@@ -295,7 +309,6 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
                 (submission) => {
                     this.submission = submission.body!;
                     this.result = getLatestSubmissionResult(this.submission);
-                    this.jhiAlertService.success('artemisApp.modelingEditor.saveSuccessful');
                     this.subscribeToAutomaticSubmissionWebsocket();
                     this.onSaveSuccess();
                 },
@@ -311,7 +324,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
         }
         this.updateSubmissionWithCurrentValues();
         if (this.isModelEmpty(this.submission.model)) {
-            this.jhiAlertService.warning('artemisApp.modelingEditor.empty');
+            this.alertService.warning('artemisApp.modelingEditor.empty');
             return;
         }
         this.isSaving = true;
@@ -336,9 +349,9 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
                     this.retryStarted = false;
 
                     if (this.isLate) {
-                        this.jhiAlertService.warning('entity.action.submitDeadlineMissedAlert');
+                        this.alertService.warning('entity.action.submitDeadlineMissedAlert');
                     } else {
-                        this.jhiAlertService.success('entity.action.submitSuccessfulAlert');
+                        this.alertService.success('entity.action.submitSuccessfulAlert');
                     }
 
                     this.subscribeToWebsockets();
@@ -360,9 +373,9 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
                     this.modelingExercise.participationStatus = participationStatus(this.modelingExercise);
                     this.result = getLatestSubmissionResult(this.submission);
                     if (this.isLate) {
-                        this.jhiAlertService.warning('artemisApp.modelingEditor.submitDeadlineMissed');
+                        this.alertService.warning('artemisApp.modelingEditor.submitDeadlineMissed');
                     } else {
-                        this.jhiAlertService.success('artemisApp.modelingEditor.submitSuccessful');
+                        this.alertService.success('artemisApp.modelingEditor.submitSuccessful');
                     }
                     this.subscribeToAutomaticSubmissionWebsocket();
                     this.onSaveSuccess();
@@ -374,13 +387,14 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
 
     private onSaveSuccess() {
         this.isSaving = false;
+        this.isChanged = !this.canDeactivate();
     }
 
     private onSaveError(error?: HttpErrorResponse) {
         if (error) {
             console.error(error.message);
         }
-        this.jhiAlertService.error('artemisApp.modelingEditor.error');
+        this.alertService.error('artemisApp.modelingEditor.error');
         this.isSaving = false;
     }
 
@@ -396,7 +410,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
     }
 
     ngOnDestroy(): void {
-        this.subscription.unsubscribe();
+        this.subscription?.unsubscribe();
         clearInterval(this.autoSaveInterval);
         clearInterval(this.teamSyncInterval);
         if (this.automaticSubmissionWebsocketChannel) {
@@ -453,7 +467,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
      */
     private initializeAssessmentInfo(): void {
         if (this.assessmentResult && this.assessmentResult.feedbacks && this.umlModel) {
-            this.assessmentsNames = this.modelingAssessmentService.getNamesForAssessments(this.assessmentResult, this.umlModel);
+            this.assessmentsNames = getNamesForAssessments(this.assessmentResult, this.umlModel);
             let totalScore = 0;
             for (const feedback of this.assessmentResult.feedbacks) {
                 totalScore += feedback.credits!;
@@ -549,7 +563,7 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
      * The exercise is still active if it's due date hasn't passed yet.
      */
     get isActive(): boolean {
-        return this.modelingExercise && !this.examMode && (!this.modelingExercise.dueDate || moment(this.modelingExercise.dueDate).isSameOrAfter(moment()));
+        return this.modelingExercise && !this.examMode && !hasExerciseDueDatePassed(this.modelingExercise, this.participation);
     }
 
     get submitButtonTooltip(): string {
@@ -564,5 +578,9 @@ export class ModelingSubmissionComponent implements OnInit, OnDestroy, Component
         }
 
         return 'entity.action.submitDeadlineMissedTooltip';
+    }
+
+    public buildFeedbackTextForReview(feedback: Feedback): string {
+        return buildFeedbackTextForReview(feedback);
     }
 }

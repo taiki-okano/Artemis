@@ -3,7 +3,6 @@ import { RouterModule } from '@angular/router';
 import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { exerciseAssessmentDashboardRoute } from './exercise-assessment-dashboard.route';
 import { ExerciseAssessmentDashboardComponent } from './exercise-assessment-dashboard.component';
-import { MomentModule } from 'ngx-moment';
 import { ClipboardModule } from 'ngx-clipboard';
 import { AssessmentInstructionsModule } from 'app/assessment/assessment-instructions/assessment-instructions.module';
 import { ArtemisSidePanelModule } from 'app/shared/side-panel/side-panel.module';
@@ -22,14 +21,16 @@ import { SecondCorrectionEnableButtonComponent } from 'app/exercises/shared/dash
 import { LanguageTableCellComponent } from 'app/exercises/shared/dashboards/tutor/language-table-cell/language-table-cell.component';
 import { OrionModule } from 'app/shared/orion/orion.module';
 import { OrionExerciseAssessmentDashboardComponent } from 'app/orion/assessment/orion-exercise-assessment-dashboard.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { SubmissionResultStatusModule } from 'app/overview/submission-result-status.module';
 
 const ENTITY_STATES = [...exerciseAssessmentDashboardRoute];
 
 @NgModule({
     imports: [
+        NgxChartsModule,
         ArtemisSharedModule,
         ArtemisResultModule,
-        MomentModule,
         ClipboardModule,
         RouterModule.forChild(ENTITY_STATES),
         ArtemisModelingEditorModule,
@@ -45,6 +46,7 @@ const ENTITY_STATES = [...exerciseAssessmentDashboardRoute];
         ArtemisTutorParticipationGraphModule,
         ArtemisMarkdownModule,
         OrionModule,
+        SubmissionResultStatusModule,
     ],
     declarations: [ExerciseAssessmentDashboardComponent, OrionExerciseAssessmentDashboardComponent, SecondCorrectionEnableButtonComponent, LanguageTableCellComponent],
     providers: [],

@@ -23,19 +23,23 @@ import de.tum.in.www1.artemis.domain.leaderboard.tutor.*;
 @Repository
 public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
 
-    Optional<Complaint> findByResult_Id(Long resultId);
+    @Query("""
+            SELECT c FROM Complaint c
+            LEFT JOIN c.result r
+            LEFT JOIN r.submission s
+            WHERE s.id = :#{#submissionId}
+            """)
+    Optional<Complaint> findByResultSubmissionId(@Param("submissionId") Long submissionId);
 
-    @Query("SELECT c FROM Complaint c LEFT JOIN FETCH c.result r LEFT JOIN FETCH r.assessor WHERE c.id = :#{#complaintId}")
+    Optional<Complaint> findByResultId(Long resultId);
+
+    @Query("""
+            SELECT c FROM Complaint c
+            LEFT JOIN FETCH c.result r
+            LEFT JOIN FETCH r.assessor
+            WHERE c.id = :#{#complaintId}
+            """)
     Optional<Complaint> findByIdWithEagerAssessor(@Param("complaintId") Long complaintId);
-
-    /**
-     * This magic method counts the number of complaints associated to a course id and to the results assessed by a specific user, identified by a tutor id
-     *
-     * @param courseId - the id of the course we want to filter by
-     * @param tutorId  - the id of the tutor we are interested in
-     * @return number of complaints associated to course courseId and tutor tutorId
-     */
-    long countByResult_Participation_Exercise_Course_IdAndResult_Assessor_Id(Long courseId, Long tutorId);
 
     /**
      * This magic method counts the number of complaints by complaint type associated to a course id
@@ -47,7 +51,7 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     long countByResult_Participation_Exercise_Course_IdAndComplaintType(Long courseId, ComplaintType complaintType);
 
     /**
-     * This magic method counts the number of complaints by complaint type associated to a exam id
+     * This magic method counts the number of complaints by complaint type associated to an exam id
      *
      * @param examId      - the id of the exam we want to filter by
      * @param complaintType - type of complaint we want to filter by
@@ -56,9 +60,13 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     long countByResult_Participation_Exercise_ExerciseGroup_Exam_IdAndComplaintType(Long examId, ComplaintType complaintType);
 
     @Query("""
-            SELECT c FROM Complaint c LEFT JOIN FETCH c.result r LEFT JOIN FETCH r.assessor LEFT JOIN FETCH r.participation p LEFT JOIN FETCH p.exercise e LEFT JOIN FETCH r.submission
-            WHERE e.id = :#{#exerciseId}
-            AND c.complaintType = :#{#complaintType}
+            SELECT c FROM Complaint c
+            LEFT JOIN FETCH c.result r
+            LEFT JOIN FETCH r.assessor
+            LEFT JOIN FETCH r.participation p
+            LEFT JOIN FETCH p.exercise e
+            LEFT JOIN FETCH r.submission
+            WHERE e.id = :#{#exerciseId} AND c.complaintType = :#{#complaintType}
             """)
     List<Complaint> getAllComplaintsByExerciseIdAndComplaintType(@Param("exerciseId") Long exerciseId, @Param("complaintType") ComplaintType complaintType);
 
@@ -70,7 +78,11 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
      * @param courseId  the id of the course
      * @return the number of unaccepted complaints
      */
-    @Query("SELECT COUNT(c) FROM Complaint c WHERE c.complaintType = 'COMPLAINT' AND c.student.id = :#{#studentId} AND c.result.participation.exercise.course.id = :#{#courseId} AND (c.accepted = false OR c.accepted is null)")
+    @Query("""
+            SELECT COUNT(c) FROM Complaint c
+            WHERE c.complaintType = 'COMPLAINT' AND c.student.id = :#{#studentId}
+            AND c.result.participation.exercise.course.id = :#{#courseId} AND (c.accepted = false OR c.accepted is null)
+            """)
     long countUnacceptedComplaintsByComplaintTypeStudentIdAndCourseId(@Param("studentId") Long studentId, @Param("courseId") Long courseId);
 
     /**
@@ -81,7 +93,11 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
      * @param courseId  the id of the course
      * @return the number of unaccepted complaints
      */
-    @Query("SELECT COUNT(c) FROM Complaint c WHERE c.complaintType = 'COMPLAINT' AND c.team.shortName = :#{#teamShortName} AND c.result.participation.exercise.course.id = :#{#courseId} AND (c.accepted = false OR c.accepted is null)")
+    @Query("""
+            SELECT COUNT(c) FROM Complaint c
+            WHERE c.complaintType = 'COMPLAINT' AND c.team.shortName = :#{#teamShortName}
+            AND c.result.participation.exercise.course.id = :#{#courseId} AND (c.accepted = false OR c.accepted is null)
+            """)
     long countUnacceptedComplaintsByComplaintTypeTeamShortNameAndCourseId(@Param("teamShortName") String teamShortName, @Param("courseId") Long courseId);
 
     /**
@@ -156,14 +172,14 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     long countByResultParticipationExerciseIdAndComplaintTypeIgnoreTestRuns(@Param("exerciseId") Long exerciseId, @Param("complaintType") ComplaintType complaintType);
 
     /**
-     * Delete all complaints that belong to results of a given participation
-     * @param participationId the Id of the participation where the complaints should be deleted
+     * Delete all complaints that belong to the results of a given participation
+     * @param participationId the id of the participation where the complaints should be deleted
      */
     void deleteByResult_Participation_Id(Long participationId);
 
     /**
      * Delete all complaints that belong to the given result
-     * @param resultId the Id of the result where the complaints should be deleted
+     * @param resultId the id of the result where the complaints should be deleted
      */
     void deleteByResult_Id(long resultId);
 
@@ -177,7 +193,7 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> getAllByResult_Assessor_Id(Long assessorId);
 
     /**
-     * Given a exercise id, retrieve all complaints related to that exercise
+     * Given an exercise id, retrieve all complaints related to that exercise
      *
      * @param exerciseId - the id of the exercise
      * @return a list of complaints

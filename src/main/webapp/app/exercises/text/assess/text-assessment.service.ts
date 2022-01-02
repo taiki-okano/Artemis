@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
-import { SERVER_API_URL } from 'app/app.constants';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Result } from 'app/entities/result.model';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { ComplaintResponse } from 'app/entities/complaint-response.model';
 import { Feedback } from 'app/entities/feedback.model';
 import { StudentParticipation } from 'app/entities/participation/student-participation.model';
 import { TextBlock } from 'app/entities/text-block.model';
 import { TextBlockRef } from 'app/entities/text-block-ref.model';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { TextSubmission } from 'app/entities/text-submission.model';
 import { FeedbackConflict } from 'app/entities/feedback-conflict';
 import { getLatestSubmissionResult, getSubmissionResultByCorrectionRound, getSubmissionResultById, setLatestSubmissionResult, Submission } from 'app/entities/submission.model';
@@ -64,8 +63,17 @@ export class TextAssessmentService {
     public addTextAssessmentEvent(assessmentEvent: TextAssessmentEvent): Observable<EntityResponseEventType> {
         const body = Object.assign({}, assessmentEvent);
         return this.http
-            .post<TextAssessmentEvent>('/analytics/text-assessment/events', body, { observe: 'response' })
+            .post<TextAssessmentEvent>('/api/analytics/text-assessment/events', body, { observe: 'response' })
             .pipe(map((res: EntityResponseEventType) => Object.assign({}, res)));
+    }
+
+    /**
+     * Submits an assessment event to the artemis analytics for text exercises.
+     * @param courseId the id of the respective assessment event course id
+     * @param exerciseId the id of the respective assessment event exercise id
+     */
+    public getNumberOfTutorsInvolvedInAssessment(courseId: number, exerciseId: number): Observable<number> {
+        return this.http.get<number>(`/api/analytics/text-assessment/courses/${courseId}/text-exercises/${exerciseId}/tutors-involved`);
     }
 
     /**
@@ -159,7 +167,13 @@ export class TextAssessmentService {
         return this.http.get<Result>(`${this.resourceUrl}/exercises/${exerciseId}/submissions/${submissionId}/example-result`);
     }
 
-    public deleteExampleFeedback(exerciseId: number, exampleSubmissionId: number): Observable<void> {
+    /**
+     * Deletes the example assessment associated with given example submission.
+     *
+     * @param exerciseId   id of the exercise for which the example assessment should be deleted
+     * @param submissionId id of the submission for which the example assessment should be deleted
+     */
+    public deleteExampleAssessment(exerciseId: number, exampleSubmissionId: number): Observable<void> {
         return this.http.delete<void>(`${this.resourceUrl}/exercises/${exerciseId}/example-submissions/${exampleSubmissionId}/example-text-assessment/feedback`);
     }
 
@@ -203,13 +217,13 @@ export class TextAssessmentService {
         const result = TextAssessmentService.convertItemFromServer(res.body!);
 
         if (result.completionDate) {
-            result.completionDate = moment(result.completionDate);
+            result.completionDate = dayjs(result.completionDate);
         }
         if (result.submission && result.submission.submissionDate) {
-            result.submission.submissionDate = moment(result.submission.submissionDate);
+            result.submission.submissionDate = dayjs(result.submission.submissionDate);
         }
         if (result.participation && result.participation.initializationDate) {
-            result.participation.initializationDate = moment(result.participation.initializationDate);
+            result.participation.initializationDate = dayjs(result.participation.initializationDate);
         }
 
         return res.clone({ body: result });

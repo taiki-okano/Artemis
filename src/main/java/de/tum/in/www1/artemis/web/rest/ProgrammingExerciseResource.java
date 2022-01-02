@@ -27,7 +27,9 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import de.jplag.exceptions.ExitException;
 import de.tum.in.www1.artemis.domain.*;
+import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
 import de.tum.in.www1.artemis.domain.enumeration.ProgrammingLanguage;
 import de.tum.in.www1.artemis.domain.enumeration.ProjectType;
 import de.tum.in.www1.artemis.domain.enumeration.RepositoryType;
@@ -53,7 +55,6 @@ import de.tum.in.www1.artemis.web.rest.errors.BadRequestAlertException;
 import de.tum.in.www1.artemis.web.rest.errors.EntityNotFoundException;
 import de.tum.in.www1.artemis.web.rest.util.HeaderUtil;
 import de.tum.in.www1.artemis.web.websocket.dto.ProgrammingExerciseTestCaseStateDTO;
-import jplag.ExitException;
 
 /**
  * REST controller for managing ProgrammingExercise.
@@ -66,12 +67,12 @@ public class ProgrammingExerciseResource {
 
     private static final String ENTITY_NAME = "programmingExercise";
 
-    private static final String AUX_REPO_ENTITY_NAME = "programmingExercise";
-
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
     private final ProgrammingExerciseRepository programmingExerciseRepository;
+
+    private final ProgrammingExerciseTestCaseRepository programmingExerciseTestCaseRepository;
 
     private final UserRepository userRepository;
 
@@ -84,6 +85,8 @@ public class ProgrammingExerciseResource {
     private final Optional<VersionControlService> versionControlService;
 
     private final ExerciseService exerciseService;
+
+    private final ExerciseDeletionService exerciseDeletionService;
 
     private final PlagiarismResultRepository plagiarismResultRepository;
 
@@ -111,6 +114,10 @@ public class ProgrammingExerciseResource {
 
     private final AuxiliaryRepositoryRepository auxiliaryRepositoryRepository;
 
+    private final AuxiliaryRepositoryService auxiliaryRepositoryService;
+
+    private final SubmissionPolicyService submissionPolicyService;
+
     /**
      * Java package name Regex according to Java 14 JLS (https://docs.oracle.com/javase/specs/jls/se14/html/jls-7.html#jls-7.4.1),
      * with the restriction to a-z,A-Z,_ as "Java letter" and 0-9 as digits due to JavaScript/Browser Unicode character class limitations
@@ -127,24 +134,25 @@ public class ProgrammingExerciseResource {
 
     private final Pattern packageNamePatternForSwift = Pattern.compile(packageNameRegexForSwift);
 
-    private final Pattern allowedBambooCheckoutDirectory = Pattern.compile("[a-zA-Z0-9]+(/[a-zA-Z0-9]*)*$");
-
-    public ProgrammingExerciseResource(ProgrammingExerciseRepository programmingExerciseRepository, UserRepository userRepository, AuthorizationCheckService authCheckService,
-            CourseService courseService, Optional<ContinuousIntegrationService> continuousIntegrationService, Optional<VersionControlService> versionControlService,
-            ExerciseService exerciseService, ProgrammingExerciseService programmingExerciseService, StudentParticipationRepository studentParticipationRepository,
+    public ProgrammingExerciseResource(ProgrammingExerciseRepository programmingExerciseRepository, ProgrammingExerciseTestCaseRepository programmingExerciseTestCaseRepository,
+            UserRepository userRepository, AuthorizationCheckService authCheckService, CourseService courseService,
+            Optional<ContinuousIntegrationService> continuousIntegrationService, Optional<VersionControlService> versionControlService, ExerciseService exerciseService,
+            ExerciseDeletionService exerciseDeletionService, ProgrammingExerciseService programmingExerciseService, StudentParticipationRepository studentParticipationRepository,
             PlagiarismResultRepository plagiarismResultRepository, ProgrammingExerciseImportService programmingExerciseImportService,
             ProgrammingExerciseExportService programmingExerciseExportService, StaticCodeAnalysisService staticCodeAnalysisService,
             GradingCriterionRepository gradingCriterionRepository, ProgrammingLanguageFeatureService programmingLanguageFeatureService, TemplateUpgradePolicy templateUpgradePolicy,
             CourseRepository courseRepository, GitService gitService, ProgrammingPlagiarismDetectionService programmingPlagiarismDetectionService,
-            AuxiliaryRepositoryRepository auxiliaryRepositoryRepository) {
+            AuxiliaryRepositoryRepository auxiliaryRepositoryRepository, AuxiliaryRepositoryService auxiliaryRepositoryService, SubmissionPolicyService submissionPolicyService) {
 
         this.programmingExerciseRepository = programmingExerciseRepository;
+        this.programmingExerciseTestCaseRepository = programmingExerciseTestCaseRepository;
         this.userRepository = userRepository;
         this.courseService = courseService;
         this.authCheckService = authCheckService;
         this.continuousIntegrationService = continuousIntegrationService;
         this.versionControlService = versionControlService;
         this.exerciseService = exerciseService;
+        this.exerciseDeletionService = exerciseDeletionService;
         this.programmingExerciseService = programmingExerciseService;
         this.studentParticipationRepository = studentParticipationRepository;
         this.plagiarismResultRepository = plagiarismResultRepository;
@@ -158,6 +166,8 @@ public class ProgrammingExerciseResource {
         this.gitService = gitService;
         this.programmingPlagiarismDetectionService = programmingPlagiarismDetectionService;
         this.auxiliaryRepositoryRepository = auxiliaryRepositoryRepository;
+        this.auxiliaryRepositoryService = auxiliaryRepositoryService;
+        this.submissionPolicyService = submissionPolicyService;
     }
 
     /**
@@ -176,6 +186,16 @@ public class ProgrammingExerciseResource {
         var solutionRepositoryUrl = exercise.getVcsSolutionRepositoryUrl();
         if (solutionRepositoryUrl != null && !versionControlService.get().repositoryUrlIsValid(solutionRepositoryUrl)) {
             throw new BadRequestAlertException("The Solution Repository URL seems to be invalid.", "Exercise", ErrorKeys.INVALID_SOLUTION_REPOSITORY_URL);
+        }
+
+        // It has already been checked when setting the test case weights that their sum is at least >= 0.
+        // Only when changing the assessment format to automatic an additional check for > 0 has to be performed.
+        if (exercise.getAssessmentType() == AssessmentType.AUTOMATIC) {
+            final Set<ProgrammingExerciseTestCase> testCases = programmingExerciseTestCaseRepository.findByExerciseIdAndActive(exercise.getId(), true);
+            if (!ProgrammingExerciseTestCaseService.isTestCaseWeightSumValid(exercise, testCases)) {
+                throw new BadRequestAlertException("For exercises with only automatic assignment at least one test case weight must be greater than zero.", "Exercise",
+                        ErrorKeys.INVALID_TEST_CASE_WEIGHTS);
+            }
         }
     }
 
@@ -323,7 +343,7 @@ public class ProgrammingExerciseResource {
 
         // Static code analysis max penalty must be positive
         if (programmingExercise.getMaxStaticCodeAnalysisPenalty() != null && programmingExercise.getMaxStaticCodeAnalysisPenalty() < 0) {
-            throw new BadRequestAlertException("You need to allow at least one participation mode, the online editor or the offline IDE", "Exercise", "noParticipationModeAllowed");
+            throw new BadRequestAlertException("The static code analysis penalty must not be negative", "Exercise", "staticCodeAnalysisPenaltyNotNegative");
         }
     }
 
@@ -349,7 +369,8 @@ public class ProgrammingExerciseResource {
 
         exerciseService.validateGeneralSettings(programmingExercise);
         validateProgrammingSettings(programmingExercise);
-        validateAndAddAuxiliaryRepositoriesOfProgrammingExercise(programmingExercise, programmingExercise.getAuxiliaryRepositories(), programmingExercise);
+        auxiliaryRepositoryService.validateAndAddAuxiliaryRepositoriesOfProgrammingExercise(programmingExercise, programmingExercise.getAuxiliaryRepositories());
+        submissionPolicyService.validateSubmissionPolicyCreation(programmingExercise);
 
         ProgrammingLanguageFeature programmingLanguageFeature = programmingLanguageFeatureService.getProgrammingLanguageFeatures(programmingExercise.getProgrammingLanguage());
 
@@ -391,8 +412,7 @@ public class ProgrammingExerciseResource {
         // Check if checkout solution repository is enabled
         if (programmingExercise.getCheckoutSolutionRepository() && !programmingLanguageFeature.isCheckoutSolutionRepositoryAllowed()) {
             return ResponseEntity.badRequest()
-                    .headers(
-                            HeaderUtil.createAlert(applicationName, "Checking out the solution repository is only supported for Haskell exercises", "checkoutSolutionNotSupported"))
+                    .headers(HeaderUtil.createAlert(applicationName, "Checking out the solution repository is not supported for this language", "checkoutSolutionNotSupported"))
                     .body(null);
         }
 
@@ -505,6 +525,11 @@ public class ProgrammingExerciseResource {
                     "staticCodeAnalysisCannotChange");
         }
 
+        // If the new exercise has a submission policy, it must be validated.
+        if (newExercise.getSubmissionPolicy() != null) {
+            submissionPolicyService.validateSubmissionPolicy(newExercise.getSubmissionPolicy());
+        }
+
         // Check if the user has the rights to access the original programming exercise
         Course originalCourse = courseService.retrieveCourseOverExerciseGroupOrCourseId(originalProgrammingExercise);
         authCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.EDITOR, originalCourse, user);
@@ -584,11 +609,11 @@ public class ProgrammingExerciseResource {
 
         checkProgrammingExerciseForError(updatedProgrammingExercise);
 
-        var existingProgrammingExercise = programmingExerciseRepository.findByIdWithAuxiliaryRepositoriesElseThrow(updatedProgrammingExercise.getId());
-        if (!Objects.equals(existingProgrammingExercise.getShortName(), updatedProgrammingExercise.getShortName())) {
+        var programmingExerciseBeforeUpdate = programmingExerciseRepository.findByIdWithAuxiliaryRepositoriesElseThrow(updatedProgrammingExercise.getId());
+        if (!Objects.equals(programmingExerciseBeforeUpdate.getShortName(), updatedProgrammingExercise.getShortName())) {
             throw new BadRequestAlertException("The programming exercise short name cannot be changed", ENTITY_NAME, "shortNameCannotChange");
         }
-        if (existingProgrammingExercise.isStaticCodeAnalysisEnabled() != updatedProgrammingExercise.isStaticCodeAnalysisEnabled()) {
+        if (programmingExerciseBeforeUpdate.isStaticCodeAnalysisEnabled() != updatedProgrammingExercise.isStaticCodeAnalysisEnabled()) {
             throw new BadRequestAlertException("Static code analysis enabled flag must not be changed", ENTITY_NAME, "staticCodeAnalysisCannotChange");
         }
         if (!Boolean.TRUE.equals(updatedProgrammingExercise.isAllowOnlineEditor()) && !Boolean.TRUE.equals(updatedProgrammingExercise.isAllowOfflineIde())) {
@@ -596,14 +621,18 @@ public class ProgrammingExerciseResource {
                     "You need to allow at least one participation mode, the online editor or the offline IDE", "noParticipationModeAllowed")).body(null);
         }
 
+        // Forbid changing the course the exercise belongs to.
+        if (!Objects.equals(programmingExerciseBeforeUpdate.getCourseViaExerciseGroupOrCourseMember().getId(),
+                updatedProgrammingExercise.getCourseViaExerciseGroupOrCourseMember().getId())) {
+            return conflict("Exercise course id does not match the stored course id", ENTITY_NAME, "cannotChangeCourseId");
+        }
+
         if (updatedProgrammingExercise.getAuxiliaryRepositories() == null) {
             // make sure the default value is set properly
             updatedProgrammingExercise.setAuxiliaryRepositories(new ArrayList<>());
         }
 
-        List<AuxiliaryRepository> newAuxiliaryRepositories = updatedProgrammingExercise.getAuxiliaryRepositories().stream().filter(repo -> repo.getId() == null).toList();
-
-        validateAndAddAuxiliaryRepositoriesOfProgrammingExercise(existingProgrammingExercise, newAuxiliaryRepositories, updatedProgrammingExercise);
+        auxiliaryRepositoryService.handleAuxiliaryRepositoriesWhenUpdatingExercises(programmingExerciseBeforeUpdate, updatedProgrammingExercise);
 
         if (updatedProgrammingExercise.getBonusPoints() == null) {
             // make sure the default value is set properly
@@ -615,12 +644,12 @@ public class ProgrammingExerciseResource {
         // true --> false: remove access for students from all existing student participations
 
         // Forbid conversion between normal course exercise and exam exercise
-        exerciseService.checkForConversionBetweenExamAndCourseExercise(updatedProgrammingExercise, existingProgrammingExercise, ENTITY_NAME);
+        exerciseService.checkForConversionBetweenExamAndCourseExercise(updatedProgrammingExercise, programmingExerciseBeforeUpdate, ENTITY_NAME);
 
         // Only save after checking for errors
         ProgrammingExercise savedProgrammingExercise = programmingExerciseService.updateProgrammingExercise(updatedProgrammingExercise, notificationText);
         exerciseService.logUpdate(updatedProgrammingExercise, updatedProgrammingExercise.getCourseViaExerciseGroupOrCourseMember(), user);
-        exerciseService.updatePointsInRelatedParticipantScores(existingProgrammingExercise, updatedProgrammingExercise);
+        exerciseService.updatePointsInRelatedParticipantScores(programmingExerciseBeforeUpdate, updatedProgrammingExercise);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, updatedProgrammingExercise.getTitle()))
                 .body(savedProgrammingExercise);
     }
@@ -707,9 +736,9 @@ public class ProgrammingExerciseResource {
         programmingExercise.setGradingCriteria(gradingCriteria);
 
         exerciseService.checkExerciseIfStructuredGradingInstructionFeedbackUsed(gradingCriteria, programmingExercise);
-        // If the exercise belongs to an exam, only instructors and admins are allowed to access it, otherwise also TA have access
+        // If the exercise belongs to an exam, only editors, instructors and admins are allowed to access it, otherwise also TA have access
         if (programmingExercise.isExamExercise()) {
-            authCheckService.checkHasAtLeastRoleForExerciseElseThrow(Role.INSTRUCTOR, programmingExercise, null);
+            authCheckService.checkHasAtLeastRoleForExerciseElseThrow(Role.EDITOR, programmingExercise, null);
         }
         else {
             authCheckService.checkHasAtLeastRoleForExerciseElseThrow(Role.TEACHING_ASSISTANT, programmingExercise, null);
@@ -778,7 +807,7 @@ public class ProgrammingExerciseResource {
         User user = userRepository.getUserWithGroupsAndAuthorities();
         authCheckService.checkHasAtLeastRoleForExerciseElseThrow(Role.INSTRUCTOR, programmingExercise, user);
         exerciseService.logDeletion(programmingExercise, programmingExercise.getCourseViaExerciseGroupOrCourseMember(), user);
-        exerciseService.delete(exerciseId, deleteStudentReposBuildPlans, deleteBaseReposBuildPlans);
+        exerciseDeletionService.delete(exerciseId, deleteStudentReposBuildPlans, deleteBaseReposBuildPlans);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, programmingExercise.getTitle())).build();
     }
 
@@ -924,6 +953,7 @@ public class ProgrammingExerciseResource {
         }
 
         if (repositoryExportOptions.getFilterLateSubmissionsDate() == null) {
+            repositoryExportOptions.setFilterLateSubmissionsIndividualDueDate(true);
             repositoryExportOptions.setFilterLateSubmissionsDate(programmingExercise.getDueDate());
         }
 
@@ -968,6 +998,7 @@ public class ProgrammingExerciseResource {
         }
 
         if (repositoryExportOptions.getFilterLateSubmissionsDate() == null) {
+            repositoryExportOptions.setFilterLateSubmissionsIndividualDueDate(true);
             repositoryExportOptions.setFilterLateSubmissionsDate(programmingExercise.getDueDate());
         }
 
@@ -1249,135 +1280,6 @@ public class ProgrammingExerciseResource {
         return ResponseEntity.ok().build();
     }
 
-    private void validateAndAddAuxiliaryRepositoriesOfProgrammingExercise(ProgrammingExercise programmingExercise, List<AuxiliaryRepository> newAuxiliaryRepositories,
-            ProgrammingExercise updatedExercise) {
-        final List<AuxiliaryRepository> auxiliaryRepositories = Objects.requireNonNullElse(programmingExercise.getAuxiliaryRepositories(), new ArrayList<AuxiliaryRepository>())
-                .stream().filter(repo -> repo.getId() != null).collect(Collectors.toList());
-        for (AuxiliaryRepository repo : newAuxiliaryRepositories) {
-            validateAuxiliaryRepository(repo, auxiliaryRepositories);
-            auxiliaryRepositories.add(repo);
-        }
-        updatedExercise.setAuxiliaryRepositories(new ArrayList<>());
-        auxiliaryRepositories.forEach(updatedExercise::addAuxiliaryRepository);
-    }
-
-    private void validateAuxiliaryRepositoryId(AuxiliaryRepository auxiliaryRepository) {
-        if (auxiliaryRepository.getId() != null) {
-            throw new BadRequestAlertException("Auxiliary repositories must not have an id.", AUX_REPO_ENTITY_NAME, ErrorKeys.INVALID_AUXILIARY_REPOSITORY_ID);
-        }
-    }
-
-    private void validateAuxiliaryRepositoryNameExists(AuxiliaryRepository auxiliaryRepository) {
-        if (auxiliaryRepository.getName() == null || auxiliaryRepository.getName().isEmpty()) {
-            throw new BadRequestAlertException("Cannot set empty name for auxiliary repositories!", AUX_REPO_ENTITY_NAME, ErrorKeys.INVALID_AUXILIARY_REPOSITORY_NAME);
-        }
-        auxiliaryRepository.setName(auxiliaryRepository.getName().toLowerCase());
-    }
-
-    private void validateAuxiliaryRepositoryNameLength(AuxiliaryRepository auxiliaryRepository) {
-        if (auxiliaryRepository.getName().length() > AuxiliaryRepository.MAX_NAME_LENGTH) {
-            throw new BadRequestAlertException("The name of an auxiliary repository must not be longer than 100 characters!", AUX_REPO_ENTITY_NAME,
-                    ErrorKeys.INVALID_AUXILIARY_REPOSITORY_NAME);
-        }
-    }
-
-    private void validateAuxiliaryRepositoryNameDuplication(AuxiliaryRepository auxiliaryRepository, List<AuxiliaryRepository> otherRepositories) {
-        for (AuxiliaryRepository existingRepository : otherRepositories) {
-            if (existingRepository.getName().equals(auxiliaryRepository.getName())) {
-                throw new BadRequestAlertException("The name '" + auxiliaryRepository.getName() + "' is not allowed for auxiliary repositories!", AUX_REPO_ENTITY_NAME,
-                        ErrorKeys.INVALID_AUXILIARY_REPOSITORY_NAME);
-            }
-        }
-    }
-
-    private void validateAuxiliaryRepositoryNameRestricted(AuxiliaryRepository auxiliaryRepository) {
-        for (RepositoryType repositoryType : RepositoryType.values()) {
-            String repositoryName = repositoryType.getName();
-            if (auxiliaryRepository.getName().equals(repositoryName)) {
-                throw new BadRequestAlertException("The name '" + repositoryName + "' is not allowed for auxiliary repositories!", AUX_REPO_ENTITY_NAME,
-                        ErrorKeys.INVALID_AUXILIARY_REPOSITORY_NAME);
-            }
-        }
-    }
-
-    private void validateAuxiliaryRepositoryCheckoutDirectoryValid(AuxiliaryRepository auxiliaryRepository) {
-        String checkoutDirectory = auxiliaryRepository.getCheckoutDirectory();
-        Matcher ciCheckoutDirectoryMatcher = allowedBambooCheckoutDirectory.matcher(checkoutDirectory);
-        if (!ciCheckoutDirectoryMatcher.matches() || checkoutDirectory.equals(ASSIGNMENT_CHECKOUT_PATH)) {
-            throw new BadRequestAlertException("The checkout directory '" + auxiliaryRepository.getCheckoutDirectory() + "' is invalid!", AUX_REPO_ENTITY_NAME,
-                    ErrorKeys.INVALID_AUXILIARY_REPOSITORY_CHECKOUT_DIRECTORY);
-        }
-    }
-
-    private void validateAuxiliaryRepositoryCheckoutDirectoryLength(AuxiliaryRepository auxiliaryRepository) {
-        if (auxiliaryRepository.getCheckoutDirectory().length() > AuxiliaryRepository.MAX_CHECKOUT_DIRECTORY_LENGTH) {
-            throw new BadRequestAlertException("The checkout directory path '" + auxiliaryRepository.getCheckoutDirectory() + "' is too long!", AUX_REPO_ENTITY_NAME,
-                    ErrorKeys.INVALID_AUXILIARY_REPOSITORY_CHECKOUT_DIRECTORY);
-        }
-    }
-
-    private void validateAuxiliaryRepositoryCheckoutDirectoryDuplication(AuxiliaryRepository auxiliaryRepository, List<AuxiliaryRepository> otherRepositories) {
-        for (AuxiliaryRepository repo : otherRepositories) {
-            if (repo.getCheckoutDirectory() != null && repo.getCheckoutDirectory().equals(auxiliaryRepository.getCheckoutDirectory())) {
-                throw new BadRequestAlertException("The checkout directory path is already defined for another additional repository!", AUX_REPO_ENTITY_NAME,
-                        ErrorKeys.INVALID_AUXILIARY_REPOSITORY_CHECKOUT_DIRECTORY);
-            }
-        }
-    }
-
-    private void validateAuxiliaryRepositoryDescriptionLength(AuxiliaryRepository auxiliaryRepository) {
-        if (auxiliaryRepository.getDescription() != null && auxiliaryRepository.getDescription().length() > AuxiliaryRepository.MAX_DESCRIPTION_LENGTH) {
-            throw new BadRequestAlertException("The provided description is too long!", AUX_REPO_ENTITY_NAME, ErrorKeys.INVALID_AUXILIARY_REPOSITORY_DESCRIPTION);
-        }
-    }
-
-    private void validateAuxiliaryRepository(AuxiliaryRepository auxiliaryRepository, List<AuxiliaryRepository> otherRepositories) {
-
-        // Id of the auxiliary repository must not be set, because the id is set
-        // by the database.
-        validateAuxiliaryRepositoryId(auxiliaryRepository);
-
-        // We want to force the user to set a name of the auxiliary repository, otherwise we
-        // cannot determine which name we should use for setting up the repo on the VCS.
-        validateAuxiliaryRepositoryNameExists(auxiliaryRepository);
-
-        // The name must not be longer than 100 characters, since the database column is
-        // limited to 100 characters.
-        validateAuxiliaryRepositoryNameLength(auxiliaryRepository);
-
-        // We want to avoid using the same auxiliary repository name multiple times
-        validateAuxiliaryRepositoryNameDuplication(auxiliaryRepository, otherRepositories);
-
-        // The name must not match any of the names of the already present repositories, otherwise
-        // we get an undefined state.
-        // Currently, the names "exercise", "solution", and "tests" are restricted.
-        validateAuxiliaryRepositoryNameRestricted(auxiliaryRepository);
-
-        if (auxiliaryRepository.getCheckoutDirectory() != null) {
-
-            if (auxiliaryRepository.getCheckoutDirectory().isBlank()) {
-                auxiliaryRepository.setCheckoutDirectory(null);
-            }
-            else {
-
-                // We want to make sure, that the checkout directory path is valid.
-                validateAuxiliaryRepositoryCheckoutDirectoryValid(auxiliaryRepository);
-
-                // The checkout directory path must not be longer than 100 characters, since the database column is
-                // limited to 100 characters.
-                validateAuxiliaryRepositoryCheckoutDirectoryLength(auxiliaryRepository);
-
-                // Multiple auxiliary repositories might not share one checkout directory, since
-                // Bamboo does not allow this.
-                validateAuxiliaryRepositoryCheckoutDirectoryDuplication(auxiliaryRepository, otherRepositories);
-            }
-        }
-
-        // The description must not be longer than 100 characters, since the database column is
-        // limited to 500 characters.
-        validateAuxiliaryRepositoryDescriptionLength(auxiliaryRepository);
-    }
-
     /**
      * PUT /programming-exercises/{exerciseId}/re-evaluate : Re-evaluates and updates an existing ProgrammingExercise.
      *
@@ -1487,6 +1389,8 @@ public class ProgrammingExerciseResource {
         public static final String INVALID_AUXILIARY_REPOSITORY_CHECKOUT_DIRECTORY = "invalid.auxiliary.repository.checkout.directory";
 
         public static final String INVALID_AUXILIARY_REPOSITORY_DESCRIPTION = "invalid.auxiliary.repository.description";
+
+        public static final String INVALID_TEST_CASE_WEIGHTS = "invalid.testcases.weights";
 
         private ErrorKeys() {
         }

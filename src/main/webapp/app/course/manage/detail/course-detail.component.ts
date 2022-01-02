@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { Course } from 'app/entities/course.model';
 import { CourseManagementService } from '../course-management.service';
 import { CachingStrategy } from 'app/shared/image/secured-image.component';
@@ -12,6 +11,23 @@ import { ButtonSize } from 'app/shared/components/button.component';
 import { CourseManagementDetailViewDto } from 'app/course/manage/course-management-detail-view-dto.model';
 import { ARTEMIS_DEFAULT_COLOR } from 'app/app.constants';
 import { onError } from 'app/shared/util/global.utils';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import {
+    faChartBar,
+    faClipboard,
+    faComments,
+    faEye,
+    faFilePdf,
+    faFlag,
+    faGraduationCap,
+    faHeartBroken,
+    faListAlt,
+    faTable,
+    faTimes,
+    faUserCheck,
+    faWrench,
+} from '@fortawesome/free-solid-svg-icons';
 
 export enum DoughnutChartType {
     ASSESSMENT = 'ASSESSMENT',
@@ -45,12 +61,27 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     dialogError$ = this.dialogErrorSource.asObservable();
     paramSub: Subscription;
 
+    // Icons
+    faTimes = faTimes;
+    faEye = faEye;
+    faWrench = faWrench;
+    faTable = faTable;
+    faUserCheck = faUserCheck;
+    faFlag = faFlag;
+    faListAlt = faListAlt;
+    faChartBar = faChartBar;
+    faFilePdf = faFilePdf;
+    faComments = faComments;
+    faClipboard = faClipboard;
+    faGraduationCap = faGraduationCap;
+    faHeartBroken = faHeartBroken;
+
     constructor(
-        private eventManager: JhiEventManager,
+        private eventManager: EventManager,
         private courseService: CourseManagementService,
         private route: ActivatedRoute,
         private router: Router,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
     ) {}
 
     /**
@@ -99,7 +130,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
                 this.courseDTO = courseResponse.body!;
                 this.activeStudents = courseResponse.body!.activeStudents;
             },
-            (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+            (error: HttpErrorResponse) => onError(this.alertService, error),
         );
     }
 

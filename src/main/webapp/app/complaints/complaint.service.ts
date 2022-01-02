@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { SERVER_API_URL } from 'app/app.constants';
 
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 
 import { Complaint, ComplaintType } from 'app/entities/complaint.model';
 import { ComplaintResponseService } from 'app/complaints/complaint-response.service';
@@ -15,7 +14,7 @@ export type EntityResponseTypeArray = HttpResponse<Complaint[]>;
 
 export interface IComplaintService {
     create: (complaint: Complaint, examId: number) => Observable<EntityResponseType>;
-    findByResultId: (resultId: number) => Observable<EntityResponseType>;
+    findBySubmissionId: (participationId: number) => Observable<EntityResponseType>;
     getNumberOfAllowedComplaintsInCourse: (courseId: number) => Observable<number>;
 }
 
@@ -27,12 +26,12 @@ export class ComplaintService implements IComplaintService {
     constructor(private http: HttpClient, private complaintResponseService: ComplaintResponseService) {}
 
     /**
-     * Checks if a complaint is locked for the currently logged in user
+     * Checks if a complaint is locked for the currently logged-in user
      *
      * A complaint is locked if the associated complaint response is locked
      *
      * @param complaint complaint to check the lock status for
-     * @param exercise exercise used to find out if currently logged in user is instructor
+     * @param exercise exercise used to find out if currently logged-in user is instructor
      */
     isComplaintLockedForLoggedInUser(complaint: Complaint, exercise: Exercise) {
         if (complaint.complaintResponse && complaint.accepted === undefined) {
@@ -43,7 +42,7 @@ export class ComplaintService implements IComplaintService {
     }
 
     /**
-     * Checks if the lock on a complaint is active and if the currently logged in user is the creator of the lock
+     * Checks if the lock on a complaint is active and if the currently logged-in user is the creator of the lock
      * @param complaint complaint to check the lock status for
      */
     isComplaintLockedByLoggedInUser(complaint: Complaint) {
@@ -69,10 +68,10 @@ export class ComplaintService implements IComplaintService {
     /**
      * Create a new complaint.
      * @param complaint
-     * @param examId the Id of the exam
+     * @param examId the id of the exam
      */
     create(complaint: Complaint, examId?: number): Observable<EntityResponseType> {
-        const copy = this.convertDateFromClient(complaint);
+        const copy = ComplaintService.convertDateFromClient(complaint);
         if (examId) {
             return this.http
                 .post<Complaint>(`${this.resourceUrl}/exam/${examId}`, copy, { observe: 'response' })
@@ -82,11 +81,13 @@ export class ComplaintService implements IComplaintService {
     }
 
     /**
-     * Find complaint by Result id.
-     * @param resultId
+     * Find complaint by Submission id.
+     * @param submissionId
      */
-    findByResultId(resultId: number): Observable<EntityResponseType> {
-        return this.http.get<Complaint>(`${this.resourceUrl}/result/${resultId}`, { observe: 'response' }).pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    findBySubmissionId(submissionId: number): Observable<EntityResponseType> {
+        return this.http
+            .get<Complaint>(`${this.resourceUrl}/submissions/${submissionId}`, { observe: 'response' })
+            .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
     }
 
     /**
@@ -174,17 +175,17 @@ export class ComplaintService implements IComplaintService {
         return this.http.get<Complaint[]>(url, { observe: 'response' }).pipe(map((res: EntityResponseTypeArray) => this.convertDateFromServerArray(res)));
     }
 
-    private convertDateFromClient(complaint: Complaint): Complaint {
+    private static convertDateFromClient(complaint: Complaint): Complaint {
         return Object.assign({}, complaint, {
-            submittedTime: complaint.submittedTime && moment(complaint.submittedTime).isValid ? complaint.submittedTime.toJSON() : undefined,
+            submittedTime: complaint.submittedTime && dayjs(complaint.submittedTime).isValid ? complaint.submittedTime.toJSON() : undefined,
         });
     }
 
     private convertDateFromServer(res: EntityResponseType): EntityResponseType {
         if (res.body) {
-            res.body.submittedTime = res.body.submittedTime ? moment(res.body.submittedTime) : undefined;
+            res.body.submittedTime = res.body.submittedTime ? dayjs(res.body.submittedTime) : undefined;
             if (res.body?.complaintResponse) {
-                this.complaintResponseService.convertDatesToMoment(res.body.complaintResponse);
+                this.complaintResponseService.convertDatesToDayjs(res.body.complaintResponse);
             }
         }
         return res;
@@ -193,9 +194,9 @@ export class ComplaintService implements IComplaintService {
     private convertDateFromServerArray(res: EntityResponseTypeArray): EntityResponseTypeArray {
         if (res.body) {
             res.body.forEach((complaint) => {
-                complaint.submittedTime = complaint.submittedTime ? moment(complaint.submittedTime) : undefined;
+                complaint.submittedTime = complaint.submittedTime ? dayjs(complaint.submittedTime) : undefined;
                 if (complaint.complaintResponse) {
-                    this.complaintResponseService.convertDatesToMoment(complaint.complaintResponse);
+                    this.complaintResponseService.convertDatesToDayjs(complaint.complaintResponse);
                 }
             });
         }

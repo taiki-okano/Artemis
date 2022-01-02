@@ -2,13 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, of, Observable } from 'rxjs';
 import { tap, map, switchMap, filter } from 'rxjs/operators';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { JhiAlertService, JhiLanguageService } from 'ng-jhipster';
 import { SessionStorageService } from 'ngx-webstorage';
 import { User } from 'app/core/user/user.model';
 import { JhiLanguageHelper } from 'app/core/language/language.helper';
 import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
-import { SERVER_API_URL, VERSION } from 'app/app.constants';
-import * as moment from 'moment';
+import { VERSION } from 'app/app.constants';
 import { ParticipationWebsocketService } from 'app/overview/participation-websocket.service';
 import { AccountService } from 'app/core/auth/account.service';
 import { ProfileService } from 'app/shared/layouts/profiles/profile.service';
@@ -27,6 +25,32 @@ import { ApollonDiagramService } from 'app/exercises/quiz/manage/apollon-diagram
 import { LectureService } from 'app/lecture/lecture.service';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { Authority } from 'app/shared/constants/authority.constants';
+import { TranslateService } from '@ngx-translate/core';
+import { AlertService } from 'app/core/util/alert.service';
+import { LANGUAGES } from 'app/core/language/language.constants';
+import { OrganizationManagementService } from 'app/admin/organization-management/organization-management.service';
+import {
+    faBars,
+    faBell,
+    faBook,
+    faBookOpen,
+    faCog,
+    faEye,
+    faFlag,
+    faHeart,
+    faList,
+    faLock,
+    faSignOutAlt,
+    faTachometerAlt,
+    faTasks,
+    faThLarge,
+    faThList,
+    faToggleOn,
+    faUniversity,
+    faUser,
+    faUserPlus,
+    faWrench,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-navbar',
@@ -39,7 +63,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     inProduction: boolean;
     isNavbarCollapsed: boolean;
     isTourAvailable: boolean;
-    languages: string[];
+    languages = LANGUAGES;
     openApiEnabled?: boolean;
     modalRef: NgbModalRef;
     version: string;
@@ -47,6 +71,27 @@ export class NavbarComponent implements OnInit, OnDestroy {
     isRegistrationEnabled = false;
     passwordResetEnabled = false;
     breadcrumbs: Breadcrumb[];
+    // Icons
+    faBars = faBars;
+    faThLarge = faThLarge;
+    faThList = faThList;
+    faUser = faUser;
+    faBell = faBell;
+    faUniversity = faUniversity;
+    faEye = faEye;
+    faCog = faCog;
+    faWrench = faWrench;
+    faLock = faLock;
+    faFlag = faFlag;
+    faBook = faBook;
+    faTasks = faTasks;
+    faList = faList;
+    faHeart = faHeart;
+    faTachometerAlt = faTachometerAlt;
+    faToggleOn = faToggleOn;
+    faBookOpen = faBookOpen;
+    faUserPlus = faUserPlus;
+    faSignOutAlt = faSignOutAlt;
 
     private authStateSubscription: Subscription;
     private routerEventSubscription: Subscription;
@@ -57,7 +102,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     constructor(
         private loginService: LoginService,
-        private languageService: JhiLanguageService,
+        private translateService: TranslateService,
         private languageHelper: JhiLanguageHelper,
         private localeConversionService: LocaleConversionService,
         private sessionStorage: SessionStorageService,
@@ -69,13 +114,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private examParticipationService: ExamParticipationService,
         private serverDateService: ArtemisServerDateService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private courseManagementService: CourseManagementService,
         private exerciseService: ExerciseService,
         private hintService: ExerciseHintService,
         private apollonDiagramService: ApollonDiagramService,
         private lectureService: LectureService,
         private examService: ExamManagementService,
+        private organisationService: OrganizationManagementService,
     ) {
         this.version = VERSION ? VERSION : '';
         this.isNavbarCollapsed = true;
@@ -83,8 +129,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.languages = this.languageHelper.getAll();
-
         this.profileService.getProfileInfo().subscribe((profileInfo) => {
             if (profileInfo) {
                 this.inProduction = profileInfo.inProduction;
@@ -161,7 +205,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         goal_management: 'artemisApp.learningGoal.manageLearningGoals.title',
         assessment_locks: 'artemisApp.assessment.locks.home.title',
         apollon_diagrams: 'artemisApp.apollonDiagram.home.title',
-        posts: 'artemisApp.metis.overview.title',
+        discussion: 'artemisApp.metis.discussion.label',
         scores: 'entity.action.scores',
         assessment: 'artemisApp.assessment.assessment',
         export: 'artemisApp.quizExercise.export.export',
@@ -171,7 +215,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         quiz_statistic: 'artemisApp.quizExercise.statistics',
         quiz_point_statistic: 'artemisApp.quizExercise.statistics',
         import: 'artemisApp.exercise.import.table.doImport',
-        plagiarism: 'artemisApp.plagiarism.plagiarism-detection',
+        plagiarism: 'artemisApp.plagiarism.plagiarismDetection',
         example_solution: 'artemisApp.modelingExercise.exampleSolution',
         example_submissions: 'artemisApp.exampleSubmission.home.title',
         example_submission_editor: 'artemisApp.exampleSubmission.home.editor',
@@ -199,6 +243,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
         course_statistics: 'statistics.course_statistics_title',
         grading_system: 'artemisApp.gradingSystem.title',
         exercise_statistics: 'exercise-statistics.title',
+        tutor_effort_statistics: 'artemisApp.textExercise.tutorEffortStatistics.title',
+        text_cluster_statistics: 'artemisApp.textExercise.clusterStatistics.title',
+        user_settings: 'artemisApp.userSettings.title',
     };
 
     /**
@@ -267,6 +314,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
             case 'file-upload-exercises':
             case 'programming-exercises':
             case 'quiz-exercises':
+            case 'assessment-dashboard':
                 this.addResolvedTitleAsCrumb(this.exerciseService.getTitle(Number(segment)), currentPath, segment);
                 break;
             case 'hints':
@@ -281,6 +329,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
             case 'exams':
                 this.routeExamId = Number(segment);
                 this.addResolvedTitleAsCrumb(this.examService.getTitle(this.routeExamId), currentPath, segment);
+                break;
+            case 'organization-management':
+                this.addResolvedTitleAsCrumb(this.organisationService.getTitle(Number(segment)), currentPath, segment);
                 break;
             case 'import':
                 // Special case: Don't display the ID here but the name directly (clicking the ID wouldn't work)
@@ -417,7 +468,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
                 const title = response.body ?? segment;
                 this.setBreadcrumb(uri, title, false, index);
             },
-            (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+            (error: HttpErrorResponse) => onError(this.alertService, error),
         );
     }
 
@@ -450,8 +501,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     changeLanguage(languageKey: string) {
         this.sessionStorage.store('locale', languageKey);
-        this.languageService.changeLanguage(languageKey);
-        moment.locale(languageKey);
+        this.translateService.use(languageKey);
         this.localeConversionService.locale = languageKey;
     }
 

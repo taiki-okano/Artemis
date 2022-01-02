@@ -33,6 +33,7 @@ import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.service.*;
 import de.tum.in.www1.artemis.service.connectors.*;
 import de.tum.in.www1.artemis.service.messaging.InstanceMessageSendService;
+import de.tum.in.www1.artemis.service.notifications.GroupNotificationService;
 import de.tum.in.www1.artemis.service.util.structureoraclegenerator.OracleGenerator;
 import de.tum.in.www1.artemis.web.rest.dto.PageableSearchDTO;
 import de.tum.in.www1.artemis.web.rest.dto.SearchResultPageDTO;
@@ -52,6 +53,8 @@ public class ProgrammingExerciseService {
     private final Optional<VersionControlService> versionControlService;
 
     private final Optional<ContinuousIntegrationService> continuousIntegrationService;
+
+    private final ParticipationRepository participationRepository;
 
     private final ParticipationService participationService;
 
@@ -77,8 +80,9 @@ public class ProgrammingExerciseService {
             Optional<VersionControlService> versionControlService, Optional<ContinuousIntegrationService> continuousIntegrationService,
             TemplateProgrammingExerciseParticipationRepository templateProgrammingExerciseParticipationRepository,
             SolutionProgrammingExerciseParticipationRepository solutionProgrammingExerciseParticipationRepository, ParticipationService participationService,
-            ResultRepository resultRepository, UserRepository userRepository, AuthorizationCheckService authCheckService, ResourceLoaderService resourceLoaderService,
-            GroupNotificationService groupNotificationService, InstanceMessageSendService instanceMessageSendService, AuxiliaryRepositoryRepository auxiliaryRepositoryRepository) {
+            ParticipationRepository participationRepository, ResultRepository resultRepository, UserRepository userRepository, AuthorizationCheckService authCheckService,
+            ResourceLoaderService resourceLoaderService, GroupNotificationService groupNotificationService, InstanceMessageSendService instanceMessageSendService,
+            AuxiliaryRepositoryRepository auxiliaryRepositoryRepository) {
         this.programmingExerciseRepository = programmingExerciseRepository;
         this.fileService = fileService;
         this.gitService = gitService;
@@ -86,6 +90,7 @@ public class ProgrammingExerciseService {
         this.continuousIntegrationService = continuousIntegrationService;
         this.templateProgrammingExerciseParticipationRepository = templateProgrammingExerciseParticipationRepository;
         this.solutionProgrammingExerciseParticipationRepository = solutionProgrammingExerciseParticipationRepository;
+        this.participationRepository = participationRepository;
         this.participationService = participationService;
         this.resultRepository = resultRepository;
         this.userRepository = userRepository;
@@ -124,7 +129,7 @@ public class ProgrammingExerciseService {
     @Transactional // ok because we create many objects in a rather complex way and need a rollback in case of exceptions
     public ProgrammingExercise createProgrammingExercise(ProgrammingExercise programmingExercise) throws InterruptedException, GitAPIException, IOException {
         programmingExercise.generateAndSetProjectKey();
-        final User user = userRepository.getUser();
+        final User exerciseCreator = userRepository.getUser();
 
         createRepositoriesForNewExercise(programmingExercise);
         initParticipations(programmingExercise);
@@ -135,7 +140,7 @@ public class ProgrammingExerciseService {
 
         connectAuxiliaryRepositoriesToExercise(programmingExercise);
 
-        setupExerciseTemplate(programmingExercise, user);
+        setupExerciseTemplate(programmingExercise, exerciseCreator);
 
         // Save programming exercise to prevent transient exception
         programmingExercise = programmingExerciseRepository.save(programmingExercise);
@@ -151,10 +156,7 @@ public class ProgrammingExerciseService {
 
         scheduleOperations(programmingExercise.getId());
 
-        // Notify tutors only if this a course exercise
-        if (programmingExercise.isCourseExercise()) {
-            groupNotificationService.notifyTutorGroupAboutExerciseCreated(programmingExercise);
-        }
+        groupNotificationService.checkNotificationForExerciseRelease(programmingExercise, instanceMessageSendService);
 
         return programmingExercise;
     }
@@ -248,12 +250,12 @@ public class ProgrammingExerciseService {
     }
 
     /**
-     * Setup the exercise template by determining the files needed for the template and copying them.
+     * Set up the exercise template by determining the files needed for the template and copying them. Commit and push the changes to all repositories for this programming exercise.
      *
      * @param programmingExercise the programming exercise that should be set up
-     * @param user                the User that performed the action (used as Git commit author)
+     * @param exerciseCreator     the User that performed the action (used as Git commit author)
      */
-    private void setupExerciseTemplate(ProgrammingExercise programmingExercise, User user) throws GitAPIException, InterruptedException {
+    private void setupExerciseTemplate(ProgrammingExercise programmingExercise, User exerciseCreator) throws GitAPIException, InterruptedException {
 
         // Get URLs for repos
         var exerciseRepoUrl = programmingExercise.getVcsTemplateRepositoryUrl();
@@ -322,23 +324,25 @@ public class ProgrammingExerciseService {
         }
 
         try {
-            setupTemplateAndPush(exerciseRepo, exerciseResources, exercisePrefix, projectTypeExerciseResources, projectTypeExercisePrefix, "Exercise", programmingExercise, user);
+            setupTemplateAndPush(exerciseRepo, exerciseResources, exercisePrefix, projectTypeExerciseResources, projectTypeExercisePrefix, "Exercise", programmingExercise,
+                    exerciseCreator);
             // The template repo can be re-written so we can unprotect the default branch.
             var templateVcsRepositoryUrl = programmingExercise.getVcsTemplateRepositoryUrl();
             String templateVcsRepositoryDefaultBranch = versionControlService.get().getDefaultBranchOfRepository(templateVcsRepositoryUrl);
             versionControlService.get().unprotectBranch(templateVcsRepositoryUrl, templateVcsRepositoryDefaultBranch);
 
-            setupTemplateAndPush(solutionRepo, solutionResources, solutionPrefix, projectTypeSolutionResources, projectTypeSolutionPrefix, "Solution", programmingExercise, user);
-            setupTestTemplateAndPush(testRepo, testResources, testPrefix, projectTypeTestResources, projectTypeTestPrefix, "Test", programmingExercise, user);
+            setupTemplateAndPush(solutionRepo, solutionResources, solutionPrefix, projectTypeSolutionResources, projectTypeSolutionPrefix, "Solution", programmingExercise,
+                    exerciseCreator);
+            setupTestTemplateAndPush(testRepo, testResources, testPrefix, projectTypeTestResources, projectTypeTestPrefix, "Test", programmingExercise, exerciseCreator);
 
         }
         catch (Exception ex) {
             // if any exception occurs, try to at least push an empty commit, so that the
             // repositories can be used by the build plans
             log.warn("An exception occurred while setting up the repositories", ex);
-            gitService.commitAndPush(exerciseRepo, "Empty Setup by Artemis", user);
-            gitService.commitAndPush(testRepo, "Empty Setup by Artemis", user);
-            gitService.commitAndPush(solutionRepo, "Empty Setup by Artemis", user);
+            gitService.commitAndPush(exerciseRepo, "Empty Setup by Artemis", exerciseCreator);
+            gitService.commitAndPush(testRepo, "Empty Setup by Artemis", exerciseCreator);
+            gitService.commitAndPush(solutionRepo, "Empty Setup by Artemis", exerciseCreator);
         }
     }
 
@@ -377,19 +381,19 @@ public class ProgrammingExerciseService {
      * @return the updates programming exercise from the database
      */
     public ProgrammingExercise updateProgrammingExercise(ProgrammingExercise programmingExercise, @Nullable String notificationText) {
-
         setURLsForAuxiliaryRepositoriesOfExercise(programmingExercise);
         connectAuxiliaryRepositoriesToExercise(programmingExercise);
 
+        final ProgrammingExercise programmingExerciseBeforeUpdate = programmingExerciseRepository.findByIdElseThrow(programmingExercise.getId());
         ProgrammingExercise savedProgrammingExercise = programmingExerciseRepository.save(programmingExercise);
+
+        participationRepository.removeIndividualDueDatesIfBeforeDueDate(savedProgrammingExercise, programmingExerciseBeforeUpdate.getDueDate());
 
         // TODO: in case of an exam exercise, this is not necessary
         scheduleOperations(programmingExercise.getId());
 
-        // Only send notification for course exercises
-        if (notificationText != null && programmingExercise.isCourseExercise()) {
-            groupNotificationService.notifyStudentGroupAboutExerciseUpdate(savedProgrammingExercise, notificationText);
-        }
+        groupNotificationService.checkAndCreateAppropriateNotificationsWhenUpdatingExercise(programmingExerciseBeforeUpdate, savedProgrammingExercise, notificationText,
+                instanceMessageSendService);
 
         return savedProgrammingExercise;
     }
@@ -594,20 +598,33 @@ public class ProgrammingExerciseService {
      * @throws IOException If replacing the directory name, or file variables throws an exception
      */
     public void replacePlaceholders(ProgrammingExercise programmingExercise, Repository repository) throws IOException {
-        if (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA || programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.KOTLIN) {
-            fileService.replaceVariablesInDirectoryName(repository.getLocalPath().toAbsolutePath().toString(), "${packageNameFolder}", programmingExercise.getPackageFolderName());
-        }
-        else if (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.SWIFT) {
-            fileService.replaceVariablesInDirectoryName(repository.getLocalPath().toAbsolutePath().toString(), "${packageNameFolder}", programmingExercise.getPackageName());
-            fileService.replaceVariablesInFileName(repository.getLocalPath().toAbsolutePath().toString(), "${packageNameFile}", programmingExercise.getPackageName());
-        }
-
         Map<String, String> replacements = new HashMap<>();
+        ProgrammingLanguage programmingLanguage = programmingExercise.getProgrammingLanguage();
+        ProjectType projectType = programmingExercise.getProjectType();
 
-        if (programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.JAVA || programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.KOTLIN
-                || programmingExercise.getProgrammingLanguage() == ProgrammingLanguage.SWIFT) {
-            replacements.put("${packageName}", programmingExercise.getPackageName());
+        switch (programmingLanguage) {
+            case JAVA, KOTLIN -> {
+                fileService.replaceVariablesInDirectoryName(repository.getLocalPath().toAbsolutePath().toString(), "${packageNameFolder}",
+                        programmingExercise.getPackageFolderName());
+                replacements.put("${packageName}", programmingExercise.getPackageName());
+            }
+            case SWIFT -> {
+                switch (projectType) {
+                    case PLAIN -> {
+                        fileService.replaceVariablesInDirectoryName(repository.getLocalPath().toAbsolutePath().toString(), "${packageNameFolder}",
+                                programmingExercise.getPackageName());
+                        fileService.replaceVariablesInFileName(repository.getLocalPath().toAbsolutePath().toString(), "${packageNameFile}", programmingExercise.getPackageName());
+                        replacements.put("${packageName}", programmingExercise.getPackageName());
+                    }
+                    case XCODE -> {
+                        fileService.replaceVariablesInDirectoryName(repository.getLocalPath().toAbsolutePath().toString(), "${appName}", programmingExercise.getPackageName());
+                        fileService.replaceVariablesInFileName(repository.getLocalPath().toAbsolutePath().toString(), "${appName}", programmingExercise.getPackageName());
+                        replacements.put("${appName}", programmingExercise.getPackageName());
+                    }
+                }
+            }
         }
+
         // there is no need in python to replace package names
 
         replacements.put("${exerciseNamePomXml}", programmingExercise.getTitle().replaceAll(" ", "-")); // Used e.g. in artifactId
@@ -638,17 +655,22 @@ public class ProgrammingExerciseService {
      * @return the updated ProgrammingExercise object.
      */
     public ProgrammingExercise updateTimeline(ProgrammingExercise updatedProgrammingExercise, @Nullable String notificationText) {
+        ProgrammingExercise programmingExercise = programmingExerciseRepository.findByIdElseThrow(updatedProgrammingExercise.getId());
 
-        var programmingExercise = programmingExerciseRepository.findByIdElseThrow(updatedProgrammingExercise.getId());
+        // create slim copy of programmingExercise before the update - needed for notifications (only release date needed)
+        ProgrammingExercise programmingExerciseBeforeUpdate = new ProgrammingExercise();
+        programmingExerciseBeforeUpdate.setReleaseDate(programmingExercise.getReleaseDate());
+
         programmingExercise.setReleaseDate(updatedProgrammingExercise.getReleaseDate());
         programmingExercise.setDueDate(updatedProgrammingExercise.getDueDate());
         programmingExercise.setBuildAndTestStudentSubmissionsAfterDueDate(updatedProgrammingExercise.getBuildAndTestStudentSubmissionsAfterDueDate());
         programmingExercise.setAssessmentType(updatedProgrammingExercise.getAssessmentType());
         programmingExercise.setAssessmentDueDate(updatedProgrammingExercise.getAssessmentDueDate());
         ProgrammingExercise savedProgrammingExercise = programmingExerciseRepository.save(programmingExercise);
-        if (notificationText != null) {
-            groupNotificationService.notifyStudentGroupAboutExerciseUpdate(updatedProgrammingExercise, notificationText);
-        }
+
+        groupNotificationService.checkAndCreateAppropriateNotificationsWhenUpdatingExercise(programmingExerciseBeforeUpdate, savedProgrammingExercise, null,
+                instanceMessageSendService);
+
         return savedProgrammingExercise;
     }
 
@@ -666,9 +688,9 @@ public class ProgrammingExerciseService {
 
         programmingExercise.setProblemStatement(problemStatement);
         ProgrammingExercise updatedProgrammingExercise = programmingExerciseRepository.save(programmingExercise);
-        if (notificationText != null) {
-            groupNotificationService.notifyStudentGroupAboutExerciseUpdate(updatedProgrammingExercise, notificationText);
-        }
+
+        groupNotificationService.notifyAboutExerciseUpdate(programmingExercise, notificationText);
+
         return updatedProgrammingExercise;
     }
 

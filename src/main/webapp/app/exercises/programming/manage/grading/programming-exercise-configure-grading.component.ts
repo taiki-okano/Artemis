@@ -4,12 +4,13 @@ import { AccountService } from 'app/core/auth/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subscription, zip } from 'rxjs';
 import { catchError, distinctUntilChanged, map, take, tap } from 'rxjs/operators';
-import { differenceBy as _differenceBy, differenceWith as _differenceWith, intersectionWith as _intersectionWith, unionBy as _unionBy } from 'lodash';
-import { JhiAlertService } from 'ng-jhipster';
+import { differenceBy as _differenceBy, differenceWith as _differenceWith, intersectionWith as _intersectionWith, unionBy as _unionBy } from 'lodash-es';
+import { AlertService } from 'app/core/util/alert.service';
 import { ProgrammingExerciseTestCase, Visibility } from 'app/entities/programming-exercise-test-case.model';
 import { ProgrammingExerciseWebsocketService } from 'app/exercises/programming/manage/services/programming-exercise-websocket.service';
 import { ComponentCanDeactivate } from 'app/shared/guard/can-deactivate.model';
 import { ProgrammingExerciseService } from 'app/exercises/programming/manage/services/programming-exercise.service';
+import { AssessmentType } from 'app/entities/assessment-type.model';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
 import { IssuesMap, ProgrammingExerciseGradingStatistics, TestCaseStats } from 'app/entities/programming-exercise-test-case-statistics.model';
 import { StaticCodeAnalysisCategory, StaticCodeAnalysisCategoryState } from 'app/entities/static-code-analysis-category.model';
@@ -20,6 +21,9 @@ import {
     ProgrammingExerciseTestCaseUpdate,
     StaticCodeAnalysisCategoryUpdate,
 } from 'app/exercises/programming/manage/services/programming-exercise-grading.service';
+import { SubmissionPolicyService } from 'app/exercises/programming/manage/services/submission-policy.service';
+import { SubmissionPolicy, SubmissionPolicyType } from 'app/entities/submission-policy.model';
+import { faQuestionCircle, faSort, faSortDown, faSortUp, faSquare } from '@fortawesome/free-solid-svg-icons';
 
 /**
  * Describes the editableField
@@ -84,6 +88,13 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
     testCaseColors = {};
     categoryColors = {};
 
+    submissionPolicy?: SubmissionPolicy;
+    hadPolicyBefore: boolean;
+
+    // Icons
+    faQuestionCircle = faQuestionCircle;
+    faSquare = faSquare;
+
     /**
      * Returns the value of testcases
      */
@@ -120,9 +131,10 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
         private accountService: AccountService,
         private gradingService: ProgrammingExerciseGradingService,
         private programmingExerciseService: ProgrammingExerciseService,
+        private programmingExerciseSubmissionPolicyService: SubmissionPolicyService,
         private programmingExerciseWebsocketService: ProgrammingExerciseWebsocketService,
         private route: ActivatedRoute,
-        private alertService: JhiAlertService,
+        private alertService: AlertService,
         private translateService: TranslateService,
         private location: Location,
         private router: Router,
@@ -154,10 +166,8 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
                     tap(() => {
                         if (this.programmingExercise.staticCodeAnalysisEnabled) {
                             this.loadStaticCodeAnalysisCategories();
-                        } else if (this.activeTab !== 'test-cases') {
-                            this.selectTab('test-cases');
                         }
-                        this.programmingExercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorForExercise(this.programmingExercise);
+                        this.hadPolicyBefore = this.programmingExercise.submissionPolicy !== undefined;
                     }),
                     catchError(() => of(null)),
                 );
@@ -186,8 +196,8 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
                 this.isLoading = false;
             }
 
-            if (params['tab'] === 'test-cases' || params['tab'] === 'code-analysis') {
-                this.activeTab = params['tab'];
+            if (params['tab'] === 'test-cases' || params['tab'] === 'code-analysis' || params['tab'] === 'submission-policy') {
+                this.selectTab(params['tab']);
             } else {
                 this.selectTab('test-cases');
             }
@@ -320,8 +330,7 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
 
         const testCaseUpdates = testCasesToUpdate.map((testCase) => ProgrammingExerciseTestCaseUpdate.from(testCase));
 
-        const isSumOfWeightsOK = this.isSumOfWeightsGreaterThanZero(testCaseUpdates);
-        if (!isSumOfWeightsOK) {
+        if (!this.isSumOfWeightsOk(testCaseUpdates)) {
             this.alertService.error(`artemisApp.programmingExercise.configureGrading.testCases.weightSumError`);
             this.isSaving = false;
             return;
@@ -450,6 +459,101 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
     }
 
     /**
+     * Removes the submission policy of the programming exercise.
+     */
+    removeSubmissionPolicy() {
+        this.isSaving = true;
+        this.programmingExerciseSubmissionPolicyService
+            .removeSubmissionPolicyFromProgrammingExercise(this.programmingExercise.id!)
+            .pipe(
+                tap(() => {
+                    this.programmingExercise.submissionPolicy = undefined;
+                    this.hadPolicyBefore = false;
+                }),
+                catchError(() => {
+                    return of(null);
+                }),
+            )
+            .subscribe(() => {
+                this.isSaving = false;
+            });
+    }
+
+    /**
+     * Adds the submission policy of the programming exercise.
+     */
+    addSubmissionPolicy() {
+        this.isSaving = true;
+        this.programmingExerciseSubmissionPolicyService
+            .addSubmissionPolicyToProgrammingExercise(this.programmingExercise.submissionPolicy!, this.programmingExercise.id!)
+            .pipe(
+                tap((submissionPolicy: SubmissionPolicy) => {
+                    this.programmingExercise.submissionPolicy = submissionPolicy;
+                    this.hadPolicyBefore = true;
+                }),
+                catchError(() => {
+                    return of(null);
+                }),
+            )
+            .subscribe(() => {
+                this.isSaving = false;
+            });
+    }
+
+    /**
+     * Updates the submission policy of the programming exercise.
+     */
+    updateSubmissionPolicy() {
+        if (this.programmingExercise.submissionPolicy?.type === SubmissionPolicyType.NONE && this.hadPolicyBefore) {
+            this.removeSubmissionPolicy();
+            return;
+        } else if (!this.hadPolicyBefore && this.programmingExercise.submissionPolicy?.type !== SubmissionPolicyType.NONE) {
+            this.addSubmissionPolicy();
+            return;
+        }
+        this.isSaving = true;
+        this.programmingExerciseSubmissionPolicyService
+            .updateSubmissionPolicyToProgrammingExercise(this.programmingExercise.submissionPolicy!, this.programmingExercise.id!)
+            .pipe(
+                catchError(() => {
+                    return of(null);
+                }),
+            )
+            .subscribe(() => {
+                this.isSaving = false;
+            });
+    }
+
+    /**
+     * Enable/Disable the submission policy of the programming exercise.
+     */
+    toggleSubmissionPolicy() {
+        this.isSaving = true;
+        const deactivateSaving = () => {
+            this.isSaving = false;
+        };
+        if (this.programmingExercise.submissionPolicy!.active) {
+            this.programmingExerciseSubmissionPolicyService
+                .disableSubmissionPolicyOfProgrammingExercise(this.programmingExercise.id!)
+                .pipe(
+                    tap(() => {
+                        this.programmingExercise!.submissionPolicy!.active = false;
+                    }),
+                )
+                .subscribe(deactivateSaving);
+        } else {
+            this.programmingExerciseSubmissionPolicyService
+                .enableSubmissionPolicyOfProgrammingExercise(this.programmingExercise.id!)
+                .pipe(
+                    tap(() => {
+                        this.programmingExercise!.submissionPolicy!.active = true;
+                    }),
+                )
+                .subscribe(deactivateSaving);
+        }
+    }
+
+    /**
      * Executes filtering on all available test cases with the specified params.
      */
     updateTestCaseFilter = () => {
@@ -518,9 +622,9 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
     iconForSortPropField(table: 'testCases' | 'codeAnalysis', prop: string) {
         const propSort = this.tableSorts[table].find((e) => e.prop === prop);
         if (!propSort) {
-            return 'sort';
+            return faSort;
         }
-        return propSort.dir === 'asc' ? 'sort-up' : 'sort-down';
+        return propSort.dir === 'asc' ? faSortUp : faSortDown;
     }
 
     /**
@@ -612,7 +716,25 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
             .subscribe();
     }
 
-    private isSumOfWeightsGreaterThanZero(testCaseUpdates: ProgrammingExerciseTestCaseUpdate[]): boolean {
+    /**
+     * The sum of all test weights has to be at least zero. For exercises with purely automatic assessment the weight has to be greater than zero.
+     * @param testCaseUpdates the changed test cases with not-yet-verified settings.
+     * @private
+     */
+    private isSumOfWeightsOk(testCaseUpdates: ProgrammingExerciseTestCaseUpdate[]): boolean {
+        const totalTestCaseWeights = this.sumOfTestCaseWeights(testCaseUpdates);
+        if (this.programmingExercise.assessmentType === AssessmentType.AUTOMATIC) {
+            // Students can only get points when at least one test case is weighted > 0
+            return totalTestCaseWeights > 0;
+        } else {
+            // When manual assessment is enabled, students can also reach full
+            // marks just with manual feedbacks.
+            // Therefore, it is okay if all weights are set to 0.
+            return totalTestCaseWeights >= 0;
+        }
+    }
+
+    private sumOfTestCaseWeights(testCaseUpdates: ProgrammingExerciseTestCaseUpdate[]): number {
         let weight = 0;
         this.testCases.forEach((testCase) => {
             const index = testCaseUpdates.findIndex((update) => testCase.id === update.id);
@@ -622,7 +744,7 @@ export class ProgrammingExerciseConfigureGradingComponent implements OnInit, OnD
                 weight += testCase.weight ?? 0;
             }
         });
-        return weight > 0;
+        return weight;
     }
 
     getEventValue(event: Event) {

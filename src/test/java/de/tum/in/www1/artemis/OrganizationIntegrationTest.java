@@ -1,6 +1,7 @@
 package de.tum.in.www1.artemis;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -20,6 +21,7 @@ import de.tum.in.www1.artemis.repository.OrganizationRepository;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.util.ModelFactory;
 import de.tum.in.www1.artemis.web.rest.dto.OrganizationCountDTO;
+import de.tum.in.www1.artemis.web.rest.errors.EntityNotFoundException;
 
 public class OrganizationIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTest {
 
@@ -145,7 +147,7 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
         Course course1 = ModelFactory.generateCourse(null, ZonedDateTime.now(), ZonedDateTime.now(), new HashSet<>(), "testcourse1", "tutor", "editor", "instructor");
         course1 = courseRepo.save(course1);
 
-        request.postWithoutLocation("/api/organizations/course/" + course1.getId() + "/organization/" + organization.getId(), null, HttpStatus.OK, null);
+        request.postWithoutLocation("/api/organizations/" + organization.getId() + "/courses/" + course1.getId(), null, HttpStatus.OK, null);
 
         Organization updatedOrganization = request.get("/api/organizations/" + organization.getId() + "/full", HttpStatus.OK, Organization.class);
         assertThat(updatedOrganization.getCourses()).contains(course1);
@@ -187,7 +189,7 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
         Organization organization = database.createOrganization();
         organization = organizationRepo.save(organization);
 
-        request.postWithoutLocation("/api/organizations/user/" + users.get(0).getLogin() + "/organization/" + organization.getId(), null, HttpStatus.OK, null);
+        request.postWithoutLocation("/api/organizations/" + organization.getId() + "/users/" + users.get(0).getLogin(), null, HttpStatus.OK, null);
         Organization updatedOrganization = request.get("/api/organizations/" + organization.getId() + "/full", HttpStatus.OK, Organization.class);
         assertThat(updatedOrganization.getUsers()).contains(users.get(0));
     }
@@ -207,7 +209,7 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
 
         assertThat(organization.getUsers()).contains(users.get(0));
 
-        request.delete("/api/organizations/user/" + users.get(0).getLogin() + "/organization/" + organization.getId(), HttpStatus.OK);
+        request.delete("/api/organizations/" + organization.getId() + "/users/" + users.get(0).getLogin(), HttpStatus.OK);
         Organization updatedOrganization = request.get("/api/organizations/" + organization.getId() + "/full", HttpStatus.OK, Organization.class);
 
         assertThat(updatedOrganization.getUsers()).doesNotContain(users.get(0));
@@ -220,11 +222,14 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void testAddOrganization() throws Exception {
+        assertThrows(EntityNotFoundException.class, () -> organizationRepo.findByIdElseThrow(Long.MAX_VALUE));
+        assertThrows(EntityNotFoundException.class, () -> organizationRepo.findByIdWithEagerUsersAndCoursesElseThrow(Long.MAX_VALUE));
+
         jiraRequestMockProvider.enableMockingOfRequests();
 
         Organization organization = database.createOrganization();
 
-        Organization updatedOrganization = request.postWithResponseBody("/api/organizations/add", organization, Organization.class, HttpStatus.OK);
+        Organization updatedOrganization = request.postWithResponseBody("/api/organizations", organization, Organization.class, HttpStatus.OK);
         Organization updatedOrganization2 = request.get("/api/organizations/" + organization.getId(), HttpStatus.OK, Organization.class);
         assertThat(updatedOrganization2).isNotNull();
         assertThat(updatedOrganization.getId()).isNotNull();
@@ -242,8 +247,47 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
         Organization organization = database.createOrganization();
         organization.setName("UpdatedName");
 
-        Organization updatedOrganization = request.putWithResponseBody("/api/organizations/update", organization, Organization.class, HttpStatus.OK);
+        Organization updatedOrganization = request.putWithResponseBody("/api/organizations/" + organization.getId(), organization, Organization.class, HttpStatus.OK);
         assertThat(updatedOrganization.getName()).isEqualTo("UpdatedName");
+    }
+
+    /**
+     * Test updating an existing organization when the Id in the RequestBody is null
+     * @throws Exception exception
+     */
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void testUpdateOrganization_idInBodyNull() throws Exception {
+        jiraRequestMockProvider.enableMockingOfRequests();
+
+        Organization initialOrganization = database.createOrganization();
+        long initialOrganizationId = initialOrganization.getId();
+        organizationRepo.save(initialOrganization);
+        initialOrganization.setId(null);
+
+        Organization updatedOrganization = request.putWithResponseBody("/api/organizations/" + initialOrganizationId, initialOrganization, Organization.class,
+                HttpStatus.BAD_REQUEST);
+        assertThat(updatedOrganization).isNull();
+    }
+
+    /**
+     * Test updating an existing organization when the Id in the path doesn't match the one in the Body
+     * @throws Exception exception
+     */
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void testUpdateOrganization_IdInPathWrong() throws Exception {
+        jiraRequestMockProvider.enableMockingOfRequests();
+
+        Organization organization = database.createOrganization();
+        organizationRepo.save(organization);
+        String initialName = organization.getName();
+        organization.setName("UpdatedName");
+        long randomId = 1337420;
+
+        Organization updatedOrganization = request.putWithResponseBody("/api/organizations/" + randomId, organization, Organization.class, HttpStatus.BAD_REQUEST);
+        organization.setName(initialName);
+        assertThat(updatedOrganization).isNull();
     }
 
     /**
@@ -253,14 +297,16 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void testDeleteOrganization() throws Exception {
-        jiraRequestMockProvider.enableMockingOfRequests();
+        Course course1 = ModelFactory.generateCourse(null, ZonedDateTime.now(), ZonedDateTime.now(), new HashSet<>(), "testcourse1", "tutor", "editor", "instructor");
+        course1 = courseRepo.save(course1);
 
         Organization organization = database.createOrganization();
         organization = organizationRepo.save(organization);
 
-        request.delete("/api/organizations/delete/" + organization.getId(), HttpStatus.OK);
+        courseRepo.addOrganizationToCourse(course1.getId(), organization);
 
-        request.get("/api/organizations/" + organization.getId(), HttpStatus.INTERNAL_SERVER_ERROR, Organization.class);
+        request.delete("/api/organizations/" + organization.getId(), HttpStatus.OK);
+        request.get("/api/organizations/" + organization.getId(), HttpStatus.NOT_FOUND, Organization.class);
     }
 
     /**
@@ -270,15 +316,13 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void testGetAllOrganizations() throws Exception {
-        jiraRequestMockProvider.enableMockingOfRequests();
-
         Organization organization = database.createOrganization();
         Organization organization2 = database.createOrganization();
         organization2.setName("Org2");
         organizationRepo.save(organization);
         organizationRepo.save(organization2);
 
-        List<Organization> result = request.getList("/api/organizations/all", HttpStatus.OK, Organization.class);
+        List<Organization> result = request.getList("/api/organizations", HttpStatus.OK, Organization.class);
         assertThat(result).hasSize(2);
     }
 
@@ -345,6 +389,9 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
         courseRepo.addOrganizationToCourse(course1.getId(), organization);
 
         userRepo.addOrganizationToUser(users.get(0).getId(), organization);
+        // invoked remove to make sure it works correctly
+        userRepo.removeOrganizationFromUser(users.get(0).getId(), organization);
+        userRepo.addOrganizationToUser(users.get(0).getId(), organization);
 
         Organization result = request.get("/api/organizations/" + organization.getId(), HttpStatus.OK, Organization.class);
         Organization resultWithCoursesAndUsers = request.get("/api/organizations/" + organization.getId() + "/full", HttpStatus.OK, Organization.class);
@@ -373,7 +420,7 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
 
         courseRepo.addOrganizationToCourse(course1.getId(), organization);
 
-        List<Organization> result = request.getList("/api/organizations/course/" + course1.getId(), HttpStatus.OK, Organization.class);
+        List<Organization> result = request.getList("/api/organizations/courses/" + course1.getId(), HttpStatus.OK, Organization.class);
         assertThat(result).contains(organization);
     }
 
@@ -391,7 +438,7 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
 
         userRepo.addOrganizationToUser(users.get(0).getId(), organization);
 
-        List<Organization> result = request.getList("/api/organizations/user/" + users.get(0).getId(), HttpStatus.OK, Organization.class);
+        List<Organization> result = request.getList("/api/organizations/users/" + users.get(0).getId(), HttpStatus.OK, Organization.class);
 
         assertThat(result).contains(organization);
     }
@@ -411,10 +458,25 @@ public class OrganizationIntegrationTest extends AbstractSpringIntegrationBamboo
 
         organization.setEmailPattern("^" + users.get(0).getEmail() + "$");
 
-        Organization updatedOrganization = request.putWithResponseBody("/api/organizations/update", organization, Organization.class, HttpStatus.OK);
+        Organization updatedOrganization = request.putWithResponseBody("/api/organizations/" + organization.getId(), organization, Organization.class, HttpStatus.OK);
         updatedOrganization = request.get("/api/organizations/" + updatedOrganization.getId() + "/full", HttpStatus.OK, Organization.class);
 
         assertThat(updatedOrganization.getUsers()).hasSize(1);
         assertThat(updatedOrganization.getUsers()).contains(users.get(0));
+
+        var organizations = organizationRepo.getAllMatchingOrganizationsByUserEmail(users.get(0).getEmail());
+        assertThat(organizations).hasSize(1);
+        assertThat(organizations).contains(organization);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void testGetOrganizationTitle() throws Exception {
+        Organization organization = database.createOrganization();
+        organization.setName("Test Organization");
+        organization = organizationRepo.save(organization);
+
+        final var title = request.get("/api/organizations/" + organization.getId() + "/title", HttpStatus.OK, String.class);
+        assertThat(title).isEqualTo(organization.getName());
     }
 }

@@ -1,7 +1,7 @@
 import { ActivatedRoute, Params } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { Observable, Subject } from 'rxjs';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { ProgrammingExercise, ProgrammingLanguage, ProjectType } from 'app/entities/programming-exercise.model';
@@ -12,9 +12,8 @@ import { switchMap, tap } from 'rxjs/operators';
 import { FeatureToggle } from 'app/shared/feature-toggle/feature-toggle.service';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
 import { AssessmentType } from 'app/entities/assessment-type.model';
-import { Exercise, IncludedInOverallScore } from 'app/entities/exercise.model';
+import { Exercise, IncludedInOverallScore, resetDates, ValidationReason } from 'app/entities/exercise.model';
 import { EditorMode } from 'app/shared/markdown-editor/markdown-editor.component';
-import { KatexCommand } from 'app/shared/markdown-editor/commands/katex.command';
 import { ProfileService } from 'app/shared/layouts/profiles/profile.service';
 import { ProgrammingExerciseSimulationService } from 'app/exercises/programming/manage/services/programming-exercise-simulation.service';
 import { ExerciseGroupService } from 'app/exam/manage/exercise-groups/exercise-group.service';
@@ -22,11 +21,13 @@ import { ProgrammingLanguageFeatureService } from 'app/exercises/programming/sha
 import { ArtemisNavigationUtilService } from 'app/utils/navigation.utils';
 import { shortNamePattern } from 'app/shared/constants/input.constants';
 import { ExerciseCategory } from 'app/entities/exercise-category.model';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { ExerciseUpdateWarningService } from 'app/exercises/shared/exercise-update-warning/exercise-update-warning.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { onError } from 'app/shared/util/global.utils';
 import { AuxiliaryRepository } from 'app/entities/programming-exercise-auxiliary-repository-model';
+import { SubmissionPolicyType } from 'app/entities/submission-policy.model';
+import { faBan, faExclamationCircle, faQuestionCircle, faSave } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-programming-exercise-update',
@@ -42,9 +43,9 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
 
     private translationBasePath = 'artemisApp.programmingExercise.';
 
-    invalidRepositoryNamePattern: RegExp;
-    invalidDirectoryNamePattern: RegExp;
-    invalidWarnings: boolean;
+    auxiliaryRepositoryDuplicateNames: boolean;
+    auxiliaryRepositoryDuplicateDirectories: boolean;
+    auxiliaryRepositoryNamedCorrectly: boolean;
     submitButtonTitle: string;
     isImport: boolean;
     isEdit: boolean;
@@ -56,7 +57,6 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
     problemStatementLoaded = false;
     templateParticipationResultLoaded = true;
     notificationText?: string;
-    domainCommandsGradingInstructions = [new KatexCommand()];
     EditorMode = EditorMode;
     AssessmentType = AssessmentType;
     rerenderSubject = new Subject<void>();
@@ -72,18 +72,25 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
         '^(?!.*(?:\\.|^)(?:abstract|continue|for|new|switch|assert|default|if|package|synchronized|boolean|do|goto|private|this|break|double|implements|protected|throw|byte|else|import|public|throws|case|enum|instanceof|return|transient|catch|extends|int|short|try|char|final|interface|static|void|class|finally|long|strictfp|volatile|const|float|native|super|while|_|true|false|null)(?:\\.|$))[A-Z_a-z][0-9A-Z_a-z]*(?:\\.[A-Z_a-z][0-9A-Z_a-z]*)*$';
     // Swift package name Regex derived from (https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#ID412),
     // with the restriction to a-z,A-Z as "Swift letter" and 0-9 as digits where no separators are allowed
-    packageNamePatternForSwift =
+    appNamePatternForSwift =
         '^(?!(?:associatedtype|class|deinit|enum|extension|fileprivate|func|import|init|inout|internal|let|open|operator|private|protocol|public|rethrows|static|struct|subscript|typealias|var|break|case|continue|default|defer|do|else|fallthrough|for|guard|if|in|repeat|return|switch|where|while|as|Any|catch|false|is|nil|super|self|Self|throw|throws|true|try|_|[sS]wift)$)[A-Za-z][0-9A-Za-z]*$';
     packageNamePattern = '';
 
-    readonly shortNamePattern = shortNamePattern; // must start with a letter and cannot contain special characters
+    // Auxiliary Repository names must only include words or '-' characters.
+    invalidRepositoryNamePattern = RegExp('^(?!(solution|exercise|tests|auxiliary)\\b)\\b(\\w|-)+$');
+
+    // Auxiliary Repository checkout directories must be valid directory paths. Those must only include words,
+    // '-' or '/' characters.
+    invalidDirectoryNamePattern = RegExp('^[\\w-]+(/[\\w-]+)*$');
+
+    // length of < 3 is also accepted in order to provide more accurate validation error messages
+    readonly shortNamePattern = RegExp('(^(?![\\s\\S]))|^[a-zA-Z][a-zA-Z0-9]*$|' + shortNamePattern); // must start with a letter and cannot contain special characters
     titleNamePattern = '^[a-zA-Z0-9-_ ]+'; // must only contain alphanumeric characters, or whitespaces, or '_' or '-'
 
     exerciseCategories: ExerciseCategory[];
     existingCategories: ExerciseCategory[];
 
     public inProductionEnvironment: boolean;
-    checkedFlagForStructuredGradingInstructions = false;
 
     public supportsJava = true;
     public supportsPython = false;
@@ -100,6 +107,7 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
     public staticCodeAnalysisAllowed = false;
     public checkoutSolutionRepositoryAllowed = false;
     public sequentialTestRunsAllowed = false;
+    public auxiliaryRepositoriesValid = true;
 
     // Additional options for import
     public recreateBuildPlans = false;
@@ -108,12 +116,18 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
 
     public projectTypes: ProjectType[] = [];
 
+    // Icons
+    faSave = faSave;
+    faBan = faBan;
+    faQuestionCircle = faQuestionCircle;
+    faExclamationCircle = faExclamationCircle;
+
     constructor(
         private programmingExerciseService: ProgrammingExerciseService,
         private modalService: NgbModal,
         private popupService: ExerciseUpdateWarningService,
         private courseService: CourseManagementService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private exerciseService: ExerciseService,
         private fileService: FileService,
         private activatedRoute: ActivatedRoute,
@@ -133,33 +147,53 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
     updateRepositoryName(editedAuxiliaryRepository: AuxiliaryRepository) {
         return (newValue: any) => {
             editedAuxiliaryRepository.name = newValue;
-            this.invalidWarnings = true;
+            this.refreshAuxiliaryRepositoryChecks();
             return editedAuxiliaryRepository.name;
         };
     }
 
     /**
-     * Updates the checkouDirectory name of the editedAuxiliaryRepository.
+     * Updates the checkoutDirectory name of the editedAuxiliaryRepository.
      *
      * @param editedAuxiliaryRepository
      */
     updateCheckoutDirectory(editedAuxiliaryRepository: AuxiliaryRepository) {
         return (newValue: any) => {
             editedAuxiliaryRepository.checkoutDirectory = newValue;
+            this.refreshAuxiliaryRepositoryChecks();
             return editedAuxiliaryRepository.checkoutDirectory;
         };
     }
 
     /**
-     * Updates the description of the editedAuxiliaryRepository.
-     *
-     * @param editedAuxiliaryRepository
+     * Refreshes auxiliary variables for auxiliary repository checks. Those variables are
+     * used in the template to display warnings.
      */
-    updateDescription(editedAuxiliaryRepository: AuxiliaryRepository) {
-        return (newValue: any) => {
-            editedAuxiliaryRepository.description = newValue;
-            return editedAuxiliaryRepository.description;
-        };
+    refreshAuxiliaryRepositoryChecks() {
+        let legalNameAndDirs = false;
+        // Check that there are no duplicate names.
+        const names = new Set<string | undefined>();
+        const auxReposWithName = this.programmingExercise.auxiliaryRepositories!.filter((auxiliaryRepository) => auxiliaryRepository.name);
+        auxReposWithName.forEach((auxiliaryRepository) => {
+            names.add(auxiliaryRepository.name);
+            legalNameAndDirs ||= !this.invalidRepositoryNamePattern.test(auxiliaryRepository.name!);
+        });
+        this.auxiliaryRepositoryDuplicateNames = names.size !== auxReposWithName.length;
+
+        // Check that there are no duplicate checkout directories
+        const directories = new Set<string | undefined>();
+        const auxReposWithDirectory = this.programmingExercise.auxiliaryRepositories!.filter((auxiliaryRepository) => auxiliaryRepository.checkoutDirectory);
+        auxReposWithDirectory.forEach((auxiliaryRepository) => {
+            directories.add(auxiliaryRepository.checkoutDirectory);
+            legalNameAndDirs ||= !this.invalidDirectoryNamePattern.test(auxiliaryRepository.checkoutDirectory!);
+        });
+        this.auxiliaryRepositoryDuplicateDirectories = directories.size !== auxReposWithDirectory.length;
+
+        // Check that there are no empty/incorrect repository names and directories
+        this.auxiliaryRepositoryNamedCorrectly = this.programmingExercise.auxiliaryRepositories!.length === auxReposWithName.length && !legalNameAndDirs;
+
+        // Combining auxiliary variables to one to keep the template readable
+        this.auxiliaryRepositoriesValid = this.auxiliaryRepositoryNamedCorrectly && !this.auxiliaryRepositoryDuplicateNames && !this.auxiliaryRepositoryDuplicateDirectories;
     }
 
     /**
@@ -274,7 +308,7 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
                                     (categoryRes: HttpResponse<string[]>) => {
                                         this.existingCategories = this.exerciseService.convertExerciseCategoriesAsStringFromServer(categoryRes.body!);
                                     },
-                                    (error: HttpErrorResponse) => onError(this.jhiAlertService, error),
+                                    (error: HttpErrorResponse) => onError(this.alertService, error),
                                 );
                             });
                         }
@@ -317,9 +351,6 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
         this.supportsSwift = this.programmingLanguageFeatureService.supportsProgrammingLanguage(ProgrammingLanguage.SWIFT);
         this.supportsOCaml = this.programmingLanguageFeatureService.supportsProgrammingLanguage(ProgrammingLanguage.OCAML);
         this.supportsEmpty = this.programmingLanguageFeatureService.supportsProgrammingLanguage(ProgrammingLanguage.EMPTY);
-
-        this.setInvalidRepoNamePattern();
-        this.setInvalidDirectoryNamePattern();
     }
 
     /**
@@ -347,33 +378,15 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
             });
             this.isExamMode = false;
         }
-        this.programmingExercise.dueDate = undefined;
+        resetDates(this.programmingExercise);
+
         this.programmingExercise.projectKey = undefined;
         this.programmingExercise.buildAndTestStudentSubmissionsAfterDueDate = undefined;
-        this.programmingExercise.assessmentDueDate = undefined;
-        this.programmingExercise.releaseDate = undefined;
         this.programmingExercise.shortName = undefined;
         this.programmingExercise.title = undefined;
-    }
-
-    /**
-     * Sets the attribute invalidRepositoryNamePattern to an updated RegExp that does not allow auxiliary repository names that are already used for this exercise and only allows
-     * "-" besides [0-9A-z]
-     */
-    private setInvalidRepoNamePattern() {
-        let invalidRepoNames = '';
-        this.programmingExercise.auxiliaryRepositories?.forEach((auxiliaryRepository) => (invalidRepoNames += '|' + auxiliaryRepository.name));
-        this.invalidRepositoryNamePattern = new RegExp('^(?!(solution|exercise|tests' + invalidRepoNames + ')\\b)\\b(\\w|-)+$');
-    }
-
-    /**
-     * Sets the attribute invalidDirectoryNamePattern to an updated RegExp that does not allow directory names that are already used for other auxiliary repositories of this
-     * exercise "-" besides [0-9A-z]
-     */
-    private setInvalidDirectoryNamePattern() {
-        let invalidDirectoryNames = '';
-        this.programmingExercise.auxiliaryRepositories?.forEach((auxiliaryRepository) => (invalidDirectoryNames += '|' + auxiliaryRepository.checkoutDirectory));
-        this.invalidDirectoryNamePattern = new RegExp('^(?!( ' + invalidDirectoryNames + ')\\b)\\b(\\w|-|/)+$');
+        if (this.programmingExercise.submissionPolicy) {
+            this.programmingExercise.submissionPolicy.id = undefined;
+        }
     }
 
     /**
@@ -425,6 +438,11 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
             }
         }
 
+        // If the programming exercise has a submission policy with a NONE type, the policy is removed altogether
+        if (this.programmingExercise.submissionPolicy && this.programmingExercise.submissionPolicy.type === SubmissionPolicyType.NONE) {
+            this.programmingExercise.submissionPolicy = undefined;
+        }
+
         Exercise.sanitize(this.programmingExercise);
 
         this.isSaving = true;
@@ -460,8 +478,8 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
     private onSaveError(error: HttpErrorResponse) {
         const errorMessage = error.headers.get('X-artemisApp-alert')!;
         // TODO: this is a workaround to avoid translation not found issues. Provide proper translations
-        const jhiAlert = this.jhiAlertService.error(errorMessage);
-        jhiAlert.msg = errorMessage;
+        const jhiAlert = this.alertService.error(errorMessage);
+        jhiAlert.message = errorMessage;
         this.isSaving = false;
         window.scrollTo(0, 0);
     }
@@ -494,7 +512,7 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
      */
     setPackageNamePattern(language: ProgrammingLanguage) {
         if (language === ProgrammingLanguage.SWIFT) {
-            this.packageNamePattern = this.packageNamePatternForSwift;
+            this.packageNamePattern = this.appNamePatternForSwift;
         } else {
             this.packageNamePattern = this.packageNamePatternForJavaKotlin;
         }
@@ -542,13 +560,6 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
     }
 
     /**
-     * gets the flag of the structured grading instructions slide toggle
-     */
-    getCheckedFlag(event: boolean) {
-        this.checkedFlagForStructuredGradingInstructions = event;
-    }
-
-    /**
      * Change the selected programming language for the current exercise. If there are unsaved changes, the user
      * will see a confirmation dialog about switching to a new template
      *
@@ -585,5 +596,170 @@ export class ProgrammingExerciseUpdateComponent implements OnInit {
             return event.target.tagName === 'TEXTAREA';
         }
         return false;
+    }
+
+    /**
+     * Get a list of all reasons that describe why the current input to update is invalid
+     */
+    getInvalidReasons(): ValidationReason[] {
+        const result: ValidationReason[] = [];
+        if (this.programmingExercise.title === undefined || this.programmingExercise.title === '') {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.title.undefined',
+                translateValues: {},
+            });
+        } else if (this.programmingExercise.title.match(this.titleNamePattern) === null || this.programmingExercise.title?.match(this.titleNamePattern)?.length === 0) {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.title.pattern',
+                translateValues: {},
+            });
+        }
+        if (this.programmingExercise.shortName === undefined || this.programmingExercise.shortName === '') {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.shortName.undefined',
+                translateValues: {},
+            });
+        } else {
+            if (this.programmingExercise.shortName.length < 3) {
+                result.push({
+                    translateKey: 'artemisApp.exercise.form.shortName.minlength',
+                    translateValues: {},
+                });
+            }
+            const shortNamePatternMatch = this.programmingExercise.shortName.match(this.shortNamePattern);
+            if (shortNamePatternMatch === null || shortNamePatternMatch.length === 0) {
+                result.push({
+                    translateKey: 'artemisApp.exercise.form.shortName.pattern',
+                    translateValues: {},
+                });
+            }
+        }
+
+        if (this.programmingExercise.maxPoints === undefined) {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.points.undefined',
+                translateValues: {},
+            });
+        } else if (this.programmingExercise.maxPoints < 1) {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.points.customMin',
+                translateValues: {},
+            });
+        } else if (this.programmingExercise.maxPoints > 9999) {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.points.customMax',
+                translateValues: {},
+            });
+        }
+
+        if (this.programmingExercise.bonusPoints === undefined || typeof this.programmingExercise.bonusPoints !== 'number') {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.bonusPoints.undefined',
+                translateValues: {},
+            });
+        } else if (this.programmingExercise.bonusPoints! < 0) {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.bonusPoints.customMin',
+                translateValues: {},
+            });
+        } else if (this.programmingExercise.bonusPoints! > 9999) {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.bonusPoints.customMax',
+                translateValues: {},
+            });
+        }
+
+        const maxStaticCodeAnalysisPenaltyPatternMatch = this.programmingExercise.maxStaticCodeAnalysisPenalty?.toString().match(this.maxPenaltyPattern);
+        if (maxStaticCodeAnalysisPenaltyPatternMatch === null || maxStaticCodeAnalysisPenaltyPatternMatch?.length === 0) {
+            result.push({
+                translateKey: 'artemisApp.exercise.form.maxPenalty.pattern',
+                translateValues: {},
+            });
+        }
+
+        // validation on package name has not to be performed for languages Empty, C and Python
+        if (
+            this.programmingExercise.programmingLanguage !== ProgrammingLanguage.C &&
+            this.programmingExercise.programmingLanguage !== ProgrammingLanguage.PYTHON &&
+            this.programmingExercise.programmingLanguage !== ProgrammingLanguage.EMPTY
+        ) {
+            if (this.programmingExercise.packageName === undefined || this.programmingExercise.packageName === '') {
+                result.push({
+                    translateKey: 'artemisApp.exercise.form.packageName.undefined',
+                    translateValues: {},
+                });
+            } else {
+                const patternMatchJavaKotlin: RegExpMatchArray | null = this.programmingExercise.packageName.match(this.packageNamePatternForJavaKotlin);
+                const patternMatchSwift: RegExpMatchArray | null = this.programmingExercise.packageName.match(this.appNamePatternForSwift);
+                // window.alert(patternMatchJavaKotlin + ' ; ' + patternMatchSwift);
+                if (this.programmingExercise.programmingLanguage === ProgrammingLanguage.JAVA && (patternMatchJavaKotlin === null || patternMatchJavaKotlin.length === 0)) {
+                    result.push({
+                        translateKey: 'artemisApp.exercise.form.packageName.pattern.JAVA',
+                        translateValues: {},
+                    });
+                } else if (
+                    this.programmingExercise.programmingLanguage === ProgrammingLanguage.KOTLIN &&
+                    (patternMatchJavaKotlin === null || patternMatchJavaKotlin.length === 0)
+                ) {
+                    result.push({
+                        translateKey: 'artemisApp.exercise.form.packageName.pattern.KOTLIN',
+                        translateValues: {},
+                    });
+                } else if (this.programmingExercise.programmingLanguage === ProgrammingLanguage.SWIFT && (patternMatchSwift === null || patternMatchSwift.length === 0)) {
+                    result.push({
+                        translateKey: 'artemisApp.exercise.form.packageName.pattern.SWIFT',
+                        translateValues: {},
+                    });
+                }
+            }
+        }
+
+        // verifying submission limit value
+        if (this.programmingExercise.submissionPolicy !== undefined && this.programmingExercise.submissionPolicy !== SubmissionPolicyType.NONE) {
+            const submissionLimit = this.programmingExercise.submissionPolicy?.submissionLimit;
+            if (submissionLimit === undefined || typeof submissionLimit !== 'number') {
+                result.push({
+                    translateKey: 'artemisApp.programmingExercise.submissionPolicy.submissionLimitWarning.required',
+                    translateValues: {},
+                });
+            } else if (submissionLimit < 1 || submissionLimit > 500 || submissionLimit % 1 !== 0) {
+                result.push({
+                    translateKey: 'artemisApp.programmingExercise.submissionPolicy.submissionLimitWarning.pattern',
+                    translateValues: {},
+                });
+            }
+        }
+
+        // verifying exceeding submission limit penalty
+        if (this.programmingExercise.submissionPolicy?.type === SubmissionPolicyType.SUBMISSION_PENALTY) {
+            const exceedingPenalty = this.programmingExercise.submissionPolicy?.exceedingPenalty;
+            if (exceedingPenalty === undefined || typeof exceedingPenalty !== 'number') {
+                result.push({
+                    translateKey: 'artemisApp.programmingExercise.submissionPolicy.submissionPenalty.penaltyInputFieldValidationWarning.required',
+                    translateValues: {},
+                });
+            } else if (exceedingPenalty <= 0) {
+                result.push({
+                    translateKey: 'artemisApp.programmingExercise.submissionPolicy.submissionPenalty.penaltyInputFieldValidationWarning.pattern',
+                    translateValues: {},
+                });
+            }
+        }
+
+        if (!this.auxiliaryRepositoriesValid) {
+            result.push({
+                translateKey: 'artemisApp.programmingExercise.auxiliaryRepository.error',
+                translateValues: {},
+            });
+        }
+
+        if (!this.validIdeSelection()) {
+            result.push({
+                translateKey: 'artemisApp.programmingExercise.allowOnlineEditor.alert',
+                translateValues: {},
+            });
+        }
+
+        return result;
     }
 }

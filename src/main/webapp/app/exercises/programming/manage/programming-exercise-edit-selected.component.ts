@@ -6,7 +6,8 @@ import { Observable } from 'rxjs';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
 import { ProgrammingExerciseSimulationService } from 'app/exercises/programming/manage/services/programming-exercise-simulation.service';
 import { ProgrammingExerciseService } from 'app/exercises/programming/manage/services/programming-exercise.service';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
+import { faSave } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-programming-exercise-edit-selected',
@@ -23,10 +24,13 @@ export class ProgrammingExerciseEditSelectedComponent implements OnInit {
     private translationBasePath = 'artemisApp.programmingExercise.';
     notificationText?: string;
 
+    // Icons
+    faSave = faSave;
+
     constructor(
         private activeModal: NgbActiveModal,
         private translateService: TranslateService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private programmingExerciseService: ProgrammingExerciseService,
         private programmingExerciseSimulationService: ProgrammingExerciseSimulationService,
     ) {}

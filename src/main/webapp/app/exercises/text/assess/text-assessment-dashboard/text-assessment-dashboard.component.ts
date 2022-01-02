@@ -15,6 +15,7 @@ import { AccountService } from 'app/core/auth/account.service';
 import { getLinkToSubmissionAssessment } from 'app/utils/navigation.utils';
 import { StudentParticipation } from 'app/entities/participation/student-participation.model';
 import { map } from 'rxjs/operators';
+import { faBan, faEdit, faFolderOpen, faSort } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     templateUrl: './text-assessment-dashboard.component.html',
@@ -34,6 +35,12 @@ export class TextAssessmentDashboardComponent implements OnInit {
     exerciseGroupId: number;
 
     private cancelConfirmationText: string;
+
+    // Icons
+    faSort = faSort;
+    faBan = faBan;
+    faEdit = faEdit;
+    faFolderOpen = faFolderOpen;
 
     constructor(
         private route: ActivatedRoute,
@@ -74,7 +81,6 @@ export class TextAssessmentDashboardComponent implements OnInit {
                 this.exercise = exercise;
                 this.getSubmissions();
                 this.numberOfCorrectionrounds = this.exercise.exerciseGroup ? this.exercise!.exerciseGroup.exam!.numberOfCorrectionRoundsInExam! : 1;
-                this.setPermissions();
             });
     }
 
@@ -125,13 +131,6 @@ export class TextAssessmentDashboardComponent implements OnInit {
             return `artemisApp.AssessmentType.${result.assessmentType}`;
         }
         return 'artemisApp.AssessmentType.null';
-    }
-    private setPermissions() {
-        if (this.exercise.course) {
-            this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.course!);
-        } else {
-            this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.exerciseGroup?.exam?.course!);
-        }
     }
 
     /**

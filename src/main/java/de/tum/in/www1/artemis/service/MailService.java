@@ -1,6 +1,10 @@
 package de.tum.in.www1.artemis.service;
 
+import static de.tum.in.www1.artemis.domain.notification.NotificationTargetFactory.extractNotificationUrl;
+
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Locale;
 
 import javax.mail.MessagingException;
@@ -8,6 +12,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,8 +22,13 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
-import de.tum.in.www1.artemis.domain.User;
-import io.github.jhipster.config.JHipsterProperties;
+import de.tum.in.www1.artemis.domain.*;
+import de.tum.in.www1.artemis.domain.enumeration.NotificationType;
+import de.tum.in.www1.artemis.domain.metis.Post;
+import de.tum.in.www1.artemis.domain.notification.GroupNotification;
+import de.tum.in.www1.artemis.domain.notification.Notification;
+import de.tum.in.www1.artemis.domain.notification.NotificationTitleTypeConstants;
+import tech.jhipster.config.JHipsterProperties;
 
 /**
  * Service for sending emails.
@@ -34,6 +44,9 @@ public class MailService {
 
     private static final String BASE_URL = "baseUrl";
 
+    @Value("${server.url}")
+    private URL artemisServerUrl;
+
     private final JHipsterProperties jHipsterProperties;
 
     private final JavaMailSender javaMailSender;
@@ -42,40 +55,61 @@ public class MailService {
 
     private final SpringTemplateEngine templateEngine;
 
-    public MailService(JHipsterProperties jHipsterProperties, JavaMailSender javaMailSender, MessageSource messageSource, SpringTemplateEngine templateEngine) {
+    private final TimeService timeService;
 
+    // notification related variables
+
+    private static final String NOTIFICATION = "notification";
+
+    private static final String NOTIFICATION_SUBJECT = "notificationSubject";
+
+    private static final String NOTIFICATION_URL = "notificationUrl";
+
+    private static final String EXERCISE_TYPE = "exerciseType";
+
+    // Translation that can not be done via i18n Recource Bundle (for Thymeleaf) but has to be set in this service via Java
+    private final String newAnnouncementEN = "New announcement \"%s\" in course \"%s\"";
+
+    private final String newAnnouncementDE = "Neue Ankündigung \"%s\" im Kurs \"%s\"";
+
+    // time related variables
+    private static final String TIME_SERVICE = "timeService";
+
+    public MailService(JHipsterProperties jHipsterProperties, JavaMailSender javaMailSender, MessageSource messageSource, SpringTemplateEngine templateEngine,
+            TimeService timeService) {
         this.jHipsterProperties = jHipsterProperties;
         this.javaMailSender = javaMailSender;
         this.messageSource = messageSource;
         this.templateEngine = templateEngine;
+        this.timeService = timeService;
     }
 
     /**
      * Sends an e-mail to the specified sender
      *
-     * @param to The receiver address
+     * @param recipient who should be contacted.
      * @param subject The mail subject
      * @param content The content of the mail. Can be enriched with HTML tags
      * @param isMultipart Whether to create a multipart that supports alternative texts, inline elements
      * @param isHtml Whether the mail should support HTML tags
      */
     @Async
-    public void sendEmail(String to, String subject, String content, boolean isMultipart, boolean isHtml) {
-        log.debug("Send email[multipart '{}' and html '{}'] to '{}' with subject '{}' and content={}", isMultipart, isHtml, to, subject, content);
+    public void sendEmail(User recipient, String subject, String content, boolean isMultipart, boolean isHtml) {
+        log.debug("Send email[multipart '{}' and html '{}'] to '{}' with subject '{}' and content={}", isMultipart, isHtml, recipient, subject, content);
 
         // Prepare message using a Spring helper
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultipart, StandardCharsets.UTF_8.name());
-            message.setTo(to);
+            message.setTo(recipient.getEmail());
             message.setFrom(jHipsterProperties.getMail().getFrom());
             message.setSubject(subject);
             message.setText(content, isHtml);
             javaMailSender.send(mimeMessage);
-            log.info("Sent email with subject '{}' to User '{}'", subject, to);
+            log.info("Sent email with subject '{}' to User '{}'", subject, recipient);
         }
         catch (MailException | MessagingException e) {
-            log.warn("Email could not be sent to user '{}'", to, e);
+            log.warn("Email could not be sent to user '{}'", recipient, e);
         }
     }
 
@@ -91,10 +125,10 @@ public class MailService {
         Locale locale = Locale.forLanguageTag(user.getLangKey());
         Context context = new Context(locale);
         context.setVariable(USER, user);
-        context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
+        context.setVariable(BASE_URL, artemisServerUrl);
         String content = templateEngine.process(templateName, context);
-        String subject = messageSource.getMessage(titleKey, null, locale);
-        sendEmail(user.getEmail(), subject, content, false, true);
+        String subject = messageSource.getMessage(titleKey, null, context.getLocale());
+        sendEmail(user, subject, content, false, true);
     }
 
     @Async
@@ -119,5 +153,89 @@ public class MailService {
     public void sendSAML2SetPasswordMail(User user) {
         log.debug("Sending SAML2 set password email to '{}'", user.getEmail());
         sendEmailFromTemplate(user, "mail/samlSetPasswordEmail", "email.saml.title");
+    }
+
+    // notification related
+
+    /**
+     * Sets the context and subject for the case that the notificationSubject is a Post
+     * @param context that is modified
+     * @param notificationSubject which has to be a Post
+     * @param locale used for translations
+     * @return the modified subject of the email
+     */
+    private String setPostContextAndSubject(Context context, Object notificationSubject, Locale locale) {
+        // posts use a different mechanism for the url
+        context.setVariable(NOTIFICATION_URL, extractNotificationUrl((Post) notificationSubject, artemisServerUrl.toString()));
+
+        // For Announcement Posts
+        String newAnnouncementString = locale.toString().equals("en") ? newAnnouncementEN : newAnnouncementDE;
+        String postTitle = ((Post) notificationSubject).getTitle();
+        String courseTitle = ((Post) notificationSubject).getCourse().getTitle();
+
+        return String.format(newAnnouncementString, postTitle, courseTitle);
+    }
+
+    /**
+     * Sends a notification based email to one user
+     * @param notification which properties are used to create the email
+     * @param user who should be contacted
+     * @param notificationSubject that is used to provide further information (e.g. exercise, attachment, post, etc.)
+     */
+    @Async
+    public void sendNotificationEmail(Notification notification, User user, Object notificationSubject) {
+        NotificationType notificationType = NotificationTitleTypeConstants.findCorrespondingNotificationType(notification.getTitle());
+        log.debug("Sending \"{}\" notification email to '{}'", notificationType.name(), user.getEmail());
+
+        Locale locale = Locale.forLanguageTag(user.getLangKey());
+
+        Context context = new Context(locale);
+        context.setVariable(USER, user);
+        context.setVariable(NOTIFICATION, notification);
+        context.setVariable(NOTIFICATION_SUBJECT, notificationSubject);
+
+        context.setVariable(TIME_SERVICE, this.timeService);
+        String subject = notification.getTitle();
+
+        if (notificationSubject instanceof Exercise) {
+            context.setVariable(EXERCISE_TYPE, ((Exercise) notificationSubject).getExerciseType());
+        }
+
+        if (notificationSubject instanceof Post) {
+            // posts use a different mechanism for the url
+            context.setVariable(NOTIFICATION_URL, extractNotificationUrl((Post) notificationSubject, artemisServerUrl.toString()));
+            subject = setPostContextAndSubject(context, notificationSubject, locale);
+        }
+        else {
+            context.setVariable(NOTIFICATION_URL, extractNotificationUrl(notification, artemisServerUrl.toString()));
+        }
+        context.setVariable(BASE_URL, artemisServerUrl);
+
+        String content = createContentForNotificationEmailByType(notificationType, context);
+
+        sendEmail(user, subject, content, false, true);
+    }
+
+    /**
+     * Creates content for a notification email based on its type
+     * @param notificationType which is used to find the corresponding html template
+     * @param context which is needed for creating the content via the templateEngine
+     * @return created content based on notification type
+     */
+    private String createContentForNotificationEmailByType(NotificationType notificationType, Context context) {
+        return switch (notificationType) {
+            case ATTACHMENT_CHANGE -> templateEngine.process("mail/notification/attachmentChangedEmail", context);
+            case EXERCISE_RELEASED -> templateEngine.process("mail/notification/exerciseReleasedEmail", context);
+            case EXERCISE_PRACTICE -> templateEngine.process("mail/notification/exerciseOpenForPracticeEmail", context);
+            case NEW_ANNOUNCEMENT_POST -> templateEngine.process("mail/notification/announcementPostEmail", context);
+            case FILE_SUBMISSION_SUCCESSFUL -> templateEngine.process("mail/notification/fileSubmissionSuccessfulEmail", context);
+            case DUPLICATE_TEST_CASE -> templateEngine.process("mail/notification/duplicateTestCasesEmail", context);
+            default -> throw new UnsupportedOperationException("Unsupported NotificationType: " + notificationType);
+        };
+    }
+
+    @Async
+    public void sendNotificationEmailForMultipleUsers(GroupNotification notification, List<User> users, Object notificationSubject) {
+        users.forEach(user -> sendNotificationEmail(notification, user, notificationSubject));
     }
 }

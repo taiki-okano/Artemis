@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import de.tum.in.www1.artemis.domain.Course;
 import de.tum.in.www1.artemis.domain.Exercise;
 import de.tum.in.www1.artemis.domain.Lecture;
+import de.tum.in.www1.artemis.domain.enumeration.DisplayPriority;
 
 /**
  * A Post, i.e. start of a Metis thread.
@@ -26,7 +27,6 @@ import de.tum.in.www1.artemis.domain.Lecture;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Post extends Posting {
 
-    // To be used with introduction of Metis
     @Size(max = 200)
     @Column(name = "title")
     private String title;
@@ -34,43 +34,36 @@ public class Post extends Posting {
     @Column(name = "visible_for_students")
     private Boolean visibleForStudents;
 
-    /**
-     * Track the votes for a "Post"
-     *
-     * @deprecated This will be removed with the introduction of Metis, where every Post will have an emoji reaction bar.
-     */
-    @Deprecated
-    @Column(name = "votes", columnDefinition = "integer default 0")
-    private Integer votes = 0;
-
-    // To be used with introduction of Metis
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Reaction> reactions = new HashSet<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<AnswerPost> answers = new HashSet<>();
 
-    // To be used with introduction of Metis
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "post_tag", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "text")
     private Set<String> tags = new HashSet<>();
 
     @ManyToOne
-    @JsonIncludeProperties({ "id" })
+    @JsonIncludeProperties({ "id", "title" })
     private Exercise exercise;
 
     @ManyToOne
-    @JsonIncludeProperties({ "id" })
+    @JsonIncludeProperties({ "id", "title" })
     private Lecture lecture;
 
     @ManyToOne
-    @JsonIncludeProperties({ "id" })
+    @JsonIncludeProperties({ "id", "title" })
     private Course course;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "course_wide_context")
     private CourseWideContext courseWideContext;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "display_priority")
+    private DisplayPriority displayPriority;
 
     public String getTitle() {
         return title;
@@ -88,14 +81,6 @@ public class Post extends Posting {
         this.visibleForStudents = visibleForStudents;
     }
 
-    public Integer getVotes() {
-        return votes;
-    }
-
-    public void setVotes(Integer votes) {
-        this.votes = votes;
-    }
-
     @Override
     public Set<Reaction> getReactions() {
         return reactions;
@@ -111,6 +96,11 @@ public class Post extends Posting {
         this.reactions.add(reaction);
     }
 
+    @Override
+    public void removeReaction(Reaction reaction) {
+        this.reactions.remove(reaction);
+    }
+
     public Set<AnswerPost> getAnswers() {
         return answers;
     }
@@ -121,6 +111,10 @@ public class Post extends Posting {
 
     public void addAnswerPost(AnswerPost answerPost) {
         this.answers.add(answerPost);
+    }
+
+    public void removeAnswerPost(AnswerPost answerPost) {
+        this.answers.remove(answerPost);
     }
 
     public Set<String> getTags() {
@@ -151,7 +145,6 @@ public class Post extends Posting {
         this.lecture = lecture;
     }
 
-    @Override
     public Course getCourse() {
         return course;
     }
@@ -168,9 +161,35 @@ public class Post extends Posting {
         this.courseWideContext = courseWideContext;
     }
 
+    public DisplayPriority getDisplayPriority() {
+        return displayPriority;
+    }
+
+    public void setDisplayPriority(DisplayPriority displayPriority) {
+        this.displayPriority = displayPriority;
+    }
+
+    /**
+     * Helper method to determine if a given post has the same context, i.e. either same exercise, lecture or course-wide context
+     * @param otherPost post that is compared to
+     * @return boolean flag indicating if same context or not
+     */
+    public boolean hasSameContext(Post otherPost) {
+        if (getExercise() != null && otherPost.getExercise() != null && getExercise().getId().equals(otherPost.getExercise().getId())) {
+            return true;
+        }
+        else if (getLecture() != null && otherPost.getLecture() != null && getLecture().getId().equals(otherPost.getLecture().getId())) {
+            return true;
+        }
+        else if (getCourseWideContext() != null && otherPost.getCourseWideContext() != null && getCourseWideContext() == otherPost.getCourseWideContext()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Post{" + "id=" + getId() + ", content='" + getContent() + "'" + ", creationDate='" + getCreationDate() + "'" + ", visibleForStudents='" + isVisibleForStudents()
-                + "'" + ", votes='" + getVotes() + "'" + "}";
+                + "'" + ", displayPriority='" + getDisplayPriority() + "'" + "}";
     }
 }

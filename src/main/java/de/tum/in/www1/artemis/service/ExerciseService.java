@@ -1,6 +1,6 @@
 package de.tum.in.www1.artemis.service;
 
-import static de.tum.in.www1.artemis.service.util.RoundingUtil.round;
+import static de.tum.in.www1.artemis.service.util.RoundingUtil.roundScoreSpecifiedByCourseSettings;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -8,29 +8,20 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import de.tum.in.www1.artemis.config.Constants;
 import de.tum.in.www1.artemis.domain.*;
 import de.tum.in.www1.artemis.domain.enumeration.ComplaintType;
 import de.tum.in.www1.artemis.domain.enumeration.ExerciseMode;
 import de.tum.in.www1.artemis.domain.enumeration.InitializationState;
-import de.tum.in.www1.artemis.domain.exam.Exam;
-import de.tum.in.www1.artemis.domain.exam.StudentExam;
-import de.tum.in.www1.artemis.domain.lecture.ExerciseUnit;
-import de.tum.in.www1.artemis.domain.modeling.ModelingExercise;
-import de.tum.in.www1.artemis.domain.participation.ProgrammingExerciseStudentParticipation;
 import de.tum.in.www1.artemis.domain.participation.StudentParticipation;
 import de.tum.in.www1.artemis.domain.quiz.QuizExercise;
 import de.tum.in.www1.artemis.domain.quiz.QuizSubmission;
 import de.tum.in.www1.artemis.domain.scores.ParticipantScore;
 import de.tum.in.www1.artemis.repository.*;
-import de.tum.in.www1.artemis.service.programming.ProgrammingAssessmentService;
-import de.tum.in.www1.artemis.service.programming.ProgrammingExerciseService;
 import de.tum.in.www1.artemis.service.scheduled.quiz.QuizScheduleService;
 import de.tum.in.www1.artemis.web.rest.dto.CourseManagementOverviewExerciseStatisticsDTO;
 import de.tum.in.www1.artemis.web.rest.dto.DueDateStat;
@@ -45,40 +36,19 @@ import de.tum.in.www1.artemis.web.rest.errors.EntityNotFoundException;
 @Service
 public class ExerciseService {
 
-    @Value("${jhipster.clientApp.name}")
-    private String applicationName;
-
     private final Logger log = LoggerFactory.getLogger(ExerciseService.class);
-
-    private final ParticipationService participationService;
 
     private final AuthorizationCheckService authCheckService;
 
-    private final ProgrammingExerciseService programmingExerciseService;
-
-    private final ModelingExerciseService modelingExerciseService;
-
-    private final QuizExerciseService quizExerciseService;
-
     private final QuizScheduleService quizScheduleService;
 
-    private final ExampleSubmissionService exampleSubmissionService;
-
-    private final ProgrammingAssessmentService programmingAssessmentService;
+    private final ExerciseDateService exerciseDateService;
 
     private final TeamRepository teamRepository;
 
-    private final ExamRepository examRepository;
-
-    private final StudentExamRepository studentExamRepository;
-
     private final AuditEventRepository auditEventRepository;
 
-    private final ExerciseUnitRepository exerciseUnitRepository;
-
     private final ExerciseRepository exerciseRepository;
-
-    private final TutorParticipationRepository tutorParticipationRepository;
 
     private final ParticipantScoreRepository participantScoreRepository;
 
@@ -89,8 +59,6 @@ public class ExerciseService {
     private final LtiOutcomeUrlRepository ltiOutcomeUrlRepository;
 
     private final StudentParticipationRepository studentParticipationRepository;
-
-    private final LectureUnitService lectureUnitService;
 
     private final UserRepository userRepository;
 
@@ -106,38 +74,24 @@ public class ExerciseService {
 
     private final FeedbackRepository feedbackRepository;
 
-    private final PlagiarismResultRepository plagiarismResultRepository;
+    private final RatingService ratingService;
 
-    public ExerciseService(ExerciseRepository exerciseRepository, ExerciseUnitRepository exerciseUnitRepository, ParticipationService participationService,
-            AuthorizationCheckService authCheckService, ProgrammingExerciseService programmingExerciseService, ModelingExerciseService modelingExerciseService,
-            QuizExerciseService quizExerciseService, QuizScheduleService quizScheduleService, TutorParticipationRepository tutorParticipationRepository,
-            ExampleSubmissionService exampleSubmissionService, AuditEventRepository auditEventRepository, TeamRepository teamRepository,
-            StudentExamRepository studentExamRepository, ExamRepository examRepository, ProgrammingExerciseRepository programmingExerciseRepository,
+    public ExerciseService(ExerciseRepository exerciseRepository, AuthorizationCheckService authCheckService, QuizScheduleService quizScheduleService,
+            AuditEventRepository auditEventRepository, TeamRepository teamRepository, ProgrammingExerciseRepository programmingExerciseRepository,
             LtiOutcomeUrlRepository ltiOutcomeUrlRepository, StudentParticipationRepository studentParticipationRepository, ResultRepository resultRepository,
-            SubmissionRepository submissionRepository, ParticipantScoreRepository participantScoreRepository, LectureUnitService lectureUnitService, UserRepository userRepository,
+            SubmissionRepository submissionRepository, ParticipantScoreRepository participantScoreRepository, UserRepository userRepository,
             ComplaintRepository complaintRepository, TutorLeaderboardService tutorLeaderboardService, ComplaintResponseRepository complaintResponseRepository,
-            PlagiarismResultRepository plagiarismResultRepository, GradingCriterionRepository gradingCriterionRepository, FeedbackRepository feedbackRepository,
-            ProgrammingAssessmentService programmingAssessmentService) {
+            GradingCriterionRepository gradingCriterionRepository, FeedbackRepository feedbackRepository, RatingService ratingService, ExerciseDateService exerciseDateService) {
         this.exerciseRepository = exerciseRepository;
         this.resultRepository = resultRepository;
-        this.examRepository = examRepository;
-        this.participationService = participationService;
         this.authCheckService = authCheckService;
-        this.programmingExerciseService = programmingExerciseService;
-        this.modelingExerciseService = modelingExerciseService;
-        this.tutorParticipationRepository = tutorParticipationRepository;
-        this.exampleSubmissionService = exampleSubmissionService;
         this.auditEventRepository = auditEventRepository;
-        this.quizExerciseService = quizExerciseService;
         this.quizScheduleService = quizScheduleService;
-        this.studentExamRepository = studentExamRepository;
-        this.exerciseUnitRepository = exerciseUnitRepository;
         this.submissionRepository = submissionRepository;
         this.teamRepository = teamRepository;
         this.participantScoreRepository = participantScoreRepository;
         this.ltiOutcomeUrlRepository = ltiOutcomeUrlRepository;
         this.studentParticipationRepository = studentParticipationRepository;
-        this.lectureUnitService = lectureUnitService;
         this.userRepository = userRepository;
         this.complaintRepository = complaintRepository;
         this.tutorLeaderboardService = tutorLeaderboardService;
@@ -145,8 +99,8 @@ public class ExerciseService {
         this.programmingExerciseRepository = programmingExerciseRepository;
         this.gradingCriterionRepository = gradingCriterionRepository;
         this.feedbackRepository = feedbackRepository;
-        this.programmingAssessmentService = programmingAssessmentService;
-        this.plagiarismResultRepository = plagiarismResultRepository;
+        this.exerciseDateService = exerciseDateService;
+        this.ratingService = ratingService;
     }
 
     /**
@@ -154,7 +108,7 @@ public class ExerciseService {
      *
      * @param exercises exercises to filter
      * @param user      user
-     * @return subset of the exercises that a user allowed to see
+     * @return subset of the exercises that a user is allowed to access
      */
     public Set<Exercise> filterOutExercisesThatUserShouldNotSee(Set<Exercise> exercises, User user) {
         if (exercises == null || user == null || exercises.isEmpty()) {
@@ -185,7 +139,6 @@ public class ExerciseService {
                 }
             }
             else {
-                // disclaimer: untested syntax, something along those lines should do the job however
                 exercisesUserIsAllowedToSee.addAll(exercises.stream().filter(Exercise::isVisibleToStudents).collect(Collectors.toSet()));
             }
         }
@@ -265,6 +218,8 @@ public class ExerciseService {
                 ComplaintType.MORE_FEEDBACK);
 
         stats.setNumberOfOpenMoreFeedbackRequests(numberOfMoreFeedbackRequests - numberOfMoreFeedbackComplaintResponses);
+
+        stats.setNumberOfRatings(ratingService.countRatingsByExerciseId(exerciseId));
 
         List<TutorLeaderboardDTO> leaderboardEntries = tutorLeaderboardService.getExerciseLeaderboard(exercise);
         stats.setTutorLeaderboardEntries(leaderboardEntries);
@@ -355,100 +310,6 @@ public class ExerciseService {
     }
 
     /**
-     * Checks if the exercise has any test runs and sets the transient property if it does
-     * @param exercise - the exercise for which we check if test runs exist
-     */
-    public void checkTestRunsExist(Exercise exercise) {
-        Long containsTestRunParticipations = studentParticipationRepository.countParticipationsOnlyTestRunsByExerciseId(exercise.getId());
-        if (containsTestRunParticipations != null && containsTestRunParticipations > 0) {
-            exercise.setTestRunParticipationsExist(Boolean.TRUE);
-        }
-    }
-
-    /**
-     * Resets an Exercise by deleting all its participations and plagiarsim results
-     *
-     * @param exercise which should be reset
-     */
-    public void reset(Exercise exercise) {
-        log.debug("Request reset Exercise : {}", exercise.getId());
-
-        // delete all plagiarism results for this exercise
-        plagiarismResultRepository.deletePlagiarismResultsByExerciseId(exercise.getId());
-
-        // delete all participations for this exercise
-        participationService.deleteAllByExerciseId(exercise.getId(), true, true);
-
-        if (exercise instanceof QuizExercise) {
-            quizExerciseService.resetExercise(exercise.getId());
-        }
-    }
-
-    /**
-     * Delete the exercise by id and all its participations.
-     *
-     * @param exerciseId                   the exercise to be deleted
-     * @param deleteStudentReposBuildPlans whether the student repos and build plans should be deleted (can be true for programming exercises and should be false for all other exercise types)
-     * @param deleteBaseReposBuildPlans    whether the template and solution repos and build plans should be deleted (can be true for programming exercises and should be false for all other exercise types)
-     */
-    @Transactional // ok
-    public void delete(long exerciseId, boolean deleteStudentReposBuildPlans, boolean deleteBaseReposBuildPlans) {
-        // Delete has a transactional mechanism. Therefore, all lazy objects that are deleted below, should be fetched when needed.
-        final var exercise = exerciseRepository.findByIdElseThrow(exerciseId);
-
-        log.info("Checking if exercise is modeling exercise", exercise.getId());
-        if (exercise instanceof ModelingExercise) {
-            log.info("Deleting clusters, elements and cancel scheduled operations", exercise.getId());
-
-            modelingExerciseService.deleteClustersAndElements((ModelingExercise) exercise);
-            modelingExerciseService.cancelScheduledOperations(exerciseId);
-        }
-
-        participantScoreRepository.deleteAllByExerciseIdTransactional(exerciseId);
-        // delete all exercise units linking to the exercise
-        List<ExerciseUnit> exerciseUnits = this.exerciseUnitRepository.findByIdWithLearningGoalsBidirectional(exerciseId);
-        for (ExerciseUnit exerciseUnit : exerciseUnits) {
-            this.lectureUnitService.removeLectureUnit(exerciseUnit);
-        }
-
-        // delete all plagiarism results belonging to this exercise
-        plagiarismResultRepository.deletePlagiarismResultsByExerciseId(exerciseId);
-
-        // delete all participations belonging to this quiz
-        participationService.deleteAllByExerciseId(exercise.getId(), deleteStudentReposBuildPlans, deleteStudentReposBuildPlans);
-        // clean up the many to many relationship to avoid problems when deleting the entities but not the relationship table
-        // to avoid a ConcurrentModificationException, we need to use a copy of the set
-        var exampleSubmissions = new HashSet<>(exercise.getExampleSubmissions());
-        for (ExampleSubmission exampleSubmission : exampleSubmissions) {
-            exampleSubmissionService.deleteById(exampleSubmission.getId());
-        }
-        // make sure tutor participations are deleted before the exercise is deleted
-        tutorParticipationRepository.deleteAllByAssessedExerciseId(exercise.getId());
-
-        if (exercise.isExamExercise()) {
-            Exam exam = examRepository.findOneWithEagerExercisesGroupsAndStudentExams(exercise.getExerciseGroup().getExam().getId());
-            for (StudentExam studentExam : exam.getStudentExams()) {
-                if (studentExam.getExercises().contains(exercise)) {
-                    // remove exercise reference from student exam
-                    List<Exercise> exerciseList = studentExam.getExercises();
-                    exerciseList.remove(exercise);
-                    studentExam.setExercises(exerciseList);
-                    studentExamRepository.save(studentExam);
-                }
-            }
-        }
-
-        // Programming exercises have some special stuff that needs to be cleaned up (solution/template participation, build plans, etc.).
-        if (exercise instanceof ProgrammingExercise) {
-            // TODO: delete all schedules related to this programming exercise
-            programmingExerciseService.delete(exercise.getId(), deleteBaseReposBuildPlans);
-        }
-        else {
-            exerciseRepository.delete(exercise);
-        }
-    }
-
-    /**
      * Updates the points of related exercises if the points of exercises have changed
      *
      * @param originalExercise the original exercise
@@ -464,44 +325,17 @@ public class ExerciseService {
             Double lastPoints = null;
             Double lastRatedPoints = null;
             if (participantScore.getLastScore() != null) {
-                lastPoints = round(participantScore.getLastScore() * 0.01 * updatedExercise.getMaxPoints());
+                lastPoints = roundScoreSpecifiedByCourseSettings(participantScore.getLastScore() * 0.01 * updatedExercise.getMaxPoints(),
+                        updatedExercise.getCourseViaExerciseGroupOrCourseMember());
             }
             if (participantScore.getLastRatedScore() != null) {
-                lastRatedPoints = round(participantScore.getLastRatedScore() * 0.01 * updatedExercise.getMaxPoints());
+                lastRatedPoints = roundScoreSpecifiedByCourseSettings(participantScore.getLastRatedScore() * 0.01 * updatedExercise.getMaxPoints(),
+                        updatedExercise.getCourseViaExerciseGroupOrCourseMember());
             }
             participantScore.setLastPoints(lastPoints);
             participantScore.setLastRatedPoints(lastRatedPoints);
         }
         participantScoreRepository.saveAll(participantScoreList);
-    }
-
-    /**
-     * Delete student build plans (except BASE/SOLUTION) and optionally git repositories of all exercise student participations.
-     *
-     * @param exerciseId         programming exercise for which build plans in respective student participations are deleted
-     * @param deleteRepositories if true, the repositories gets deleted
-     */
-    public void cleanup(Long exerciseId, boolean deleteRepositories) {
-        Exercise exercise = exerciseRepository.findByIdWithStudentParticipationsElseThrow(exerciseId);
-        log.info("Request to cleanup all participations for Exercise : {}", exercise.getTitle());
-
-        if (exercise instanceof ProgrammingExercise) {
-            for (StudentParticipation participation : exercise.getStudentParticipations()) {
-                participationService.cleanupBuildPlan((ProgrammingExerciseStudentParticipation) participation);
-            }
-
-            if (!deleteRepositories) {
-                return;    // in this case, we are done
-            }
-
-            for (StudentParticipation participation : exercise.getStudentParticipations()) {
-                participationService.cleanupRepository((ProgrammingExerciseStudentParticipation) participation);
-            }
-
-        }
-        else {
-            log.warn("Exercise with exerciseId {} is not an instance of ProgrammingExercise. Ignoring the request to cleanup repositories and build plan", exerciseId);
-        }
     }
 
     public void logDeletion(Exercise exercise, Course course, User user) {
@@ -705,14 +539,14 @@ public class ExerciseService {
      * @param exercise the exercise corresponding to the <code>CourseManagementOverviewExerciseStatisticsDTO</code>
      */
     private void setAverageScoreForStatisticsDTO(CourseManagementOverviewExerciseStatisticsDTO exerciseStatisticsDTO, Map<Long, Double> averageScoreById, Exercise exercise) {
+        Double averageScore;
         if (exercise instanceof QuizExercise) {
-            var averageScore = participantScoreRepository.findAverageScoreForExercise(exercise.getId());
-            exerciseStatisticsDTO.setAverageScoreInPercent(averageScore != null ? averageScore : 0.0);
+            averageScore = participantScoreRepository.findAverageScoreForExercise(exercise.getId());
         }
         else {
-            var averageScore = averageScoreById.get(exercise.getId());
-            exerciseStatisticsDTO.setAverageScoreInPercent(averageScore != null ? averageScore : 0.0);
+            averageScore = averageScoreById.get(exercise.getId());
         }
+        exerciseStatisticsDTO.setAverageScoreInPercent(averageScore != null ? averageScore : 0.0);
     }
 
     /**
@@ -727,7 +561,7 @@ public class ExerciseService {
             Exercise exercise) {
         exerciseStatisticsDTO.setNoOfStudentsInCourse(amountOfStudentsInCourse);
 
-        if (amountOfStudentsInCourse != null && amountOfStudentsInCourse != 0 && !exercise.isEnded()) {
+        if (amountOfStudentsInCourse != null && amountOfStudentsInCourse != 0 && exerciseDateService.isBeforeLatestDueDate(exercise)) {
             if (exercise.getMode() == ExerciseMode.TEAM) {
                 Long teamParticipations = exerciseRepository.getTeamParticipationCountById(exercise.getId());
                 var participations = teamParticipations == null ? 0 : Math.toIntExact(teamParticipations);
@@ -830,7 +664,6 @@ public class ExerciseService {
      * @param deleteFeedbackAfterGradingInstructionUpdate  boolean flag that indicates whether the associated feedback should be deleted or not     *
      */
     public void reEvaluateExercise(Exercise exercise, boolean deleteFeedbackAfterGradingInstructionUpdate) {
-
         List<GradingCriterion> gradingCriteria = exercise.getGradingCriteria();
         // retrieve the feedback associated with the structured grading instructions
         List<Feedback> feedbackToBeUpdated = feedbackRepository.findFeedbackByExerciseGradingCriteria(gradingCriteria);
@@ -844,7 +677,6 @@ public class ExerciseService {
                 if (feedback.getGradingInstruction().getId().equals(instruction.getId())) {
                     feedback.setCredits(instruction.getCredits());
                     feedback.setPositive(feedback.getCredits() >= 0);
-                    feedback.setDetailText(instruction.getFeedback());
                 }
             }
         }
@@ -852,7 +684,7 @@ public class ExerciseService {
 
         List<Feedback> feedbackToBeDeleted = getFeedbackToBeDeletedAfterGradingInstructionUpdate(deleteFeedbackAfterGradingInstructionUpdate, gradingInstructions, exercise);
 
-        List<Result> results = resultRepository.findWithEagerSubmissionAndFeedbackByParticipationExerciseId(exercise.getId());
+        List<Result> results = resultRepository.findWithEagerSubmissionAndFeedbackAndParticipationByParticipationExerciseId(exercise.getId());
 
         // add example submission results that belong exercise
         if (!exercise.getExampleSubmissions().isEmpty()) {
@@ -872,18 +704,18 @@ public class ExerciseService {
             }
 
             if (!(exercise instanceof ProgrammingExercise)) {
-                resultRepository.submitResult(result, exercise);
+                final Optional<ZonedDateTime> dueDate;
+                if (result.getParticipation() == null) {
+                    // this is only the case for example submissions, due date does not matter then
+                    dueDate = Optional.empty();
+                }
+                else {
+                    dueDate = exerciseDateService.getDueDate(result.getParticipation());
+                }
+                resultRepository.submitResult(result, exercise, dueDate);
             }
             else {
-                double totalScore = programmingAssessmentService.calculateTotalScore(result);
-                result.setScore(totalScore, exercise.getMaxPoints());
-                /*
-                 * Result string has following structure e.g: "1 of 13 passed, 2 issues, 10 of 100 points" The last part of the result string has to be updated, as the points the
-                 * student has achieved have changed
-                 */
-                String[] resultStringParts = result.getResultString().split(", ");
-                resultStringParts[resultStringParts.length - 1] = result.createResultString(totalScore, exercise.getMaxPoints());
-                result.setResultString(String.join(", ", resultStringParts));
+                result.calculateScoreForProgrammingExercise(exercise.getMaxPoints());
                 resultRepository.save(result);
             }
         }
@@ -909,7 +741,7 @@ public class ExerciseService {
                     .map(GradingInstruction::getId).toList();
 
             // collect deleted grading instruction ids into the list
-            List<Long> gradingInstructionIdsToBeDeleted = backupInstructionIds.stream().filter(backupinstructionId -> !updatedInstructionIds.contains(backupinstructionId))
+            List<Long> gradingInstructionIdsToBeDeleted = backupInstructionIds.stream().filter(backupInstructionId -> !updatedInstructionIds.contains(backupInstructionId))
                     .toList();
 
             // determine the feedback to be deleted

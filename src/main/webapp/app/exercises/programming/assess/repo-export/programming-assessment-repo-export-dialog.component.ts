@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { ProgrammingAssessmentRepoExportService, RepositoryExportOptions } from 'app/exercises/programming/assess/repo-export/programming-assessment-repo-export.service';
 import { catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -10,7 +10,7 @@ import { Exercise } from 'app/entities/exercise.model';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
 import { downloadZipFileFromResponse } from 'app/shared/util/download.util';
-import { AccountService } from 'app/core/auth/account.service';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-exercise-scores-repo-export-dialog',
@@ -32,14 +32,15 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
     repositoryExportOptions: RepositoryExportOptions;
     isLoading = false;
     isRepoExportForMultipleExercises: boolean;
-    isAtLeastInstructor?: boolean;
+
+    // Icons
+    faCircleNotch = faCircleNotch;
 
     constructor(
         private exerciseService: ExerciseService,
         private repoExportService: ProgrammingAssessmentRepoExportService,
         public activeModal: NgbActiveModal,
-        private jhiAlertService: JhiAlertService,
-        private accountService: AccountService,
+        private alertService: AlertService,
     ) {}
 
     ngOnInit() {
@@ -49,7 +50,7 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
             exportAllParticipants: false,
             filterLateSubmissions: false,
             addParticipantName: true,
-            combineStudentCommits: false,
+            combineStudentCommits: true,
             anonymizeStudentCommits: false,
             normalizeCodeStyle: false, // disabled by default because it is rather unstable
             hideStudentNameInZippedFolder: false,
@@ -61,14 +62,9 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
                 .pipe(
                     tap(({ body: exercise }) => {
                         this.exercise = exercise!;
-                        // TODO workaround since find does not support exam exercise permissions properly
-                        if (this.exercise.exerciseGroup?.exam?.course) {
-                            this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.exerciseGroup?.exam?.course!);
-                        }
-                        this.isAtLeastInstructor = this.exercise.isAtLeastInstructor;
                     }),
                     catchError((err) => {
-                        this.jhiAlertService.error(err);
+                        this.alertService.error(err);
                         this.clear();
                         return of(undefined);
                     }),
@@ -78,7 +74,6 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
                 });
         } else {
             this.isLoading = false;
-            this.isAtLeastInstructor = this.selectedProgrammingExercises.every((exercise: ProgrammingExercise) => exercise.isAtLeastInstructor);
         }
     }
 
@@ -119,7 +114,7 @@ export class ProgrammingAssessmentRepoExportDialogComponent implements OnInit {
     }
 
     handleExportRepoResponse = (response: HttpResponse<Blob>) => {
-        this.jhiAlertService.success('artemisApp.programmingExercise.export.successMessageRepos');
+        this.alertService.success('artemisApp.programmingExercise.export.successMessageRepos');
         this.activeModal.dismiss(true);
         this.exportInProgress = false;
         downloadZipFileFromResponse(response);

@@ -1,25 +1,28 @@
 import * as sinon from 'sinon';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ArtemisTestModule } from '../../test.module';
-import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { TextblockFeedbackEditorComponent } from 'app/exercises/text/assess/textblock-feedback-editor/textblock-feedback-editor.component';
-import { Feedback, FeedbackType } from 'app/entities/feedback.model';
+import { Feedback, FeedbackType, FeedbackCorrectionErrorType } from 'app/entities/feedback.model';
 import { TextBlock, TextBlockType } from 'app/entities/text-block.model';
-import { ArtemisConfirmIconModule } from 'app/shared/confirm-icon/confirm-icon.module';
+import { ConfirmIconComponent } from 'app/shared/confirm-icon/confirm-icon.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { MockComponent, MockProvider } from 'ng-mocks';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { MockComponent, MockDirective, MockPipe, MockProvider } from 'ng-mocks';
+import { FaIconComponent, FaLayersComponent } from '@fortawesome/angular-fontawesome';
 import { GradingInstruction } from 'app/exercises/shared/structured-grading-criterion/grading-instruction.model';
 import { FeedbackConflict } from 'app/entities/feedback-conflict';
 import { AssessmentCorrectionRoundBadgeComponent } from 'app/assessment/assessment-detail/assessment-correction-round-badge/assessment-correction-round-badge.component';
-import { ArtemisGradingInstructionLinkIconModule } from 'app/shared/grading-instruction-link-icon/grading-instruction-link-icon.module';
+import { GradingInstructionLinkIconComponent } from 'app/shared/grading-instruction-link-icon/grading-instruction-link-icon.component';
 import { ChangeDetectorRef } from '@angular/core';
 import { MockNgbModalService } from '../../helpers/mocks/service/mock-ngb-modal.service';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
-import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
+import { MockTranslateService, TranslateTestingModule } from '../../helpers/mocks/service/mock-translate.service';
 import { TextAssessmentEventType } from 'app/entities/text-assesment-event.model';
+import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgModel } from '@angular/forms';
+import { TranslateDirective } from 'app/shared/language/translate.directive';
 
 describe('TextblockFeedbackEditorComponent', () => {
     let component: TextblockFeedbackEditorComponent;
@@ -28,10 +31,21 @@ describe('TextblockFeedbackEditorComponent', () => {
 
     const textBlock = { id: 'f6773c4b3c2d057fd3ac11f02df31c0a3e75f800' } as TextBlock;
 
-    beforeEach(async () => {
+    beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, ArtemisSharedModule, TranslateModule.forRoot(), ArtemisConfirmIconModule, ArtemisGradingInstructionLinkIconModule],
-            declarations: [TextblockFeedbackEditorComponent, AssessmentCorrectionRoundBadgeComponent],
+            imports: [ArtemisTestModule, TranslateModule.forRoot(), TranslateTestingModule],
+            declarations: [
+                TextblockFeedbackEditorComponent,
+                AssessmentCorrectionRoundBadgeComponent,
+                MockPipe(ArtemisTranslatePipe),
+                MockComponent(ConfirmIconComponent),
+                MockComponent(FaIconComponent),
+                MockComponent(FaLayersComponent),
+                MockComponent(GradingInstructionLinkIconComponent),
+                MockDirective(TranslateDirective),
+                MockDirective(NgbTooltip),
+                MockDirective(NgModel),
+            ],
             providers: [
                 MockProvider(ChangeDetectorRef),
                 { provide: NgbModal, useClass: MockNgbModalService },
@@ -42,8 +56,8 @@ describe('TextblockFeedbackEditorComponent', () => {
         })
             .overrideModule(ArtemisTestModule, {
                 remove: {
-                    declarations: [MockComponent(FaIconComponent)],
-                    exports: [MockComponent(FaIconComponent)],
+                    declarations: [MockComponent(FaIconComponent), MockComponent(FaLayersComponent)],
+                    exports: [MockComponent(FaIconComponent), MockComponent(FaLayersComponent)],
                 },
             })
             .compileComponents();
@@ -71,28 +85,28 @@ describe('TextblockFeedbackEditorComponent', () => {
     });
 
     it('should show delete button for empty feedback only', () => {
-        let button = compiled.querySelector('.close fa-icon[icon="times"]');
+        let button = compiled.querySelector('.close fa-icon[ng-reflect-icon="[object Object]"]');
         let confirm = compiled.querySelector('.close jhi-confirm-icon');
         expect(button).toBeTruthy();
         expect(confirm).toBeFalsy();
 
         component.feedback.credits = 1;
         fixture.detectChanges();
-        button = compiled.querySelector('.close fa-icon[icon="times"]');
+        button = compiled.querySelector('.close fa-icon[ng-reflect-icon="[object Object]"]');
         confirm = compiled.querySelector('.close jhi-confirm-icon');
         expect(button).toBeFalsy();
         expect(confirm).toBeTruthy();
 
         component.feedback.detailText = 'Lorem Ipsum';
         fixture.detectChanges();
-        button = compiled.querySelector('.close fa-icon[icon="times"]');
+        button = compiled.querySelector('.close fa-icon[ng-reflect-icon="[object Object]"]');
         confirm = compiled.querySelector('.close jhi-confirm-icon');
         expect(button).toBeFalsy();
         expect(confirm).toBeTruthy();
 
         component.feedback.credits = 0;
         fixture.detectChanges();
-        button = compiled.querySelector('.close fa-icon[icon="times"]');
+        button = compiled.querySelector('.close fa-icon[ng-reflect-icon="[object Object]"]');
         confirm = compiled.querySelector('.close jhi-confirm-icon');
         expect(button).toBeFalsy();
         expect(confirm).toBeTruthy();
@@ -100,7 +114,7 @@ describe('TextblockFeedbackEditorComponent', () => {
         component.feedback.detailText = '';
         fixture.detectChanges();
 
-        button = compiled.querySelector('.close fa-icon[icon="times"]');
+        button = compiled.querySelector('.close fa-icon[ng-reflect-icon="[object Object]"]');
         confirm = compiled.querySelector('.close jhi-confirm-icon');
         expect(button).toBeTruthy();
         expect(confirm).toBeFalsy();
@@ -109,7 +123,7 @@ describe('TextblockFeedbackEditorComponent', () => {
     it('should put the badge and the text correctly for feedback conflicts', () => {
         component.feedback.conflictingTextAssessments = [new FeedbackConflict()];
         fixture.detectChanges();
-        const badge = compiled.querySelector('.bg-warning fa-icon[ng-reflect-icon="balance-scale-right"]');
+        const badge = compiled.querySelector('.bg-warning fa-icon[ng-reflect-icon="[object Object]"]');
         expect(badge).toBeTruthy();
         const text = compiled.querySelector('[jhiTranslate$=conflictingAssessments]');
         expect(text).toBeTruthy();
@@ -123,7 +137,7 @@ describe('TextblockFeedbackEditorComponent', () => {
         component.isLeftConflictingFeedback = true;
         fixture.detectChanges();
 
-        spyOn(component['textareaElement'], 'focus');
+        jest.spyOn(component['textareaElement'], 'focus');
         component.focus();
 
         expect(component['textareaElement'].focus).toHaveBeenCalled();
@@ -137,7 +151,7 @@ describe('TextblockFeedbackEditorComponent', () => {
         component.isLeftConflictingFeedback = false;
         fixture.detectChanges();
 
-        spyOn(component['textareaElement'], 'focus');
+        jest.spyOn(component['textareaElement'], 'focus');
         component.focus();
 
         expect(component['textareaElement'].focus).toHaveBeenCalledTimes(0);
@@ -146,7 +160,7 @@ describe('TextblockFeedbackEditorComponent', () => {
     it('should call escKeyup when keyEvent', () => {
         component.feedback.credits = 0;
         component.feedback.detailText = '';
-        spyOn(component, 'escKeyup');
+        jest.spyOn(component, 'escKeyup');
         const event = new KeyboardEvent('keydown', {
             key: 'Esc',
         });
@@ -164,7 +178,7 @@ describe('TextblockFeedbackEditorComponent', () => {
         component.feedback.type = FeedbackType.MANUAL;
         fixture.detectChanges();
 
-        const warningIcon = compiled.querySelector('fa-icon[ng-reflect-icon="info-circle"]');
+        const warningIcon = compiled.querySelector('fa-icon[ng-reflect-icon="[object Object]"]');
         expect(warningIcon).toBeTruthy();
         const text = compiled.querySelector('[jhiTranslate$=impactWarning]');
         expect(text).toBeTruthy();
@@ -174,9 +188,6 @@ describe('TextblockFeedbackEditorComponent', () => {
         textBlock.numberOfAffectedSubmissions = 0;
         fixture.detectChanges();
 
-        const warningIcon = compiled.querySelector('fa-icon[ng-reflect-icon="exclamation-triangle"]');
-        expect(warningIcon).toBeFalsy();
-
         const text = compiled.querySelector('[jhiTranslate$=feedbackImpactWarning]');
         expect(text).toBeFalsy();
     });
@@ -185,7 +196,7 @@ describe('TextblockFeedbackEditorComponent', () => {
         component.feedback.type = FeedbackType.AUTOMATIC;
         fixture.detectChanges();
 
-        const searchOriginIcon = compiled.querySelector('fa-icon[ng-reflect-icon="search"]');
+        const searchOriginIcon = compiled.querySelector('fa-icon[ng-reflect-icon="[object Object]"]');
         expect(searchOriginIcon).toBeTruthy();
     });
 
@@ -216,7 +227,7 @@ describe('TextblockFeedbackEditorComponent', () => {
     it('should send assessment event on conflict button click', () => {
         component.feedback.type = FeedbackType.AUTOMATIC;
         component.textBlock.type = TextBlockType.AUTOMATIC;
-        const sendAssessmentEvent = spyOn<any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
+        const sendAssessmentEvent = jest.spyOn<any, any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
         component.onConflictClicked(1);
         fixture.detectChanges();
         expect(sendAssessmentEvent).toHaveBeenCalledWith(TextAssessmentEventType.CLICK_TO_RESOLVE_CONFLICT, FeedbackType.AUTOMATIC, TextBlockType.AUTOMATIC);
@@ -225,7 +236,7 @@ describe('TextblockFeedbackEditorComponent', () => {
     it('should send assessment event on dismiss button click', () => {
         component.feedback.type = FeedbackType.MANUAL;
         component.textBlock.type = TextBlockType.MANUAL;
-        const sendAssessmentEvent = spyOn<any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
+        const sendAssessmentEvent = jest.spyOn<any, any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
         component.dismiss();
         fixture.detectChanges();
         expect(sendAssessmentEvent).toHaveBeenCalledWith(TextAssessmentEventType.DELETE_FEEDBACK, FeedbackType.MANUAL, TextBlockType.MANUAL);
@@ -234,9 +245,32 @@ describe('TextblockFeedbackEditorComponent', () => {
     it('should send assessment event on hovering over warning', () => {
         component.feedback.type = FeedbackType.MANUAL;
         component.textBlock.type = TextBlockType.AUTOMATIC;
-        const sendAssessmentEvent = spyOn<any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
+        const sendAssessmentEvent = jest.spyOn<any, any>(component.textAssessmentAnalytics, 'sendAssessmentEvent');
         component.mouseEnteredWarningLabel();
         fixture.detectChanges();
         expect(sendAssessmentEvent).toHaveBeenCalledWith(TextAssessmentEventType.HOVER_OVER_IMPACT_WARNING, FeedbackType.MANUAL, TextBlockType.AUTOMATIC);
+    });
+
+    it('should set correctionStatus of the feedback to undefined on score click', () => {
+        // given
+        component.feedback.correctionStatus = FeedbackCorrectionErrorType.UNNECESSARY_FEEDBACK;
+
+        // when
+        component.onScoreClick(new MouseEvent(''));
+
+        // then
+        expect(component.feedback.correctionStatus).toBeUndefined();
+    });
+
+    it('should set correctionStatus of the feedback to undefined on connection of feedback with the grading instruction', () => {
+        // given
+        component.feedback.correctionStatus = FeedbackCorrectionErrorType.MISSING_GRADING_INSTRUCTION;
+        jest.spyOn(component.structuredGradingCriterionService, 'updateFeedbackWithStructuredGradingInstructionEvent').mockImplementation();
+
+        // when
+        component.connectFeedbackWithInstruction(new Event(''));
+
+        // then
+        expect(component.feedback.correctionStatus).toBeUndefined();
     });
 });

@@ -1,18 +1,21 @@
 import { EventEmitter, Input, OnDestroy, OnInit, Output, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { JhiEventManager } from 'ng-jhipster';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { Course } from 'app/entities/course.model';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { ExerciseFilter } from 'app/entities/exercise-filter.model';
 
 @Component({ template: '' })
 export abstract class ExerciseComponent implements OnInit, OnDestroy {
     private eventSubscriber: Subscription;
     @Input() embedded = false;
     @Input() course: Course;
+    filter: ExerciseFilter;
     @Output() exerciseCount = new EventEmitter<number>();
+    @Output() filteredExerciseCount = new EventEmitter<number>();
     showAlertHeading: boolean;
     showHeading: boolean;
     courseId: number;
@@ -27,7 +30,7 @@ export abstract class ExerciseComponent implements OnInit, OnDestroy {
         private courseService: CourseManagementService,
         protected translateService: TranslateService,
         private route: ActivatedRoute,
-        protected eventManager: JhiEventManager,
+        protected eventManager: EventManager,
     ) {
         this.predicate = 'id';
         this.reverse = true;
@@ -41,6 +44,7 @@ export abstract class ExerciseComponent implements OnInit, OnDestroy {
         this.showHeading = this.embedded;
         this.load();
         this.registerChangeInExercises();
+        this.filter = new ExerciseFilter();
     }
 
     /**
@@ -49,6 +53,12 @@ export abstract class ExerciseComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.eventManager.destroy(this.eventSubscriber);
         this.dialogErrorSource.unsubscribe();
+    }
+
+    @Input()
+    set exerciseFilter(value: ExerciseFilter) {
+        this.filter = value;
+        this.applyFilter();
     }
 
     protected load(): void {
@@ -82,8 +92,14 @@ export abstract class ExerciseComponent implements OnInit, OnDestroy {
 
     protected abstract loadExercises(): void;
 
+    protected abstract applyFilter(): void;
+
     protected emitExerciseCount(count: number): void {
         this.exerciseCount.emit(count);
+    }
+
+    protected emitFilteredExerciseCount(count: number): void {
+        this.filteredExerciseCount.emit(count);
     }
 
     protected abstract getChangeEventName(): string;

@@ -1,26 +1,18 @@
 import { HttpTestingController } from '@angular/common/http/testing';
 import { SimpleChange } from '@angular/core';
 import { ArtemisTestModule } from '../../test.module';
-import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { StatisticsGraphComponent } from 'app/shared/statistics-graph/statistics-graph.component';
 import { StatisticsService } from 'app/shared/statistics-graph/statistics.service';
 import { Graphs, SpanType, StatisticsView } from 'app/entities/statistics.model';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
-import * as chai from 'chai';
-import * as moment from 'moment';
-import { MockPipe } from 'ng-mocks';
-import { ChartsModule } from 'ng2-charts';
-import { MomentModule } from 'ngx-moment';
-import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
+import dayjs from 'dayjs';
+import { MockModule, MockPipe } from 'ng-mocks';
 import { of } from 'rxjs';
-import * as sinonChai from 'sinon-chai';
 import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-chai.use(sinonChai);
-const expect = chai.expect;
+import { BarChartModule } from '@swimlane/ngx-charts';
 
 describe('StatisticsGraphComponent', () => {
     let fixture: ComponentFixture<StatisticsGraphComponent>;
@@ -30,13 +22,9 @@ describe('StatisticsGraphComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, RouterTestingModule.withRoutes([]), MomentModule, ChartsModule],
+            imports: [ArtemisTestModule, RouterTestingModule.withRoutes([]), MockModule(BarChartModule)],
             declarations: [StatisticsGraphComponent, MockPipe(ArtemisTranslatePipe)],
-            providers: [
-                { provide: LocalStorageService, useClass: MockSyncStorage },
-                { provide: SessionStorageService, useClass: MockSyncStorage },
-                { provide: TranslateService, useClass: MockTranslateService },
-            ],
+            providers: [{ provide: TranslateService, useClass: MockTranslateService }],
         })
             .compileComponents()
             .then(() => {
@@ -56,7 +44,7 @@ describe('StatisticsGraphComponent', () => {
         component.graphType = Graphs.SUBMISSIONS;
         component.statisticsView = StatisticsView.ARTEMIS;
         let arrayLength = 0;
-        const spy = spyOn(service, 'getChartData');
+        const getChartDataMock = jest.spyOn(service, 'getChartData');
 
         for (const span of Object.values(SpanType)) {
             component.currentSpan = span;
@@ -68,8 +56,8 @@ describe('StatisticsGraphComponent', () => {
                     arrayLength = 7;
                     break;
                 case SpanType.MONTH:
-                    const startDate = moment().subtract(1, 'months');
-                    arrayLength = moment().diff(startDate, 'days');
+                    const startDate = dayjs().subtract(1, 'months');
+                    arrayLength = dayjs().diff(startDate, 'days');
                     break;
                 case SpanType.QUARTER:
                     arrayLength = 12;
@@ -82,14 +70,16 @@ describe('StatisticsGraphComponent', () => {
             for (let i = 0; i < arrayLength; i++) {
                 graphData[i] = i + 1;
             }
-            spy.and.returnValue(of(graphData));
+            getChartDataMock.mockReturnValue(of(graphData));
 
             const changes = { currentSpan: { currentValue: span } as SimpleChange };
             component.ngOnChanges(changes);
 
-            expect(component.dataForSpanType).to.equal(graphData);
-            expect(component.chartData[0].data).to.equal(graphData);
-            expect(component.currentSpan).to.equal(span);
+            expect(component.dataForSpanType).toEqual(graphData);
+            graphData.forEach((data, index) => {
+                expect(component.ngxData[index].value).toBe(data);
+            });
+            expect(component.currentSpan).toEqual(span);
         }
     });
 
@@ -108,8 +98,8 @@ describe('StatisticsGraphComponent', () => {
         const req = httpMock.expectOne({ method: 'GET' });
         req.flush([...graphData]);
 
-        expect(component.dataForSpanType).to.deep.equal(graphData);
-        expect(component.currentSpan).to.equal(SpanType.DAY);
+        expect(component.dataForSpanType).toEqual(graphData);
+        expect(component.currentSpan).toEqual(SpanType.DAY);
     });
 
     it('should switch time span', () => {
@@ -117,13 +107,12 @@ describe('StatisticsGraphComponent', () => {
         component.currentSpan = SpanType.WEEK;
         component.statisticsView = StatisticsView.ARTEMIS;
         const graphData = [1, 2, 3, 4, 5, 6, 8];
-        spyOn(service, 'getChartData').and.returnValue(of(graphData));
+        jest.spyOn(service, 'getChartData').mockReturnValue(of(graphData));
 
         fixture.detectChanges();
 
         component.switchTimeSpan(true);
 
-        expect(component.dataForSpanType).to.equal(graphData);
-        expect(component).to.be.ok;
+        expect(component.dataForSpanType).toEqual(graphData);
     });
 });

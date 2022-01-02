@@ -30,6 +30,8 @@ import { ArtemisHeaderExercisePageWithDetailsModule } from 'app/exercises/shared
 import { ArtemisMarkdownModule } from 'app/shared/markdown.module';
 import { FileUploadExamSubmissionComponent } from 'app/exam/participate/exercises/file-upload/file-upload-exam-submission.component';
 import { ExamExerciseOverviewPageComponent } from 'app/exam/participate/exercises/exercise-overview-page/exam-exercise-overview-page.component';
+import { ExamExerciseUpdateHighlighterComponent } from 'app/exam/participate/exercises/exam-exercise-update-highlighter/exam-exercise-update-highlighter.component';
+import { SubmissionResultStatusModule } from 'app/overview/submission-result-status.module';
 
 const ENTITY_STATES = [...examParticipationState];
 
@@ -54,6 +56,7 @@ const ENTITY_STATES = [...examParticipationState];
         ArtemisProgrammingAssessmentModule,
         ArtemisParticipationSummaryModule,
         ArtemisMarkdownModule,
+        SubmissionResultStatusModule,
     ],
     declarations: [
         ExamParticipationComponent,
@@ -66,6 +69,7 @@ const ENTITY_STATES = [...examParticipationState];
         ExamNavigationBarComponent,
         ExamTimerComponent,
         ExamExerciseOverviewPageComponent,
+        ExamExerciseUpdateHighlighterComponent,
     ],
 })
 export class ArtemisExamParticipationModule {}

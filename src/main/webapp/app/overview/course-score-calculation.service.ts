@@ -2,18 +2,19 @@ import { Injectable } from '@angular/core';
 import { Result } from 'app/entities/result.model';
 import { Course } from 'app/entities/course.model';
 import { Exercise, IncludedInOverallScore } from 'app/entities/exercise.model';
-import * as moment from 'moment';
-import { Moment } from 'moment';
+import dayjs from 'dayjs';
 import { StudentParticipation } from 'app/entities/participation/student-participation.model';
 import { Participation } from 'app/entities/participation/participation.model';
-import { round } from 'app/shared/util/utils';
+import { roundScorePercentSpecifiedByCourseSettings, roundScoreSpecifiedByCourseSettings } from 'app/shared/util/utils';
 
-export const ABSOLUTE_SCORE = 'absoluteScore';
-export const RELATIVE_SCORE = 'relativeScore';
-export const MAX_POINTS = 'maxPoints';
-export const PRESENTATION_SCORE = 'presentationScore';
-export const REACHABLE_POINTS = 'reachableScore';
-export const CURRENT_RELATIVE_SCORE = 'currentRelativeScore';
+export enum ScoreType {
+    ABSOLUTE_SCORE = 'absoluteScore',
+    RELATIVE_SCORE = 'relativeScore',
+    MAX_POINTS = 'maxPoints',
+    PRESENTATION_SCORE = 'presentationScore',
+    REACHABLE_POINTS = 'reachableScore',
+    CURRENT_RELATIVE_SCORE = 'currentRelativeScore',
+}
 
 @Injectable({ providedIn: 'root' })
 export class CourseScoreCalculationService {
@@ -22,15 +23,15 @@ export class CourseScoreCalculationService {
 
     constructor() {}
 
-    calculateTotalScores(courseExercises: Exercise[]): Map<string, number> {
+    calculateTotalScores(courseExercises: Exercise[], course: Course): Map<string, number> {
         const scores = new Map<string, number>();
         let pointsAchievedByStudentInCourse = 0.0;
         let maxPointsInCourse = 0;
         let reachableMaxPointsInCourse = 0;
         let presentationScore = 0;
         for (const exercise of courseExercises) {
-            const isExerciseFinished = !exercise.dueDate || exercise.dueDate.isBefore(moment());
-            const isAssessmentOver = !exercise.assessmentDueDate || exercise.assessmentDueDate.isBefore(moment());
+            const isExerciseFinished = !exercise.dueDate || exercise.dueDate.isBefore(dayjs());
+            const isAssessmentOver = !exercise.assessmentDueDate || exercise.assessmentDueDate.isBefore(dayjs());
             const isExerciseIncluded = exercise.includedInOverallScore !== IncludedInOverallScore.NOT_INCLUDED;
 
             if (isExerciseFinished && isExerciseIncluded) {
@@ -57,26 +58,26 @@ export class CourseScoreCalculationService {
                         // In the client, these are now displayed rounded as 1.1 points.
                         // If the student adds up the displayed points, he gets a total of 5.5 points.
                         // In order to get the same total result as the student, we have to round before summing.
-                        pointsAchievedByStudentInCourse += round(score * this.SCORE_NORMALIZATION_VALUE * maxPointsReachableInExercise, 1);
+                        pointsAchievedByStudentInCourse += roundScoreSpecifiedByCourseSettings(score * this.SCORE_NORMALIZATION_VALUE * maxPointsReachableInExercise, course);
                     }
                     presentationScore += participation.presentationScore ? participation.presentationScore : 0;
                 }
             }
         }
-        scores.set(ABSOLUTE_SCORE, round(pointsAchievedByStudentInCourse, 1));
+        scores.set(ScoreType.ABSOLUTE_SCORE, roundScoreSpecifiedByCourseSettings(pointsAchievedByStudentInCourse, course));
         if (maxPointsInCourse > 0) {
-            scores.set(RELATIVE_SCORE, round((pointsAchievedByStudentInCourse / maxPointsInCourse) * 100, 1));
+            scores.set(ScoreType.RELATIVE_SCORE, roundScorePercentSpecifiedByCourseSettings(pointsAchievedByStudentInCourse / maxPointsInCourse, course));
         } else {
-            scores.set(RELATIVE_SCORE, 0);
+            scores.set(ScoreType.RELATIVE_SCORE, 0);
         }
         if (reachableMaxPointsInCourse > 0) {
-            scores.set(CURRENT_RELATIVE_SCORE, round((pointsAchievedByStudentInCourse / reachableMaxPointsInCourse) * 100, 1));
+            scores.set(ScoreType.CURRENT_RELATIVE_SCORE, roundScorePercentSpecifiedByCourseSettings(pointsAchievedByStudentInCourse / reachableMaxPointsInCourse, course));
         } else {
-            scores.set(CURRENT_RELATIVE_SCORE, 0);
+            scores.set(ScoreType.CURRENT_RELATIVE_SCORE, 0);
         }
-        scores.set(MAX_POINTS, maxPointsInCourse);
-        scores.set(PRESENTATION_SCORE, presentationScore);
-        scores.set(REACHABLE_POINTS, reachableMaxPointsInCourse);
+        scores.set(ScoreType.MAX_POINTS, maxPointsInCourse);
+        scores.set(ScoreType.PRESENTATION_SCORE, presentationScore);
+        scores.set(ScoreType.REACHABLE_POINTS, reachableMaxPointsInCourse);
         return scores;
     }
 
@@ -101,7 +102,7 @@ export class CourseScoreCalculationService {
         }
     }
 
-    getResultForParticipation(participation: Participation | undefined, dueDate: Moment) {
+    getResultForParticipation(participation: Participation | undefined, dueDate: dayjs.Dayjs) {
         if (!participation) {
             return undefined;
         }
@@ -156,12 +157,12 @@ export class CourseScoreCalculationService {
     }
 
     private static convertDateForResultFromServer(result: Result): Result {
-        result.completionDate = result.completionDate ? moment(result.completionDate) : undefined;
+        result.completionDate = result.completionDate ? dayjs(result.completionDate) : undefined;
         return result;
     }
 
     private static convertDateForParticipationFromServer(participation: Participation): Participation {
-        participation.initializationDate = participation.initializationDate ? moment(participation.initializationDate) : undefined;
+        participation.initializationDate = participation.initializationDate ? dayjs(participation.initializationDate) : undefined;
         return participation;
     }
 }

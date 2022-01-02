@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Organization } from 'app/entities/organization.model';
 import { OrganizationManagementService } from 'app/admin/organization-management/organization-management.service';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { User } from 'app/core/user/user.model';
 import { Subject, Observable, of } from 'rxjs';
 import { Subscription } from 'rxjs';
@@ -12,6 +12,7 @@ import { ActionType } from 'app/shared/delete-dialog/delete-dialog.model';
 import { iconsAsHTML } from 'app/utils/icons.utils';
 import { UserService } from 'app/core/user/user.service';
 import { DataTableComponent } from 'app/shared/data-table/data-table.component';
+import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 const cssClasses = {
     alreadyMember: 'already-member',
@@ -39,12 +40,10 @@ export class OrganizationManagementDetailComponent implements OnInit {
     isTransitioning = false;
     rowClass: string | undefined = undefined;
 
-    constructor(
-        private organizationService: OrganizationManagementService,
-        private userService: UserService,
-        private alertService: JhiAlertService,
-        private route: ActivatedRoute,
-    ) {}
+    // Icons
+    faUserSlash = faUserSlash;
+
+    constructor(private organizationService: OrganizationManagementService, private userService: UserService, private alertService: AlertService, private route: ActivatedRoute) {}
 
     /**
      * Retrieve the organization from the organization management activated route data {@link OrganizationMgmtResolve} subscription

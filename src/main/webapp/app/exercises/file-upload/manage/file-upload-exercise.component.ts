@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 import { TranslateService } from '@ngx-translate/core';
 import { filter } from 'rxjs/operators';
 import { FileUploadExercise } from 'app/entities/file-upload-exercise.model';
@@ -9,9 +8,14 @@ import { FileUploadExerciseService } from './file-upload-exercise.service';
 import { ExerciseComponent } from 'app/exercises/shared/exercise/exercise.component';
 import { onError } from 'app/shared/util/global.utils';
 import { AccountService } from 'app/core/auth/account.service';
-import { CourseExerciseService, CourseManagementService } from '../../../course/manage/course-management.service';
+import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { SortService } from 'app/shared/service/sort.service';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { faBook, faPlus, faSort, faTable, faTimes, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faListAlt } from '@fortawesome/free-regular-svg-icons';
+import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 
 @Component({
     selector: 'jhi-file-upload-exercise',
@@ -19,17 +23,28 @@ import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service'
 })
 export class FileUploadExerciseComponent extends ExerciseComponent {
     @Input() fileUploadExercises: FileUploadExercise[] = [];
+    filteredFileUploadExercises: FileUploadExercise[] = [];
+
+    // Icons
+    faSort = faSort;
+    faPlus = faPlus;
+    faTimes = faTimes;
+    faBook = faBook;
+    faWrench = faWrench;
+    faUsers = faUsers;
+    faTable = faTable;
+    farListAlt = faListAlt;
 
     constructor(
         public exerciseService: ExerciseService,
         private fileUploadExerciseService: FileUploadExerciseService,
         private courseExerciseService: CourseExerciseService,
-        private jhiAlertService: JhiAlertService,
+        private alertService: AlertService,
         private accountService: AccountService,
         private sortService: SortService,
         courseService: CourseManagementService,
         translateService: TranslateService,
-        eventManager: JhiEventManager,
+        eventManager: EventManager,
         route: ActivatedRoute,
     ) {
         super(courseService, translateService, route, eventManager);
@@ -45,14 +60,18 @@ export class FileUploadExerciseComponent extends ExerciseComponent {
                     // reconnect exercise with course
                     this.fileUploadExercises.forEach((exercise) => {
                         exercise.course = this.course;
-                        exercise.isAtLeastTutor = this.accountService.isAtLeastTutorInCourse(exercise.course);
-                        exercise.isAtLeastEditor = this.accountService.isAtLeastEditorInCourse(exercise.course);
-                        exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(exercise.course);
+                        this.accountService.setAccessRightsForExercise(exercise);
                     });
                     this.emitExerciseCount(this.fileUploadExercises.length);
+                    this.applyFilter();
                 },
-                (res: HttpErrorResponse) => onError(this.jhiAlertService, res),
+                (res: HttpErrorResponse) => onError(this.alertService, res),
             );
+    }
+
+    protected applyFilter(): void {
+        this.filteredFileUploadExercises = this.fileUploadExercises.filter((exercise) => this.filter.matchesExercise(exercise));
+        this.emitFilteredExerciseCount(this.filteredFileUploadExercises.length);
     }
 
     /**
@@ -87,5 +106,6 @@ export class FileUploadExerciseComponent extends ExerciseComponent {
 
     sortRows() {
         this.sortService.sortByProperty(this.fileUploadExercises, this.predicate, this.reverse);
+        this.applyFilter();
     }
 }

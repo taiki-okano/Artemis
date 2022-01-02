@@ -1,6 +1,6 @@
 package de.tum.in.www1.artemis.web.rest.repository;
 
-import static de.tum.in.www1.artemis.web.rest.util.ResponseUtil.forbidden;
+import static de.tum.in.www1.artemis.web.rest.util.ResponseUtil.*;
 
 import java.util.*;
 
@@ -18,12 +18,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import de.tum.in.www1.artemis.domain.*;
 import de.tum.in.www1.artemis.domain.participation.*;
-import de.tum.in.www1.artemis.repository.ParticipationRepository;
-import de.tum.in.www1.artemis.repository.ProgrammingExerciseRepository;
-import de.tum.in.www1.artemis.repository.UserRepository;
+import de.tum.in.www1.artemis.domain.submissionpolicy.LockRepositoryPolicy;
+import de.tum.in.www1.artemis.repository.*;
 import de.tum.in.www1.artemis.service.AuthorizationCheckService;
 import de.tum.in.www1.artemis.service.BuildLogEntryService;
 import de.tum.in.www1.artemis.service.RepositoryService;
+import de.tum.in.www1.artemis.service.SubmissionPolicyService;
 import de.tum.in.www1.artemis.service.connectors.ContinuousIntegrationService;
 import de.tum.in.www1.artemis.service.connectors.GitService;
 import de.tum.in.www1.artemis.service.connectors.VersionControlService;
@@ -33,6 +33,7 @@ import de.tum.in.www1.artemis.service.feature.FeatureToggle;
 import de.tum.in.www1.artemis.service.programming.ProgrammingExerciseParticipationService;
 import de.tum.in.www1.artemis.web.rest.dto.FileMove;
 import de.tum.in.www1.artemis.web.rest.dto.RepositoryStatusDTO;
+import de.tum.in.www1.artemis.web.rest.errors.AccessForbiddenException;
 import de.tum.in.www1.artemis.web.rest.errors.EntityNotFoundException;
 
 /**
@@ -51,39 +52,54 @@ public class RepositoryProgrammingExerciseParticipationResource extends Reposito
 
     private final BuildLogEntryService buildLogService;
 
+    private final ProgrammingSubmissionRepository programmingSubmissionRepository;
+
+    private final SubmissionPolicyService submissionPolicyService;
+
     public RepositoryProgrammingExerciseParticipationResource(UserRepository userRepository, AuthorizationCheckService authCheckService, GitService gitService,
             Optional<ContinuousIntegrationService> continuousIntegrationService, Optional<VersionControlService> versionControlService, RepositoryService repositoryService,
             ProgrammingExerciseParticipationService participationService, ProgrammingExerciseRepository programmingExerciseRepository,
-            ParticipationRepository participationRepository, ExamSubmissionService examSubmissionService, BuildLogEntryService buildLogService) {
+            ParticipationRepository participationRepository, ExamSubmissionService examSubmissionService, BuildLogEntryService buildLogService,
+            ProgrammingSubmissionRepository programmingSubmissionRepository, SubmissionPolicyService submissionPolicyService) {
         super(userRepository, authCheckService, gitService, continuousIntegrationService, repositoryService, versionControlService, programmingExerciseRepository);
         this.participationService = participationService;
         this.participationRepository = participationRepository;
         this.examSubmissionService = examSubmissionService;
         this.buildLogService = buildLogService;
+        this.programmingSubmissionRepository = programmingSubmissionRepository;
+        this.submissionPolicyService = submissionPolicyService;
     }
 
     @Override
     Repository getRepository(Long participationId, RepositoryActionType repositoryAction, boolean pullOnGet) throws InterruptedException, IllegalAccessException, GitAPIException {
         Participation participation = participationRepository.findByIdElseThrow(participationId);
         // Error case 1: The participation is not from a programming exercise.
-        if (!(participation instanceof ProgrammingExerciseParticipation)) {
+        if (!(participation instanceof ProgrammingExerciseParticipation programmingParticipation)) {
             throw new IllegalArgumentException();
         }
-        ProgrammingExerciseParticipation programmingParticipation = (ProgrammingExerciseParticipation) participation;
-        // Error case 2: The user does not have permissions to push into the repository.
+        ProgrammingExercise programmingExercise = programmingExerciseRepository.getProgrammingExerciseFromParticipation(programmingParticipation);
+        // Error case 2: The programming exercise cannot be found.
+        if (programmingExercise == null) {
+            throw new IllegalArgumentException();
+        }
+        boolean lockRepositoryPolicyEnforced = false;
+
+        if (programmingExerciseRepository.findWithSubmissionPolicyById(programmingExercise.getId()).get().getSubmissionPolicy() instanceof LockRepositoryPolicy policy) {
+            lockRepositoryPolicyEnforced = submissionPolicyService.isParticipationLocked(policy, participation);
+        }
+        // Error case 3: The user does not have permissions to push into the repository.
         boolean hasPermissions = participationService.canAccessParticipation(programmingParticipation);
         if (!hasPermissions) {
             throw new IllegalAccessException();
         }
-        // Error case 3: The user's participation repository is locked.
-        if (repositoryAction == RepositoryActionType.WRITE && programmingParticipation.isLocked()) {
+        // Error case 4: The user's participation repository is locked.
+        if (repositoryAction == RepositoryActionType.WRITE && (programmingParticipation.isLocked() || lockRepositoryPolicyEnforced)) {
             throw new IllegalAccessException();
         }
 
         User user = userRepository.getUserWithGroupsAndAuthorities();
-        var programmingExercise = programmingParticipation.getProgrammingExercise();
         boolean isStudent = !authCheckService.isAtLeastTeachingAssistantForExercise(programmingExercise);
-        // Error case 4: The student can reset the repository only before and a tutor/instructor only after the due date has passed
+        // Error case 5: The student can reset the repository only before and a tutor/instructor only after the due date has passed
         if (repositoryAction == RepositoryActionType.RESET) {
             boolean isOwner = true; // true for Solution- and TemplateProgrammingExerciseParticipation
             if (participation instanceof StudentParticipation) {
@@ -107,7 +123,7 @@ public class RepositoryProgrammingExerciseParticipationResource extends Reposito
                 }
             }
         }
-        // Error case 5: The user is not (any longer) allowed to submit to the exam/exercise. This check is only relevant for students.
+        // Error case 6: The user is not (any longer) allowed to submit to the exam/exercise. This check is only relevant for students.
         // This must be a student participation as hasPermissions would have been false and an error already thrown
         boolean isStudentParticipation = participation instanceof ProgrammingExerciseStudentParticipation;
         if (isStudentParticipation && isStudent && !examSubmissionService.isAllowedToSubmitDuringExam(programmingExercise, user, false)) {
@@ -329,32 +345,43 @@ public class RepositoryProgrammingExerciseParticipationResource extends Reposito
      * GET /repository/:participationId/buildlogs : get the build log from Bamboo for the "participationId" repository.
      *
      * @param participationId to identify the repository with.
+     * @param resultId an optional result ID to get the build logs for the submission that the result belongs to. If the result ID is not specified, the latest submission is used.
      * @return the ResponseEntity with status 200 (OK) and with body the result, or with status 404 (Not Found)
      */
     @GetMapping(value = "/repository/{participationId}/buildlogs", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<BuildLogEntry>> getBuildLogs(@PathVariable Long participationId) {
+    public ResponseEntity<List<BuildLogEntry>> getBuildLogs(@PathVariable Long participationId, @RequestParam(name = "resultId") Optional<Long> resultId) {
         log.debug("REST request to get build log : {}", participationId);
 
         ProgrammingExerciseParticipation participation = participationService.findProgrammingExerciseParticipationWithLatestSubmissionAndResult(participationId);
 
         if (!participationService.canAccessParticipation(participation)) {
-            return forbidden();
+            throw new AccessForbiddenException("Participation", participationId);
         }
 
-        Optional<Submission> optionalSubmission = participation.getSubmissions().stream().findFirst();
-        if (optionalSubmission.isEmpty()) {
+        ProgrammingSubmission programmingSubmission = (ProgrammingSubmission) participation.getSubmissions().stream().findFirst().orElse(null);
+        // If a resultId is specified and the ID does not belong to the latest result, find the corresponding submission. Otherwise use the latest submission.
+        if (resultId.isPresent() && (programmingSubmission == null || programmingSubmission.getResults().stream().noneMatch(r -> resultId.get().equals(r.getId())))) {
+            // Note: if the submission was null, this will fail with a good message.
+            programmingSubmission = programmingSubmissionRepository.findByResultIdElseThrow(resultId.get());
+            if (!Objects.equals(participation.getId(), programmingSubmission.getParticipation().getId())) {
+                // The result of the given ID must belong to the participation
+                log.warn("Participation ID {} tried to access the build logs of another participation's submission with ID {}.", participation.getId(),
+                        programmingSubmission.getId());
+                return badRequest();
+            }
+        }
+        else if (programmingSubmission == null) {
             // Can't return build logs if a submission doesn't exist yet
             return ResponseEntity.ok(new ArrayList<>());
         }
 
-        ProgrammingSubmission latestSubmission = (ProgrammingSubmission) optionalSubmission.get();
         // Do not return build logs if the build hasn't failed
-        if (!latestSubmission.isBuildFailed()) {
-            return forbidden();
+        if (!programmingSubmission.isBuildFailed()) {
+            throw new AccessForbiddenException("Build logs cannot be retrieved when the build hasn't failed!");
         }
 
         // Load the logs from the database
-        List<BuildLogEntry> buildLogsFromDatabase = buildLogService.getLatestBuildLogs(latestSubmission);
+        List<BuildLogEntry> buildLogsFromDatabase = buildLogService.getLatestBuildLogs(programmingSubmission);
 
         // If there are logs present in the database, return them (they were already filtered when inserted)
         if (!buildLogsFromDatabase.isEmpty()) {
@@ -362,7 +389,7 @@ public class RepositoryProgrammingExerciseParticipationResource extends Reposito
         }
 
         // Otherwise attempt to fetch the build logs from the CI
-        List<BuildLogEntry> logs = continuousIntegrationService.get().getLatestBuildLogs(latestSubmission);
+        List<BuildLogEntry> logs = continuousIntegrationService.get().getLatestBuildLogs(programmingSubmission);
 
         return new ResponseEntity<>(logs, HttpStatus.OK);
     }

@@ -2,10 +2,9 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { BehaviorSubject, from, merge, Observable, of, Subject, Subscription, timer } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, reduce, switchMap, tap } from 'rxjs/operators';
-import { SERVER_API_URL } from 'app/app.constants';
 import { ParticipationWebsocketService } from 'app/overview/participation-websocket.service';
 import { Result } from 'app/entities/result.model';
-import { createRequestOption } from 'app/shared/util/request-util';
+import { createRequestOption } from 'app/shared/util/request.util';
 import { JhiWebsocketService } from 'app/core/websocket/websocket.service';
 import { Exercise, ExerciseType } from 'app/entities/exercise.model';
 import { ProgrammingSubmission } from 'app/entities/programming-submission.model';
@@ -110,7 +109,7 @@ export class ProgrammingSubmissionService implements IProgrammingSubmissionServi
         }, 0);
 
         // For every 100 submissions, we increase the expected time by 1 minute.
-        this.currentExpectedResultETA = this.DEFAULT_EXPECTED_RESULT_ETA + Math.floor(buildingSubmissionCount / 100) * 4000 * 60;
+        this.currentExpectedResultETA = this.DEFAULT_EXPECTED_RESULT_ETA + Math.floor(buildingSubmissionCount / 100) * 1000 * 60;
         this.resultEtaSubject?.next(this.currentExpectedResultETA);
     }
 

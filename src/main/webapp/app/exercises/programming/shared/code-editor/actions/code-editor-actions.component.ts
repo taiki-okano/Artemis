@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, S
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Observable, of, Subscription, throwError } from 'rxjs';
-import { isEmpty as _isEmpty } from 'lodash';
+import { isEmpty as _isEmpty } from 'lodash-es';
 import { CodeEditorSubmissionService } from 'app/exercises/programming/shared/code-editor/service/code-editor-submission.service';
 import { CodeEditorConflictStateService } from 'app/exercises/programming/shared/code-editor/service/code-editor-conflict-state.service';
 import { CodeEditorResolveConflictModalComponent } from 'app/exercises/programming/shared/code-editor/actions/code-editor-resolve-conflict-modal.component';
@@ -11,6 +11,8 @@ import { CodeEditorRepositoryFileService, CodeEditorRepositoryService, Connectio
 import { CommitState, EditorState, FileSubmission, GitConflictState } from 'app/exercises/programming/shared/code-editor/model/code-editor.model';
 import { CodeEditorConfirmRefreshModalComponent } from './code-editor-confirm-refresh-modal.component';
 import { AUTOSAVE_CHECK_INTERVAL, AUTOSAVE_EXERCISE_INTERVAL } from 'app/shared/constants/exercise-exam-constants';
+import { faCircleNotch, faSync, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlayCircle } from '@fortawesome/free-regular-svg-icons';
 
 @Component({
     selector: 'jhi-code-editor-actions',
@@ -59,6 +61,12 @@ export class CodeEditorActionsComponent implements OnInit, OnDestroy, OnChanges 
     // autoTimerInterval in seconds
     autoSaveTimer = 0;
     autoSaveInterval: number;
+
+    // Icons
+    faTimes = faTimes;
+    faCircleNotch = faCircleNotch;
+    faSync = faSync;
+    farPlayCircle = faPlayCircle;
 
     set commitState(commitState: CommitState) {
         this.commitStateValue = commitState;

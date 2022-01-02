@@ -197,7 +197,7 @@ General best practices
             }
         }
         String expected = "Dog:French";
-        String actual = testTranslationServer.runService("Dog", "French");
+        String actual = testTranslationServer.runService("French", "Dog");
         if(!expected.equals(actual)) fail("Descriptive fail message");
     }
 
@@ -286,9 +286,6 @@ Java best practices
   `Jqwik <https://jqwik.net>`__ allows testing with arbitrary inputs and shrinks the test errors, resulting in excellent
   counter examples when student code fails (usually exactly the edge case).
 
-  .. note::
-    Ares currently only supports jqwik 1.3.4.
-
 - **Eclipse Compiler and Best-Effort Compilation**
 
   Use the Eclipse Java Compiler for partial, best-effort compilation. This is particularly useful for exam exercises and
@@ -328,8 +325,8 @@ Java best practices
            <artifactId>maven-compiler-plugin</artifactId>
            <version>3.8.1</version>
            <configuration>
-               <source>16</source>
-               <target>16</target>
+               <source>17</source>
+               <target>17</target>
            </configuration>
            <executions>
                <execution>
@@ -339,8 +336,8 @@ Java best practices
                        <goal>testCompile</goal>
                    </goals>
                    <configuration>
-                       <source>16</source>
-                       <target>16</target>
+                       <source>17</source>
+                       <target>17</target>
                        <compilerId>jdt</compilerId>
                        <optimize>true</optimize>
                        <failOnError>false</failOnError>
@@ -377,8 +374,8 @@ Java best practices
            <artifactId>maven-compiler-plugin</artifactId>
            <version>3.8.1</version>
            <configuration>
-               <source>16</source>
-               <target>16</target>
+               <source>17</source>
+               <target>17</target>
                <compilerId>jdt</compilerId>
                <optimize>true</optimize>
                <failOnError>false</failOnError>

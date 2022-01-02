@@ -3,7 +3,7 @@ import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { ExerciseHint } from 'app/entities/exercise-hint.model';
 import { ExerciseHintService } from './exercise-hint.service';
 import { EditorMode, MarkdownEditorHeight } from 'app/shared/markdown-editor/markdown-editor.component';
@@ -12,6 +12,7 @@ import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service'
 import { KatexCommand } from 'app/shared/markdown-editor/commands/katex.command';
 import { onError } from 'app/shared/util/global.utils';
 import { ArtemisNavigationUtilService } from 'app/utils/navigation.utils';
+import { faBan, faCircleNotch, faSave } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-exercise-hint-update',
@@ -33,9 +34,14 @@ export class ExerciseHintUpdateComponent implements OnInit, OnDestroy {
     domainCommands = [new KatexCommand()];
     editorMode = EditorMode.LATEX;
 
+    // Icons
+    faCircleNotch = faCircleNotch;
+    faBan = faBan;
+    faSave = faSave;
+
     constructor(
         private route: ActivatedRoute,
-        protected jhiAlertService: JhiAlertService,
+        protected alertService: AlertService,
         protected exerciseHintService: ExerciseHintService,
         protected exerciseService: ExerciseService,
         private navigationUtilService: ArtemisNavigationUtilService,
@@ -65,7 +71,7 @@ export class ExerciseHintUpdateComponent implements OnInit, OnDestroy {
                         }),
                         catchError((error: HttpErrorResponse) => {
                             this.exerciseNotFound = true;
-                            onError(this.jhiAlertService, error);
+                            onError(this.alertService, error);
                             return of(null);
                         }),
                     )

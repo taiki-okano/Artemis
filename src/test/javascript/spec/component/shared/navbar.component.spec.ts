@@ -1,9 +1,9 @@
 import { HttpResponse } from '@angular/common/http';
-import { Directive, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, UrlSerializer } from '@angular/router';
 import { NgbCollapse, NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
+import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
 import { ApollonDiagramService } from 'app/exercises/quiz/manage/apollon-diagrams/apollon-diagram.service';
@@ -13,36 +13,26 @@ import { GuidedTourComponent } from 'app/guided-tour/guided-tour.component';
 import { LectureService } from 'app/lecture/lecture.service';
 import { HasAnyAuthorityDirective } from 'app/shared/auth/has-any-authority.directive';
 import { FindLanguageFromKeyPipe } from 'app/shared/language/find-language-from-key.pipe';
+import { TranslateDirective } from 'app/shared/language/translate.directive';
 import { ActiveMenuDirective } from 'app/shared/layouts/navbar/active-menu.directive';
 import { NavbarComponent } from 'app/shared/layouts/navbar/navbar.component';
 import { LoadingNotificationComponent } from 'app/shared/notification/loading-notification/loading-notification.component';
 import { NotificationSidebarComponent } from 'app/shared/notification/notification-sidebar/notification-sidebar.component';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import * as chai from 'chai';
-import { JhiTranslateDirective } from 'ng-jhipster';
 import { MockComponent, MockDirective, MockPipe, MockProvider } from 'ng-mocks';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { of } from 'rxjs';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { MockRouter } from '../../helpers/mocks/mock-router';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { ArtemisTestModule } from '../../test.module';
+import { OrganizationManagementService } from 'app/admin/organization-management/organization-management.service';
+import { MockRouterLinkActiveOptionsDirective, MockRouterLinkDirective } from '../../helpers/mocks/directive/mock-router-link.directive';
 
 chai.use(sinonChai);
 const expect = chai.expect;
-
-// tslint:disable-next-line:directive-selector
-@Directive({ selector: '[routerLink]' })
-export class MockRouterLinkDirective {
-    @Input('routerLink') data: any;
-}
-
-// tslint:disable-next-line:directive-selector
-@Directive({ selector: '[routerLinkActiveOptions]' })
-export class MockRouterLinkActiveOptionsDirective {
-    @Input('routerLinkActiveOptions') data: any;
-}
 
 class MockBreadcrumb {
     label: string;
@@ -78,7 +68,7 @@ describe('NavbarComponent', () => {
     } as MockBreadcrumb;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        return TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
             declarations: [
                 NavbarComponent,
@@ -86,9 +76,9 @@ describe('NavbarComponent', () => {
                 MockDirective(HasAnyAuthorityDirective),
                 MockDirective(NgbDropdown),
                 MockDirective(ActiveMenuDirective),
-                MockDirective(JhiTranslateDirective),
-                MockDirective(MockRouterLinkDirective),
-                MockDirective(MockRouterLinkActiveOptionsDirective),
+                MockDirective(TranslateDirective),
+                MockRouterLinkDirective,
+                MockRouterLinkActiveOptionsDirective,
                 MockPipe(ArtemisTranslatePipe),
                 MockPipe(FindLanguageFromKeyPipe),
                 MockComponent(NotificationSidebarComponent),
@@ -96,9 +86,10 @@ describe('NavbarComponent', () => {
                 MockComponent(LoadingNotificationComponent),
             ],
             providers: [
+                MockProvider(UrlSerializer),
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
-                MockProvider(TranslateService),
+                { provide: TranslateService, useClass: MockTranslateService },
                 { provide: Router, useValue: router },
             ],
         })
@@ -183,6 +174,23 @@ describe('NavbarComponent', () => {
         // Use matching here to ignore non-semantic differences between objects
         sinon.assert.match(component.breadcrumbs[0], { label: 'userManagement.home.title', translate: true, uri: '/admin/user-management/' } as MockBreadcrumb);
         sinon.assert.match(component.breadcrumbs[1], { label: 'test_user', translate: false, uri: '/admin/user-management/test_user/' } as MockBreadcrumb);
+    });
+
+    it('should build breadcrumbs for organization management', () => {
+        const testUrl = '/admin/organization-management/1';
+        router.setUrl(testUrl);
+
+        const organizationService = fixture.debugElement.injector.get(OrganizationManagementService);
+        const organizationStub = sinon.stub(organizationService, 'getTitle').returns(of({ body: 'Organization Name' } as HttpResponse<string>));
+
+        fixture.detectChanges();
+
+        expect(organizationStub).to.have.been.calledWith(1);
+        expect(component.breadcrumbs.length).to.equal(2);
+
+        // Use matching here to ignore non-semantic differences between objects
+        sinon.assert.match(component.breadcrumbs[0], { label: 'organizationManagement.title', translate: true, uri: '/admin/organization-management/' } as MockBreadcrumb);
+        sinon.assert.match(component.breadcrumbs[1], { label: 'Organization Name', translate: false, uri: '/admin/organization-management/1/' } as MockBreadcrumb);
     });
 
     it('should not error without translation', () => {
@@ -337,6 +345,34 @@ describe('NavbarComponent', () => {
             sinon.assert.match(component.breadcrumbs[3], { label: 'Test Exercise', translate: false, uri: '/course-management/1/text-exercises/2/' } as MockBreadcrumb);
             sinon.assert.match(component.breadcrumbs[4], submissionsCrumb);
             sinon.assert.match(component.breadcrumbs[5], conflictCrumb);
+        });
+
+        it('exercise assessment dashboard', () => {
+            const courseId = 1;
+            const exerciseId = 2;
+            const testUrl = `/course-management/${courseId}/assessment-dashboard/${exerciseId}`;
+            router.setUrl(testUrl);
+
+            fixture.detectChanges();
+
+            expect(courseManagementStub).to.have.been.calledWith(courseId);
+            expect(exerciseStub).to.have.been.calledWith(exerciseId);
+
+            expect(component.breadcrumbs.length).to.equal(4);
+
+            // Use matching here to ignore non-semantic differences between objects
+            sinon.assert.match(component.breadcrumbs[0], courseManagementCrumb);
+            sinon.assert.match(component.breadcrumbs[1], testCourseCrumb);
+            sinon.assert.match(component.breadcrumbs[2], {
+                label: 'artemisApp.assessmentDashboard.home.title',
+                translate: true,
+                uri: '/course-management/1/assessment-dashboard/',
+            } as MockBreadcrumb);
+            sinon.assert.match(component.breadcrumbs[3], {
+                label: 'Test Exercise',
+                translate: false,
+                uri: '/course-management/1/assessment-dashboard/2/',
+            } as MockBreadcrumb);
         });
 
         it('modeling exercise example submission', () => {
@@ -529,7 +565,7 @@ describe('NavbarComponent', () => {
                 uri: '/course-management/1/exams/2/exercise-groups/3/quiz-exercises/4/',
             };
             const plagiarismCrumb = {
-                label: 'artemisApp.plagiarism.plagiarism-detection',
+                label: 'artemisApp.plagiarism.plagiarismDetection',
                 translate: true,
                 uri: '/course-management/1/exams/2/exercise-groups/3/quiz-exercises/4/plagiarism/',
             };

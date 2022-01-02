@@ -1,9 +1,10 @@
 import { HttpHeaders, HttpResponse } from '@angular/common/http';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateService } from '@ngx-translate/core';
-import { DueDateStat } from 'app/course/dashboards/instructor-course-dashboard/due-date-stat.model';
+import { DueDateStat } from 'app/course/dashboards/due-date-stat.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { Course } from 'app/entities/course.model';
 import { Exercise } from 'app/entities/exercise.model';
@@ -12,48 +13,43 @@ import { GuidedTourService } from 'app/guided-tour/guided-tour.service';
 import { CourseCardComponent } from 'app/overview/course-card.component';
 import { CourseExerciseRowComponent } from 'app/overview/course-exercises/course-exercise-row.component';
 import { CourseExercisesComponent } from 'app/overview/course-exercises/course-exercises.component';
-import { CourseRegistrationSelectorComponent } from 'app/overview/course-registration-selector/course-registration-selector.component';
+import { CourseRegistrationComponent } from 'app/overview/course-registration/course-registration.component';
 import { CourseScoreCalculationService } from 'app/overview/course-score-calculation.service';
 import { CoursesComponent } from 'app/overview/courses.component';
 import { ArtemisDatePipe } from 'app/shared/pipes/artemis-date.pipe';
 import { ArtemisServerDateService } from 'app/shared/server-date.service';
-import * as chai from 'chai';
-import * as moment from 'moment';
-import { JhiAlertService, JhiSortByDirective, JhiSortDirective } from 'ng-jhipster';
 import { MockComponent, MockDirective, MockPipe } from 'ng-mocks';
-import { MomentModule } from 'ngx-moment';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
-import { of } from 'rxjs';
-import * as sinon from 'sinon';
-import { stub } from 'sinon';
-import * as sinonChai from 'sinon-chai';
 import { MockHasAnyAuthorityDirective } from '../../helpers/mocks/directive/mock-has-any-authority.directive';
-import { MockRouter } from '../../helpers/mocks/mock-router';
 import { MockAlertService } from '../../helpers/mocks/service/mock-alert.service';
 import { MockSyncStorage } from '../../helpers/mocks/service/mock-sync-storage.service';
 import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
 import { ArtemisTestModule } from '../../test.module';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
+import { SortByDirective } from 'app/shared/sort/sort-by.directive';
+import { SortDirective } from 'app/shared/sort/sort.directive';
+import { AlertService } from 'app/core/util/alert.service';
+import { Component } from '@angular/core';
+import { of } from 'rxjs';
+import dayjs from 'dayjs';
 
-chai.use(sinonChai);
-const expect = chai.expect;
-const endDate1 = moment().add(1, 'days');
-const visibleDate1 = moment().subtract(1, 'days');
-const endDate2 = moment().subtract(1, 'days');
-const visibleDate2 = moment().subtract(2, 'days');
+const endDate1 = dayjs().add(1, 'days');
+const visibleDate1 = dayjs().subtract(1, 'days');
+const endDate2 = dayjs().subtract(1, 'days');
+const visibleDate2 = dayjs().subtract(2, 'days');
 const dueDateStat1: DueDateStat = { inTime: 1, late: 0, total: 1 };
 const exercise1: Exercise = {
     id: 5,
     numberOfAssessmentsOfCorrectionRounds: [dueDateStat1],
     studentAssignedTeamIdComputed: false,
-    dueDate: moment().add(2, 'days'),
+    dueDate: dayjs().add(2, 'days'),
     secondCorrectionEnabled: true,
 };
 const exercise2: Exercise = {
     id: 6,
     numberOfAssessmentsOfCorrectionRounds: [dueDateStat1],
     studentAssignedTeamIdComputed: false,
-    dueDate: moment().add(1, 'days'),
+    dueDate: dayjs().add(1, 'days'),
     secondCorrectionEnabled: true,
 };
 
@@ -66,6 +62,11 @@ const course1 = { id: 1, exams, exercises: [exercise1] };
 const course2 = { id: 2, exercises: [exercise2] };
 const courses: Course[] = [course1, course2];
 
+@Component({
+    template: '',
+})
+class DummyComponent {}
+
 describe('CoursesComponent', () => {
     let component: CoursesComponent;
     let fixture: ComponentFixture<CoursesComponent>;
@@ -73,23 +74,24 @@ describe('CoursesComponent', () => {
     let courseScoreCalculationService: CourseScoreCalculationService;
     let serverDateService: ArtemisServerDateService;
     let exerciseService: ExerciseService;
-    const router = new MockRouter();
+    let router: Router;
+    let location: Location;
 
     const route = { data: of({ courseId: course1.id }), children: [] } as any as ActivatedRoute;
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            imports: [ArtemisTestModule, RouterTestingModule.withRoutes([]), MomentModule],
+            imports: [ArtemisTestModule, RouterTestingModule.withRoutes([{ path: 'courses/:courseId/exams/:examId', component: DummyComponent }])],
             declarations: [
                 CoursesComponent,
                 MockDirective(MockHasAnyAuthorityDirective),
                 MockPipe(ArtemisTranslatePipe),
-                MockDirective(JhiSortDirective),
-                MockDirective(JhiSortByDirective),
+                MockDirective(SortDirective),
+                MockDirective(SortByDirective),
                 MockPipe(ArtemisDatePipe),
                 MockComponent(CourseExerciseRowComponent),
                 MockComponent(CourseExercisesComponent),
-                MockComponent(CourseRegistrationSelectorComponent),
+                MockComponent(CourseRegistrationComponent),
                 MockComponent(CourseCardComponent),
             ],
             providers: [
@@ -98,8 +100,7 @@ describe('CoursesComponent', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: ActivatedRoute, useValue: route },
                 { provide: CourseExerciseRowComponent },
-                { provide: JhiAlertService, useClass: MockAlertService },
-                { provide: Router, useValue: router },
+                { provide: AlertService, useClass: MockAlertService },
             ],
         })
             .compileComponents()
@@ -107,10 +108,12 @@ describe('CoursesComponent', () => {
                 fixture = TestBed.createComponent(CoursesComponent);
                 component = fixture.componentInstance;
                 courseService = TestBed.inject(CourseManagementService);
+                router = TestBed.inject(Router);
+                location = TestBed.inject(Location);
                 TestBed.inject(GuidedTourService);
                 courseScoreCalculationService = TestBed.inject(CourseScoreCalculationService);
                 serverDateService = TestBed.inject(ArtemisServerDateService);
-                TestBed.inject(JhiAlertService);
+                TestBed.inject(AlertService);
                 exerciseService = TestBed.inject(ExerciseService);
                 fixture.detectChanges();
             });
@@ -118,37 +121,37 @@ describe('CoursesComponent', () => {
 
     afterEach(() => {
         component.ngOnDestroy();
-        sinon.restore();
+        jest.restoreAllMocks();
     });
 
     describe('OnInit', () => {
         it('Should call loadAndFilterCourses on init', () => {
-            const loadAndFilterCoursesSpy = sinon.spy(component, 'loadAndFilterCourses');
+            const loadAndFilterCoursesSpy = jest.spyOn(component, 'loadAndFilterCourses');
 
             component.ngOnInit();
 
-            expect(loadAndFilterCoursesSpy).to.have.been.called;
+            expect(loadAndFilterCoursesSpy).toHaveBeenCalled();
         });
 
         it('Should load courses on init', () => {
-            const findAllForDashboardStub = stub(courseService, 'findAllForDashboard');
-            const courseScoreCalculationServiceStub = stub(courseScoreCalculationService, 'setCourses');
-            const serverDateServiceStub = stub(serverDateService, 'now');
-            const findNextRelevantExerciseSpy = sinon.spy(component, 'findNextRelevantExercise');
-            findAllForDashboardStub.returns(of(new HttpResponse({ body: courses, headers: new HttpHeaders() })));
-            serverDateServiceStub.returns(moment());
+            const findAllForDashboardSpy = jest.spyOn(courseService, 'findAllForDashboard');
+            const courseScoreCalculationServiceSpy = jest.spyOn(courseScoreCalculationService, 'setCourses');
+            const serverDateServiceSpy = jest.spyOn(serverDateService, 'now');
+            const findNextRelevantExerciseSpy = jest.spyOn(component, 'findNextRelevantExercise');
+            findAllForDashboardSpy.mockReturnValue(of(new HttpResponse({ body: courses, headers: new HttpHeaders() })));
+            serverDateServiceSpy.mockReturnValue(dayjs());
 
             component.ngOnInit();
 
-            expect(findAllForDashboardStub).to.have.been.called;
-            expect(findNextRelevantExerciseSpy).to.have.been.called;
-            expect(component.courses).to.equal(courses);
-            expect(courseScoreCalculationServiceStub).to.have.been.called;
-            expect(component.exams.length).to.equal(2);
-            expect(component.exams).to.contain(exam1);
-            expect(component.exams).to.contain(exam2);
-            expect(component.nextRelevantExams?.length).to.equal(1);
-            expect(component.nextRelevantExams?.[0]).to.equal(exam1);
+            expect(findAllForDashboardSpy).toHaveBeenCalled();
+            expect(findNextRelevantExerciseSpy).toHaveBeenCalled();
+            expect(component.courses).toEqual(courses);
+            expect(courseScoreCalculationServiceSpy).toHaveBeenCalled();
+            expect(component.exams.length).toEqual(2);
+            expect(component.exams).toContain(exam1);
+            expect(component.exams).toContain(exam2);
+            expect(component.nextRelevantExams?.length).toEqual(1);
+            expect(component.nextRelevantExams?.[0]).toEqual(exam1);
         });
 
         it('Should load exercises on init', () => {
@@ -161,28 +164,29 @@ describe('CoursesComponent', () => {
                 }
             };
 
-            const findAllForDashboardStub = stub(courseService, 'findAllForDashboard');
-            const getNextExerciseForHoursStub = stub(exerciseService, 'getNextExerciseForHours').callsFake(mockFunction);
-            const serverDateServiceStub = stub(serverDateService, 'now');
+            const findAllForDashboardSpy = jest.spyOn(courseService, 'findAllForDashboard');
+            const getNextExerciseForHoursSpy = jest.spyOn(exerciseService, 'getNextExerciseForHours').mockImplementation(mockFunction);
+            const serverDateServiceSpy = jest.spyOn(serverDateService, 'now');
 
-            findAllForDashboardStub.returns(of(new HttpResponse({ body: courses, headers: new HttpHeaders() })));
-
-            serverDateServiceStub.returns(moment());
+            findAllForDashboardSpy.mockReturnValue(of(new HttpResponse({ body: courses, headers: new HttpHeaders() })));
+            serverDateServiceSpy.mockReturnValue(dayjs());
 
             component.ngOnInit();
 
-            expect(getNextExerciseForHoursStub).to.have.been.calledWith(course1.exercises);
-            expect(component.nextRelevantExercise).to.equal(exercise2);
-            expect(component.nextRelevantCourse).to.equal(exercise2.course);
+            expect(getNextExerciseForHoursSpy).toHaveBeenCalledWith(course1.exercises);
+            expect(component.nextRelevantExercise).toEqual(exercise2);
+            expect(component.nextRelevantCourse).toEqual(exercise2.course);
         });
     });
 
-    it('Should load next relevant exam', () => {
-        const navigateSpy = sinon.spy(router, 'navigate');
+    it('Should load next relevant exam', fakeAsync(() => {
+        const navigateSpy = jest.spyOn(router, 'navigate');
         component.nextRelevantCourseForExam = course1;
         component.nextRelevantExams = [exam1];
         component.openExam();
+        tick();
 
-        expect(navigateSpy).to.have.been.calledWith(['courses', 1, 'exams', 3]);
-    });
+        expect(navigateSpy).toHaveBeenCalledWith(['courses', 1, 'exams', 3]);
+        expect(location.path()).toEqual('/courses/1/exams/3');
+    }));
 });

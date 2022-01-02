@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { faAngleDown, faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-feedback-collapse',
@@ -11,7 +12,11 @@ import { Component, Input } from '@angular/core';
  * text is any string passed to the component
  */
 export class FeedbackCollapseComponent {
-    @Input() text: string;
-    smallCharacterLimit = 200;
+    @Input() text: string; // this is typically feedback.detailText
+    @Input() previewText?: string; // if this is undefined, the whole text is shown
     isCollapsed = true;
+
+    // Icons
+    faAngleDown = faAngleDown;
+    faAngleRight = faAngleRight;
 }

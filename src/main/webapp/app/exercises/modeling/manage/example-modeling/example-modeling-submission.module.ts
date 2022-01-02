@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { MomentModule } from 'ngx-moment';
 import { ClipboardModule } from 'ngx-clipboard';
 import { ArtemisExampleModelingSubmissionRoutingModule } from 'app/exercises/modeling/manage/example-modeling/example-modeling-submission.route';
 import { ExampleModelingSubmissionComponent } from 'app/exercises/modeling/manage/example-modeling/example-modeling-submission.component';
@@ -8,6 +7,7 @@ import { AssessmentInstructionsModule } from 'app/assessment/assessment-instruct
 import { ArtemisSharedModule } from 'app/shared/shared.module';
 import { ArtemisResultModule } from 'app/exercises/shared/result/result.module';
 import { ModelingAssessmentModule } from 'app/exercises/modeling/assess/modeling-assessment.module';
+import { ArtemisAssessmentSharedModule } from 'app/assessment/assessment-shared.module';
 
 @NgModule({
     imports: [
@@ -16,9 +16,9 @@ import { ModelingAssessmentModule } from 'app/exercises/modeling/assess/modeling
         ArtemisModelingEditorModule,
         ArtemisExampleModelingSubmissionRoutingModule,
         ModelingAssessmentModule,
+        ArtemisAssessmentSharedModule,
         AssessmentInstructionsModule,
         ClipboardModule,
-        MomentModule,
     ],
     declarations: [ExampleModelingSubmissionComponent],
 })

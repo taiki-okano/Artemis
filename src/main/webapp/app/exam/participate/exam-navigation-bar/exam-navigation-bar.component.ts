@@ -2,8 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Exercise, ExerciseType } from 'app/entities/exercise.model';
 import { LayoutService } from 'app/shared/breakpoints/layout.service';
 import { CustomBreakpointNames } from 'app/shared/breakpoints/breakpoints.service';
-import * as moment from 'moment';
-import { Moment } from 'moment';
+import dayjs from 'dayjs';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { ExamExerciseUpdateService } from 'app/exam/manage/exam-exercise-update.service';
 import { Subscription } from 'rxjs';
@@ -13,6 +12,7 @@ import { CodeEditorRepositoryService } from 'app/exercises/programming/shared/co
 import { map } from 'rxjs/operators';
 import { CodeEditorConflictStateService } from 'app/exercises/programming/shared/code-editor/service/code-editor-conflict-state.service';
 import { ExamSession } from 'app/entities/exam-session.model';
+import { faBars, faCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-exam-navigation-bar',
@@ -22,7 +22,7 @@ import { ExamSession } from 'app/entities/exam-session.model';
 export class ExamNavigationBarComponent implements OnInit {
     @Input() exercises: Exercise[] = [];
     @Input() exerciseIndex = 0;
-    @Input() endDate: Moment;
+    @Input() endDate: dayjs.Dayjs;
     @Input() overviewPageOpen: boolean;
     @Input() examSessions?: ExamSession[] = [];
     @Output() onPageChanged = new EventEmitter<{ overViewChange: boolean; exercise?: Exercise; forceSave: boolean }>();
@@ -32,12 +32,15 @@ export class ExamNavigationBarComponent implements OnInit {
     static itemsVisiblePerSideDefault = 4;
     itemsVisiblePerSide = ExamNavigationBarComponent.itemsVisiblePerSideDefault;
 
-    criticalTime = moment.duration(5, 'minutes');
+    criticalTime = dayjs.duration(5, 'minutes');
 
     icon: IconProp;
     getExerciseButtonTooltip = this.examParticipationService.getExerciseButtonTooltip;
 
     subscriptionToLiveExamExerciseUpdates: Subscription;
+
+    // Icons
+    faBars = faBars;
 
     constructor(
         private layoutService: LayoutService,
@@ -175,7 +178,7 @@ export class ExamNavigationBarComponent implements OnInit {
         // start with a yellow status (edit icon)
         // TODO: it's a bit weired, that it works that multiple icons (one per exercise) are hold in the same instance variable of the component
         //  we should definitely refactor this and e.g. use the same ExamExerciseOverviewItem as in exam-exercise-overview-page.component.ts !
-        this.icon = 'edit';
+        this.icon = faEdit;
         const exercise = this.exercises[exerciseIndex];
         const submission = ExamParticipationService.getSubmissionForExercise(exercise);
         if (!submission) {
@@ -183,7 +186,7 @@ export class ExamNavigationBarComponent implements OnInit {
             return 'synced';
         }
         if (submission.submitted) {
-            this.icon = 'check';
+            this.icon = faCheck;
         }
         if (submission.isSynced) {
             // make button blue (except for the current page)
@@ -194,7 +197,7 @@ export class ExamNavigationBarComponent implements OnInit {
             }
         } else {
             // make button yellow
-            this.icon = 'edit';
+            this.icon = faEdit;
             return 'notSynced';
         }
     }

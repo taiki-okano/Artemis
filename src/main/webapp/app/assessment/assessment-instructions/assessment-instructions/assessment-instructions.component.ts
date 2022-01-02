@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ContentChild, Input, TemplateRef } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { UMLDiagramType, UMLModel } from '@ls1intum/apollon';
 import { ArtemisMarkdownService } from 'app/shared/markdown.service';
@@ -23,11 +23,16 @@ export class AssessmentInstructionsComponent {
     sampleSolutionModel?: UMLModel;
     sampleSolutionDiagramType?: UMLDiagramType;
     criteria: GradingCriterion[];
+
+    @Input() isAssessmentTraining = false;
     @Input() readOnly: boolean;
     // For programming exercises we hand over the participation or use the template participation
     @Input() programmingParticipation?: ProgrammingExerciseStudentParticipation;
 
     readonly ExerciseType = ExerciseType;
+
+    // extension points, see shared/extension-point
+    @ContentChild('overrideTitle') overrideTitle: TemplateRef<any>;
 
     constructor(private markdownService: ArtemisMarkdownService) {}
 

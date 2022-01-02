@@ -15,7 +15,8 @@ import { QuizQuestion } from 'app/entities/quiz/quiz-question.model';
 import { AccountService } from 'app/core/auth/account.service';
 import { MockAccountService } from '../../helpers/mocks/service/mock-account.service';
 import { QuizStatisticComponent } from 'app/exercises/quiz/manage/statistics/quiz-statistic/quiz-statistic.component';
-import { SinonStub, stub } from 'sinon';
+import { MockProvider } from 'ng-mocks';
+import { ChangeDetectorRef } from '@angular/core';
 
 const question = { id: 1 } as QuizQuestion;
 const course = { id: 2 } as Course;
@@ -31,9 +32,9 @@ describe('QuizExercise Statistic Component', () => {
     let fixture: ComponentFixture<QuizStatisticComponent>;
     let quizService: QuizExerciseService;
     let accountService: AccountService;
-    let accountSpy: SinonStub;
+    let accountSpy: jest.SpyInstance;
     let router: Router;
-    let quizServiceFindSpy: SinonStub;
+    let quizServiceFindSpy: jest.SpyInstance;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -46,6 +47,7 @@ describe('QuizExercise Statistic Component', () => {
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: Router, useClass: MockRouter },
                 { provide: AccountService, useClass: MockAccountService },
+                MockProvider(ChangeDetectorRef),
             ],
         })
             .overrideTemplate(QuizStatisticComponent, '')
@@ -56,33 +58,39 @@ describe('QuizExercise Statistic Component', () => {
                 quizService = fixture.debugElement.injector.get(QuizExerciseService);
                 accountService = fixture.debugElement.injector.get(AccountService);
                 router = fixture.debugElement.injector.get(Router);
-                quizServiceFindSpy = stub(quizService, 'find').returns(of(new HttpResponse({ body: quizExercise })));
+                quizServiceFindSpy = jest.spyOn(quizService, 'find').mockReturnValue(of(new HttpResponse({ body: quizExercise })));
             });
     });
 
     afterEach(() => {
         comp.ngOnDestroy();
         quizExercise = { id: 42, started: true, course, quizQuestions: [question] } as QuizExercise;
-        quizServiceFindSpy.reset();
+        quizServiceFindSpy.mockClear();
     });
 
     describe('OnInit', function () {
-        let loadQuizSuccessSpy: SinonStub;
-        let loadDataSpy: SinonStub;
+        let loadQuizSuccessSpy: jest.SpyInstance;
+        let loadDataSpy: jest.SpyInstance;
 
         beforeEach(() => {
-            loadQuizSuccessSpy = loadQuizSuccessSpy = stub(comp, 'loadQuizSuccess');
-            loadDataSpy = stub(comp, 'loadData');
+            loadQuizSuccessSpy = jest.spyOn(comp, 'loadQuizSuccess');
+            loadDataSpy = jest.spyOn(comp, 'loadData');
+            quizExercise.quizQuestions = [
+                { quizQuestionStatistic: quizQuestionStatOne, points: 5 },
+                { quizQuestionStatistic: quizQuestionStatTwo, points: 6 },
+            ];
+            quizExercise.quizPointStatistic = { participantsRated: 42 };
+            comp.quizExercise = quizExercise;
         });
 
         afterEach(() => {
-            loadQuizSuccessSpy.resetHistory();
-            loadDataSpy.resetHistory();
+            loadQuizSuccessSpy.mockClear();
+            loadDataSpy.mockClear();
         });
 
         it('should call functions on Init', fakeAsync(() => {
             // setup
-            accountSpy = stub(accountService, 'hasAnyAuthorityDirect').returns(true);
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
 
             // call
             comp.ngOnInit();
@@ -96,7 +104,7 @@ describe('QuizExercise Statistic Component', () => {
 
         it('should not load QuizSuccess if not authorised', fakeAsync(() => {
             // setup
-            accountSpy = stub(accountService, 'hasAnyAuthorityDirect').returns(false);
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(false);
 
             // call
             comp.ngOnInit();
@@ -110,37 +118,39 @@ describe('QuizExercise Statistic Component', () => {
     });
 
     describe('loadQuizSuccess', function () {
-        let calculateMaxScoreSpy: SinonStub;
-        let loadDataSpy: SinonStub;
+        let loadDataSpy: jest.SpyInstance;
 
         beforeEach(() => {
-            calculateMaxScoreSpy = stub(comp, 'calculateMaxScore').returns(32);
-            loadDataSpy = stub(comp, 'loadData');
+            loadDataSpy = jest.spyOn(comp, 'loadData');
+            quizExercise.quizQuestions = [
+                { quizQuestionStatistic: quizQuestionStatOne, points: 5 },
+                { quizQuestionStatistic: quizQuestionStatTwo, points: 6 },
+            ];
+            quizExercise.quizPointStatistic = { participantsRated: 42 };
+            comp.quizExercise = quizExercise;
         });
 
         afterEach(() => {
-            calculateMaxScoreSpy.resetHistory();
-            loadDataSpy.resetHistory();
+            loadDataSpy.mockClear();
         });
 
         it('should set data', () => {
             // setup
-            accountSpy = stub(accountService, 'hasAnyAuthorityDirect').returns(true);
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
 
             // call
             comp.loadQuizSuccess(quizExercise);
 
             // check
             expect(comp.quizExercise).toBe(quizExercise);
-            expect(calculateMaxScoreSpy).toHaveBeenCalled();
-            expect(comp.maxScore).toEqual(32);
+            expect(comp.maxScore).toEqual(11);
             expect(loadDataSpy).toHaveBeenCalled();
         });
 
         it('should call navigate to courses if called by student', () => {
             // setup
-            accountSpy = stub(accountService, 'hasAnyAuthorityDirect').returns(false);
-            const routerSpy = spyOn(router, 'navigate');
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(false);
+            const routerSpy = jest.spyOn(router, 'navigate');
 
             // call
             comp.loadQuizSuccess(quizExercise);
@@ -155,12 +165,14 @@ describe('QuizExercise Statistic Component', () => {
             // setup
             quizExercise.quizQuestions = [{ points: 1 }, { points: 2 }];
             comp.quizExercise = quizExercise;
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            jest.spyOn(comp, 'loadData').mockImplementation();
 
             // call
-            const result = comp.calculateMaxScore();
+            comp.loadQuizSuccess(quizExercise);
 
             // check
-            expect(result).toBe(3);
+            expect(comp.maxScore).toBe(3);
         });
 
         it('should return MaxScore be using quizExercise.maxScore', () => {
@@ -168,12 +180,14 @@ describe('QuizExercise Statistic Component', () => {
             quizExercise.quizQuestions = undefined;
             quizExercise.maxPoints = 42;
             comp.quizExercise = quizExercise;
+            accountSpy = jest.spyOn(accountService, 'hasAnyAuthorityDirect').mockReturnValue(true);
+            jest.spyOn(comp, 'loadData').mockImplementation();
 
             // call
-            const result = comp.calculateMaxScore();
+            comp.loadQuizSuccess(quizExercise);
 
             // check
-            expect(result).toBe(42);
+            expect(comp.maxScore).toBe(42);
         });
     });
 
@@ -189,7 +203,7 @@ describe('QuizExercise Statistic Component', () => {
 
         it('should use values of quizExercise and rated data', () => {
             // setup
-            const updateChartSpy = spyOn(comp, 'updateChart');
+            const updateChartSpy = jest.spyOn(comp, 'loadDataInDiagram');
             comp.rated = true;
             comp.maxScore = 1;
 
@@ -219,7 +233,7 @@ describe('QuizExercise Statistic Component', () => {
 
         it('should use defaults if no quizQuestions are not set', () => {
             // setup
-            const updateChartSpy = spyOn(comp, 'updateChart');
+            const updateChartSpy = jest.spyOn(comp, 'loadDataInDiagram');
             quizExercise.quizQuestions = [];
             comp.rated = true;
             comp.maxScore = 1;

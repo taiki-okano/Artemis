@@ -4,12 +4,13 @@ import { ExerciseUnit } from 'app/entities/lecture-unit/exerciseUnit.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { onError } from 'app/shared/util/global.utils';
-import { JhiAlertService } from 'ng-jhipster';
+import { AlertService } from 'app/core/util/alert.service';
 import { concatMap, finalize, switchMap, take } from 'rxjs/operators';
 import { Exercise } from 'app/entities/exercise.model';
 import { SortService } from 'app/shared/service/sort.service';
 import { forkJoin, combineLatest, from } from 'rxjs';
 import { ExerciseUnitService } from 'app/lecture/lecture-unit/lecture-unit-management/exerciseUnit.service';
+import { faSort } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'jhi-create-exercise-unit',
@@ -26,11 +27,14 @@ export class CreateExerciseUnitComponent implements OnInit {
     exercisesAvailableForUnitCreation: Exercise[] = [];
     exercisesToCreateUnitFor: Exercise[] = [];
 
+    // Icons
+    faSort = faSort;
+
     constructor(
         private activatedRoute: ActivatedRoute,
         private router: Router,
         private courseManagementService: CourseManagementService,
-        private alertService: JhiAlertService,
+        private alertService: AlertService,
         private sortService: SortService,
         private exerciseUnitService: ExerciseUnitService,
     ) {}

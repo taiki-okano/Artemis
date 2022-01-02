@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
+import { Subject, Subscription } from 'rxjs';
 import { Participation } from 'app/entities/participation/participation.model';
 import { ParticipationService } from './participation.service';
 import { ActivatedRoute } from '@angular/router';
@@ -8,18 +7,22 @@ import { StudentParticipation } from 'app/entities/participation/student-partici
 import { ExerciseSubmissionState, ProgrammingSubmissionService, ProgrammingSubmissionState } from 'app/exercises/programming/participate/programming-submission.service';
 import { ActionType } from 'app/shared/delete-dialog/delete-dialog.model';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Exercise, ExerciseType } from 'app/entities/exercise.model';
-import { areManualResultsAllowed } from 'app/exercises/shared/exercise/exercise-utils';
+import { areManualResultsAllowed } from 'app/exercises/shared/exercise/exercise.utils';
 import { FeatureToggle } from 'app/shared/feature-toggle/feature-toggle.service';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
 import { formatTeamAsSearchResult } from 'app/exercises/shared/team/team.utils';
 import { AccountService } from 'app/core/auth/account.service';
-import * as moment from 'moment';
-import { Moment } from 'moment';
+import dayjs from 'dayjs';
 import { defaultLongDateTimeFormat } from 'app/shared/pipes/artemis-date.pipe';
 import { ProgrammingExerciseStudentParticipation } from 'app/entities/participation/programming-exercise-student-participation.model';
+import { AlertService } from 'app/core/util/alert.service';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { ProfileService } from 'app/shared/layouts/profiles/profile.service';
+import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
+import { setBuildPlanUrlForProgrammingParticipations } from 'app/exercises/shared/participation/participation.utils';
+import { faCircleNotch, faEraser, faFilePowerpoint, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 enum FilterProp {
     ALL = 'all',
@@ -40,6 +43,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
     readonly FeatureToggle = FeatureToggle;
 
     participations: StudentParticipation[] = [];
+    participationsChangedDueDate: Map<number, StudentParticipation> = new Map<number, StudentParticipation>();
     filteredParticipationsSize = 0;
     eventSubscriber: Subscription;
     paramSub: Subscription;
@@ -61,14 +65,23 @@ export class ParticipationComponent implements OnInit, OnDestroy {
 
     isLoading: boolean;
 
+    isSaving: boolean;
+
+    // Icons
+    faTimes = faTimes;
+    faCircleNotch = faCircleNotch;
+    faEraser = faEraser;
+    faFilePowerpoint = faFilePowerpoint;
+
     constructor(
         private route: ActivatedRoute,
         private participationService: ParticipationService,
-        private jhiAlertService: JhiAlertService,
-        private eventManager: JhiEventManager,
+        private alertService: AlertService,
+        private eventManager: EventManager,
         private exerciseService: ExerciseService,
         private programmingSubmissionService: ProgrammingSubmissionService,
         private accountService: AccountService,
+        private profileService: ProfileService,
     ) {
         this.participationCriteria = {
             filterProp: FilterProp.ALL,
@@ -79,7 +92,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
      * Initialize component by calling loadAll and registerChangeInParticipation
      */
     ngOnInit() {
-        this.loadAll();
+        this.paramSub = this.route.params.subscribe((params) => this.loadExercise(params['exerciseId']));
         this.registerChangeInParticipations();
     }
 
@@ -90,47 +103,55 @@ export class ParticipationComponent implements OnInit, OnDestroy {
         this.programmingSubmissionService.unsubscribeAllWebsocketTopics(this.exercise);
         this.eventManager.destroy(this.eventSubscriber);
         this.dialogErrorSource.unsubscribe();
+        if (this.paramSub) {
+            this.paramSub.unsubscribe();
+        }
     }
 
-    loadAll() {
-        this.paramSub = this.route.params.subscribe((params) => {
-            this.isLoading = true;
-            this.hasLoadedPendingSubmissions = false;
-            this.exerciseService.find(params['exerciseId']).subscribe((exerciseResponse) => {
-                this.exercise = exerciseResponse.body!;
-                this.participationService.findAllParticipationsByExercise(params['exerciseId'], true).subscribe((participationsResponse) => {
-                    this.participations = participationsResponse.body!;
-                    this.isLoading = false;
-                });
-                if (this.exercise.type === ExerciseType.PROGRAMMING) {
-                    this.programmingSubmissionService
-                        .getSubmissionStateOfExercise(this.exercise.id!)
-                        .pipe(
-                            tap((exerciseSubmissionState: ExerciseSubmissionState) => {
-                                this.exerciseSubmissionState = exerciseSubmissionState;
-                            }),
-                        )
-                        .subscribe(() => (this.hasLoadedPendingSubmissions = true));
-                }
-                this.newManualResultAllowed = areManualResultsAllowed(this.exercise);
-                this.presentationScoreEnabled = this.checkPresentationScoreConfig();
-                this.hasAccessRights();
-            });
+    private loadExercise(exerciseId: number) {
+        this.isLoading = true;
+        this.hasLoadedPendingSubmissions = false;
+        this.exerciseService.find(exerciseId).subscribe((exerciseResponse) => {
+            this.exercise = exerciseResponse.body!;
+            this.loadParticipations(exerciseId);
+            if (this.exercise.type === ExerciseType.PROGRAMMING) {
+                this.loadSubmissions(exerciseId);
+            }
+            this.newManualResultAllowed = areManualResultsAllowed(this.exercise);
+            this.presentationScoreEnabled = this.checkPresentationScoreConfig();
+            this.isAdmin = this.accountService.isAdmin();
         });
     }
 
-    formatDate(date: Moment | Date | undefined) {
-        // TODO: we should try to use the artemis date pipe here
-        return date ? moment(date).format(defaultLongDateTimeFormat) : '';
+    private loadParticipations(exerciseId: number) {
+        this.participationService.findAllParticipationsByExercise(exerciseId, true).subscribe((participationsResponse) => {
+            this.participations = participationsResponse.body!;
+            if (this.exercise.type === ExerciseType.PROGRAMMING) {
+                const programmingExercise = this.exercise as ProgrammingExercise;
+                if (programmingExercise.projectKey) {
+                    this.profileService.getProfileInfo().subscribe((profileInfo) => {
+                        setBuildPlanUrlForProgrammingParticipations(profileInfo, this.participations, (this.exercise as ProgrammingExercise).projectKey);
+                    });
+                }
+            }
+            this.isLoading = false;
+        });
     }
 
-    hasAccessRights() {
-        if (this.exercise.course) {
-            this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.course);
-        } else if (this.exercise.exerciseGroup) {
-            this.exercise.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.exercise.exerciseGroup.exam?.course!);
-        }
-        this.isAdmin = this.accountService.isAdmin();
+    private loadSubmissions(exerciseId: number) {
+        this.programmingSubmissionService
+            .getSubmissionStateOfExercise(exerciseId)
+            .pipe(
+                tap((exerciseSubmissionState: ExerciseSubmissionState) => {
+                    this.exerciseSubmissionState = exerciseSubmissionState;
+                }),
+            )
+            .subscribe(() => (this.hasLoadedPendingSubmissions = true));
+    }
+
+    formatDate(date: dayjs.Dayjs | Date | undefined) {
+        // TODO: we should try to use the artemis date pipe here
+        return date ? dayjs(date).format(defaultLongDateTimeFormat) : '';
     }
 
     updateParticipationFilter(newValue: FilterProp) {
@@ -167,7 +188,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
     }
 
     registerChangeInParticipations() {
-        this.eventSubscriber = this.eventManager.subscribe('participationListModification', () => this.loadAll());
+        this.eventSubscriber = this.eventManager.subscribe('participationListModification', () => this.loadExercise(this.exercise.id!));
     }
 
     checkPresentationScoreConfig(): boolean {
@@ -182,12 +203,9 @@ export class ParticipationComponent implements OnInit, OnDestroy {
             return;
         }
         participation.presentationScore = 1;
-        this.participationService.update(this.exercise.id!, participation).subscribe(
-            () => {},
-            () => {
-                this.jhiAlertService.error('artemisApp.participation.addPresentation.error');
-            },
-        );
+        this.participationService.update(this.exercise, participation).subscribe({
+            error: () => this.alertService.error('artemisApp.participation.addPresentation.error'),
+        });
     }
 
     removePresentation(participation: StudentParticipation) {
@@ -195,12 +213,62 @@ export class ParticipationComponent implements OnInit, OnDestroy {
             return;
         }
         participation.presentationScore = 0;
-        this.participationService.update(this.exercise.id!, participation).subscribe(
-            () => {},
-            () => {
-                this.jhiAlertService.error('artemisApp.participation.removePresentation.error');
+        this.participationService.update(this.exercise, participation).subscribe({
+            error: () => this.alertService.error('artemisApp.participation.removePresentation.error'),
+        });
+    }
+
+    /**
+     * Save that the due date of the given participation has changed.
+     *
+     * Does not issue an immediate update of the due date to the server.
+     * The actual update is performed with {@link saveChangedDueDates}.
+     * @param participation of which the individual due date has changed.
+     */
+    changedIndividualDueDate(participation: StudentParticipation) {
+        this.participationsChangedDueDate.set(participation.id!, participation);
+    }
+
+    /**
+     * Removes the individual due date from the given participation.
+     *
+     * Does not issue an immediate update of the due date to the server.
+     * The actual update is performed with {@link saveChangedDueDates}.
+     * @param participation of which the individual due date should be removed.
+     */
+    removeIndividualDueDate(participation: StudentParticipation) {
+        participation.individualDueDate = undefined;
+        this.participationsChangedDueDate.set(participation.id!, participation);
+    }
+
+    /**
+     * Saves the updated individual due dates for all participants.
+     *
+     * Changes are not updated directly when changing just a single due date, as
+     * an update here might require a full update of the scheduling of the
+     * exercise. Therefore, an explicit save action which can also update the
+     * due date for multiple participants at the same time is preferred.
+     */
+    saveChangedDueDates() {
+        this.isSaving = true;
+
+        const changedParticipations = Array.from(this.participationsChangedDueDate.values());
+        this.participationService.updateIndividualDueDates(this.exercise, changedParticipations).subscribe({
+            next: (response) => {
+                response.body!.forEach((updatedParticipation) => {
+                    const changedIndex = this.participations.findIndex((participation) => participation.id! === updatedParticipation.id!);
+                    this.participations[changedIndex] = updatedParticipation;
+                });
+
+                this.participationsChangedDueDate.clear();
+                this.isSaving = false;
+                this.alertService.success('artemisApp.participation.updateDueDates.success', { count: response.body!.length });
             },
-        );
+            error: () => {
+                this.alertService.error('artemisApp.participation.updateDueDates.error');
+                this.isSaving = false;
+            },
+        });
     }
 
     /**
@@ -211,32 +279,34 @@ export class ParticipationComponent implements OnInit, OnDestroy {
     deleteParticipation(participationId: number, event: { [key: string]: boolean }) {
         const deleteBuildPlan = event.deleteBuildPlan ? event.deleteBuildPlan : false;
         const deleteRepository = event.deleteRepository ? event.deleteRepository : false;
-        this.participationService.delete(participationId, { deleteBuildPlan, deleteRepository }).subscribe(
-            () => {
+        this.participationService.delete(participationId, { deleteBuildPlan, deleteRepository }).subscribe({
+            next: () => {
                 this.eventManager.broadcast({
                     name: 'participationListModification',
                     content: 'Deleted an participation',
                 });
                 this.dialogErrorSource.next('');
+                this.participationsChangedDueDate.delete(participationId);
             },
-            (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
-        );
+            error: (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
+        });
     }
+
     /**
      * Cleans programming exercise participation
      * @param programmingExerciseParticipation the id of the participation that we want to delete
      */
     cleanupProgrammingExerciseParticipation(programmingExerciseParticipation: StudentParticipation) {
-        this.participationService.cleanupBuildPlan(programmingExerciseParticipation).subscribe(
-            () => {
+        this.participationService.cleanupBuildPlan(programmingExerciseParticipation).subscribe({
+            next: () => {
                 this.eventManager.broadcast({
                     name: 'participationListModification',
                     content: 'Cleanup the build plan of an participation',
                 });
                 this.dialogErrorSource.next('');
             },
-            (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
-        );
+            error: (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
+        });
     }
 
     /**
@@ -279,7 +349,7 @@ export class ParticipationComponent implements OnInit, OnDestroy {
      * @param participation Student participation
      * @param repoUrl original repository url
      */
-    getRepositoryLink = (participation: StudentParticipation, repoUrl: String) => {
+    getRepositoryLink = (participation: StudentParticipation, repoUrl: string) => {
         if ((participation as ProgrammingExerciseStudentParticipation).repositoryUrl === repoUrl) {
             return (participation as ProgrammingExerciseStudentParticipation).userIndependentRepositoryUrl;
         }

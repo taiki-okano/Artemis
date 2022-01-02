@@ -1,5 +1,5 @@
-import { async, ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { TranslateService } from '@ngx-translate/core';
 import { ArtemisTestModule } from '../../test.module';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -15,8 +15,7 @@ import { ExerciseType } from 'app/entities/exercise.model';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
 import { HttpHeaders, HttpResponse } from '@angular/common/http';
 import { SortService } from 'app/shared/service/sort.service';
-import { stub } from 'sinon';
-import { ProgrammingAssessmentDashboardComponent } from 'app/exercises/programming/assess/programming-assessment-dashboard/programming-assessment-dashboard.component';
+import { ProgrammingExerciseSubmissionsComponent } from 'app/exercises/programming/assess/programming-assessment-dashboard/programming-exercise-submissions.component';
 import { ProgrammingSubmissionService } from 'app/exercises/programming/participate/programming-submission.service';
 import { ProgrammingAssessmentManualResultService } from 'app/exercises/programming/assess/manual-result/programming-assessment-manual-result.service';
 import { ProgrammingExercise } from 'app/entities/programming-exercise.model';
@@ -49,22 +48,22 @@ const programmingSubmission2 = {
     participation: { id: 41, exercise: programmingExercise2 },
 };
 
-describe('FileUploadAssessmentDashboardComponent', () => {
-    let component: ProgrammingAssessmentDashboardComponent;
-    let fixture: ComponentFixture<ProgrammingAssessmentDashboardComponent>;
+describe('ProgrammingAssessmentDashboardComponent', () => {
+    let component: ProgrammingExerciseSubmissionsComponent;
+    let fixture: ComponentFixture<ProgrammingExerciseSubmissionsComponent>;
     let exerciseService: ExerciseService;
     let programmingSubmissionService: ProgrammingSubmissionService;
     let programmingAssessmentService: ProgrammingAssessmentManualResultService;
     let accountService: AccountService;
     let sortService: SortService;
 
-    beforeEach(async(() => {
+    beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [RouterTestingModule, TranslateModule.forRoot(), ArtemisTestModule],
-            declarations: [ProgrammingAssessmentDashboardComponent],
+            imports: [RouterTestingModule, ArtemisTestModule],
+            declarations: [ProgrammingExerciseSubmissionsComponent],
             providers: [
                 JhiLanguageHelper,
-                { provide: Router, useClass: route },
+                { provide: Router, useValue: route },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
@@ -82,24 +81,24 @@ describe('FileUploadAssessmentDashboardComponent', () => {
                 },
             ],
         })
-            .overrideTemplate(ProgrammingAssessmentDashboardComponent, '')
+            .overrideTemplate(ProgrammingExerciseSubmissionsComponent, '')
             .compileComponents()
             .then(() => {
-                fixture = TestBed.createComponent(ProgrammingAssessmentDashboardComponent);
+                fixture = TestBed.createComponent(ProgrammingExerciseSubmissionsComponent);
                 component = fixture.componentInstance;
                 exerciseService = fixture.debugElement.injector.get(ExerciseService);
                 programmingSubmissionService = fixture.debugElement.injector.get(ProgrammingSubmissionService);
                 programmingAssessmentService = fixture.debugElement.injector.get(ProgrammingAssessmentManualResultService);
                 accountService = fixture.debugElement.injector.get(AccountService);
                 sortService = fixture.debugElement.injector.get(SortService);
-            });
-    }));
+            })
+            .catch((e) => console.error(e));
+    });
 
     it('should set parameters and call functions on init', fakeAsync(() => {
         // setup
-        const exerciseServiceFind = stub(exerciseService, 'find');
-        exerciseServiceFind.returns(of(new HttpResponse({ body: programmingExercise1 })));
-        spyOn<any>(component, 'setPermissions');
+        const exerciseServiceFindMock = jest.spyOn(exerciseService, 'find');
+        exerciseServiceFindMock.mockReturnValue(of(new HttpResponse({ body: programmingExercise1 })));
         // test for init values
         expect(component).toBeTruthy();
         expect(component.submissions).toEqual([]);
@@ -112,47 +111,43 @@ describe('FileUploadAssessmentDashboardComponent', () => {
         tick(500);
 
         // check
-        expect(exerciseServiceFind).toHaveBeenCalledWith(programmingExercise2.id);
-        expect(component['setPermissions']).toHaveBeenCalled();
+        expect(exerciseServiceFindMock).toHaveBeenCalledWith(programmingExercise2.id);
         expect(component.exercise).toEqual(programmingExercise1 as ProgrammingExercise);
     }));
 
     it('should get Submissions', fakeAsync(() => {
         // test getSubmissions
-        const exerciseServiceFind = stub(exerciseService, 'find');
-        const getProgrammingSubmissionsForExerciseByCorrectionRoundStub = stub(programmingSubmissionService, 'getProgrammingSubmissionsForExerciseByCorrectionRound');
-        const isAtLeastInstructorInCourseStub = stub(accountService, 'isAtLeastInstructorInCourse');
-        exerciseServiceFind.returns(of(new HttpResponse({ body: programmingExercise1 })));
-        getProgrammingSubmissionsForExerciseByCorrectionRoundStub.returns(of(new HttpResponse({ body: [programmingSubmission1] })));
-        isAtLeastInstructorInCourseStub.returns(true);
-        spyOn<any>(component, 'setPermissions');
-        const getSubmissionSpy = spyOn<any>(component, 'getSubmissions');
-        getSubmissionSpy.and.callThrough();
+        const exerciseServiceFindMock = jest.spyOn(exerciseService, 'find');
+        const getProgrammingSubmissionsForExerciseByCorrectionRoundStub = jest.spyOn(programmingSubmissionService, 'getProgrammingSubmissionsForExerciseByCorrectionRound');
+        const isAtLeastInstructorInCourseStub = jest.spyOn(accountService, 'isAtLeastInstructorInCourse');
+        exerciseServiceFindMock.mockReturnValue(of(new HttpResponse({ body: programmingExercise1 })));
+        getProgrammingSubmissionsForExerciseByCorrectionRoundStub.mockReturnValue(of(new HttpResponse({ body: [programmingSubmission1] })));
+        isAtLeastInstructorInCourseStub.mockReturnValue(true);
+        jest.spyOn<any, any>(component, 'getSubmissions');
+
         // call
         component.ngOnInit();
         tick(500);
         // check
-        expect(component['setPermissions']).toHaveBeenCalled();
         expect(component['getSubmissions']).toHaveBeenCalled();
         expect(getProgrammingSubmissionsForExerciseByCorrectionRoundStub).toHaveBeenCalled();
         expect(getProgrammingSubmissionsForExerciseByCorrectionRoundStub).toHaveBeenCalledWith(programmingExercise2.id, { submittedOnly: true });
-        expect(exerciseServiceFind).toHaveBeenCalledWith(programmingExercise2.id);
+        expect(exerciseServiceFindMock).toHaveBeenCalledWith(programmingExercise2.id);
         expect(component.submissions).toEqual([programmingSubmission1]);
         expect(component.filteredSubmissions).toEqual([programmingSubmission1]);
     }));
 
     it('should not get Submissions', fakeAsync(() => {
-        const exerciseServiceFind = stub(exerciseService, 'find');
-        const getProgrammingSubmissionsForExerciseByCorrectionRoundStub = stub(programmingSubmissionService, 'getProgrammingSubmissionsForExerciseByCorrectionRound');
-        const isAtLeastInstructorInCourseStub = stub(accountService, 'isAtLeastInstructorInCourse');
+        const exerciseServiceFind = jest.spyOn(exerciseService, 'find');
+        const getProgrammingSubmissionsForExerciseByCorrectionRoundStub = jest.spyOn(programmingSubmissionService, 'getProgrammingSubmissionsForExerciseByCorrectionRound');
+        const isAtLeastInstructorInCourseStub = jest.spyOn(accountService, 'isAtLeastInstructorInCourse');
 
-        exerciseServiceFind.returns(of(new HttpResponse({ body: programmingExercise1 })));
-        getProgrammingSubmissionsForExerciseByCorrectionRoundStub.returns(of(new HttpResponse({ body: [] })));
-        isAtLeastInstructorInCourseStub.returns(true);
+        exerciseServiceFind.mockReturnValue(of(new HttpResponse({ body: programmingExercise1 })));
+        getProgrammingSubmissionsForExerciseByCorrectionRoundStub.mockReturnValue(of(new HttpResponse({ body: [] })));
+        isAtLeastInstructorInCourseStub.mockReturnValue(true);
         // findExerciseStub.returns(of(new HttpResponse({ body: fileUploadExercise, headers: new HttpHeaders() })));
-        exerciseServiceFind.returns(of(new HttpResponse({ body: programmingExercise2, headers: new HttpHeaders() })));
-        const getSubmissionSpy = spyOn<any>(component, 'getSubmissions');
-        getSubmissionSpy.and.callThrough();
+        exerciseServiceFind.mockReturnValue(of(new HttpResponse({ body: programmingExercise2, headers: new HttpHeaders() })));
+        jest.spyOn<any, any>(component, 'getSubmissions');
         component.exercise = programmingExercise2;
 
         // call
@@ -178,8 +173,8 @@ describe('FileUploadAssessmentDashboardComponent', () => {
 
     it('should cancelAssessment', fakeAsync(() => {
         // test cancelAssessment
-        const windowSpy = spyOn(window, 'confirm').and.returnValue(true);
-        const modelAssServiceCancelAssSpy = spyOn(programmingAssessmentService, 'cancelAssessment').and.returnValue(of(1));
+        const windowSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+        const modelAssServiceCancelAssSpy = jest.spyOn(programmingAssessmentService, 'cancelAssessment').mockReturnValue(of(undefined));
         component.exercise = programmingExercise2;
         // call
         component.cancelAssessment(programmingSubmission2);
@@ -192,7 +187,7 @@ describe('FileUploadAssessmentDashboardComponent', () => {
 
     it('should sortRows', () => {
         // test cancelAssessment
-        const sortServiceSpy = spyOn(sortService, 'sortByProperty');
+        const sortServiceSpy = jest.spyOn(sortService, 'sortByProperty');
         component.predicate = 'predicate';
         component.reverse = false;
         component.submissions = [programmingSubmission2];

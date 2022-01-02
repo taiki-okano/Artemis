@@ -1,19 +1,25 @@
 package de.tum.in.www1.artemis.domain.modeling;
 
+import static de.tum.in.www1.artemis.domain.enumeration.ExerciseType.MODELING;
+
 import java.time.ZonedDateTime;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import de.tum.in.www1.artemis.domain.Exercise;
+import de.tum.in.www1.artemis.domain.ModelAssessmentKnowledge;
 import de.tum.in.www1.artemis.domain.enumeration.DiagramType;
+import de.tum.in.www1.artemis.domain.enumeration.ExerciseType;
 
 /**
  * A ModelingExercise.
  */
 @Entity
 @DiscriminatorValue(value = "M")
+@SecondaryTable(name = "model_exercise_details")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ModelingExercise extends Exercise {
 
@@ -28,6 +34,11 @@ public class ModelingExercise extends Exercise {
     @Column(name = "sample_solution_explanation")
     @Lob
     private String sampleSolutionExplanation;
+
+    @ManyToOne
+    @JoinColumn(table = "model_exercise_details")
+    @JsonIgnore
+    private ModelAssessmentKnowledge knowledge;
 
     @Transient
     private ZonedDateTime clusterBuildDate;
@@ -64,6 +75,14 @@ public class ModelingExercise extends Exercise {
         this.clusterBuildDate = examEndDate;
     }
 
+    public ModelAssessmentKnowledge getKnowledge() {
+        return knowledge;
+    }
+
+    public void setKnowledge(ModelAssessmentKnowledge knowledge) {
+        this.knowledge = knowledge;
+    }
+
     /**
      * set all sensitive information to null, so no info with respect to the solution gets leaked to students through json
      */
@@ -72,6 +91,11 @@ public class ModelingExercise extends Exercise {
         setSampleSolutionModel(null);
         setSampleSolutionExplanation(null);
         super.filterSensitiveInformation();
+    }
+
+    @Override
+    public ExerciseType getExerciseType() {
+        return MODELING;
     }
 
     @Override
