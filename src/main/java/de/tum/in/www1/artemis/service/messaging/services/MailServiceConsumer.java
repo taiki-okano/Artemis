@@ -9,6 +9,7 @@ import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
+import de.tum.in.www1.artemis.config.MessageBrokerConstants;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.service.MailService;
 import de.tum.in.www1.artemis.web.rest.errors.InternalServerErrorException;
@@ -19,10 +20,6 @@ import de.tum.in.www1.artemis.web.rest.errors.InternalServerErrorException;
 @Component
 @EnableJms
 public class MailServiceConsumer {
-
-    public static final String USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL = "user_management_queue.send_activation_mail";
-
-    public static final String USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL = "user_management_queue.send_password_reset_mail";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceConsumer.class);
 
@@ -37,9 +34,9 @@ public class MailServiceConsumer {
      *
      * @param message the message coming from the message broker
      */
-    @JmsListener(destination = USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL)
     public void sendActivationEmail(Message message) {
-        LOGGER.info("Receive message in queue {}", USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL);
+        LOGGER.info("Receive message in queue {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL);
         User user;
         try {
             user = message.getBody(User.class);
@@ -55,9 +52,9 @@ public class MailServiceConsumer {
      *
      * @param message the message coming from the message broker
      */
-    @JmsListener(destination = USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL)
     public void sendPasswordResetEmail(Message message) {
-        LOGGER.info("Receive message in queue {}", USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL);
+        LOGGER.info("Receive message in queue {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL);
         User user;
         try {
             user = message.getBody(User.class);

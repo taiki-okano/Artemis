@@ -13,6 +13,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import de.tum.in.www1.artemis.config.MessageBrokerConstants;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.web.rest.errors.InternalServerErrorException;
 import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
@@ -23,24 +24,6 @@ import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
 @Component
 @EnableJms
 public class UserServiceProducer {
-
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER = "user_management_queue.create_internal_user";
-
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP = "user_management_queue.create_internal_user_resp";
-
-    public static final String USER_MANAGEMENT_QUEUE_ACTIVATE_USER = "user_management_queue.activate_user";
-
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_USER = "user_management_queue.create_user";
-
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_USER_RESP = "user_management_queue.create_user_resp";
-
-    public static final String USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET = "user_management_queue.request_password_reset";
-
-    public static final String USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP = "user_management_queue.request_password_reset_resp";
-
-    public static final String USER_MANAGEMENT_QUEUE_SAVE_USER = "user_management_queue.save_user";
-
-    public static final String USER_MANAGEMENT_QUEUE_SAVE_USER_RESP = "user_management_queue.save_user_resp";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceProducer.class);
 
@@ -80,12 +63,12 @@ public class UserServiceProducer {
         user.setLangKey(langKey);
 
         String correlationId = Integer.toString(user.hashCode());
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER, user, message -> {
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER, user, message -> {
             message.setJMSCorrelationID(correlationId);
             return message;
         });
-        Message responseMessage = jmsTemplate.receiveSelected(USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, "JMSCorrelationID='" + correlationId + "'");
-        LOGGER.info("Received response in queue {} with body {}", USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, responseMessage);
+        Message responseMessage = jmsTemplate.receiveSelected(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, "JMSCorrelationID='" + correlationId + "'");
+        LOGGER.info("Received response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, responseMessage);
         try {
             return responseMessage.getBody(User.class);
         }
@@ -102,12 +85,12 @@ public class UserServiceProducer {
      */
     public User createUser(ManagedUserVM userDTO) {
         String correlationId = Integer.toString(userDTO.hashCode());
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_CREATE_USER, userDTO, message -> {
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER, userDTO, message -> {
             message.setJMSCorrelationID(correlationId);
             return message;
         });
-        Message responseMessage = jmsTemplate.receiveSelected(USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, "JMSCorrelationID='" + correlationId + "'");
-        LOGGER.info("Received response in queue {} with body {}", USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, responseMessage);
+        Message responseMessage = jmsTemplate.receiveSelected(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, "JMSCorrelationID='" + correlationId + "'");
+        LOGGER.info("Received response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, responseMessage);
         try {
             return responseMessage.getBody(User.class);
         }
@@ -123,7 +106,7 @@ public class UserServiceProducer {
      */
     public void activateUser(User userDTO) {
         LOGGER.info("Activate user");
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_ACTIVATE_USER, userDTO);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_ACTIVATE_USER, userDTO);
     }
 
     /**
@@ -135,12 +118,12 @@ public class UserServiceProducer {
     public User requestPasswordReset(String mail) {
         LOGGER.info("Request password reset for user with mail {}", mail);
         String correlationId = Integer.toString(mail.hashCode());
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET, mail, message -> {
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET, mail, message -> {
             message.setJMSCorrelationID(correlationId);
             return message;
         });
-        Message responseMessage = jmsTemplate.receiveSelected(USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, "JMSCorrelationID='" + correlationId + "'");
-        LOGGER.info("Received response in queue {} with body {}", USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, responseMessage);
+        Message responseMessage = jmsTemplate.receiveSelected(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, "JMSCorrelationID='" + correlationId + "'");
+        LOGGER.info("Received response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, responseMessage);
         try {
             return responseMessage.getBody(User.class);
         }
@@ -157,12 +140,12 @@ public class UserServiceProducer {
      */
     public User saveUser(User userDTO) {
         String correlationId = Integer.toString(userDTO.hashCode());
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_SAVE_USER, userDTO, message -> {
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER, userDTO, message -> {
             message.setJMSCorrelationID(correlationId);
             return message;
         });
-        Message responseMessage = jmsTemplate.receiveSelected(USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, "JMSCorrelationID='" + correlationId + "'");
-        LOGGER.info("Received response in queue {} with body {}", USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, responseMessage);
+        Message responseMessage = jmsTemplate.receiveSelected(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, "JMSCorrelationID='" + correlationId + "'");
+        LOGGER.info("Received response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, responseMessage);
         try {
             return responseMessage.getBody(User.class);
         }

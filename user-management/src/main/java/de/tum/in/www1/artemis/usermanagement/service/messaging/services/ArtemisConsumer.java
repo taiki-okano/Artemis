@@ -1,5 +1,6 @@
 package de.tum.in.www1.artemis.usermanagement.service.messaging.services;
 
+import de.tum.in.www1.artemis.config.MessageBrokerConstants;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserCreationService;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserService;
@@ -23,19 +24,13 @@ import java.util.Optional;
 @Component
 @EnableJms
 public class ArtemisConsumer {
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_USER = "user_management_queue.create_user";
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_USER_RESP = "user_management_queue.create_user_resp";
-    public static final String USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET = "user_management_queue.request_password_reset";
-    public static final String USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP = "user_management_queue.request_password_reset_resp";
-    public static final String USER_MANAGEMENT_QUEUE_ACTIVATE_USER = "user_management_queue.activate_user";
-    public static final String USER_MANAGEMENT_QUEUE_SAVE_USER = "user_management_queue.save_user";
-    public static final String USER_MANAGEMENT_QUEUE_SAVE_USER_RESP = "user_management_queue.save_user_resp";
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER = "user_management_queue.create_internal_user";
-    public static final String USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP = "user_management_queue.create_internal_user_resp";
     private static final Logger LOGGER = LoggerFactory.getLogger(ArtemisConsumer.class);
+
     @Autowired
     private final JmsTemplate jmsTemplate;
+
     private UserCreationService userCreationService;
+
     private UserService userService;
 
     public ArtemisConsumer(UserCreationService userCreationService, UserService userService, JmsTemplate jmsTemplate) {
@@ -49,7 +44,7 @@ public class ArtemisConsumer {
      *
      * @param message the message to consume
      */
-    @JmsListener(destination = USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET)
     public void requestPasswordReset(Message message) {
         String userEmail;
         try {
@@ -58,8 +53,8 @@ public class ArtemisConsumer {
             throw new InternalServerErrorException("There was a problem with the communication between server components. Please try again later!");
         }
         Optional<User> updatedUser = userService.requestPasswordReset(userEmail);
-        LOGGER.info("Send response in queue {} with body {}", USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser);
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser.isPresent() ? updatedUser.get() : false, msg -> {
+        LOGGER.info("Send response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser.isPresent() ? updatedUser.get() : false, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
@@ -70,7 +65,7 @@ public class ArtemisConsumer {
      *
      * @param message the message to consume
      */
-    @JmsListener(destination = USER_MANAGEMENT_QUEUE_CREATE_USER)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER)
     public void createUser(Message message) {
         ManagedUserVM managedUserVM;
         try {
@@ -79,8 +74,8 @@ public class ArtemisConsumer {
             throw new InternalServerErrorException("There was a problem with the communication between server components. Please try again later!");
         }
         User createdUser = userCreationService.createUser(managedUserVM);
-        LOGGER.info("Send response in queue {} with body {}", USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, createdUser);
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, createdUser, msg -> {
+        LOGGER.info("Send response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, createdUser);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, createdUser, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
@@ -91,7 +86,7 @@ public class ArtemisConsumer {
      *
      * @param message the message to consume
      */
-    @JmsListener(destination = USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER)
     public void createInternalUser(Message message) {
         User user;
         try {
@@ -101,8 +96,8 @@ public class ArtemisConsumer {
         }
         User createdUser = userCreationService.createInternalUser(user.getLogin(), user.getPassword(), user.getGroups(),
             user.getFirstName(), user.getLastName(), user.getEmail(), user.getRegistrationNumber(), user.getImageUrl(), user.getLangKey());
-        LOGGER.info("Send response in queue {} with body {}", USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, createdUser);
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, createdUser, msg -> {
+        LOGGER.info("Send response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, createdUser);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, createdUser, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
@@ -113,7 +108,7 @@ public class ArtemisConsumer {
      *
      * @param message the message to consume
      */
-    @JmsListener(destination = USER_MANAGEMENT_QUEUE_SAVE_USER)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER)
     public void saveUser(Message message) {
         User user;
         try {
@@ -122,8 +117,8 @@ public class ArtemisConsumer {
             throw new InternalServerErrorException("There was a problem with the communication between server components. Please try again later!");
         }
         User updatedUser = userService.saveUser(user);
-        LOGGER.info("Send response in queue {} with body {}", USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, updatedUser);
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, updatedUser, msg -> {
+        LOGGER.info("Send response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, updatedUser);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, updatedUser, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
@@ -134,7 +129,7 @@ public class ArtemisConsumer {
      *
      * @param message the message to consume
      */
-    @JmsListener(destination = USER_MANAGEMENT_QUEUE_ACTIVATE_USER)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_ACTIVATE_USER)
     public void activateUser(Message message) {
         User user;
         try {

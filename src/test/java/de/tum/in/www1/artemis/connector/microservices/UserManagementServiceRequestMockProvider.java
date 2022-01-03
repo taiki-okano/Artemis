@@ -16,9 +16,9 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import de.tum.in.www1.artemis.config.Constants;
+import de.tum.in.www1.artemis.config.MessageBrokerConstants;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.repository.UserRepository;
-import de.tum.in.www1.artemis.service.messaging.services.UserServiceProducer;
 import de.tum.in.www1.artemis.service.user.PasswordService;
 import de.tum.in.www1.artemis.web.rest.errors.InternalServerErrorException;
 import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
@@ -43,7 +43,7 @@ public class UserManagementServiceRequestMockProvider {
         this.passwordService = passwordService;
     }
 
-    @JmsListener(destination = UserServiceProducer.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET)
     public void requestPasswordReset(Message message) {
         LOGGER.info("received message {}", message.toString());
 
@@ -59,13 +59,13 @@ public class UserManagementServiceRequestMockProvider {
             user.setResetDate(Instant.now());
             return userRepository.save(user);
         });
-        jmsTemplate.convertAndSend(UserServiceProducer.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser.isPresent() ? updatedUser.get() : false, msg -> {
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser.isPresent() ? updatedUser.get() : false, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
     }
 
-    @JmsListener(destination = UserServiceProducer.USER_MANAGEMENT_QUEUE_CREATE_USER)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER)
     public void createUser(Message message) {
         LOGGER.info("received message {}", message.toString());
         ManagedUserVM managedUserVM;
@@ -97,13 +97,13 @@ public class UserManagementServiceRequestMockProvider {
         user.setRegistrationNumber(managedUserVM.getVisibleRegistrationNumber());
         userRepository.save(user);
 
-        jmsTemplate.convertAndSend(UserServiceProducer.USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, user, msg -> {
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_USER_RESP, user, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
     }
 
-    @JmsListener(destination = UserServiceProducer.USER_MANAGEMENT_QUEUE_SAVE_USER)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER)
     public void saveUser(Message message) {
         User user;
         try {
@@ -113,14 +113,14 @@ public class UserManagementServiceRequestMockProvider {
             throw new InternalServerErrorException("There was a problem with the communication between server components. Please try again later!");
         }
         userRepository.save(user);
-        LOGGER.info("Send response in queue {} with body {}", UserServiceProducer.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, user);
-        jmsTemplate.convertAndSend(UserServiceProducer.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, user, msg -> {
+        LOGGER.info("Send response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, user);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SAVE_USER_RESP, user, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
     }
 
-    @JmsListener(destination = UserServiceProducer.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER)
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER)
     public void createInternalUser(Message message) {
         User user;
         try {
@@ -138,9 +138,15 @@ public class UserManagementServiceRequestMockProvider {
 
         userRepository.save(user);
 
-        jmsTemplate.convertAndSend(UserServiceProducer.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, user, msg -> {
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, user, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());
             return msg;
         });
     }
+
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_ACTIVATE_USER)
+    public void sendActivateUser() {
+        // Do nothing
+    }
+
 }

@@ -1,5 +1,6 @@
 package de.tum.in.www1.artemis.usermanagement.service.messaging.services;
 
+import de.tum.in.www1.artemis.config.MessageBrokerConstants;
 import de.tum.in.www1.artemis.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +17,6 @@ import org.springframework.stereotype.Component;
 public class MailServiceProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceProducer.class);
 
-    public static final String USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL = "user_management_queue.send_activation_mail";
-    public static final String USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL = "user_management_queue.send_password_reset_mail";
-
     @Autowired
     private final JmsTemplate jmsTemplate;
 
@@ -33,7 +31,7 @@ public class MailServiceProducer {
      */
     public void sendActivationMail(User user) {
         LOGGER.info("Send data {}", user);
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL, user);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SEND_ACTIVATION_MAIL, user);
     }
 
     /**
@@ -43,6 +41,6 @@ public class MailServiceProducer {
      */
     public void sendPasswordResetMail(User user) {
         LOGGER.info("Send data {}", user);
-        jmsTemplate.convertAndSend(USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL, user);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_SEND_PASSWORD_RESET_MAIL, user);
     }
 }
