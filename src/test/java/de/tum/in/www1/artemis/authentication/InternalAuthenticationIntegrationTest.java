@@ -165,4 +165,5 @@ public class InternalAuthenticationIntegrationTest extends AbstractSpringIntegra
         assertThat(jwtToken.getIdToken()).as("JWT token is present").isNotNull();
         assertThat(this.tokenProvider.validateTokenForAuthority(jwtToken.getIdToken())).as("JWT token is valid").isTrue();
     }
+
 }
