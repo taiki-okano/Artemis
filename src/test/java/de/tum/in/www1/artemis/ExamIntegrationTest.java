@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.util.LinkedMultiValueMap;
 
+import de.tum.in.www1.artemis.connector.microservices.UserManagementJmsMessageMockProvider;
 import de.tum.in.www1.artemis.domain.*;
 import de.tum.in.www1.artemis.domain.enumeration.AssessmentType;
 import de.tum.in.www1.artemis.domain.enumeration.DiagramType;
@@ -103,6 +104,9 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
     @Autowired
     ZipFileTestUtilService zipFileTestUtilService;
 
+    @Autowired
+    private UserManagementJmsMessageMockProvider userManagementJmsMessageMockProvider;
+
     private List<User> users;
 
     private Course course1;
@@ -156,6 +160,7 @@ public class ExamIntegrationTest extends AbstractSpringIntegrationBambooBitbucke
     @WithMockUser(username = "instructor1", roles = "INSTRUCTOR")
     public void testRegisterUsersInExam() throws Exception {
         jiraRequestMockProvider.enableMockingOfRequests();
+        userManagementJmsMessageMockProvider.mockSendAndReceiveCreateInternalUser();
 
         var exam = ModelFactory.generateExam(course1);
         var savedExam = examRepository.save(exam);
