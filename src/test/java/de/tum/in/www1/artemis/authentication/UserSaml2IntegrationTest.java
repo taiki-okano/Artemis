@@ -18,6 +18,7 @@ import org.springframework.security.saml2.provider.service.authentication.Saml2A
 import org.springframework.security.test.context.TestSecurityContextHolder;
 
 import de.tum.in.www1.artemis.AbstractSpringIntegrationSaml2Test;
+import de.tum.in.www1.artemis.connector.microservices.UserManagementJmsMessageMockProvider;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.security.jwt.TokenProvider;
@@ -46,6 +47,9 @@ public class UserSaml2IntegrationTest extends AbstractSpringIntegrationSaml2Test
     @Autowired
     private PasswordService passwordService;
 
+    @Autowired
+    private UserManagementJmsMessageMockProvider userManagementJmsMessageMockProvider;
+
     /**
      * This test checks the creation of a new SAML2 authenticated user.
      *
@@ -57,6 +61,8 @@ public class UserSaml2IntegrationTest extends AbstractSpringIntegrationSaml2Test
 
         // Mock existing SAML2 Auth
         mockSAMLAuthentication();
+        userManagementJmsMessageMockProvider.mockSendAndReceiveCreateUser();
+
         // Test whether authorizeSAML2 generates a valid token
         UserJWTController.JWTToken result = request.postWithResponseBody("/api/saml2", Boolean.FALSE, UserJWTController.JWTToken.class, HttpStatus.OK);
 
@@ -101,6 +107,8 @@ public class UserSaml2IntegrationTest extends AbstractSpringIntegrationSaml2Test
 
         // Create user
         mockSAMLAuthentication();
+        userManagementJmsMessageMockProvider.mockSendAndReceiveCreateUser();
+
         request.postWithResponseBody("/api/saml2", Boolean.FALSE, UserJWTController.JWTToken.class, HttpStatus.OK);
         assertStudentExists();
 

@@ -188,8 +188,6 @@ dependencies {
     }
     testImplementation "com.h2database:h2:${h2_database_version}"
     testImplementation "com.opencsv:opencsv:${opencsv_version}"
-    // Embedded message broker for testing
-    testImplementation "org.apache.activemq:artemis-jms-server:2.20.0"
 }
 
 task executeTests (type: Exec) {

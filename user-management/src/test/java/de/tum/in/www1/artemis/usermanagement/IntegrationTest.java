@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import de.tum.in.www1.artemis.usermanagement.util.ActiveMqArtemisMockProvider;
+import de.tum.in.www1.artemis.util.JmsTemplateMockConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
@@ -15,6 +15,6 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest(classes = UserManagementApp.class)
-@Import(ActiveMqArtemisMockProvider.class)
+@Import(JmsTemplateMockConfiguration.class)
 public @interface IntegrationTest {
 }

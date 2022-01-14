@@ -10,6 +10,7 @@ import de.tum.in.www1.artemis.service.user.PasswordService;
 import de.tum.in.www1.artemis.usermanagement.AbstractSpringIntegrationJenkinsGitlabTest;
 import de.tum.in.www1.artemis.connector.GitlabRequestMockProvider;
 
+import de.tum.in.www1.artemis.usermanagement.connector.microservices.JmsMessageMockProvider;
 import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -44,6 +45,9 @@ public class InternalAuthenticationProviderIntegrationTest extends AbstractSprin
 
     @Autowired
     private GitlabRequestMockProvider gitlabRequestMockProvider;
+
+    @Autowired
+    private JmsMessageMockProvider jmsMessageMockProvider;
 
     @Value("${info.guided-tour.course-group-students:#{null}}")
     private Optional<String> tutorialGroupStudents;
@@ -87,6 +91,7 @@ public class InternalAuthenticationProviderIntegrationTest extends AbstractSprin
 
     @NotNull
     private User createUserWithRestApi(Set<Authority> authorities) throws Exception {
+        jmsMessageMockProvider.mockCheckGroupsAvailability();
         gitlabRequestMockProvider.enableMockingOfRequests();
         gitlabRequestMockProvider.mockGetUserID();
         database.addTutorialCourse();

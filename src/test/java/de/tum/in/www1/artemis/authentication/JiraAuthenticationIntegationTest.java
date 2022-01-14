@@ -23,6 +23,7 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 
 import de.tum.in.www1.artemis.AbstractSpringIntegrationBambooBitbucketJiraTest;
 import de.tum.in.www1.artemis.connector.JiraRequestMockProvider;
+import de.tum.in.www1.artemis.connector.microservices.UserManagementJmsMessageMockProvider;
 import de.tum.in.www1.artemis.domain.Authority;
 import de.tum.in.www1.artemis.domain.Course;
 import de.tum.in.www1.artemis.domain.ProgrammingExercise;
@@ -32,7 +33,6 @@ import de.tum.in.www1.artemis.security.Role;
 import de.tum.in.www1.artemis.security.jwt.TokenProvider;
 import de.tum.in.www1.artemis.service.connectors.jira.JiraAuthenticationProvider;
 import de.tum.in.www1.artemis.service.user.PasswordService;
-import de.tum.in.www1.artemis.service.user.UserService;
 import de.tum.in.www1.artemis.web.rest.UserJWTController;
 import de.tum.in.www1.artemis.web.rest.dto.LtiLaunchRequestDTO;
 import de.tum.in.www1.artemis.web.rest.vm.LoginVM;
@@ -61,9 +61,6 @@ public class JiraAuthenticationIntegationTest extends AbstractSpringIntegrationB
     private TokenProvider tokenProvider;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private PasswordService passwordService;
 
     @Autowired
@@ -80,6 +77,9 @@ public class JiraAuthenticationIntegationTest extends AbstractSpringIntegrationB
 
     @Autowired
     protected AuthorityRepository authorityRepository;
+
+    @Autowired
+    private UserManagementJmsMessageMockProvider userManagementJmsMessageMockProvider;
 
     private static final String USERNAME = "student1";
 
@@ -122,6 +122,8 @@ public class JiraAuthenticationIntegationTest extends AbstractSpringIntegrationB
         final var email = ltiLaunchRequest.getLis_person_contact_email_primary();
         final var firstName = "Elliot";
         final var groups = Set.of("allsec", "security", ADMIN_GROUP_NAME, course.getInstructorGroupName(), course.getTeachingAssistantGroupName());
+        userManagementJmsMessageMockProvider.mockSendAndReceiveCreateInternalUser();
+        userManagementJmsMessageMockProvider.mockSendAndReceiveSaveUser();
         jiraRequestMockProvider.mockGetUsernameForEmail(email, username);
         jiraRequestMockProvider.mockGetOrCreateUserLti(JIRA_USER, JIRA_PASSWORD, username, email, firstName, groups);
         jiraRequestMockProvider.mockAddUserToGroupForMultipleGroups(Set.of(course.getStudentGroupName()));
@@ -162,6 +164,7 @@ public class JiraAuthenticationIntegationTest extends AbstractSpringIntegrationB
         loginVM.setPassword(USER_PASSWORD);
         loginVM.setRememberMe(true);
 
+        userManagementJmsMessageMockProvider.mockSendAndReceiveCreateInternalUser();
         jiraRequestMockProvider.mockGetOrCreateUserJira(USERNAME, "test@test.de", "Test", Set.of("test"));
 
         HttpHeaders httpHeaders = new HttpHeaders();

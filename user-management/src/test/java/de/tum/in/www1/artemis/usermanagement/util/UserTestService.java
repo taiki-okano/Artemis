@@ -7,6 +7,7 @@ import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.security.Role;
 import de.tum.in.www1.artemis.service.dto.UserDTO;
 import de.tum.in.www1.artemis.service.user.PasswordService;
+import de.tum.in.www1.artemis.usermanagement.connector.microservices.JmsMessageMockProvider;
 import de.tum.in.www1.artemis.util.RequestUtilService;
 import de.tum.in.www1.artemis.web.rest.vm.ManagedUserVM;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,9 @@ public class UserTestService {
     @Autowired
     protected RequestUtilService request;
 
+    @Autowired
+    private JmsMessageMockProvider jmsMessageMockProvider;
+
     private MockDelegate mockDelegate;
 
     public User student;
@@ -71,6 +75,8 @@ public class UserTestService {
         List<User> users = database.addUsers(numberOfStudents, numberOfTutors, numberOfEditors, numberOfInstructors);
         student = users.get(0);
         users.forEach(user -> cacheManager.getCache(UserRepository.USERS_CACHE).evict(user.getLogin()));
+
+        jmsMessageMockProvider.mockCheckGroupsAvailability();
     }
 
     public void tearDown() throws IOException {

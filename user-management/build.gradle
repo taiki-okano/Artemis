@@ -181,6 +181,7 @@ sourceSets {
             include "java/de/tum/in/www1/artemis/util/RequestUtilService.*"
             include "java/de/tum/in/www1/artemis/util/DatabaseCleanupService.*"
             include "java/de/tum/in/www1/artemis/util/ConfigUtil.*"
+            include "java/de/tum/in/www1/artemis/util/JmsTemplateMockConfiguration.*"
             include "java/de/tum/in/www1/artemis/util/ModelFactory.*"
             include "java/de/tum/in/www1/artemis/util/TestConstants.*"
             include "java/de/tum/in/www1/artemis/connector/GitlabRequestMockProvider.*"
@@ -322,8 +323,6 @@ dependencies {
 
     developmentOnly "org.springframework.boot:spring-boot-devtools:${spring_boot_version}"
     testImplementation "com.h2database:h2:${h2_database_version}"
-    // Embedded message broker for testing
-    testImplementation "org.apache.activemq:artemis-jms-server:2.20.0"
 }
 
 task executeTests (type: Exec) {
