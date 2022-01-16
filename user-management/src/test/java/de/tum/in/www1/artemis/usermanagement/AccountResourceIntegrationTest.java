@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import de.tum.in.www1.artemis.usermanagement.service.dto.PasswordChangeDTO;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserCreationService;
 import de.tum.in.www1.artemis.usermanagement.web.rest.AccountResource;
 import de.tum.in.www1.artemis.usermanagement.web.rest.vm.KeyAndPasswordVM;
@@ -26,7 +27,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import de.tum.in.www1.artemis.config.Constants;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.repository.UserRepository;
-import de.tum.in.www1.artemis.service.dto.PasswordChangeDTO;
 import de.tum.in.www1.artemis.service.dto.UserDTO;
 import de.tum.in.www1.artemis.service.user.PasswordService;
 import de.tum.in.www1.artemis.util.ConfigUtil;

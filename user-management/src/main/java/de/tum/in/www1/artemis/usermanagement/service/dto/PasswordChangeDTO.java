@@ -1,4 +1,4 @@
-package de.tum.in.www1.artemis.service.dto;
+package de.tum.in.www1.artemis.usermanagement.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

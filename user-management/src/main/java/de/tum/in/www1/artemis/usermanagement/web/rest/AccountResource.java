@@ -4,10 +4,10 @@ import de.tum.in.www1.artemis.config.Constants;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.security.SecurityUtils;
-import de.tum.in.www1.artemis.service.dto.PasswordChangeDTO;
 import de.tum.in.www1.artemis.service.dto.UserDTO;
 
 import de.tum.in.www1.artemis.service.user.PasswordService;
+import de.tum.in.www1.artemis.usermanagement.service.dto.PasswordChangeDTO;
 import de.tum.in.www1.artemis.usermanagement.service.messaging.services.MailServiceProducer;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserCreationService;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserService;
