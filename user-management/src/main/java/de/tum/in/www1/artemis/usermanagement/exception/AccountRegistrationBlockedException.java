@@ -1,4 +1,4 @@
-package de.tum.in.www1.artemis.exception;
+package de.tum.in.www1.artemis.usermanagement.exception;
 
 import java.io.Serial;
 
