@@ -116,28 +116,39 @@ In addition, the SAML2 feature allows to decide whether a user can obtain a pass
 This app password allows to use the connected services as VCS and CI as usual with the local user credentials.</p>
 <p>You can see the structure of the saml2 configuration in the following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">saml2</span><span class="p">:</span>
-        <span class="c1"># Define the patterns used when generating users. SAML2 Attributes can be substituted by surrounding them with</span>
-        <span class="c1"># curly brackets. E.g. username: &#39;{user_attribute}&#39;. Missing attributes get replaced with an empty string.</span>
-        <span class="c1"># This enables definition of alternative attribute keys when using multiple IdPs. E.g. username: &#39;{uid}{user_id}&#39;.</span>
-        <span class="c1"># User template pattern:</span>
-        <span class="nt">username-pattern</span><span class="p">:</span> <span class="s">&#39;{first_name}_{last_name}&#39;</span>
-        <span class="nt">first-name-pattern</span><span class="p">:</span> <span class="s">&#39;{first_name}&#39;</span>
-        <span class="nt">last-name-pattern</span><span class="p">:</span> <span class="s">&#39;{last_name}&#39;</span>
-        <span class="nt">email-pattern</span><span class="p">:</span> <span class="s">&#39;{email}&#39;</span>
-        <span class="nt">registration-number-pattern</span><span class="p">:</span> <span class="s">&#39;{uid}&#39;</span>
-        <span class="nt">lang-key-pattern</span><span class="p">:</span> <span class="s">&#39;en&#39;</span> <span class="c1"># can be a pattern or fixed to en/de</span>
-        <span class="c1"># A list of identity provides (IdP). Metadata location can be a local path (or classpath) or url.</span>
-        <span class="c1"># If your IdP does not publish its metadata you can generate it here: https://www.samltool.com/idp_metadata.php</span>
-        <span class="nt">identity-providers</span><span class="p">:</span>
-                <span class="c1">#- metadata: https://idp_host/.../metadata</span>
-                <span class="c1">#  registration-id: IdPName</span>
-                <span class="c1">#  entity-id: artemis</span>
-                <span class="c1">#  cert-file: # path-to-cert (optional) Set this path to the Certificate for encryption/signing or leave it blank</span>
-                <span class="c1">#  key-file: # path-to-key (optional) Set this path to the Key for encryption/signing or leave it blank (must be a PKCS#8 file!)</span>
-                <span class="c1"># Multiple IdPs can be configured</span>
-                <span class="c1"># - metadata: &lt;URL&gt;</span>
-                <span class="c1">#   registrationid: &lt;id&gt;</span>
-                <span class="c1">#   entityid: &lt;id&gt;</span>
+    <span class="c1"># Define the patterns used when generating users. SAML2 Attributes can be substituted by surrounding them with</span>
+    <span class="c1"># curly brackets. E.g. username: &#39;{user_attribute}&#39;. Missing attributes get replaced with an empty string.</span>
+    <span class="c1"># This enables definition of alternative attribute keys when using multiple IdPs. E.g. username: &#39;{uid}{user_id}&#39;.</span>
+    <span class="c1"># User template pattern:</span>
+    <span class="nt">username-pattern</span><span class="p">:</span> <span class="s">&#39;{first_name}_{last_name}&#39;</span>
+    <span class="nt">first-name-pattern</span><span class="p">:</span> <span class="s">&#39;{first_name}&#39;</span>
+    <span class="nt">last-name-pattern</span><span class="p">:</span> <span class="s">&#39;{last_name}&#39;</span>
+    <span class="nt">email-pattern</span><span class="p">:</span> <span class="s">&#39;{email}&#39;</span>
+    <span class="nt">registration-number-pattern</span><span class="p">:</span> <span class="s">&#39;{uid}&#39;</span>
+    <span class="nt">lang-key-pattern</span><span class="p">:</span> <span class="s">&#39;en&#39;</span> <span class="c1"># can be a pattern or fixed to en/de</span>
+    <span class="c1"># It is also possible to only extract parts of the attribute values.</span>
+    <span class="c1"># For each attribute key exactly one regular expression can optionally be defined that is used to extract only parts</span>
+    <span class="c1"># of the received value. The regular expression must match the whole value. It also has to contain a named capture</span>
+    <span class="c1"># group with the name &#39;value&#39;.</span>
+    <span class="c1"># E.g. when receiving &#39;pre1234post&#39; from the SAML2 service in the &#39;uid&#39;-example below, only &#39;1234&#39; will be used when</span>
+    <span class="c1"># replacing &#39;{uid}&#39; in one of the user attributes defined above.</span>
+    <span class="nt">value-extraction-patterns</span><span class="p">:</span>
+        <span class="c1">#- key: &#39;registration_number&#39;</span>
+        <span class="c1">#  value_pattern: &#39;somePrefix(?&lt;value&gt;.+)someSuffix&#39;</span>
+        <span class="c1">#- key: &#39;uid&#39;</span>
+        <span class="c1">#  value_pattern: &#39;pre(?&lt;value&gt;\d+)post&#39;</span>
+    <span class="c1"># A list of identity provides (IdP). Metadata location can be a local path (or classpath) or url.</span>
+    <span class="c1"># If your IdP does not publish its metadata you can generate it here: https://www.samltool.com/idp_metadata.php</span>
+    <span class="nt">identity-providers</span><span class="p">:</span>
+        <span class="c1">#- metadata: https://idp_host/.../metadata</span>
+        <span class="c1">#  registration-id: IdPName</span>
+        <span class="c1">#  entity-id: artemis</span>
+        <span class="c1">#  cert-file: # path-to-cert (optional) Set this path to the Certificate for encryption/signing or leave it blank</span>
+        <span class="c1">#  key-file: # path-to-key (optional) Set this path to the Key for encryption/signing or leave it blank (must be a PKCS#8 file!)</span>
+        <span class="c1"># Multiple IdPs can be configured</span>
+        <span class="c1"># - metadata: &lt;URL&gt;</span>
+        <span class="c1">#   registrationid: &lt;id&gt;</span>
+        <span class="c1">#   entityid: &lt;id&gt;</span>
 
 <span class="c1"># String used for the SAML2 login button. E.g. &#39;Shibboleth Login&#39;</span>
 <span class="nt">info.saml2.button-label</span><span class="p">:</span> <span class="s">&#39;SAML2</span><span class="nv"> </span><span class="s">Login&#39;</span>
@@ -160,7 +171,7 @@ This app password allows to use the connected services as VCS and CI as usual wi
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Technical University of Munich, Chair for Applied Software Engineering.</p>
+    <p>&#169; Copyright 2022, Technical University of Munich, Chair for Applied Software Engineering.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
