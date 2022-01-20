@@ -1,5 +1,6 @@
 package de.tum.in.www1.artemis.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,7 +25,17 @@ public interface PlagiarismComparisonRepository extends JpaRepository<Plagiarism
         return findById(comparisonId).orElseThrow(() -> new EntityNotFoundException("PlagiarismComparison", comparisonId));
     }
 
+    // TODO add a new method which loads the comparison together with the 2 submissions and their elements, but be careful that it does not load too many elements
+
     Optional<Set<PlagiarismComparison<?>>> findBySubmissionA_SubmissionIdOrSubmissionB_SubmissionId(long submissionA_submissionId, long submissionB_submissionId);
+
+    // TODO: only load comparisons for the last plagiarismResultId that belongs to one exercise
+    @Query("""
+            SELECT DISTINCT comparison FROM PlagiarismComparison comparison
+            WHERE comparison.status = :status
+            AND comparison.plagiarismResult.exercise.course.id = :courseId
+            """)
+    List<PlagiarismComparison<?>> findCasesForCourse(@Param("status") PlagiarismStatus status, @Param("courseId") Long courseId);
 
     // we can't simply call save() on plagiarismComparisons because the plagiarismComparisonMatches have no id
     // and would be recreated. Therefore, we need some update methods:
@@ -63,5 +74,4 @@ public interface PlagiarismComparisonRepository extends JpaRepository<Plagiarism
     @Transactional // ok because of modifying query
     @Query("UPDATE PlagiarismComparison plagiarismComparison set plagiarismComparison.studentStatementB = :statement where plagiarismComparison.id = :plagiarismComparisonId")
     void updatePlagiarismComparisonStudentStatementB(@Param("plagiarismComparisonId") Long plagiarismComparisonId, @Param("statement") String statement);
-
 }

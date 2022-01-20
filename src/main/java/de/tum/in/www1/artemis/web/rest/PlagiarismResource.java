@@ -93,13 +93,13 @@ public class PlagiarismResource {
      */
     @GetMapping("courses/{courseId}/plagiarism-cases")
     @PreAuthorize("hasRole('INSTRUCTOR')")
-    public ResponseEntity<List<PlagiarismCaseDTO>> getPlagiarismCasesForCourse(@PathVariable long courseId) {
+    public ResponseEntity<List<PlagiarismComparison<?>>> getPlagiarismCasesForCourse(@PathVariable long courseId) {
         log.debug("REST request to get all plagiarism cases in course with id: {}", courseId);
         Course course = courseRepository.findByIdElseThrow(courseId);
         if (!authenticationCheckService.isAtLeastInstructorInCourse(course, userRepository.getUserWithGroupsAndAuthorities())) {
             throw new AccessForbiddenException("Only instructors of this course have access to its plagiarism cases.");
         }
-        List<PlagiarismCaseDTO> foundPlagiarismCasesForCourse = this.plagiarismService.collectAllPlagiarismCasesForCourse(courseId);
+        var foundPlagiarismCasesForCourse = plagiarismComparisonRepository.findCasesForCourse(PlagiarismStatus.CONFIRMED, courseId);
         return ResponseEntity.ok(foundPlagiarismCasesForCourse);
     }
 

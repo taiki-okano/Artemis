@@ -53,7 +53,7 @@ describe('Plagiarism Cases Service', () => {
 
     it('should get plagiarism cases for course', fakeAsync(() => {
         const returnedFromService = [plagiarismCase];
-        service.getPlagiarismCases(1).pipe(take(1)).subscribe();
+        service.getConfirmedComparisons(1).pipe(take(1)).subscribe();
 
         const req = httpMock.expectOne({ method: 'GET' });
         req.flush(returnedFromService);

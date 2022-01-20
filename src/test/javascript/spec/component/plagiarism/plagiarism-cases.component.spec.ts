@@ -124,46 +124,46 @@ describe('Plagiarism Cases Component', () => {
         tick();
 
         expect(comp.courseId).toBe(1);
-        expect(comp.confirmedPlagiarismCases).toEqual([plagiarismCase1, plagiarismCase2]);
+        expect(comp.confirmedComparisons).toEqual([plagiarismCase1, plagiarismCase2]);
         expect(getPlagiarismCasesStub).toHaveBeenCalledWith(1);
     }));
 
     it('should calculate the number of instructor statements', () => {
-        comp.confirmedPlagiarismCases = [plagiarismCase1, plagiarismCase2];
+        comp.confirmedComparisons = [plagiarismCase1, plagiarismCase2];
 
         expect(comp.numberOfInstructorStatements()).toBe(6);
 
-        comp.confirmedPlagiarismCases = [plagiarismCase1];
+        comp.confirmedComparisons = [plagiarismCase1];
 
         expect(comp.numberOfInstructorStatements()).toBe(3);
     });
 
     it('should calculate the number of plagiarism cases', () => {
-        comp.confirmedPlagiarismCases = [plagiarismCase1, plagiarismCase2];
+        comp.confirmedComparisons = [plagiarismCase1, plagiarismCase2];
 
         expect(comp.numberOfCases()).toBe(8);
 
-        comp.confirmedPlagiarismCases = [plagiarismCase1];
+        comp.confirmedComparisons = [plagiarismCase1];
 
         expect(comp.numberOfCases()).toBe(4);
     });
 
     it('should calculate the number of student statements', () => {
-        comp.confirmedPlagiarismCases = [plagiarismCase1, plagiarismCase2];
+        comp.confirmedComparisons = [plagiarismCase1, plagiarismCase2];
 
         expect(comp.numberOfStudentStatements()).toBe(5);
 
-        comp.confirmedPlagiarismCases = [plagiarismCase1];
+        comp.confirmedComparisons = [plagiarismCase1];
 
         expect(comp.numberOfStudentStatements()).toBe(3);
     });
 
     it('should calculate the number of final statuses', () => {
-        comp.confirmedPlagiarismCases = [plagiarismCase1, plagiarismCase2];
+        comp.confirmedComparisons = [plagiarismCase1, plagiarismCase2];
 
         expect(comp.numberOfFinalStatuses()).toBe(5);
 
-        comp.confirmedPlagiarismCases = [plagiarismCase1];
+        comp.confirmedComparisons = [plagiarismCase1];
 
         expect(comp.numberOfFinalStatuses()).toBe(3);
     });

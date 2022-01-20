@@ -40,7 +40,7 @@ export class PlagiarismSidebarComponent implements OnChanges {
     /**
      * Number of comparisons per page.
      */
-    public pageSize = 100;
+    public pageSize = 50;
 
     // Icons
     faChevronRight = faChevronRight;
@@ -67,7 +67,6 @@ export class PlagiarismSidebarComponent implements OnChanges {
 
     getPagedComparisons() {
         const startIndex = this.currentPage * this.pageSize;
-
         return this.comparisons?.slice(startIndex, startIndex + this.pageSize);
     }
 

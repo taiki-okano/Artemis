@@ -59,6 +59,7 @@ export class PlagiarismSplitViewComponent implements AfterViewInit, OnChanges, O
         }
 
         if (changes.comparison && this.isProgrammingOrTextExercise) {
+            // TODO: load the submission elements for submissionA and submissionB
             this.parseTextMatches(changes.comparison.currentValue as PlagiarismComparison<TextSubmissionElement>);
         }
     }
