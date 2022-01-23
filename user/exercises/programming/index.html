@@ -899,14 +899,23 @@ PMD and PMD CPD are a special case as both tools share a common plugin. To disab
 <p class="admonition-title">Note</p>
 <p>Bonus points for an exercise (implied by a score higher than 100%) are only achievable if at least one bonus multiplier is greater than 1 or bonus points are given for a test case</p>
 </div>
-<ul class="simple">
+<ul>
 <li><p><strong>Bonus multiplier</strong>: Allows instructors to multiply the points for passing a test case without affecting the points rewarded for passing other test cases</p></li>
 <li><p><strong>Bonus points</strong>: Adds a flat point bonus for passing a test case</p></li>
 <li><p><strong>Visibility</strong>: Select the visibility of feedbacks to students for this test case.</p>
 <ul>
 <li><p><strong>Always</strong>: Feedback associated with this test case is visible to students directly after the automatic grading process for their submission.</p></li>
 <li><p><strong>After Due Date</strong>: Feedback associated with this test case is visible to students only after the due date for this exercise has passed.
-Tutors and Instructors are able to see the feedback before the due date.</p></li>
+Tutors and Instructors are able to see the feedback before the due date.</p>
+<p>If for some students an individual due date is set, the detailed feedback for those tests is invisible to all other students until the exercise submission is no longer possible for all students.
+Other students can however still see if the tests passed or failed and receive points accordingly, even if the latest individual due has not passed yet.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For manual assessments all feedback details will be visible to this student, even if the due date has not passed yet for others.
+Tutors can start the manual assessment for all students with the regular due date as soon as it has passed.
+Set an appropriate assessment due date in the exercise settings to make sure that students cannot tell still working students about the test case details.</p>
+</div>
+</li>
 <li><p><strong>Never</strong>: Feedback associated with this test case is <em>never</em> visible to students even after the due date for this exercise has passed.
 Tutors and Instructors are able to see the feedback before and after the due date, e.g. when manually assessing submissions.
 Additionally, results of this test case are <em>not</em> considered in the student score calculation.</p></li>
