@@ -211,6 +211,11 @@ You can override the following configuration options in this file.</p>
     <span class="nt">encryption-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;encrypt-password&gt;</span>     <span class="c1"># arbitrary password for encrypting database values</span>
     <span class="nt">user-management</span><span class="p">:</span>
         <span class="nt">use-external</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+        <span class="nt">password-reset</span><span class="p">:</span>
+             <span class="nt">credential-provider</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;provider&gt;</span> <span class="c1"># The credential provider which users can log in though (e.g. TUMonline)</span>
+             <span class="nt">links</span><span class="p">:</span> <span class="c1"># The password reset links for different languages</span>
+                 <span class="nt">en</span><span class="p">:</span> <span class="s">&#39;&lt;link&gt;&#39;</span>
+                 <span class="nt">de</span><span class="p">:</span> <span class="s">&#39;&lt;link&gt;&#39;</span>
         <span class="nt">external</span><span class="p">:</span>
             <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">https://jira.ase.in.tum.de</span>
             <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;username&gt;</span>    <span class="c1"># e.g. ga12abc</span>
