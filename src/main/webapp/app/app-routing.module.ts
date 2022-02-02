@@ -100,6 +100,11 @@ const LAYOUT_ROUTES: Routes = [navbarRoute, ...errorRoute];
                     path: 'features',
                     loadChildren: () => import('./feature-overview/feature-overview.module').then((m) => m.FeatureOverviewModule),
                 },
+                // ===== LTI 1.3
+                {
+                    path: 'lti/launch',
+                    loadChildren: () => import('./lti/lti-exercise-launch.module').then((m) => m.ArtemisLtiExerciseLaunchModule),
+                },
             ],
             { enableTracing: false, onSameUrlNavigation: 'reload' },
         ),

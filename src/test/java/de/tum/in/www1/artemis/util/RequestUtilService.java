@@ -74,7 +74,14 @@ public class RequestUtilService {
     }
 
     public URI post(String path, Object body, HttpStatus expectedStatus, MediaType contentType, boolean withLocation, @Nullable HttpHeaders httpHeaders) throws Exception {
-        String jsonBody = body != null ? mapper.writeValueAsString(body) : null;
+        String jsonBody = null;
+        if (body instanceof String) {
+            jsonBody = (String) body;
+        }
+        else if (body != null) {
+            jsonBody = mapper.writeValueAsString(body);
+        }
+
         var requestBuilder = MockMvcRequestBuilders.post(new URI(path)).contentType(contentType);
         if (jsonBody != null) {
             requestBuilder = requestBuilder.content(jsonBody);
@@ -171,7 +178,7 @@ public class RequestUtilService {
      * @param params parameters for multi value
      * @param <T> Request type
      * @return Request content as string
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     public <T> String postWithResponseBodyString(String path, T body, HttpStatus expectedStatus, @Nullable HttpHeaders httpHeaders,
             @Nullable Map<String, String> expectedResponseHeaders, @Nullable LinkedMultiValueMap<String, String> params) throws Exception {
