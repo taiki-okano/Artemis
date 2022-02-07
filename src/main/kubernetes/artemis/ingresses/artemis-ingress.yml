@@ -7,10 +7,11 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - http:
+  - host: "artemis.test1.k.ase.in.tum.de"
+    http:
       paths:
-      - path: /artemis
-        pathType: Prefix
+      - pathType: Prefix
+        path: "/"
         backend: 
           service: 
             name: artemis
