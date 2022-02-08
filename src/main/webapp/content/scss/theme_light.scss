@@ -1,0 +1,10 @@
+@use 'sass:meta';
+@use 'generate-css-vars';
+
+@import 'theme-variables/light';
+
+html {
+    @include generate-css-vars.generate('light');
+}
+
+@import 'global';

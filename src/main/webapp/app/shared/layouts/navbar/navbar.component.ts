@@ -51,6 +51,7 @@ import {
     faUserPlus,
     faWrench,
 } from '@fortawesome/free-solid-svg-icons';
+import { Theme, ThemeService } from 'app/core/theme/theme.service';
 
 @Component({
     selector: 'jhi-navbar',
@@ -59,6 +60,8 @@ import {
 })
 export class NavbarComponent implements OnInit, OnDestroy {
     readonly SERVER_API_URL = SERVER_API_URL;
+
+    readonly Themes = Theme;
 
     inProduction: boolean;
     isNavbarCollapsed: boolean;
@@ -122,6 +125,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         private lectureService: LectureService,
         private examService: ExamManagementService,
         private organisationService: OrganizationManagementService,
+        public themeService: ThemeService,
     ) {
         this.version = VERSION ? VERSION : '';
         this.isNavbarCollapsed = true;

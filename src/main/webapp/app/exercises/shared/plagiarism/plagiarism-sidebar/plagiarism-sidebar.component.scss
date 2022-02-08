@@ -1,7 +1,5 @@
-@import 'src/main/webapp/content/scss/artemis-variables';
-
 .plagiarism-sidebar {
-    border-right: 1px solid $body-bg;
+    border-right: 1px solid var(--body-bg);
     display: flex;
     flex-direction: column;
     position: absolute;
@@ -11,7 +9,7 @@
     width: 240px;
 
     .plagiarism-paging {
-        border-top: 1px solid $body-bg;
+        border-top: 1px solid var(--body-bg);
         display: flex;
         flex-shrink: 0;
 
@@ -41,7 +39,7 @@
     }
 
     .plagiarism-info-tab {
-        border-bottom: 1px solid $body-bg;
+        border-bottom: 1px solid var(--body-bg);
         flex-shrink: 0;
         cursor: pointer;
         padding: 0.75rem;
@@ -110,7 +108,7 @@
     }
 
     .plagiarism-status-indicator {
-        background-color: $body-bg;
+        background-color: var(--body-bg);
         border-radius: 50%;
         flex-shrink: 0;
         height: 8px;

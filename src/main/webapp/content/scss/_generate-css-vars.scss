@@ -1,0 +1,9 @@
+@use 'sass:meta';
+@use 'theme-variables/light';
+@use 'theme-variables/dark';
+
+@mixin generate($theme) {
+    @each $name, $value in meta.module-variables($theme) {
+        --#{$name}: #{$value};
+    }
+}

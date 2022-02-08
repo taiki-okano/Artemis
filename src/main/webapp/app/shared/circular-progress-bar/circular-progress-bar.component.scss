@@ -1,15 +1,13 @@
 /* stylelint-disable at-rule-no-unknown */
 
 @use 'sass:math';
-@import 'src/main/webapp/content/scss/artemis-variables';
-
 // Code for circular progress bar adapted from https://codepen.io/fuzzywalrus/pen/OxYENY
 
 //styling
 $borderWidth: 7px;
 $animationTime: 0.5s;
 $border-color-default: #eee;
-$border-color-fill: $primary;
+$border-color-fill: var(--primary);
 $size: 150px;
 
 //Create how many steps

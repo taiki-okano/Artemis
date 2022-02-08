@@ -1,9 +1,8 @@
 .question {
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid lightgrey;
+    border: 1px solid var(--border-color);
     margin-bottom: 18px;
-    background: #fefefe;
 
     &:first-of-type {
         margin-top: 18px;
