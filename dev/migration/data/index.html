@@ -113,6 +113,7 @@
 <li><p>All executed entries are saved in the table <code class="code docutils literal notranslate"><span class="pre">migration_changelog</span></code>. If you delete entries, they get executed again.</p></li>
 <li><p>Test your changes locally first, and only commit changes you are confident that work.</p></li>
 <li><p>Before deploying any database changes to a test server, ask for official permission from the project lead. If the changes don’t get approved, manual rollbacks can be necessary, which are avoidable.</p></li>
+<li><p>If queries fail due to the authorization object being null, call <cite>SecurityUtils.setAuthorizationObject()</cite> beforehand to set a dummy object.</p></li>
 </ul>
 </div>
 </div>
