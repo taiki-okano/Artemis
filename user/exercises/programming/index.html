@@ -63,7 +63,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#display-of-hidden-files">Display of hidden files</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#testing-with-artemis-java-test-sandbox">Testing with Artemis Java Test Sandbox</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-with-ares">Testing with Ares</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#best-practices-for-writing-test-cases">Best practices for writing test cases</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#general-best-practices">General best practices</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#java-best-practices">Java best practices</a></li>
@@ -159,7 +159,7 @@
 <li><p><a class="reference internal" href="#display-of-hidden-files" id="id15">Display of hidden files</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#testing-with-artemis-java-test-sandbox" id="id16">Testing with Artemis Java Test Sandbox</a></p></li>
+<li><p><a class="reference internal" href="#testing-with-ares" id="id16">Testing with Ares</a></p></li>
 <li><p><a class="reference internal" href="#best-practices-for-writing-test-cases" id="id17">Best practices for writing test cases</a></p>
 <ul>
 <li><p><a class="reference internal" href="#general-best-practices" id="id18">General best practices</a></p></li>
@@ -1767,10 +1767,9 @@ This also means that other config files, like SwiftLint’s <code class="docutil
 can only be accessed via your own IDE.</p>
 </div>
 </div>
-<div class="section" id="testing-with-artemis-java-test-sandbox">
-<h2><a class="toc-backref" href="#id16">Testing with Artemis Java Test Sandbox</a><a class="headerlink" href="#testing-with-artemis-java-test-sandbox" title="Permalink to this headline"></a></h2>
-<p>Artemis Java Test Sandbox <em>(abbr. AJTS)</em> is a JUnit 5 extension for easy and secure Java testing
-on Artemis.</p>
+<div class="section" id="testing-with-ares">
+<h2><a class="toc-backref" href="#id16">Testing with Ares</a><a class="headerlink" href="#testing-with-ares" title="Permalink to this headline"></a></h2>
+<p>Ares is a JUnit 5 extension for easy and secure Java testing on Artemis.</p>
 <p>Its main features are</p>
 <ul class="simple">
 <li><p>a security manager to prevent students crashing the tests or cheating</p></li>
@@ -1780,12 +1779,12 @@ on Artemis.</p>
 or pointing to a possible location that caused an Exception</p></li>
 <li><p>utilities to test exercises using System.out and System.in comfortably</p></li>
 </ul>
-<p><strong>For more information see</strong> <a class="reference external" href="https://github.com/ls1intum/artemis-java-test-sandbox">AJTS GitHub</a></p>
+<p><strong>For more information see</strong> <a class="reference external" href="https://github.com/ls1intum/Ares">Ares GitHub</a></p>
 </div>
 <div class="section" id="best-practices-for-writing-test-cases">
 <h2><a class="toc-backref" href="#id17">Best practices for writing test cases</a><a class="headerlink" href="#best-practices-for-writing-test-cases" title="Permalink to this headline"></a></h2>
 <p>The following sections describe best practices for writing test cases.
-The examples and explanations are specifically written for Java (using AJTS/JUnit5), but the practices can also be generalized
+The examples and explanations are specifically written for Java (using Ares/JUnit5), but the practices can also be generalized
 for other programming languages.</p>
 <div class="section" id="general-best-practices">
 <h3><a class="toc-backref" href="#id18">General best practices</a><a class="headerlink" href="#general-best-practices" title="Permalink to this headline"></a></h3>
@@ -2000,7 +1999,7 @@ base package name to the top of your test class.</p>
 </li>
 <li><p><strong>Use JUnit5 and Ares Features</strong></p>
 <p>More information can be found in the <a class="reference external" href="https://junit.org/junit5/docs/current/user-guide/#writing-tests">JUnit5</a> and
-<a class="reference external" href="https://github.com/ls1intum/artemis-java-test-sandbox#readme">Ares</a> documentation. The following list adds some
+<a class="reference external" href="https://github.com/ls1intum/Ares#readme">Ares</a> documentation. The following list adds some
 useful notes:</p>
 <ul>
 <li><p>Use <a class="reference external" href="https://junit.org/junit5/docs/current/user-guide/#writing-tests-nested">Nested Tests</a> to group tests</p>
