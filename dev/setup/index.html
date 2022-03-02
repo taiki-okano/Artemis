@@ -46,7 +46,10 @@
 <p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Setup Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#mysql-setup">MySQL Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mysql-setup">MySQL Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#set-empty-root-password-for-mysql-8">Set empty root password for MySQL 8</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#server-setup">Server Setup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="bamboo-bitbucket-jira/">Bamboo, Bitbucket and Jira</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jenkins-gitlab/">Jenkins and Gitlab</a></li>
@@ -193,6 +196,14 @@ You can achieve this e.g. by using a <code class="docutils literal notranslate">
 </div>
 <p>Make sure the configuration file is used by MySQL when you start the server.
 You can find more information on <a class="reference external" href="https://dev.mysql.com/doc/refman/8.0/en/option-files.html">https://dev.mysql.com/doc/refman/8.0/en/option-files.html</a></p>
+<div class="section" id="set-empty-root-password-for-mysql-8">
+<h3>Set empty root password for MySQL 8<a class="headerlink" href="#set-empty-root-password-for-mysql-8" title="Permalink to this headline"></a></h3>
+<p>If you have problems connecting to the MySQL 8 database using an empty root password, you can try the following command to reset the root password to an empty password:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysql</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">--</span><span class="n">execute</span> <span class="s2">&quot;ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED WITH caching_sha2_password BY &#39;&#39;&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Note: this should only be used in a development environment. The root password for a production environment should never be empty.</p>
+</div>
 </div>
 <div class="section" id="server-setup">
 <h2>Server Setup<a class="headerlink" href="#server-setup" title="Permalink to this headline"></a></h2>
