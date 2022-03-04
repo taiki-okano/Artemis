@@ -55,7 +55,7 @@ public class LectureServiceConsumerTest extends AbstractSpringDevelopmentTest {
     @Autowired
     private UserRepository userRepository;
 
-    ArgumentCaptor<Set<String>> setCaptor;
+    private ArgumentCaptor<Set<String>> setCaptor;
 
     private Set<Exercise> exercises;
 
@@ -88,7 +88,6 @@ public class LectureServiceConsumerTest extends AbstractSpringDevelopmentTest {
         this.user2 = userRepository.findUserWithGroupsAndAuthoritiesByLogin("student42").get();
         this.exercises = lecture.getLectureUnits().stream().filter(unit -> unit instanceof ExerciseUnit).map(unit -> ((ExerciseUnit) unit).getExercise())
                 .collect(Collectors.toSet());
-
     }
 
     @AfterEach
@@ -111,6 +110,44 @@ public class LectureServiceConsumerTest extends AbstractSpringDevelopmentTest {
     @Test
     public void testGetExercisesAndRespond_shouldResponseWithEmptyList() throws JMSException {
         UserExerciseDTO dto = new UserExerciseDTO(exercises, user2);
+        when(message.getBody(UserExerciseDTO.class)).thenReturn(dto);
+        when(message.getJMSCorrelationID()).thenReturn(Integer.toString(dto.hashCode()));
+
+        lectureServiceConsumer.getExercisesAndRespond(message);
+
+        Mockito.verify(jmsTemplate, atLeastOnce()).convertAndSend(eq(MessageBrokerConstants.LECTURE_QUEUE_GET_EXERCISES_RESPONSE), setCaptor.capture(), any());
+        assertThat(setCaptor.getValue().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetExercisesAndRespond_emptyDTO_shouldResponseWithEmptyList() throws JMSException {
+        UserExerciseDTO dto = new UserExerciseDTO();
+        when(message.getBody(UserExerciseDTO.class)).thenReturn(dto);
+        when(message.getJMSCorrelationID()).thenReturn(Integer.toString(dto.hashCode()));
+
+        lectureServiceConsumer.getExercisesAndRespond(message);
+
+        Mockito.verify(jmsTemplate, atLeastOnce()).convertAndSend(eq(MessageBrokerConstants.LECTURE_QUEUE_GET_EXERCISES_RESPONSE), setCaptor.capture(), any());
+        assertThat(setCaptor.getValue().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetExercisesAndRespond_onlyUserSet_shouldResponseWithEmptyList() throws JMSException {
+        UserExerciseDTO dto = new UserExerciseDTO();
+        dto.setUser(user1);
+        when(message.getBody(UserExerciseDTO.class)).thenReturn(dto);
+        when(message.getJMSCorrelationID()).thenReturn(Integer.toString(dto.hashCode()));
+
+        lectureServiceConsumer.getExercisesAndRespond(message);
+
+        Mockito.verify(jmsTemplate, atLeastOnce()).convertAndSend(eq(MessageBrokerConstants.LECTURE_QUEUE_GET_EXERCISES_RESPONSE), setCaptor.capture(), any());
+        assertThat(setCaptor.getValue().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetExercisesAndRespond_onlyExercisesSet_shouldResponseWithEmptyList() throws JMSException {
+        UserExerciseDTO dto = new UserExerciseDTO();
+        dto.setExercises(exercises);
         when(message.getBody(UserExerciseDTO.class)).thenReturn(dto);
         when(message.getJMSCorrelationID()).thenReturn(Integer.toString(dto.hashCode()));
 
