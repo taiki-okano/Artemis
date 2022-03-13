@@ -1,8 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Location } from '@angular/common';
 import { AlertService } from 'app/core/util/alert.service';
-import { AccountService } from 'app/core/auth/account.service';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { ExampleSubmissionService } from 'app/exercises/shared/example-submission/example-submission.service';
 import { Result } from 'app/entities/result.model';
@@ -107,10 +105,8 @@ export class ExampleModelingSubmissionComponent implements OnInit, FeedbackMarke
         private modelingAssessmentService: ModelingAssessmentService,
         private tutorParticipationService: TutorParticipationService,
         private alertService: AlertService,
-        private accountService: AccountService,
         private route: ActivatedRoute,
         private router: Router,
-        private location: Location,
         private navigationUtilService: ArtemisNavigationUtilService,
     ) {}
 
@@ -194,8 +190,8 @@ export class ExampleModelingSubmissionComponent implements OnInit, FeedbackMarke
         newExampleSubmission.exercise = this.exercise;
         newExampleSubmission.usedForTutorial = this.usedForTutorial;
 
-        this.exampleSubmissionService.create(newExampleSubmission, this.exerciseId).subscribe(
-            (exampleSubmissionResponse: HttpResponse<ExampleSubmission>) => {
+        this.exampleSubmissionService.create(newExampleSubmission, this.exerciseId).subscribe({
+            next: (exampleSubmissionResponse: HttpResponse<ExampleSubmission>) => {
                 this.exampleSubmission = exampleSubmissionResponse.body!;
                 this.exampleSubmissionId = this.exampleSubmission.id!;
                 if (this.exampleSubmission.submission) {
@@ -213,10 +209,10 @@ export class ExampleModelingSubmissionComponent implements OnInit, FeedbackMarke
                 // Update the url with the new id, without reloading the page, to make the history consistent
                 this.navigationUtilService.replaceNewWithIdInUrl(window.location.href, this.exampleSubmissionId);
             },
-            (error: HttpErrorResponse) => {
+            error: (error: HttpErrorResponse) => {
                 onError(this.alertService, error);
             },
-        );
+        });
     }
 
     private updateExampleModelingSubmission() {
@@ -237,8 +233,8 @@ export class ExampleModelingSubmissionComponent implements OnInit, FeedbackMarke
         exampleSubmission.submission = this.modelingSubmission;
         exampleSubmission.exercise = this.exercise;
         exampleSubmission.usedForTutorial = this.usedForTutorial;
-        this.exampleSubmissionService.update(exampleSubmission, this.exerciseId).subscribe(
-            (exampleSubmissionResponse: HttpResponse<ExampleSubmission>) => {
+        this.exampleSubmissionService.update(exampleSubmission, this.exerciseId).subscribe({
+            next: (exampleSubmissionResponse: HttpResponse<ExampleSubmission>) => {
                 this.exampleSubmission = exampleSubmissionResponse.body!;
                 this.exampleSubmissionId = this.exampleSubmission.id!;
                 if (this.exampleSubmission.submission) {
@@ -254,10 +250,10 @@ export class ExampleModelingSubmissionComponent implements OnInit, FeedbackMarke
 
                 this.alertService.success('artemisApp.modelingEditor.saveSuccessful');
             },
-            (error: HttpErrorResponse) => {
+            error: (error: HttpErrorResponse) => {
                 onError(this.alertService, error);
             },
-        );
+        });
     }
 
     onReferencedFeedbackChanged(referencedFeedback: Feedback[]) {
@@ -321,15 +317,15 @@ export class ExampleModelingSubmissionComponent implements OnInit, FeedbackMarke
                 }),
                 concatMap(() => this.modelingAssessmentService.saveExampleAssessment(this.assessments, this.exampleSubmissionId)),
             )
-            .subscribe(
-                (result: Result) => {
+            .subscribe({
+                next: (result: Result) => {
                     this.updateAssessment(result);
                     this.alertService.success('modelingAssessmentEditor.messages.saveSuccessful');
                 },
-                () => {
+                error: () => {
                     this.alertService.error('modelingAssessmentEditor.messages.saveFailed');
                 },
-            );
+            });
     }
 
     /**
@@ -344,15 +340,15 @@ export class ExampleModelingSubmissionComponent implements OnInit, FeedbackMarke
     }
 
     private updateExampleAssessment() {
-        this.modelingAssessmentService.saveExampleAssessment(this.assessments, this.exampleSubmissionId).subscribe(
-            (result: Result) => {
+        this.modelingAssessmentService.saveExampleAssessment(this.assessments, this.exampleSubmissionId).subscribe({
+            next: (result: Result) => {
                 this.updateAssessment(result);
                 this.alertService.success('modelingAssessmentEditor.messages.saveSuccessful');
             },
-            () => {
+            error: () => {
                 this.alertService.error('modelingAssessmentEditor.messages.saveFailed');
             },
-        );
+        });
     }
 
     /**

@@ -1,6 +1,5 @@
 package de.tum.in.www1.artemis.web.rest;
 
-import static de.tum.in.www1.artemis.web.rest.errors.AccessForbiddenException.NOT_ALLOWED;
 import static java.time.ZonedDateTime.now;
 
 import java.io.File;
@@ -191,7 +190,7 @@ public class CourseResource {
                 return createCourse(updatedCourse);
             }
             else {
-                throw new AccessForbiddenException(NOT_ALLOWED);
+                throw new AccessForbiddenException();
             }
         }
 
@@ -375,18 +374,19 @@ public class CourseResource {
     }
 
     /**
-     * GET /courses/to-register : get all courses that the current user can register to. Decided by the start and end date and if the registrationEnabled flag is set correctly
+     * GET /courses/for-registration : get all courses that the current user can register to. Decided by the start and end date and if the registrationEnabled flag is set correctly
      *
      * @return the list of courses which are active
      */
-    @GetMapping("/courses/to-register")
+    @GetMapping("/courses/for-registration")
     @PreAuthorize("hasRole('USER')")
     public List<Course> getAllCoursesToRegister() {
         log.debug("REST request to get all currently active Courses that are not online courses");
         User user = userRepository.getUserWithGroupsAndAuthoritiesAndOrganizations();
 
+        List<Course> allRegisteredCourses = courseService.findAllActiveForUser(user);
         List<Course> allCoursesToRegister = courseRepository.findAllCurrentlyActiveNotOnlineAndRegistrationEnabledWithOrganizations();
-        return allCoursesToRegister.stream().filter(course -> {
+        List<Course> registrableCourses = allCoursesToRegister.stream().filter(course -> {
             // further, check if the course has been assigned to any organization and if yes,
             // check if user is member of at least one of them
             if (course.getOrganizations() != null && course.getOrganizations().size() > 0) {
@@ -395,7 +395,9 @@ public class CourseResource {
             else {
                 return true;
             }
-        }).toList();
+        }).collect(Collectors.toList());
+        registrableCourses.removeAll(allRegisteredCourses);
+        return registrableCourses;
     }
 
     /**
@@ -523,15 +525,18 @@ public class CourseResource {
      * @return the ResponseEntity with status 200 (OK) and with body the course, or with status 404 (Not Found)
      */
     @GetMapping("/courses/{courseId}")
-    @PreAuthorize("hasRole('TA')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Course> getCourse(@PathVariable Long courseId) {
         log.debug("REST request to get Course : {}", courseId);
         Course course = courseRepository.findByIdElseThrow(courseId);
-        authCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.TEACHING_ASSISTANT, course, null);
-        course.setNumberOfInstructors(userRepository.countUserInGroup(course.getInstructorGroupName()));
-        course.setNumberOfTeachingAssistants(userRepository.countUserInGroup(course.getTeachingAssistantGroupName()));
-        course.setNumberOfEditors(userRepository.countUserInGroup(course.getEditorGroupName()));
-        course.setNumberOfStudents(userRepository.countUserInGroup(course.getStudentGroupName()));
+        authCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.STUDENT, course, null);
+
+        if (authCheckService.isAtLeastTeachingAssistantInCourse(course, null)) {
+            course.setNumberOfInstructors(userRepository.countUserInGroup(course.getInstructorGroupName()));
+            course.setNumberOfTeachingAssistants(userRepository.countUserInGroup(course.getTeachingAssistantGroupName()));
+            course.setNumberOfEditors(userRepository.countUserInGroup(course.getEditorGroupName()));
+            course.setNumberOfStudents(userRepository.countUserInGroup(course.getStudentGroupName()));
+        }
         return ResponseUtil.wrapOrNotFound(Optional.of(course));
     }
 
@@ -944,7 +949,7 @@ public class CourseResource {
             return ResponseEntity.ok().body(null);
         }
         else {
-            throw new AccessForbiddenException(NOT_ALLOWED);
+            throw new AccessForbiddenException();
         }
     }
 
@@ -1029,7 +1034,7 @@ public class CourseResource {
             return ResponseEntity.ok().body(null);
         }
         else {
-            throw new AccessForbiddenException(NOT_ALLOWED);
+            throw new AccessForbiddenException();
         }
     }
 
@@ -1051,7 +1056,7 @@ public class CourseResource {
                 .filter(exercise -> !exercise.getIncludedInOverallScore().equals(IncludedInOverallScore.NOT_INCLUDED)).collect(Collectors.toSet());
         Double averageScoreForCourse = participantScoreRepository.findAvgScore(includedExercises);
         averageScoreForCourse = averageScoreForCourse != null ? averageScoreForCourse : 0.0;
-        double reachablePoints = includedExercises.stream().map(Exercise::getMaxPoints).collect(Collectors.toSet()).stream().mapToDouble(Double::doubleValue).sum();
+        double reachablePoints = includedExercises.stream().map(Exercise::getMaxPoints).mapToDouble(Double::doubleValue).sum();
 
         Set<Long> exerciseIdsOfCourse = exercises.stream().map(Exercise::getId).collect(Collectors.toSet());
         CourseManagementDetailViewDTO dto = courseService.getStatsForDetailView(courseId, exerciseIdsOfCourse);
@@ -1122,7 +1127,7 @@ public class CourseResource {
     public ResponseEntity<List<Integer>> getActiveStudentsForCourseDetailView(@PathVariable Long courseId, @RequestParam Long periodIndex) {
         authCheckService.checkHasAtLeastRoleInCourseElseThrow(Role.TEACHING_ASSISTANT, courseRepository.findByIdElseThrow(courseId), null);
         var exerciseIds = exerciseRepository.findAllIdsByCourseId(courseId);
-        return ResponseEntity.ok(courseService.getActiveStudents(exerciseIds, periodIndex, 16, ZonedDateTime.now()));
+        return ResponseEntity.ok(courseService.getActiveStudents(exerciseIds, periodIndex, 17, ZonedDateTime.now()));
     }
 
     /**

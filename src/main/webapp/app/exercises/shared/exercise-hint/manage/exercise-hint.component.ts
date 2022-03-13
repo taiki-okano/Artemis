@@ -4,12 +4,12 @@ import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { ExerciseHint } from 'app/entities/exercise-hint.model';
 import { ExerciseHintService } from './exercise-hint.service';
 import { onError } from 'app/shared/util/global.utils';
 import { AlertService } from 'app/core/util/alert.service';
 import { EventManager } from 'app/core/util/event-manager.service';
 import { faEye, faPlus, faTimes, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { ExerciseHint } from 'app/entities/hestia/exercise-hint.model';
 
 @Component({
     selector: 'jhi-exercise-hint',
@@ -65,12 +65,12 @@ export class ExerciseHintComponent implements OnInit, OnDestroy {
                 filter((res: HttpResponse<ExerciseHint[]>) => res.ok),
                 map((res: HttpResponse<ExerciseHint[]>) => res.body),
             )
-            .subscribe(
-                (res: ExerciseHint[]) => {
+            .subscribe({
+                next: (res: ExerciseHint[]) => {
                     this.exerciseHints = res;
                 },
-                (res: HttpErrorResponse) => onError(this.alertService, res),
-            );
+                error: (res: HttpErrorResponse) => onError(this.alertService, res),
+            });
     }
 
     /**
@@ -97,15 +97,15 @@ export class ExerciseHintComponent implements OnInit, OnDestroy {
      * @param exerciseHintId the id of the exercise hint that we want to delete
      */
     deleteExerciseHint(exerciseHintId: number) {
-        this.exerciseHintService.delete(exerciseHintId).subscribe(
-            () => {
+        this.exerciseHintService.delete(this.exerciseId, exerciseHintId).subscribe({
+            next: () => {
                 this.eventManager.broadcast({
                     name: 'exerciseHintListModification',
                     content: 'Deleted an exerciseHint',
                 });
                 this.dialogErrorSource.next('');
             },
-            (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
-        );
+            error: (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
+        });
     }
 }

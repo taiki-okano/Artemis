@@ -21,7 +21,6 @@ import { Feedback, FeedbackHighlightColor, FeedbackType } from 'app/entities/fee
 import { Complaint, ComplaintType } from 'app/entities/complaint.model';
 import { ModelingAssessmentService } from 'app/exercises/modeling/assess/modeling-assessment.service';
 import { assessmentNavigateBack } from 'app/exercises/shared/navigate-back.util';
-import { Authority } from 'app/shared/constants/authority.constants';
 import { StructuredGradingCriterionService } from 'app/exercises/shared/structured-grading-criterion/structured-grading-criterion.service';
 import { getSubmissionResultByCorrectionRound, getSubmissionResultById } from 'app/entities/submission.model';
 import { getExerciseDashboardLink, getLinkToSubmissionAssessment } from 'app/utils/navigation.utils';
@@ -58,7 +57,6 @@ export class ModelingAssessmentEditorComponent implements OnInit {
     exerciseDashboardLink: string[];
     userId: number;
     isAssessor = false;
-    isAtLeastInstructor = false;
     hideBackButton: boolean;
     complaint: Complaint;
     ComplaintType = ComplaintType;
@@ -71,6 +69,7 @@ export class ModelingAssessmentEditorComponent implements OnInit {
     loadingInitialSubmission = true;
     highlightDifferences = false;
     resizeOptions = { verticalResize: true };
+    isApollonModelLoaded = false;
 
     private cancelConfirmationText: string;
 
@@ -103,7 +102,6 @@ export class ModelingAssessmentEditorComponent implements OnInit {
         this.accountService.identity().then((user) => {
             this.userId = user!.id!;
         });
-        this.isAtLeastInstructor = this.accountService.hasAnyAuthorityDirect([Authority.ADMIN, Authority.INSTRUCTOR]);
 
         this.route.queryParamMap.subscribe((queryParams) => {
             this.hideBackButton = queryParams.get('hideBackButton') === 'true';
@@ -131,29 +129,29 @@ export class ModelingAssessmentEditorComponent implements OnInit {
     }
 
     private loadSubmission(submissionId: number): void {
-        this.modelingSubmissionService.getSubmission(submissionId, this.correctionRound, this.resultId).subscribe(
-            (submission: ModelingSubmission) => {
+        this.modelingSubmissionService.getSubmission(submissionId, this.correctionRound, this.resultId).subscribe({
+            next: (submission: ModelingSubmission) => {
                 this.handleReceivedSubmission(submission);
             },
-            (error: HttpErrorResponse) => {
+            error: (error: HttpErrorResponse) => {
                 this.handleErrorResponse(error);
             },
-        );
+        });
     }
 
     private loadRandomSubmission(exerciseId: number): void {
-        this.modelingSubmissionService.getModelingSubmissionForExerciseForCorrectionRoundWithoutAssessment(exerciseId, true, this.correctionRound).subscribe(
-            (submission: ModelingSubmission) => {
+        this.modelingSubmissionService.getModelingSubmissionForExerciseForCorrectionRoundWithoutAssessment(exerciseId, true, this.correctionRound).subscribe({
+            next: (submission: ModelingSubmission) => {
                 this.handleReceivedSubmission(submission);
 
                 // Update the url with the new id, without reloading the page, to make the history consistent
                 const newUrl = window.location.hash.replace('#', '').replace('new', `${this.submission!.id}`);
                 this.location.go(newUrl);
             },
-            (error: HttpErrorResponse) => {
+            error: (error: HttpErrorResponse) => {
                 this.handleErrorResponse(error);
             },
-        );
+        });
     }
 
     private handleReceivedSubmission(submission: ModelingSubmission): void {
@@ -188,15 +186,14 @@ export class ModelingAssessmentEditorComponent implements OnInit {
         if (this.submission.model) {
             this.model = JSON.parse(this.submission.model);
         } else {
-            this.alertService.clear();
+            this.alertService.closeAll();
             this.alertService.error('modelingAssessmentEditor.messages.noModel');
         }
         if ((!this.result?.assessor || this.result.assessor.id === this.userId) && !this.result?.completionDate) {
-            this.alertService.clear();
+            this.alertService.closeAll();
             this.alertService.info('modelingAssessmentEditor.messages.lock');
         }
         this.checkPermissions();
-        this.validateFeedback();
 
         this.submissionService.handleFeedbackCorrectionRoundTag(this.correctionRound, this.submission);
 
@@ -207,17 +204,17 @@ export class ModelingAssessmentEditorComponent implements OnInit {
         if (!this.submission) {
             return;
         }
-        this.complaintService.findBySubmissionId(this.submission.id!).subscribe(
-            (res) => {
+        this.complaintService.findBySubmissionId(this.submission.id!).subscribe({
+            next: (res) => {
                 if (!res.body) {
                     return;
                 }
                 this.complaint = res.body;
             },
-            () => {
+            error: () => {
                 this.onError();
             },
-        );
+        });
     }
 
     /**
@@ -244,9 +241,6 @@ export class ModelingAssessmentEditorComponent implements OnInit {
 
     private checkPermissions(): void {
         this.isAssessor = this.result?.assessor?.id === this.userId;
-        if (this.modelingExercise) {
-            this.isAtLeastInstructor = this.accountService.isAtLeastInstructorInCourse(this.modelingExercise.course || this.modelingExercise.exerciseGroup!.exam!.course);
-        }
     }
 
     /**
@@ -258,7 +252,7 @@ export class ModelingAssessmentEditorComponent implements OnInit {
      */
     get canOverride(): boolean {
         if (this.modelingExercise) {
-            if (this.isAtLeastInstructor) {
+            if (this.modelingExercise.isAtLeastInstructor) {
                 // Instructors can override any assessment at any time.
                 return true;
             }
@@ -279,7 +273,7 @@ export class ModelingAssessmentEditorComponent implements OnInit {
 
     get readOnly(): boolean {
         return !isAllowedToModifyFeedback(
-            this.isAtLeastInstructor,
+            this.modelingExercise?.isAtLeastInstructor ?? false,
             this.isTestRun,
             this.isAssessor,
             this.hasAssessmentDueDatePassed,
@@ -307,12 +301,11 @@ export class ModelingAssessmentEditorComponent implements OnInit {
     }
 
     onError(): void {
-        this.isAtLeastInstructor = this.accountService.hasAnyAuthorityDirect([Authority.ADMIN, Authority.INSTRUCTOR]);
         this.submission = undefined;
         this.modelingExercise = undefined;
         this.result = undefined;
         this.model = undefined;
-        this.alertService.clear();
+        this.alertService.closeAll();
         this.alertService.error('modelingAssessmentEditor.messages.loadSubmissionFailed');
     }
 
@@ -322,18 +315,18 @@ export class ModelingAssessmentEditorComponent implements OnInit {
             return;
         }
 
-        this.modelingAssessmentService.saveAssessment(this.result!.id!, this.feedback, this.submission!.id!).subscribe(
-            (result: Result) => {
+        this.modelingAssessmentService.saveAssessment(this.result!.id!, this.feedback, this.submission!.id!).subscribe({
+            next: (result: Result) => {
                 this.result = result;
                 this.handleFeedback(this.result.feedbacks);
-                this.alertService.clear();
+                this.alertService.closeAll();
                 this.alertService.success('modelingAssessmentEditor.messages.saveSuccessful');
             },
-            () => {
-                this.alertService.clear();
+            error: () => {
+                this.alertService.closeAll();
                 this.alertService.error('modelingAssessmentEditor.messages.saveFailed');
             },
-        );
+        });
     }
 
     onSubmitAssessment() {
@@ -363,25 +356,26 @@ export class ModelingAssessmentEditorComponent implements OnInit {
             this.alertService.error('modelingAssessmentEditor.messages.feedbackTextTooLong');
             return;
         }
-        this.modelingAssessmentService.saveAssessment(this.result!.id!, this.feedback, this.submission!.id!, true).subscribe(
-            (result: Result) => {
+        this.modelingAssessmentService.saveAssessment(this.result!.id!, this.feedback, this.submission!.id!, true).subscribe({
+            next: (result: Result) => {
                 result.participation!.results = [result];
                 this.result = result;
 
-                this.alertService.clear();
+                this.alertService.closeAll();
                 this.alertService.success('modelingAssessmentEditor.messages.submitSuccessful');
 
                 this.highlightMissingFeedback = false;
             },
-            (error: HttpErrorResponse) => {
+            error: (error: HttpErrorResponse) => {
                 let errorMessage = 'modelingAssessmentEditor.messages.submitFailed';
                 if (error.error && error.error.entityName && error.error.message) {
                     errorMessage = `artemisApp.${error.error.entityName}.${error.error.message}`;
                 }
-                this.alertService.clear();
+                this.alertService.closeAll();
                 this.alertService.error(errorMessage);
             },
-        );
+        });
+        this.assessmentsAreValid = false;
     }
 
     /**
@@ -391,16 +385,16 @@ export class ModelingAssessmentEditorComponent implements OnInit {
      * @param complaintResponse the response to the complaint that is sent to the server along with the assessment update
      */
     onUpdateAssessmentAfterComplaint(complaintResponse: ComplaintResponse): void {
-        this.modelingAssessmentService.updateAssessmentAfterComplaint(this.feedback, complaintResponse, this.submission!.id!).subscribe(
-            (response) => {
+        this.modelingAssessmentService.updateAssessmentAfterComplaint(this.feedback, complaintResponse, this.submission!.id!).subscribe({
+            next: (response) => {
                 this.result = response.body!;
                 // reconnect
                 this.result.participation!.results = [this.result];
-                this.alertService.clear();
+                this.alertService.closeAll();
                 this.alertService.success('modelingAssessmentEditor.messages.updateAfterComplaintSuccessful');
             },
-            (httpErrorResponse: HttpErrorResponse) => {
-                this.alertService.clear();
+            error: (httpErrorResponse: HttpErrorResponse) => {
+                this.alertService.closeAll();
                 const error = httpErrorResponse.error;
                 if (error && error.errorKey && error.errorKey === 'complaintLock') {
                     this.alertService.error(error.message, error.params);
@@ -408,7 +402,7 @@ export class ModelingAssessmentEditorComponent implements OnInit {
                     this.alertService.error('modelingAssessmentEditor.messages.updateAfterComplaintFailed');
                 }
             },
-        );
+        });
     }
 
     /**
@@ -425,14 +419,22 @@ export class ModelingAssessmentEditorComponent implements OnInit {
 
     onFeedbackChanged(feedback: Feedback[]) {
         this.referencedFeedback = feedback.filter((feedbackElement) => feedbackElement.reference);
+
+        if (!this.isApollonModelLoaded) {
+            this.isApollonModelLoaded = true;
+            this.calculateTotalScore();
+            this.submissionService.handleFeedbackCorrectionRoundTag(this.correctionRound, this.submission!);
+            return;
+        }
+
         this.validateFeedback();
     }
 
     assessNext() {
         this.isLoading = true;
         this.nextSubmissionBusy = true;
-        this.modelingSubmissionService.getModelingSubmissionForExerciseForCorrectionRoundWithoutAssessment(this.modelingExercise!.id!, true, this.correctionRound).subscribe(
-            (unassessedSubmission: ModelingSubmission) => {
+        this.modelingSubmissionService.getModelingSubmissionForExerciseForCorrectionRoundWithoutAssessment(this.modelingExercise!.id!, true, this.correctionRound).subscribe({
+            next: (unassessedSubmission: ModelingSubmission) => {
                 this.nextSubmissionBusy = false;
                 this.isLoading = false;
 
@@ -451,11 +453,11 @@ export class ModelingAssessmentEditorComponent implements OnInit {
                 );
                 this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => this.router.navigate(url, { queryParams: { 'correction-round': this.correctionRound } }));
             },
-            (error: HttpErrorResponse) => {
+            error: (error: HttpErrorResponse) => {
                 this.nextSubmissionBusy = false;
                 this.handleErrorResponse(error);
             },
-        );
+        });
     }
 
     /**
@@ -551,10 +553,10 @@ export class ModelingAssessmentEditorComponent implements OnInit {
      */
     useStudentSubmissionAsExampleSubmission(): void {
         if (this.submission && this.modelingExercise) {
-            this.exampleSubmissionService.import(this.submission.id!, this.modelingExercise.id!).subscribe(
-                () => this.alertService.success('artemisApp.exampleSubmission.submitSuccessful'),
-                (error: HttpErrorResponse) => onError(this.alertService, error),
-            );
+            this.exampleSubmissionService.import(this.submission.id!, this.modelingExercise.id!).subscribe({
+                next: () => this.alertService.success('artemisApp.exampleSubmission.submitSuccessful'),
+                error: (error: HttpErrorResponse) => onError(this.alertService, error),
+            });
         }
     }
 }

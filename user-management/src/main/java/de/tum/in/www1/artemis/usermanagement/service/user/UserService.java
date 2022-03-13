@@ -200,6 +200,22 @@ public class UserService {
     }
 
     /**
+     * Set password reset data for a user if eligible
+     *
+     * @param user user requesting reset
+     * @return true if the user is eligible
+     */
+    public boolean prepareUserForPasswordReset(User user) {
+        if (user.getActivated() && user.isInternal()) {
+            user.setResetKey(RandomUtil.generateResetKey());
+            user.setResetDate(Instant.now());
+            saveUser(user);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Request password reset for user email
      *
      * @param mail to find user

@@ -46,10 +46,11 @@ public class UserServiceProducer {
      * @param registrationNumber the registration number of the user
      * @param imageUrl           the image url of the user
      * @param langKey            the language key of the user
+     * @param isInternal         flas if the user is internal user
      * @return the created user
      */
     public User createInternalUser(String login, @Nullable String password, @Nullable Set<String> groups, String firstName, String lastName, String email,
-            String registrationNumber, String imageUrl, String langKey) {
+            String registrationNumber, String imageUrl, String langKey, boolean isInternal) {
         LOGGER.info("Create internal user");
         User user = new User();
         user.setLogin(login);
@@ -61,6 +62,7 @@ public class UserServiceProducer {
         user.setRegistrationNumber(registrationNumber);
         user.setImageUrl(imageUrl);
         user.setLangKey(langKey);
+        user.setInternal(isInternal);
 
         String correlationId = Integer.toString(user.hashCode());
         jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER, user, message -> {
@@ -129,6 +131,29 @@ public class UserServiceProducer {
         }
         catch (JMSException e) {
             return null;
+        }
+    }
+
+    /**
+     * Send a message to request a password reset of a user
+     *
+     * @param user the user
+     * @return the updated user
+     */
+    public boolean prepareUserForPasswordReset(User user) {
+        LOGGER.info("Request password reset for user {}", user);
+        String correlationId = Integer.toString(user.hashCode());
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET, user, message -> {
+            message.setJMSCorrelationID(correlationId);
+            return message;
+        });
+        Message responseMessage = jmsTemplate.receiveSelected(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, "JMSCorrelationID='" + correlationId + "'");
+        LOGGER.info("Received response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, responseMessage);
+        try {
+            return responseMessage.getBody(Boolean.class);
+        }
+        catch (JMSException e) {
+            return false;
         }
     }
 

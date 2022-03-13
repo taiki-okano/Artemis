@@ -20,7 +20,6 @@
                 </div>
             </div>
         </div>
-        <jhi-alert></jhi-alert>
         <div class="tab-bar tab-bar-course-detail">
             <a [routerLink]="['/course-management', course.id, 'exercises']" class="tab-item btn btn-primary btn-md ms-1">
                 <fa-icon [icon]="faListAlt"></fa-icon>
@@ -130,20 +129,20 @@
                     ></jhi-course-detail-doughnut-chart>
                 </div>
             </div>
-            <jhi-course-detail-line-chart
-                class="col-md-8"
-                [course]="course"
-                [numberOfStudentsInCourse]="course.numberOfStudents!"
-                [initialStats]="activeStudents"
-            ></jhi-course-detail-line-chart>
+            <jhi-fullscreen class="col-md-8 fullscreen align-items-center">
+                <jhi-course-detail-line-chart
+                    class="col-12"
+                    [course]="course"
+                    [numberOfStudentsInCourse]="course.numberOfStudents!"
+                    [initialStats]="activeStudents"
+                ></jhi-course-detail-line-chart>
+            </jhi-fullscreen>
         </div>
         <hr />
         <div>
             <h2><span jhiTranslate="artemisApp.course.detail.title">Course Details:</span></h2>
         </div>
         <hr />
-        <jhi-alert></jhi-alert>
-        <jhi-alert-error></jhi-alert-error>
         <dl class="row-md jh-entity-details">
             <dt><span jhiTranslate="artemisApp.course.title">Title</span></dt>
             <dd>

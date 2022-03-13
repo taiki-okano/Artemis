@@ -16,7 +16,14 @@ import { DataTableComponent } from 'app/shared/data-table/data-table.component';
 import { iconsAsHTML } from 'app/utils/icons.utils';
 import { AccountService } from 'app/core/auth/account.service';
 import { EventManager } from 'app/core/util/event-manager.service';
+import { ExportToCsv } from 'export-to-csv';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
+
+const NAME_KEY = 'Name';
+const USERNAME_KEY = 'Username';
+const EMAIL_KEY = 'Email';
+const REGISTRATION_NUMBER_KEY = 'Registration Number';
 
 const cssClasses = {
     alreadyMember: 'already-member',
@@ -45,7 +52,6 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
     dialogError$ = this.dialogErrorSource.asObservable();
 
     isAdmin = false;
-
     isLoading = false;
     isSearching = false;
     searchFailed = false;
@@ -54,6 +60,7 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
     rowClass: string | undefined = undefined;
 
     // Icons
+    faDownload = faDownload;
     faUserSlash = faUserSlash;
 
     constructor(
@@ -163,8 +170,8 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
         // If the user is not part of this course group yet, perform the server call to add them
         if (!this.allCourseGroupUsers.map((u) => u.id).includes(user.id) && user.login) {
             this.isTransitioning = true;
-            this.courseService.addUserToCourseGroup(this.course.id!, this.courseGroup, user.login).subscribe(
-                () => {
+            this.courseService.addUserToCourseGroup(this.course.id!, this.courseGroup, user.login).subscribe({
+                next: () => {
                     this.isTransitioning = false;
 
                     // Add newly added user to the list of all users in the course group
@@ -176,10 +183,10 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
                     // Flash green background color to signal to the user that this record was added
                     this.flashRowClass(cssClasses.newlyAddedMember);
                 },
-                () => {
+                error: () => {
                     this.isTransitioning = false;
                 },
-            );
+            });
         } else {
             // Hand back over to the data table
             callback(user);
@@ -193,13 +200,13 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
      */
     removeFromGroup(user: User) {
         if (user.login) {
-            this.courseService.removeUserFromCourseGroup(this.course.id!, this.courseGroup, user.login).subscribe(
-                () => {
+            this.courseService.removeUserFromCourseGroup(this.course.id!, this.courseGroup, user.login).subscribe({
+                next: () => {
                     this.allCourseGroupUsers = this.allCourseGroupUsers.filter((u) => u.login !== user.login);
                     this.dialogErrorSource.next('');
                 },
-                (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
-            );
+                error: (error: HttpErrorResponse) => this.dialogErrorSource.next(error.message),
+            });
         }
     }
 
@@ -272,4 +279,43 @@ export class CourseGroupComponent implements OnInit, OnDestroy {
         this.rowClass = className;
         setTimeout(() => (this.rowClass = undefined));
     };
+
+    /**
+     * Method for exporting the csv with the needed data
+     */
+    exportUserInformation() {
+        if (this.allCourseGroupUsers.length > 0) {
+            const rows: any[] = this.allCourseGroupUsers.map((user: User) => {
+                const data = {};
+                data[NAME_KEY] = user.name?.trim() ?? '';
+                data[USERNAME_KEY] = user.login?.trim() ?? '';
+                data[EMAIL_KEY] = user.email?.trim() ?? '';
+                data[REGISTRATION_NUMBER_KEY] = user.visibleRegistrationNumber?.trim() ?? '';
+                return data;
+            });
+            const keys = [NAME_KEY, USERNAME_KEY, EMAIL_KEY, REGISTRATION_NUMBER_KEY];
+            this.exportAsCsv(rows, keys);
+        }
+    }
+
+    /**
+     * Method for generating the csv file containing the user information
+     *
+     * @param rows the data to export
+     * @param keys the keys of the data
+     */
+    exportAsCsv(rows: any[], keys: string[]) {
+        const options = {
+            fieldSeparator: ';',
+            quoteStrings: '"',
+            showLabels: true,
+            showTitle: false,
+            filename: this.courseGroupEntityName.charAt(0).toUpperCase() + this.courseGroupEntityName.slice(1) + ' ' + this.course.title,
+            useTextFile: false,
+            useBom: true,
+            headers: keys,
+        };
+        const csvExporter = new ExportToCsv(options);
+        csvExporter.generateCsv(rows);
+    }
 }

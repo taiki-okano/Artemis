@@ -1,4 +1,3 @@
-<jhi-alert></jhi-alert>
 <h3 class="top-container flex-wrap flex-lg-nowrap">
     <!--back button only used in assessment dashboard-->
     <div class="row-container me-2">
@@ -32,7 +31,7 @@
             id="moreFeedbackRequest"
             *ngIf="
                 isAssessor &&
-                !isAtLeastInstructor &&
+                !exercise?.isAtLeastInstructor &&
                 hasComplaint &&
                 complaintType != ComplaintType.COMPLAINT &&
                 !complaintHandled &&
@@ -48,7 +47,7 @@
             id="automaticAssessmentFeedbackRequest"
             *ngIf="
                 isAssessor &&
-                !isAtLeastInstructor &&
+                !exercise?.isAtLeastInstructor &&
                 hasComplaint &&
                 complaintType != ComplaintType.COMPLAINT &&
                 exercise?.assessmentType === AssessmentType.AUTOMATIC &&
@@ -63,7 +62,7 @@
         </span>
         <span
             id="teamComplaint"
-            *ngIf="isAssessor && !isAtLeastInstructor && hasComplaint && complaintType == ComplaintType.COMPLAINT && !complaintHandled && exercise?.teamMode"
+            *ngIf="isAssessor && !exercise?.isAtLeastInstructor && hasComplaint && complaintType == ComplaintType.COMPLAINT && !complaintHandled && exercise?.teamMode"
             class="m-2"
             style="font-size: 65%"
             jhiTranslate="artemisApp.assessment.teamComplaint"
@@ -74,7 +73,7 @@
             id="automaticAssessmentComplaint"
             *ngIf="
                 isAssessor &&
-                !isAtLeastInstructor &&
+                !exercise?.isAtLeastInstructor &&
                 hasComplaint &&
                 complaintType == ComplaintType.COMPLAINT &&
                 exercise?.assessmentType === AssessmentType.AUTOMATIC &&
@@ -91,7 +90,7 @@
             id="assessmentReadOnlyUnhandledComplaint"
             *ngIf="
                 isAssessor &&
-                !isAtLeastInstructor &&
+                !exercise?.isAtLeastInstructor &&
                 hasComplaint &&
                 exercise?.assessmentType !== AssessmentType.AUTOMATIC &&
                 complaintType == ComplaintType.COMPLAINT &&
@@ -106,7 +105,7 @@
         </span>
         <span
             id="assessmentReadOnlyHandled"
-            *ngIf="isAssessor && !isAtLeastInstructor && hasComplaint && complaintHandled && !exercise?.teamMode"
+            *ngIf="isAssessor && !exercise?.isAtLeastInstructor && hasComplaint && complaintHandled && !exercise?.teamMode"
             class="m-2"
             style="font-size: 65%"
             jhiTranslate="artemisApp.assessment.assessmentReadOnlyHandledComplaint"
@@ -115,7 +114,7 @@
         </span>
         <span
             id="assessmentLockedCurrentUser"
-            *ngIf="isAssessor && (!hasComplaint || isAtLeastInstructor)"
+            *ngIf="isAssessor && (!hasComplaint || exercise?.isAtLeastInstructor)"
             class="text-danger m-2"
             style="font-size: 65%"
             jhiTranslate="artemisApp.assessment.assessmentLockedCurrentUser"
@@ -163,7 +162,7 @@
                     *ngIf="!isTestRun"
                     class="btn m-1 btn-danger"
                     (click)="cancel.emit()"
-                    [disabled]="!(isAtLeastInstructor || isAssessor) || saveBusy || submitBusy || cancelBusy"
+                    [disabled]="!(exercise?.isAtLeastInstructor || isAssessor) || saveBusy || submitBusy || cancelBusy"
                 >
                     <fa-icon *ngIf="cancelBusy" [icon]="faSpinner" [spin]="true">&nbsp;</fa-icon>
                     <span jhiTranslate="entity.action.cancel">Cancel</span>
@@ -176,7 +175,7 @@
             <button
                 class="btn m-1 btn-primary"
                 id="useAsExampleSubmission"
-                *ngIf="result?.completionDate && isAtLeastInstructor && (exercise!.type === ExerciseType.MODELING || exercise!.type === ExerciseType.TEXT)"
+                *ngIf="result?.completionDate && exercise?.isAtLeastInstructor && (exercise!.type === ExerciseType.MODELING || exercise!.type === ExerciseType.TEXT)"
                 (click)="onUseAsExampleSolutionClicked()"
             >
                 <fa-icon *ngIf="submitBusy" [icon]="faSpinner" [spin]="true"></fa-icon>
@@ -185,7 +184,7 @@
             <button
                 class="btn m-1 btn-success"
                 id="assessNextButton"
-                *ngIf="result?.completionDate && (isAssessor || isAtLeastInstructor) && !hasComplaint && !isTeamMode && !isTestRun"
+                *ngIf="result?.completionDate && (isAssessor || exercise?.isAtLeastInstructor) && !hasComplaint && !isTeamMode && !isTestRun"
                 [disabled]="nextSubmissionBusy || submitBusy"
                 (click)="nextSubmission.emit(); sendAssessNextEventToAnalytics()"
             >

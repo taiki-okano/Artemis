@@ -27,7 +27,7 @@ import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 export class StudentExamsComponent implements OnInit {
     courseId: number;
     examId: number;
-    studentExams: StudentExam[];
+    studentExams: StudentExam[] = [];
     course: Course;
     exam: Exam;
     hasStudentsWithoutExam: boolean;
@@ -91,7 +91,7 @@ export class StudentExamsComponent implements OnInit {
             );
 
             // Calculate hasStudentsWithoutExam only when both observables emitted
-            forkJoin(studentExamObservable, examObservable).subscribe(() => {
+            forkJoin([studentExamObservable, examObservable]).subscribe(() => {
                 this.isLoading = false;
                 if (this.exam.registeredUsers) {
                     this.hasStudentsWithoutExam = this.studentExams.length < this.exam.registeredUsers.length;
@@ -117,7 +117,7 @@ export class StudentExamsComponent implements OnInit {
      */
     handleGenerateStudentExams() {
         // If student exams already exists, inform the instructor about it and get confirmations for re-creation
-        if (this.studentExams && this.studentExams.length) {
+        if (this.studentExams.length) {
             const modalRef = this.modalService.open(ConfirmAutofocusModalComponent, { keyboard: true, size: 'lg' });
             modalRef.componentInstance.title = 'artemisApp.studentExams.generateStudentExams';
             modalRef.componentInstance.text = this.artemisTranslatePipe.transform('artemisApp.studentExams.studentExamGenerationModalText');
@@ -131,16 +131,16 @@ export class StudentExamsComponent implements OnInit {
 
     private generateStudentExams() {
         this.isLoading = true;
-        this.examManagementService.generateStudentExams(this.courseId, this.examId).subscribe(
-            (res) => {
+        this.examManagementService.generateStudentExams(this.courseId, this.examId).subscribe({
+            next: (res) => {
                 this.alertService.success('artemisApp.studentExams.studentExamGenerationSuccess', { number: res?.body?.length ?? 0 });
                 this.loadAll();
             },
-            (err: HttpErrorResponse) => {
+            error: (err: HttpErrorResponse) => {
                 this.handleError('artemisApp.studentExams.studentExamGenerationError', err);
                 this.isLoading = false;
             },
-        );
+        });
     }
 
     /**
@@ -149,16 +149,16 @@ export class StudentExamsComponent implements OnInit {
      */
     generateMissingStudentExams() {
         this.isLoading = true;
-        this.examManagementService.generateMissingStudentExams(this.courseId, this.examId).subscribe(
-            (res) => {
+        this.examManagementService.generateMissingStudentExams(this.courseId, this.examId).subscribe({
+            next: (res) => {
                 this.alertService.success('artemisApp.studentExams.missingStudentExamGenerationSuccess', { number: res?.body?.length ?? 0 });
                 this.loadAll();
             },
-            (err: HttpErrorResponse) => {
+            error: (err: HttpErrorResponse) => {
                 this.handleError('artemisApp.studentExams.missingStudentExamGenerationError', err);
                 this.isLoading = false;
             },
-        );
+        });
     }
 
     /**
@@ -166,16 +166,16 @@ export class StudentExamsComponent implements OnInit {
      */
     startExercises() {
         this.isLoading = true;
-        this.examManagementService.startExercises(this.courseId, this.examId).subscribe(
-            (res) => {
+        this.examManagementService.startExercises(this.courseId, this.examId).subscribe({
+            next: (res) => {
                 this.alertService.success('artemisApp.studentExams.startExerciseSuccess', { number: res?.body });
                 this.loadAll();
             },
-            (err: HttpErrorResponse) => {
+            error: (err: HttpErrorResponse) => {
                 this.handleError('artemisApp.studentExams.startExerciseFailure', err);
                 this.isLoading = false;
             },
-        );
+        });
     }
 
     /**
@@ -195,16 +195,16 @@ export class StudentExamsComponent implements OnInit {
      */
     private unlockAllRepositories() {
         this.isLoading = true;
-        this.examManagementService.unlockAllRepositories(this.courseId, this.examId).subscribe(
-            (res) => {
+        this.examManagementService.unlockAllRepositories(this.courseId, this.examId).subscribe({
+            next: (res) => {
                 this.alertService.success('artemisApp.studentExams.unlockAllRepositoriesSuccess', { number: res?.body });
                 this.isLoading = false;
             },
-            (err: HttpErrorResponse) => {
+            error: (err: HttpErrorResponse) => {
                 this.handleError('artemisApp.studentExams.unlockAllRepositoriesFailure', err);
                 this.isLoading = false;
             },
-        );
+        });
     }
 
     /**
@@ -224,16 +224,16 @@ export class StudentExamsComponent implements OnInit {
      */
     private lockAllRepositories() {
         this.isLoading = true;
-        this.examManagementService.lockAllRepositories(this.courseId, this.examId).subscribe(
-            (res) => {
+        this.examManagementService.lockAllRepositories(this.courseId, this.examId).subscribe({
+            next: (res) => {
                 this.alertService.success('artemisApp.studentExams.lockAllRepositoriesSuccess', { number: res?.body });
                 this.isLoading = false;
             },
-            (err: HttpErrorResponse) => {
+            error: (err: HttpErrorResponse) => {
                 this.handleError('artemisApp.studentExams.lockAllRepositoriesFailure', err);
                 this.isLoading = false;
             },
-        );
+        });
     }
 
     /**

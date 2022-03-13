@@ -10,14 +10,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MockComponent, MockDirective, MockPipe, MockProvider } from 'ng-mocks';
 import { AlertService } from 'app/core/util/alert.service';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
-import { AlertComponent } from 'app/shared/alert/alert.component';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { NgModel } from '@angular/forms';
 import { MockTranslateService } from '../../helpers/mocks/service/mock-translate.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslateDirective } from 'app/shared/language/translate.directive';
 
-describe('ComplaintsComponent', () => {
+describe('ComplaintsFormComponent', () => {
     const teamComplaints = 42;
     const studentComplaints = 69;
     const course: Course = { maxTeamComplaints: teamComplaints, maxComplaints: studentComplaints };
@@ -32,14 +31,7 @@ describe('ComplaintsComponent', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [ArtemisTestModule],
-            declarations: [
-                ComplaintsFormComponent,
-                MockPipe(ArtemisTranslatePipe),
-                MockComponent(AlertComponent),
-                MockComponent(FaIconComponent),
-                MockDirective(NgModel),
-                MockDirective(TranslateDirective),
-            ],
+            declarations: [ComplaintsFormComponent, MockPipe(ArtemisTranslatePipe), MockComponent(FaIconComponent), MockDirective(NgModel), MockDirective(TranslateDirective)],
             providers: [
                 MockProvider(AlertService),
                 {
@@ -94,7 +86,7 @@ describe('ComplaintsComponent', () => {
     });
 
     it('should throw unknown error after complaint creation', () => {
-        const createMock = jest.spyOn(complaintService, 'create').mockReturnValue(throwError({ status: 500 }));
+        const createMock = jest.spyOn(complaintService, 'create').mockReturnValue(throwError(() => ({ status: 500 })));
         const submitSpy = jest.spyOn(component.submit, 'emit');
         const errorSpy = jest.spyOn(alertService, 'error');
         component.createComplaint();
@@ -105,7 +97,7 @@ describe('ComplaintsComponent', () => {
 
     it('should throw known error after complaint creation', () => {
         const error = { error: { errorKey: 'tooManyComplaints' } } as HttpErrorResponse;
-        const createMock = jest.spyOn(complaintService, 'create').mockReturnValue(throwError(error));
+        const createMock = jest.spyOn(complaintService, 'create').mockReturnValue(throwError(() => error));
         const submitSpy = jest.spyOn(component.submit, 'emit');
         const errorSpy = jest.spyOn(alertService, 'error');
         const numberOfComplaints = 42;

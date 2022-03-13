@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { AlertService } from 'app/core/util/alert.service';
+import { AlertService, AlertType } from 'app/core/util/alert.service';
 import { FileUploadExerciseService } from './file-upload-exercise.service';
 import { FileUploadExercise } from 'app/entities/file-upload-exercise.model';
 import { CourseManagementService } from 'app/course/manage/course-management.service';
@@ -74,12 +74,12 @@ export class FileUploadExerciseUpdateComponent implements OnInit {
             this.isExamMode = this.fileUploadExercise.exerciseGroup !== undefined;
             if (!this.isExamMode) {
                 this.exerciseCategories = this.fileUploadExercise.categories || [];
-                this.courseService.findAllCategoriesOfCourse(this.fileUploadExercise.course!.id!).subscribe(
-                    (categoryRes: HttpResponse<string[]>) => {
+                this.courseService.findAllCategoriesOfCourse(this.fileUploadExercise.course!.id!).subscribe({
+                    next: (categoryRes: HttpResponse<string[]>) => {
                         this.existingCategories = this.exerciseService.convertExerciseCategoriesAsStringFromServer(categoryRes.body!);
                     },
-                    (error: HttpErrorResponse) => onError(this.alertService, error),
-                );
+                    error: (error: HttpErrorResponse) => onError(this.alertService, error),
+                });
             }
 
             this.saveCommand = new SaveExerciseCommand(this.modalService, this.popupService, this.fileUploadExerciseService, this.backupExercise, this.editType);
@@ -96,13 +96,13 @@ export class FileUploadExerciseUpdateComponent implements OnInit {
     save() {
         this.isSaving = true;
 
-        this.saveCommand.save(this.fileUploadExercise, this.notificationText).subscribe(
-            () => this.onSaveSuccess(),
-            (res: HttpErrorResponse) => this.onSaveError(res),
-            () => {
+        this.saveCommand.save(this.fileUploadExercise, this.notificationText).subscribe({
+            next: () => this.onSaveSuccess(),
+            error: (res: HttpErrorResponse) => this.onSaveError(res),
+            complete: () => {
                 this.isSaving = false;
             },
-        );
+        });
     }
 
     /**
@@ -126,9 +126,11 @@ export class FileUploadExerciseUpdateComponent implements OnInit {
 
     private onSaveError(error: HttpErrorResponse) {
         const errorMessage = error.headers.get('X-artemisApp-alert')!;
-        // TODO: this is a workaround to avoid translation not found issues. Provide proper translations
-        const jhiAlert = this.alertService.error(errorMessage);
-        jhiAlert.message = errorMessage;
+        this.alertService.addAlert({
+            type: AlertType.DANGER,
+            message: errorMessage,
+            disableTranslation: true,
+        });
         this.isSaving = false;
     }
 }

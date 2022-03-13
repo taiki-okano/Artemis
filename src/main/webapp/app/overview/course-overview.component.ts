@@ -13,7 +13,7 @@ import { JhiWebsocketService } from 'app/core/websocket/websocket.service';
 import { QuizExercise } from 'app/entities/quiz/quiz-exercise.model';
 import dayjs from 'dayjs/esm';
 import { ArtemisServerDateService } from 'app/shared/server-date.service';
-import { AlertService } from 'app/core/util/alert.service';
+import { AlertService, AlertType } from 'app/core/util/alert.service';
 import { faCircleNotch, faSync } from '@fortawesome/free-solid-svg-icons';
 import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 
@@ -151,19 +151,22 @@ export class CourseOverviewComponent implements OnInit, OnDestroy, AfterViewInit
 
     loadCourse(refresh = false) {
         this.refreshingCourse = refresh;
-        this.courseService.findOneForDashboard(this.courseId).subscribe(
-            (res: HttpResponse<Course>) => {
+        this.courseService.findOneForDashboard(this.courseId).subscribe({
+            next: (res: HttpResponse<Course>) => {
                 this.courseCalculationService.updateCourse(res.body!);
                 this.course = this.courseCalculationService.getCourse(this.courseId);
                 this.adjustCourseDescription();
                 setTimeout(() => (this.refreshingCourse = false), 500); // ensure min animation duration
             },
-            (error: HttpErrorResponse) => {
+            error: (error: HttpErrorResponse) => {
                 const errorMessage = error.headers.get('X-artemisApp-message')!;
-                const jhiAlert = this.alertService.error(errorMessage);
-                jhiAlert.message = errorMessage;
+                this.alertService.addAlert({
+                    type: AlertType.DANGER,
+                    message: errorMessage,
+                    disableTranslation: true,
+                });
             },
-        );
+        });
     }
 
     ngOnDestroy() {
@@ -184,17 +187,14 @@ export class CourseOverviewComponent implements OnInit, OnDestroy, AfterViewInit
 
             // quizExercise channel => react to changes made to quizExercise (e.g. start date)
             this.jhiWebsocketService.subscribe(this.quizExercisesChannel);
-            this.jhiWebsocketService.receive(this.quizExercisesChannel).subscribe(
-                (quizExercise: QuizExercise) => {
-                    quizExercise = this.courseExerciseService.convertDateFromServer(quizExercise);
-                    // the quiz was set to visible or started, we should add it to the exercise list and display it at the top
-                    if (this.course && this.course.exercises) {
-                        this.course.exercises = this.course.exercises.filter((exercise) => exercise.id !== quizExercise.id);
-                        this.course.exercises.push(quizExercise);
-                    }
-                },
-                () => {},
-            );
+            this.jhiWebsocketService.receive(this.quizExercisesChannel).subscribe((quizExercise: QuizExercise) => {
+                quizExercise = this.courseExerciseService.convertDateFromServer(quizExercise);
+                // the quiz was set to visible or started, we should add it to the exercise list and display it at the top
+                if (this.course && this.course.exercises) {
+                    this.course.exercises = this.course.exercises.filter((exercise) => exercise.id !== quizExercise.id);
+                    this.course.exercises.push(quizExercise);
+                }
+            });
         }
     }
 
@@ -216,7 +216,7 @@ export class CourseOverviewComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     showShortDescription() {
-        this.courseDescription = this.course?.description?.substr(0, 50) + '...' || '';
+        this.courseDescription = this.course?.description?.slice(0, 50) + '...' || '';
         this.longTextShown = false;
     }
 

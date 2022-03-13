@@ -61,6 +61,27 @@ public class ArtemisConsumer {
     }
 
     /**
+     * Request password reset for a user
+     *
+     * @param message the message to consume
+     */
+    @JmsListener(destination = MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET)
+    public void prepareUserForPasswordReset(Message message) {
+        User user;
+        try {
+            user = message.getBody(User.class);
+        } catch (JMSException e) {
+            throw new InternalServerErrorException("There was a problem with the communication between server components. Please try again later!");
+        }
+        boolean updatedUser = userService.prepareUserForPasswordReset(user);
+        LOGGER.info("Send response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser);
+        jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_REQUEST_PASSWORD_RESET_RESP, updatedUser, msg -> {
+            msg.setJMSCorrelationID(message.getJMSCorrelationID());
+            return msg;
+        });
+    }
+
+    /**
      * Create a user.
      *
      * @param message the message to consume
@@ -94,8 +115,7 @@ public class ArtemisConsumer {
         } catch (JMSException e) {
             throw new InternalServerErrorException("There was a problem with the communication between server components. Please try again later!");
         }
-        User createdUser = userCreationService.createInternalUser(user.getLogin(), user.getPassword(), user.getGroups(),
-            user.getFirstName(), user.getLastName(), user.getEmail(), user.getRegistrationNumber(), user.getImageUrl(), user.getLangKey());
+        User createdUser = userCreationService.createUser(user.getLogin(), user.getPassword(), user.getGroups(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getRegistrationNumber(), user.getImageUrl(), user.getLangKey(), user.isInternal());
         LOGGER.info("Send response in queue {} with body {}", MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, createdUser);
         jmsTemplate.convertAndSend(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER_RESP, createdUser, msg -> {
             msg.setJMSCorrelationID(message.getJMSCorrelationID());

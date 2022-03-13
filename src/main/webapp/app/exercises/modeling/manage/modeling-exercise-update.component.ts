@@ -93,8 +93,8 @@ export class ModelingExerciseUpdateComponent implements OnInit {
         this.activatedRoute.data.subscribe(({ modelingExercise }) => {
             this.modelingExercise = modelingExercise;
 
-            if (this.modelingExercise.sampleSolutionModel != undefined) {
-                this.exampleSolution = JSON.parse(this.modelingExercise.sampleSolutionModel);
+            if (this.modelingExercise.exampleSolutionModel != undefined) {
+                this.exampleSolution = JSON.parse(this.modelingExercise.exampleSolutionModel);
             }
 
             this.backupExercise = cloneDeep(this.modelingExercise);
@@ -112,19 +112,19 @@ export class ModelingExerciseUpdateComponent implements OnInit {
                     if (!this.isExamMode) {
                         this.exerciseCategories = this.modelingExercise.categories || [];
                         if (!!this.modelingExercise.course) {
-                            this.courseService.findAllCategoriesOfCourse(this.modelingExercise.course!.id!).subscribe(
-                                (categoryRes: HttpResponse<string[]>) => {
+                            this.courseService.findAllCategoriesOfCourse(this.modelingExercise.course!.id!).subscribe({
+                                next: (categoryRes: HttpResponse<string[]>) => {
                                     this.existingCategories = this.exerciseService.convertExerciseCategoriesAsStringFromServer(categoryRes.body!);
                                 },
-                                (error: HttpErrorResponse) => onError(this.alertService, error),
-                            );
+                                error: (error: HttpErrorResponse) => onError(this.alertService, error),
+                            });
                         } else {
-                            this.courseService.findAllCategoriesOfCourse(this.modelingExercise.exerciseGroup!.exam!.course!.id!).subscribe(
-                                (categoryRes: HttpResponse<string[]>) => {
+                            this.courseService.findAllCategoriesOfCourse(this.modelingExercise.exerciseGroup!.exam!.course!.id!).subscribe({
+                                next: (categoryRes: HttpResponse<string[]>) => {
                                     this.existingCategories = this.exerciseService.convertExerciseCategoriesAsStringFromServer(categoryRes.body!);
                                 },
-                                (error: HttpErrorResponse) => onError(this.alertService, error),
-                            );
+                                error: (error: HttpErrorResponse) => onError(this.alertService, error),
+                            });
                         }
                     } else {
                         // Lock individual mode for exam exercises
@@ -175,18 +175,18 @@ export class ModelingExerciseUpdateComponent implements OnInit {
     }
 
     save() {
-        this.modelingExercise.sampleSolutionModel = JSON.stringify(this.modelingEditor?.getCurrentModel());
+        this.modelingExercise.exampleSolutionModel = JSON.stringify(this.modelingEditor?.getCurrentModel());
         this.isSaving = true;
 
         new SaveExerciseCommand(this.modalService, this.popupService, this.modelingExerciseService, this.backupExercise, this.editType)
             .save(this.modelingExercise, this.notificationText)
-            .subscribe(
-                (exercise: ModelingExercise) => this.onSaveSuccess(exercise.id!),
-                (error: HttpErrorResponse) => this.onSaveError(error),
-                () => {
+            .subscribe({
+                next: (exercise: ModelingExercise) => this.onSaveSuccess(exercise.id!),
+                error: (error: HttpErrorResponse) => this.onSaveError(error),
+                complete: () => {
                     this.isSaving = false;
                 },
-            );
+            });
     }
 
     /**

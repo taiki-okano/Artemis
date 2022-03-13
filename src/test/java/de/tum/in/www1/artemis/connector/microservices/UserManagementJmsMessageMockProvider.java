@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.time.Instant;
 import java.util.HashSet;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 
 import org.mockito.Mock;
@@ -65,6 +66,7 @@ public class UserManagementJmsMessageMockProvider {
             user.setResetKey(RandomUtil.generateResetKey());
             user.setResetDate(Instant.now());
             user.setActivated(true);
+            user.setInternal(true);
             user.setRegistrationNumber(managedUserVM.getVisibleRegistrationNumber());
             userRepository.save(user);
             doReturn(user).when(message).getBody(User.class);
@@ -102,6 +104,11 @@ public class UserManagementJmsMessageMockProvider {
             return null;
         }).when(jmsTemplate).convertAndSend(eq(MessageBrokerConstants.USER_MANAGEMENT_QUEUE_CREATE_INTERNAL_USER), any(), any());
 
+        doReturn(message).when(jmsTemplate).receiveSelected(anyString(), anyString());
+    }
+
+    public void mockPrepareUserForPasswordReset() throws JMSException {
+        doReturn(true).when(message).getBody(Boolean.class);
         doReturn(message).when(jmsTemplate).receiveSelected(anyString(), anyString());
     }
 }

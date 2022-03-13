@@ -40,7 +40,6 @@ import { ProgrammingAssessmentManualResultService } from 'app/exercises/programm
 import { ModelingAssessmentService } from 'app/exercises/modeling/assess/modeling-assessment.service';
 import { Result } from 'app/entities/result.model';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
-import { AlertComponent } from 'app/shared/alert/alert.component';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { ArtemisDatePipe } from 'app/shared/pipes/artemis-date.pipe';
 import { ResultComponent } from 'app/exercises/shared/result/result.component';
@@ -98,7 +97,6 @@ describe('ParticipationSubmissionComponent', () => {
                 MockPipe(ArtemisDatePipe),
                 MockPipe(ArtemisTimeAgoPipe),
                 MockDirective(DeleteButtonDirective),
-                MockComponent(AlertComponent),
                 MockComponent(ResultComponent),
                 MockComponent(FaIconComponent),
             ],
@@ -191,8 +189,8 @@ describe('ParticipationSubmissionComponent', () => {
     }));
 
     it('Template Submission is correctly loaded', fakeAsync(() => {
-        TestBed.get(ActivatedRoute).params = of({ participationId: 2, exerciseId: 42 });
-        TestBed.get(ActivatedRoute).queryParams = of({ isTmpOrSolutionProgrParticipation: 'true' });
+        TestBed.inject(ActivatedRoute).params = of({ participationId: 2, exerciseId: 42 });
+        TestBed.inject(ActivatedRoute).queryParams = of({ isTmpOrSolutionProgrParticipation: 'true' });
         const templateParticipation = new TemplateProgrammingExerciseParticipation();
         templateParticipation.id = 2;
         templateParticipation.submissions = [
@@ -228,8 +226,8 @@ describe('ParticipationSubmissionComponent', () => {
     }));
 
     it('Solution Submission is correctly loaded', fakeAsync(() => {
-        TestBed.get(ActivatedRoute).params = of({ participationId: 3, exerciseId: 42 });
-        TestBed.get(ActivatedRoute).queryParams = of({ isTmpOrSolutionProgrParticipation: 'true' });
+        TestBed.inject(ActivatedRoute).params = of({ participationId: 3, exerciseId: 42 });
+        TestBed.inject(ActivatedRoute).queryParams = of({ isTmpOrSolutionProgrParticipation: 'true' });
         const solutionParticipation = new SolutionProgrammingExerciseParticipation();
         solutionParticipation.id = 3;
         solutionParticipation.submissions = [
@@ -313,10 +311,10 @@ describe('ParticipationSubmissionComponent', () => {
     describe('should handle failed delete', () => {
         beforeEach(() => {
             const error = { message: '400 error', error: { message: 'error.hasComplaint' } } as HttpErrorResponse;
-            deleteFileUploadAssessmentStub.mockReturnValue(throwError(error));
-            deleteProgrammingAssessmentStub.mockReturnValue(throwError(error));
-            deleteModelingAssessmentStub.mockReturnValue(throwError(error));
-            deleteTextAssessmentStub.mockReturnValue(throwError(error));
+            deleteFileUploadAssessmentStub.mockReturnValue(throwError(() => error));
+            deleteProgrammingAssessmentStub.mockReturnValue(throwError(() => error));
+            deleteModelingAssessmentStub.mockReturnValue(throwError(() => error));
+            deleteTextAssessmentStub.mockReturnValue(throwError(() => error));
             findAllSubmissionsOfParticipationStub.mockReturnValue(of({ body: [submissionWithTwoResults2] }));
             jest.spyOn(participationService, 'find').mockReturnValue(of(new HttpResponse({ body: participation1 })));
         });
@@ -329,7 +327,7 @@ describe('ParticipationSubmissionComponent', () => {
 
         it('should not delete result of fileUploadSubmission because of server error', fakeAsync(() => {
             const error2 = { message: '403 error', error: { message: 'error.badAuthentication' } } as HttpErrorResponse;
-            deleteFileUploadAssessmentStub.mockReturnValue(throwError(error2));
+            deleteFileUploadAssessmentStub.mockReturnValue(throwError(() => error2));
             jest.spyOn(exerciseService, 'find').mockReturnValue(of(new HttpResponse({ body: fileUploadExercise })));
             deleteResult(submissionWithTwoResults, result2);
             flush();

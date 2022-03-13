@@ -29,8 +29,8 @@ export class ModelingExerciseDetailComponent implements OnInit, OnDestroy {
     private eventSubscriber: Subscription;
     problemStatement: SafeHtml;
     gradingInstructions: SafeHtml;
-    sampleSolution: SafeHtml;
-    sampleSolutionUML: UMLModel;
+    exampleSolution: SafeHtml;
+    exampleSolutionUML: UMLModel;
     numberOfClusters: number;
 
     readonly ExerciseType = ExerciseType;
@@ -72,9 +72,9 @@ export class ModelingExerciseDetailComponent implements OnInit, OnDestroy {
             this.course = this.isExamExercise ? this.modelingExercise.exerciseGroup?.exam?.course : this.modelingExercise.course;
             this.problemStatement = this.artemisMarkdown.safeHtmlForMarkdown(this.modelingExercise.problemStatement);
             this.gradingInstructions = this.artemisMarkdown.safeHtmlForMarkdown(this.modelingExercise.gradingInstructions);
-            this.sampleSolution = this.artemisMarkdown.safeHtmlForMarkdown(this.modelingExercise.sampleSolutionExplanation);
-            if (this.modelingExercise.sampleSolutionModel && this.modelingExercise.sampleSolutionModel !== '') {
-                this.sampleSolutionUML = JSON.parse(this.modelingExercise.sampleSolutionModel);
+            this.exampleSolution = this.artemisMarkdown.safeHtmlForMarkdown(this.modelingExercise.exampleSolutionExplanation);
+            if (this.modelingExercise.exampleSolutionModel && this.modelingExercise.exampleSolutionModel !== '') {
+                this.exampleSolutionUML = JSON.parse(this.modelingExercise.exampleSolutionModel);
             }
         });
         this.statisticsService.getExerciseStatistics(exerciseId).subscribe((statistics: ExerciseManagementStatisticsDto) => {
@@ -86,14 +86,13 @@ export class ModelingExerciseDetailComponent implements OnInit, OnDestroy {
     }
 
     downloadAsPDf() {
-        const model = this.modelingExercise.sampleSolutionModel;
+        const model = this.modelingExercise.exampleSolutionModel;
         if (model) {
-            this.modelingExerciseService.convertToPdf(model, `${this.modelingExercise.title}-example-solution`).subscribe(
-                () => {},
-                () => {
+            this.modelingExerciseService.convertToPdf(model, `${this.modelingExercise.title}-example-solution`).subscribe({
+                error: () => {
                     this.alertService.error('artemisApp.modelingExercise.apollonConversion.error');
                 },
-            );
+            });
         }
     }
 
@@ -110,40 +109,40 @@ export class ModelingExerciseDetailComponent implements OnInit, OnDestroy {
 
     buildModelClusters() {
         if (this.modelingExercise && this.modelingExercise.id) {
-            this.modelingExerciseService.buildClusters(this.modelingExercise.id).subscribe(
-                () => {
+            this.modelingExerciseService.buildClusters(this.modelingExercise.id).subscribe({
+                next: () => {
                     this.alertService.success('artemisApp.modelingExercise.buildClusters.success');
                 },
-                () => {
+                error: () => {
                     this.alertService.error('artemisApp.modelingExercise.buildClusters.error');
                 },
-            );
+            });
         }
     }
 
     deleteModelClusters() {
         if (this.modelingExercise && this.modelingExercise.id) {
-            this.modelingExerciseService.deleteClusters(this.modelingExercise.id).subscribe(
-                () => {
+            this.modelingExerciseService.deleteClusters(this.modelingExercise.id).subscribe({
+                next: () => {
                     this.alertService.success('artemisApp.modelingExercise.deleteClusters.success');
                 },
-                () => {
+                error: () => {
                     this.alertService.error('artemisApp.modelingExercise.deleteClusters.error');
                 },
-            );
+            });
         }
     }
 
     countModelClusters(exerciseId: number) {
         if (exerciseId) {
-            this.modelingExerciseService.getNumberOfClusters(exerciseId).subscribe(
-                (res) => {
+            this.modelingExerciseService.getNumberOfClusters(exerciseId).subscribe({
+                next: (res) => {
                     this.numberOfClusters = res?.body || 0;
                 },
-                () => {
+                error: () => {
                     this.alertService.error('artemisApp.modelingExercise.checkClusters.error');
                 },
-            );
+            });
         }
     }
 }

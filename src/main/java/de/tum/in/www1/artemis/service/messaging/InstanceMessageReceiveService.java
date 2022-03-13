@@ -43,11 +43,9 @@ public class InstanceMessageReceiveService {
 
     private final Optional<AtheneScheduleService> atheneScheduleService;
 
-    private final UserRepository userRepository;
-
     public InstanceMessageReceiveService(ProgrammingExerciseRepository programmingExerciseRepository, ProgrammingExerciseScheduleService programmingExerciseScheduleService,
             ModelingExerciseRepository modelingExerciseRepository, ModelingExerciseScheduleService modelingExerciseScheduleService, TextExerciseRepository textExerciseRepository,
-            ExerciseRepository exerciseRepository, Optional<AtheneScheduleService> atheneScheduleService, HazelcastInstance hazelcastInstance, UserRepository userRepository,
+            ExerciseRepository exerciseRepository, Optional<AtheneScheduleService> atheneScheduleService, HazelcastInstance hazelcastInstance,
             NotificationScheduleService notificationScheduleService) {
         this.programmingExerciseRepository = programmingExerciseRepository;
         this.programmingExerciseScheduleService = programmingExerciseScheduleService;
@@ -56,7 +54,6 @@ public class InstanceMessageReceiveService {
         this.modelingExerciseRepository = modelingExerciseRepository;
         this.modelingExerciseScheduleService = modelingExerciseScheduleService;
         this.exerciseRepository = exerciseRepository;
-        this.userRepository = userRepository;
         this.notificationScheduleService = notificationScheduleService;
 
         hazelcastInstance.<Long>getTopic("programming-exercise-schedule").addMessageListener(message -> {
@@ -99,9 +96,13 @@ public class InstanceMessageReceiveService {
             SecurityUtils.setAuthorizationObject();
             processLockAllRepositories((message.getMessageObject()));
         });
-        hazelcastInstance.<Long>getTopic("exercise-notification-schedule").addMessageListener(message -> {
+        hazelcastInstance.<Long>getTopic("exercise-released-notification-schedule").addMessageListener(message -> {
             SecurityUtils.setAuthorizationObject();
-            processScheduleNotification((message.getMessageObject()));
+            processScheduleExerciseReleasedNotification((message.getMessageObject()));
+        });
+        hazelcastInstance.<Long>getTopic("assessed-exercise-submission-notification-schedule").addMessageListener(message -> {
+            SecurityUtils.setAuthorizationObject();
+            processScheduleAssessedExerciseSubmittedNotification((message.getMessageObject()));
         });
     }
 
@@ -168,9 +169,15 @@ public class InstanceMessageReceiveService {
         programmingExerciseScheduleService.lockAllStudentRepositories(programmingExercise).run();
     }
 
-    public void processScheduleNotification(Long exerciseId) {
-        log.info("Received schedule update for exercise {} notification ", exerciseId);
+    public void processScheduleExerciseReleasedNotification(Long exerciseId) {
+        log.info("Received schedule update for exercise {} released notification ", exerciseId);
         Exercise exercise = exerciseRepository.findByIdElseThrow(exerciseId);
-        notificationScheduleService.updateScheduling(exercise);
+        notificationScheduleService.updateSchedulingForReleasedExercises(exercise);
+    }
+
+    public void processScheduleAssessedExerciseSubmittedNotification(Long exerciseId) {
+        log.info("Received schedule update for assessed exercise submitted {} notification ", exerciseId);
+        Exercise exercise = exerciseRepository.findByIdElseThrow(exerciseId);
+        notificationScheduleService.updateSchedulingForAssessedExercisesSubmissions(exercise);
     }
 }

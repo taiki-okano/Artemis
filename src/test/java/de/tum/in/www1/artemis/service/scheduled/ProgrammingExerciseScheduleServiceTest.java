@@ -1,7 +1,6 @@
 package de.tum.in.www1.artemis.service.scheduled;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.net.URISyntaxException;
@@ -335,7 +334,7 @@ class ProgrammingExerciseScheduleServiceTest extends AbstractSpringIntegrationBa
         VcsRepositoryUrl repositoryUrl = programmingExerciseWithTemplate.getVcsTemplateRepositoryUrl();
         doNothing().when(gitService).combineAllCommitsOfRepositoryIntoOne(repositoryUrl);
 
-        programmingExercise.releaseDate(ZonedDateTime.now().plusSeconds(Constants.SECONDS_BEFORE_RELEASE_DATE_FOR_COMBINING_TEMPLATE_COMMITS + 1));
+        programmingExercise.setReleaseDate(ZonedDateTime.now().plusSeconds(Constants.SECONDS_BEFORE_RELEASE_DATE_FOR_COMBINING_TEMPLATE_COMMITS + 1));
         programmingExerciseRepository.save(programmingExercise);
         instanceMessageReceiveService.processScheduleProgrammingExercise(programmingExercise.getId());
 

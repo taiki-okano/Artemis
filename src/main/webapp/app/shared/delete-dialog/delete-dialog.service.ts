@@ -16,7 +16,7 @@ export class DeleteDialogService {
      * @param deleteDialogData data that is used in dialog
      */
     openDeleteDialog(deleteDialogData: DeleteDialogData): void {
-        this.alertService.clear();
+        this.alertService.closeAll();
         this.modalRef = this.modalService.open(DeleteDialogComponent, { size: 'lg', backdrop: 'static' });
         this.modalRef.componentInstance.entityTitle = deleteDialogData.entityTitle;
         this.modalRef.componentInstance.deleteQuestion = deleteDialogData.deleteQuestion;
@@ -26,9 +26,7 @@ export class DeleteDialogService {
         this.modalRef.componentInstance.delete = deleteDialogData.delete;
         this.modalRef.componentInstance.dialogError = deleteDialogData.dialogError;
         this.modalRef.componentInstance.requireConfirmationOnlyForAdditionalChecks = deleteDialogData.requireConfirmationOnlyForAdditionalChecks;
-        from(this.modalRef.result).subscribe(
-            () => (this.modalRef = null),
-            () => {},
-        );
+
+        from(this.modalRef.result).subscribe(() => (this.modalRef = null));
     }
 }

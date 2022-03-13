@@ -9,8 +9,6 @@ import { SecuredImageComponent } from 'app/shared/image/secured-image.component'
 import dayjs from 'dayjs/esm';
 import { MockRouterLinkDirective } from '../../../helpers/mocks/directive/mock-router-link.directive';
 import { DeleteButtonDirective } from 'app/shared/delete-dialog/delete-button.directive';
-import { AlertComponent } from 'app/shared/alert/alert.component';
-import { AlertErrorComponent } from 'app/shared/alert/alert-error.component';
 import { ArtemisDatePipe } from 'app/shared/pipes/artemis-date.pipe';
 import { CourseExamArchiveButtonComponent } from 'app/shared/components/course-exam-archive-button/course-exam-archive-button.component';
 import { HasAnyAuthorityDirective } from 'app/shared/auth/has-any-authority.directive';
@@ -22,6 +20,7 @@ import { CourseManagementDetailViewDto } from 'app/course/manage/course-manageme
 import { UsersImportButtonComponent } from 'app/shared/import/users-import-button.component';
 import { EventManager } from 'app/core/util/event-manager.service';
 import { MockRouter } from '../../../helpers/mocks/mock-router';
+import { FullscreenComponent } from 'app/shared/fullscreen/fullscreen.component';
 
 describe('Course Management Detail Component', () => {
     let component: CourseDetailComponent;
@@ -65,13 +64,12 @@ describe('Course Management Detail Component', () => {
                 MockRouterLinkDirective,
                 MockPipe(ArtemisTranslatePipe),
                 MockDirective(DeleteButtonDirective),
-                MockComponent(AlertErrorComponent),
-                MockDirective(AlertComponent),
                 MockPipe(ArtemisDatePipe),
                 MockComponent(CourseExamArchiveButtonComponent),
                 MockDirective(HasAnyAuthorityDirective),
                 MockComponent(CourseDetailDoughnutChartComponent),
                 MockComponent(CourseDetailLineChartComponent),
+                MockComponent(FullscreenComponent),
             ],
             providers: [{ provide: ActivatedRoute, useValue: route }, { provide: Router, useClass: MockRouter }, MockProvider(CourseManagementService)],
         }).compileComponents();
@@ -102,7 +100,7 @@ describe('Course Management Detail Component', () => {
         component.ngOnInit();
         expect(component.courseDTO).toEqual(dtoMock);
         expect(component.course).toEqual(course);
-        expect(registerSpy).toHaveBeenCalled();
+        expect(registerSpy).toHaveBeenCalledTimes(2);
     });
 
     it('should destroy event subscriber onDestroy', () => {

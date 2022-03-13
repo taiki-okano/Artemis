@@ -157,6 +157,20 @@ public interface StudentParticipationRepository extends JpaRepository<StudentPar
             LEFT JOIN FETCH p.results r
             LEFT JOIN FETCH r.submission s
             WHERE p.exercise.id = :#{#exerciseId}
+                AND (s.type <> 'ILLEGAL' OR s.type IS NULL)
+                AND r.id = (
+                    SELECT max(id)
+                    FROM p.results
+                    WHERE completionDate IS NOT NULL
+                    )
+            """)
+    List<StudentParticipation> findByExerciseIdWithEagerLegalSubmissionsAndLatestResultWithCompletionDate(@Param("exerciseId") Long exerciseId);
+
+    @Query("""
+            SELECT DISTINCT p FROM StudentParticipation p
+            LEFT JOIN FETCH p.results r
+            LEFT JOIN FETCH r.submission s
+            WHERE p.exercise.id = :#{#exerciseId}
                 AND p.testRun = false
                 AND (r.id = (
                     SELECT max(id) FROM p.results)
@@ -439,6 +453,26 @@ public interface StudentParticipationRepository extends JpaRepository<StudentPar
     /**
      * Find the participation with the given id. Additionally, load all the submissions and results of the participation from the database.
      * Further, load the exercise and its course. Returns an empty Optional if the participation could not be found.
+     *
+     * @param participationId the id of the participation
+     * @return the participation with eager submissions, results, exercise and course or an empty Optional
+     */
+    @Query("""
+            select p from StudentParticipation p
+            left join fetch p.results r
+            left join fetch p.submissions s
+            left join fetch s.results sr
+            left join fetch sr.feedbacks
+            left join p.team.students
+            where p.id = :#{#participationId}
+            """)
+    Optional<StudentParticipation> findWithEagerSubmissionsResultsFeedbacksById(@Param("participationId") Long participationId);
+
+    /**
+     * Find the participation with the given id. Additionally, load all the submissions and results of the participation from the database.
+     * Further, load the exercise and its course. Returns an empty Optional if the participation could not be found.
+     *
+     * Note: Does NOT load illegal submissions!
      *
      * @param participationId the id of the participation
      * @return the participation with eager submissions, results, exercise and course or an empty Optional

@@ -22,6 +22,7 @@ import de.tum.in.www1.artemis.web.rest.errors.ConflictException;
 import de.tum.in.www1.artemis.web.rest.errors.EntityNotFoundException;
 import de.tum.in.www1.artemis.web.rest.util.HeaderUtil;
 
+@Deprecated // Moved to Lecture microservice. To be removed
 @RestController
 @RequestMapping("/api")
 public class TextUnitResource {
@@ -62,7 +63,7 @@ public class TextUnitResource {
         }
         TextUnit textUnit = optionalTextUnit.get();
         if (textUnit.getLecture() == null || textUnit.getLecture().getCourse() == null || !textUnit.getLecture().getId().equals(lectureId)) {
-            throw new ConflictException();
+            throw new ConflictException("Input data not valid", ENTITY_NAME, "inputInvalid");
         }
         authorizationCheckService.checkHasAtLeastRoleForLectureElseThrow(Role.EDITOR, textUnit.getLecture(), null);
         return ResponseEntity.ok().body(textUnit);
@@ -83,7 +84,7 @@ public class TextUnitResource {
             throw new BadRequestAlertException("A text unit must have an ID to be updated", ENTITY_NAME, "idnull");
         }
         if (textUnit.getLecture() == null || textUnit.getLecture().getCourse() == null || !textUnit.getLecture().getId().equals(lectureId)) {
-            throw new ConflictException();
+            throw new ConflictException("Input data not valid", ENTITY_NAME, "inputInvalid");
         }
         authorizationCheckService.checkHasAtLeastRoleForLectureElseThrow(Role.EDITOR, textUnit.getLecture(), null);
 
@@ -112,7 +113,7 @@ public class TextUnitResource {
         }
         Lecture lecture = lectureOptional.get();
         if (lecture.getCourse() == null || (textUnit.getLecture() != null && !lecture.getId().equals(textUnit.getLecture().getId()))) {
-            throw new ConflictException();
+            throw new ConflictException("Input data not valid", ENTITY_NAME, "inputInvalid");
         }
         authorizationCheckService.checkHasAtLeastRoleForLectureElseThrow(Role.EDITOR, lecture, null);
 

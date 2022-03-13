@@ -20,7 +20,6 @@ import { CourseManagementService } from 'app/course/manage/course-management.ser
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { onError } from 'app/shared/util/global.utils';
 import { ExerciseService } from 'app/exercises/shared/exercise/exercise.service';
-import { ExerciseHintService } from 'app/exercises/shared/exercise-hint/manage/exercise-hint.service';
 import { ApollonDiagramService } from 'app/exercises/quiz/manage/apollon-diagrams/apollon-diagram.service';
 import { LectureService } from 'app/lecture/lecture.service';
 import { ExamManagementService } from 'app/exam/manage/exam-management.service';
@@ -51,6 +50,7 @@ import {
     faUserPlus,
     faWrench,
 } from '@fortawesome/free-solid-svg-icons';
+import { ExerciseHintService } from 'app/exercises/shared/exercise-hint/manage/exercise-hint.service';
 
 @Component({
     selector: 'jhi-navbar',
@@ -117,7 +117,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         private alertService: AlertService,
         private courseManagementService: CourseManagementService,
         private exerciseService: ExerciseService,
-        private hintService: ExerciseHintService,
+        private exerciseHintService: ExerciseHintService,
         private apollonDiagramService: ApollonDiagramService,
         private lectureService: LectureService,
         private examService: ExamManagementService,
@@ -200,7 +200,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         test_run_exercise_assessment_dashboard: 'artemisApp.exerciseAssessmentDashboard.home.title',
         lti_configuration: 'artemisApp.programmingExercise.home.title',
         teams: 'artemisApp.team.home.title',
-        hints: 'artemisApp.exerciseHint.home.title',
+        exercise_hints: 'artemisApp.exerciseHint.home.title',
         ratings: 'artemisApp.ratingList.pageTitle',
         goal_management: 'artemisApp.learningGoal.manageLearningGoals.title',
         assessment_locks: 'artemisApp.assessment.locks.home.title',
@@ -225,7 +225,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         ide: 'artemisApp.editor.home.title',
         lectures: 'artemisApp.lecture.home.title',
         attachments: 'artemisApp.lecture.attachments.title',
-        unit_management: 'artemisApp.lectureUnit.home.title',
+        unit_management: 'lectureApp.lectureUnit.home.title',
         exams: 'artemisApp.examManagement.title',
         exercise_groups: 'artemisApp.examManagement.exerciseGroups',
         students: 'artemisApp.course.students',
@@ -317,8 +317,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
             case 'assessment-dashboard':
                 this.addResolvedTitleAsCrumb(this.exerciseService.getTitle(Number(segment)), currentPath, segment);
                 break;
-            case 'hints':
-                this.addResolvedTitleAsCrumb(this.hintService.getTitle(Number(segment)), currentPath, segment);
+            case 'exercise-hints':
+                // obtain the exerciseId of the current path
+                // current path of form '/course-management/:courseId/exercises/:exerciseId/...
+                const exerciseId = currentPath.split('/')[4];
+                this.addResolvedTitleAsCrumb(this.exerciseHintService.getTitle(Number(exerciseId), Number(segment)), currentPath, segment);
                 break;
             case 'apollon-diagrams':
                 this.addResolvedTitleAsCrumb(this.apollonDiagramService.getTitle(Number(segment)), currentPath, segment);
@@ -462,14 +465,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
         const index = this.breadcrumbs.length;
         this.addBreadcrumb(uri, segment, false);
 
-        observable.subscribe(
-            (response: HttpResponse<string>) => {
+        observable.subscribe({
+            next: (response: HttpResponse<string>) => {
                 // Fall back to the segment in case there is no body returned
                 const title = response.body ?? segment;
                 this.setBreadcrumb(uri, title, false, index);
             },
-            (error: HttpErrorResponse) => onError(this.alertService, error),
-        );
+            error: (error: HttpErrorResponse) => onError(this.alertService, error),
+        });
     }
 
     /**

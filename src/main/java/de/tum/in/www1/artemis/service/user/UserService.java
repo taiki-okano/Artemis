@@ -76,6 +76,130 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // /**
+    // <<<<<<< HEAD
+    // =======
+    // * Set password reset data for a user if eligible
+    // *
+    // * @param user user requesting reset
+    // * @return true if the user is eligible
+    // */
+    // public boolean prepareUserForPasswordReset(User user) {
+    // if (user.getActivated() && user.isInternal()) {
+    // user.setResetKey(RandomUtil.generateResetKey());
+    // user.setResetDate(Instant.now());
+    // saveUser(user);
+    // return true;
+    // }
+    // return false;
+    // }
+
+    // /**
+    // * Register user and create it only in the internal Artemis database. This is a pure service method without any logic with respect to external systems.
+    // *
+    // * @param userDTO user data transfer object
+    // * @param password string
+    // * @return newly registered user or throw registration exception
+    // */
+    // public User registerUser(UserDTO userDTO, String password) {
+    // // Prepare the new user object.
+    // final var newUser = new User();
+    // String encryptedPassword = passwordService.encodePassword(password);
+    // newUser.setLogin(userDTO.getLogin().toLowerCase());
+    // // new user gets initially a generated password
+    // newUser.setPassword(encryptedPassword);
+    // newUser.setFirstName(userDTO.getFirstName());
+    // newUser.setLastName(userDTO.getLastName());
+    // newUser.setEmail(userDTO.getEmail().toLowerCase());
+    // newUser.setImageUrl(userDTO.getImageUrl());
+    // newUser.setLangKey(userDTO.getLangKey());
+    // // new user is not active
+    // newUser.setActivated(false);
+    // // new user gets registration key
+    // newUser.setActivationKey(RandomUtil.generateActivationKey());
+    // Set<Authority> authorities = new HashSet<>();
+    // authorityRepository.findById(STUDENT.getAuthority()).ifPresent(authorities::add);
+    // newUser.setAuthorities(authorities);
+    //
+    // // Find user that has the same login
+    // Optional<User> optionalExistingUser = userRepository.findOneWithGroupsByLogin(userDTO.getLogin().toLowerCase());
+    // if (optionalExistingUser.isPresent()) {
+    // User existingUser = optionalExistingUser.get();
+    // return handleRegisterUserWithSameLoginAsExistingUser(newUser, existingUser);
+    // }
+    //
+    // // Find user that has the same email
+    // optionalExistingUser = userRepository.findOneWithGroupsByEmailIgnoreCase(userDTO.getEmail());
+    // if (optionalExistingUser.isPresent()) {
+    // User existingUser = optionalExistingUser.get();
+    //
+    // // An account with the same login is already activated.
+    // if (existingUser.getActivated()) {
+    // throw new EmailAlreadyUsedException();
+    // }
+    //
+    // // The email is different which means that the user wants to re-register the same
+    // // account with a different email. Block this.
+    // throw new AccountRegistrationBlockedException(newUser.getEmail());
+    // }
+    //
+    // // we need to save first so that the user can be found in the database in the subsequent method
+    // User savedNonActivatedUser = saveUser(newUser);
+    //
+    // // Create an account on the VCS. If it fails, abort registration.
+    // optionalVcsUserManagementService.ifPresent(vcsUserManagementService -> {
+    // try {
+    // vcsUserManagementService.createVcsUser(savedNonActivatedUser);
+    // vcsUserManagementService.deactivateUser(savedNonActivatedUser.getLogin());
+    // }
+    // catch (VersionControlException e) {
+    // log.error("An error occurred while registering GitLab user " + savedNonActivatedUser.getLogin() + ":", e);
+    // deleteUser(savedNonActivatedUser);
+    // throw e;
+    // }
+    // });
+    //
+    // // Automatically remove the user if it wasn't activated after a certain amount of time.
+    // instanceMessageSendService.sendRemoveNonActivatedUserSchedule(savedNonActivatedUser.getId());
+    //
+    // log.debug("Created Information for User: {}", newUser);
+    // return newUser;
+    // }
+
+    // /**
+    // * Handles the case where a user registers a new account but a user with the same login already
+    // * exists in Artemis.
+    // *
+    // * @param newUser the new user
+    // * @param existingUser the existing user
+    // * @return the existing non-activated user in Artemis.
+    // */
+    // private User handleRegisterUserWithSameLoginAsExistingUser(User newUser, User existingUser) {
+    // // An account with the same login is already activated.
+    // if (existingUser.getActivated()) {
+    // throw new UsernameAlreadyUsedException();
+    // }
+    //
+    // // The user has the same login and email, but the account is not activated.
+    // // Return the existing non-activated user so that Artemis can re-send the
+    // // activation link.
+    // if (existingUser.getEmail().equals(newUser.getEmail())) {
+    // // Update the existing user and VCS
+    // newUser.setId(existingUser.getId());
+    // User updatedExistingUser = userRepository.save(newUser);
+    // optionalVcsUserManagementService
+    // .ifPresent(vcsUserManagementService -> vcsUserManagementService.updateVcsUser(existingUser.getLogin(), updatedExistingUser, Set.of(), Set.of(), true));
+    //
+    // // Post-pone the cleaning up of the account
+    // instanceMessageSendService.sendRemoveNonActivatedUserSchedule(updatedExistingUser.getId());
+    // return updatedExistingUser;
+    // }
+    //
+    // // The email is different which means that the user wants to re-register the same
+    // // account with a different email. Block this.
+    // throw new AccountRegistrationBlockedException(existingUser.getEmail());
+    // }
+
     /**
      * Searches the (optional) LDAP service for a user with the give registration number (= Matrikelnummer) and returns a new Artemis user-
      * Also creates the user in the external user management (e.g. JIRA), in case this is activated
@@ -105,8 +229,13 @@ public class UserService {
                 }
 
                 // Use empty password, so that we don't store the credentials of Jira users in the Artemis DB
+                // <<<<<<< HEAD
+                // User user = userServiceProducer.createInternalUser(ldapUser.getUsername(), "", null, ldapUser.getFirstName(), ldapUser.getLastName(), ldapUser.getEmail(),
+                // registrationNumber, null, "en");
+                // =======
                 User user = userServiceProducer.createInternalUser(ldapUser.getUsername(), "", null, ldapUser.getFirstName(), ldapUser.getLastName(), ldapUser.getEmail(),
-                        registrationNumber, null, "en");
+                        registrationNumber, null, "en", false);
+                // >>>>>>> develop-microservices
                 if (useExternalUserManagement) {
                     artemisAuthenticationProvider.createUserInExternalUserManagement(user);
                 }

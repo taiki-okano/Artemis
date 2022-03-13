@@ -290,6 +290,17 @@ public class UserJenkinsGitlabIntegrationTest extends AbstractSpringIntegrationJ
     }
 
     @Test
+    @WithMockUser(username = "student1", roles = "USER")
+    public void updateUserNotificationVisibility_showAll_asStudent_isSuccessful() throws Exception {
+        userTestService.updateUserNotificationVisibilityShowAllAsStudentIsSuccessful();
+    }
+    @Test
+    @WithMockUser(username = "student1", roles = "USER")
+    public void updateUserNotificationVisibility_hideUntil_asStudent_isSuccessful() throws Exception {
+        userTestService.updateUserNotificationVisibilityHideUntilAsStudentIsSuccessful();
+    }
+
+    @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void createUserWithGroups() throws Exception {
         userTestService.createUserWithGroups();
@@ -316,7 +327,7 @@ public class UserJenkinsGitlabIntegrationTest extends AbstractSpringIntegrationJ
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void createUserWithGroupsAlreadyFailsInGitlab() throws Exception {
         Course course = database.addEmptyCourse();
-        ProgrammingExercise programmingExercise = database.addProgrammingExerciseToCourse(course, false);
+        ProgrammingExercise programmingExericse = database.addProgrammingExerciseToCourse(course, false);
 
         User newUser = userTestService.student;
         newUser.setId(null);
@@ -324,7 +335,7 @@ public class UserJenkinsGitlabIntegrationTest extends AbstractSpringIntegrationJ
         newUser.setEmail("foobar@tum.com");
         newUser.setGroups(Set.of("tutor", "instructor2"));
 
-        gitlabRequestMockProvider.mockAddUserToGroupsFails(newUser, programmingExercise.getProjectKey());
+        gitlabRequestMockProvider.mockAddUserToGroupsFails(newUser, programmingExericse.getProjectKey());
         request.post("/api/users", new ManagedUserVM(newUser), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -399,5 +410,26 @@ public class UserJenkinsGitlabIntegrationTest extends AbstractSpringIntegrationJ
         assertThat(userInDB.get().getLogin()).isEqualTo(user.getLogin());
 
         verify(gitlabRequestMockProvider.getMockedUserApi()).blockUser(anyInt());
+    }
+
+    @Test
+    @WithMockUser(username = "student1", roles = "USER")
+    public void initializeUser() throws Exception {
+        userTestService.initializeUser(true);
+    }
+    @Test
+    @WithMockUser(username = "student1", roles = "USER")
+    public void initializeUserWithoutFlag() throws Exception {
+        userTestService.initializeUserWithoutFlag();
+    }
+    @Test
+    @WithMockUser(username = "student1", roles = "USER")
+    public void initializeUserNonLTI() throws Exception {
+        userTestService.initializeUserNonLTI();
+    }
+    @Test
+    @WithMockUser(username = "student1", roles = "USER")
+    public void initializeUserExternal() throws Exception {
+        userTestService.initializeUserExternal();
     }
 }

@@ -3,10 +3,9 @@ import { LectureUnitManagementComponent } from 'app/lecture/lecture-unit/lecture
 import { AttachmentUnit } from 'app/entities/lecture-unit/attachmentUnit.model';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
 import { ExerciseUnit } from 'app/entities/lecture-unit/exerciseUnit.model';
-import { MockPipe } from 'ng-mocks';
+import { MockComponent, MockDirective, MockPipe, MockProvider } from 'ng-mocks';
 import { Component, Input } from '@angular/core';
 import { ExerciseUnitComponent } from 'app/overview/course-lectures/exercise-unit/exercise-unit.component';
-import { MockComponent, MockDirective, MockProvider } from 'ng-mocks';
 import { AttachmentUnitComponent } from 'app/overview/course-lectures/attachment-unit/attachment-unit.component';
 import { VideoUnitComponent } from 'app/overview/course-lectures/video-unit/video-unit.component';
 import { TextUnitComponent } from 'app/overview/course-lectures/text-unit/text-unit.component';
@@ -20,7 +19,6 @@ import { TextUnit } from 'app/entities/lecture-unit/textUnit.model';
 import { VideoUnit } from 'app/entities/lecture-unit/videoUnit.model';
 import { Lecture } from 'app/entities/lecture.model';
 import { HttpResponse } from '@angular/common/http';
-import { AlertComponent } from 'app/shared/alert/alert.component';
 import { DeleteButtonDirective } from 'app/shared/delete-dialog/delete-button.directive';
 import { HasAnyAuthorityDirective } from 'app/shared/auth/has-any-authority.directive';
 import { of } from 'rxjs';
@@ -70,7 +68,6 @@ describe('LectureUnitManagementComponent', () => {
                 MockComponent(VideoUnitComponent),
                 MockComponent(TextUnitComponent),
                 MockComponent(FaIconComponent),
-                MockComponent(AlertComponent),
                 MockDirective(DeleteButtonDirective),
                 MockDirective(HasAnyAuthorityDirective),
                 MockDirective(RouterOutlet),
@@ -179,17 +176,17 @@ describe('LectureUnitManagementComponent', () => {
     });
 
     it('should give the correct delete question translation key', () => {
-        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new AttachmentUnit())).toEqual('artemisApp.attachmentUnit.delete.question');
-        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new ExerciseUnit())).toEqual('artemisApp.exerciseUnit.delete.question');
-        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new TextUnit())).toEqual('artemisApp.textUnit.delete.question');
-        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new VideoUnit())).toEqual('artemisApp.videoUnit.delete.question');
+        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new AttachmentUnit())).toEqual('lectureApp.attachmentUnit.delete.question');
+        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new ExerciseUnit())).toEqual('lectureApp.exerciseUnit.delete.question');
+        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new TextUnit())).toEqual('lectureApp.textUnit.delete.question');
+        expect(lectureUnitManagementComponent.getDeleteQuestionKey(new VideoUnit())).toEqual('lectureApp.videoUnit.delete.question');
     });
 
     it('should give the correct confirmation text translation key', () => {
-        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new AttachmentUnit())).toEqual('artemisApp.attachmentUnit.delete.typeNameToConfirm');
-        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new ExerciseUnit())).toEqual('artemisApp.exerciseUnit.delete.typeNameToConfirm');
-        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new VideoUnit())).toEqual('artemisApp.videoUnit.delete.typeNameToConfirm');
-        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new TextUnit())).toEqual('artemisApp.textUnit.delete.typeNameToConfirm');
+        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new AttachmentUnit())).toEqual('lectureApp.attachmentUnit.delete.typeNameToConfirm');
+        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new ExerciseUnit())).toEqual('lectureApp.exerciseUnit.delete.typeNameToConfirm');
+        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new VideoUnit())).toEqual('lectureApp.videoUnit.delete.typeNameToConfirm');
+        expect(lectureUnitManagementComponent.getDeleteConfirmationTextKey(new TextUnit())).toEqual('lectureApp.textUnit.delete.typeNameToConfirm');
     });
 
     it('should give the correct action type', () => {

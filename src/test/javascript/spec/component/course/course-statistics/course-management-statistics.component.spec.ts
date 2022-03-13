@@ -3,7 +3,6 @@ import { ArtemisTestModule } from '../../../test.module';
 import { MockSyncStorage } from '../../../helpers/mocks/service/mock-sync-storage.service';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { MockComponent, MockDirective, MockPipe } from 'ng-mocks';
-import { AlertComponent } from 'app/shared/alert/alert.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MockHasAnyAuthorityDirective } from '../../../helpers/mocks/directive/mock-has-any-authority.directive';
 import { ArtemisTranslatePipe } from 'app/shared/pipes/artemis-translate.pipe';
@@ -14,6 +13,7 @@ import { CourseManagementStatisticsComponent } from 'app/course/manage/course-ma
 import { StatisticsService } from 'app/shared/statistics-graph/statistics.service';
 import { of } from 'rxjs';
 import { StatisticsAverageScoreGraphComponent } from 'app/shared/statistics-graph/statistics-average-score-graph.component';
+import { ExerciseType } from 'app/entities/exercise.model';
 
 describe('CourseManagementStatisticsComponent', () => {
     let fixture: ComponentFixture<CourseManagementStatisticsComponent>;
@@ -23,8 +23,8 @@ describe('CourseManagementStatisticsComponent', () => {
     const returnValue = {
         averageScoreOfCourse: 75,
         averageScoresOfExercises: [
-            { exerciseId: 1, exerciseName: 'PatternsExercise', averageScore: 50 },
-            { exerciseId: 2, exerciseName: 'MorePatterns', averageScore: 50 },
+            { exerciseId: 1, exerciseName: 'PatternsExercise', averageScore: 50, exerciseType: ExerciseType.PROGRAMMING },
+            { exerciseId: 2, exerciseName: 'MorePatterns', averageScore: 50, exerciseType: ExerciseType.MODELING },
         ],
     };
 
@@ -33,7 +33,6 @@ describe('CourseManagementStatisticsComponent', () => {
             imports: [ArtemisTestModule, RouterTestingModule.withRoutes([])],
             declarations: [
                 CourseManagementStatisticsComponent,
-                MockComponent(AlertComponent),
                 MockComponent(StatisticsGraphComponent),
                 MockComponent(StatisticsAverageScoreGraphComponent),
                 MockDirective(MockHasAnyAuthorityDirective),
@@ -54,13 +53,13 @@ describe('CourseManagementStatisticsComponent', () => {
     });
 
     afterEach(() => {
-        jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     it('should initialize', () => {
-        jest.spyOn(service, 'getCourseStatistics').mockReturnValue(of(returnValue));
+        const statisticsService = jest.spyOn(service, 'getCourseStatistics').mockReturnValue(of(returnValue));
         fixture.detectChanges();
-        expect(component).not.toBeNull();
+        expect(statisticsService).toHaveBeenCalledTimes(1);
     });
 
     it('should trigger when tab changed', fakeAsync(() => {
@@ -73,7 +72,6 @@ describe('CourseManagementStatisticsComponent', () => {
 
         tick();
         expect(tabSpy).toHaveBeenCalledTimes(1);
-        expect(component.currentSpan).toEqual(SpanType.MONTH);
-        tabSpy.mockRestore();
+        expect(component.currentSpan).toBe(SpanType.MONTH);
     }));
 });

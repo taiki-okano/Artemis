@@ -1,4 +1,4 @@
-import { getTestBed, TestBed, fakeAsync } from '@angular/core/testing';
+import { TestBed, fakeAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TextAssessmentEventType } from 'app/entities/text-assesment-event.model';
 import { TextAssessmentAnalytics } from 'app/exercises/text/assess/analytics/text-assesment-analytics.service';
@@ -9,13 +9,24 @@ import { MockTranslateService } from '../helpers/mocks/service/mock-translate.se
 import { MockSyncStorage } from '../helpers/mocks/service/mock-sync-storage.service';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { MockRouter } from '../helpers/mocks/mock-router';
-import { Router } from '@angular/router';
+import { Params, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
+import { TextAssessmentService } from 'app/exercises/text/assess/text-assessment.service';
+import { throwError } from 'rxjs';
 
 describe('TextAssessmentAnalytics Service', () => {
-    let injector: TestBed;
     let service: TextAssessmentAnalytics;
     let httpMock: HttpTestingController;
+
+    const route = (): ActivatedRoute =>
+        ({
+            params: {
+                subscribe: (fn: (value: Params) => void) =>
+                    fn({
+                        courseId: 1,
+                    }),
+            },
+        } as any as ActivatedRoute);
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -25,11 +36,14 @@ describe('TextAssessmentAnalytics Service', () => {
                 { provide: SessionStorageService, useClass: MockSyncStorage },
                 { provide: TranslateService, useClass: MockTranslateService },
                 { provide: LocalStorageService, useClass: MockSyncStorage },
+                {
+                    provide: ActivatedRoute,
+                    useValue: route(),
+                },
             ],
         });
-        injector = getTestBed();
-        service = injector.get(TextAssessmentAnalytics);
-        httpMock = injector.get(HttpTestingController);
+        service = TestBed.inject(TextAssessmentAnalytics);
+        httpMock = TestBed.inject(HttpTestingController);
         httpMock.expectOne({ url: `${SERVER_API_URL}management/info`, method: 'GET' });
     });
 
@@ -46,11 +60,27 @@ describe('TextAssessmentAnalytics Service', () => {
     }));
 
     it('should subscribe to route parameters if artemis analytics is enabled', fakeAsync(() => {
-        const subscribeToRouteParameters = jest.spyOn<any, any>(service, 'subscribeToRouteParameters').mockImplementation(() => {});
+        const subscribeToRouteParameters = jest.spyOn<any, any>(service, 'subscribeToRouteParameters');
         service.analyticsEnabled = true;
-        service.setComponentRoute(new ActivatedRoute());
+        service.setComponentRoute(route());
         expect(subscribeToRouteParameters).toHaveBeenCalledTimes(1);
+        expect(service['courseId']).toBe(1);
     }));
+
+    it('should display error when submitting event to the server', () => {
+        const error = new Error();
+        error.message = 'error occurred';
+        service.analyticsEnabled = true;
+        const textAssessmentService = TestBed.inject(TextAssessmentService);
+        const errorStub = jest.spyOn(textAssessmentService, 'addTextAssessmentEvent').mockReturnValue(throwError(() => error));
+        const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation();
+
+        service.sendAssessmentEvent(TextAssessmentEventType.VIEW_AUTOMATIC_SUGGESTION_ORIGIN, FeedbackType.AUTOMATIC, TextBlockType.AUTOMATIC);
+
+        expect(errorStub).toHaveBeenCalledTimes(1);
+        expect(consoleErrorMock).toHaveBeenCalledTimes(1);
+        expect(consoleErrorMock).toHaveBeenCalledWith('Error sending statistics: error occurred');
+    });
 
     it('should not subscribe to route parameters if artemis analytics is disabled', fakeAsync(() => {
         const subscribeToRouteParameters = jest.spyOn<any, any>(service, 'subscribeToRouteParameters');

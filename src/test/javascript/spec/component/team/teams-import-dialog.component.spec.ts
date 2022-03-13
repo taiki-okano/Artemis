@@ -11,8 +11,6 @@ import { TeamStudentsListComponent } from 'app/exercises/shared/team/team-partic
 import { TeamService } from 'app/exercises/shared/team/team.service';
 import { TeamsImportDialogComponent } from 'app/exercises/shared/team/teams-import-dialog/teams-import-dialog.component';
 import { TeamsImportFromFileFormComponent } from 'app/exercises/shared/team/teams-import-dialog/teams-import-from-file-form.component';
-import { AlertErrorComponent } from 'app/shared/alert/alert-error.component';
-import { AlertComponent } from 'app/shared/alert/alert.component';
 import { HelpIconComponent } from 'app/shared/components/help-icon.component';
 import { DeleteButtonDirective } from 'app/shared/delete-dialog/delete-button.directive';
 import { flatMap } from 'lodash-es';
@@ -65,8 +63,6 @@ describe('TeamsImportDialogComponent', () => {
                     MockDirective(DeleteButtonDirective),
                     MockDirective(TranslateDirective),
                     TranslatePipeMock,
-                    MockComponent(AlertComponent),
-                    MockComponent(AlertErrorComponent),
                     MockComponent(TeamExerciseSearchComponent),
                     MockComponent(TeamStudentsListComponent),
                     MockComponent(HelpIconComponent),
@@ -124,7 +120,7 @@ describe('TeamsImportDialogComponent', () => {
         });
 
         it('should not load teams of given exercise if find failed', () => {
-            teamServiceStub.mockReturnValue(throwError({ status: 404 }));
+            teamServiceStub.mockReturnValue(throwError(() => ({ status: 404 })));
             const sourceExercise = mockSourceExercise;
             comp.sourceTeams = [];
             comp.loadSourceTeams(sourceExercise);
@@ -570,7 +566,7 @@ describe('TeamsImportDialogComponent', () => {
 
         it('should call importTeamsFromSourceExercise if show import from exercise and call save error on Error', () => {
             const error = { status: 404 };
-            importFromSourceExerciseStub.mockReturnValue(throwError(error));
+            importFromSourceExerciseStub.mockReturnValue(throwError(() => error));
             comp.importTeams();
             expect(importFromSourceExerciseStub).toHaveBeenCalledWith(comp.exercise, comp.sourceExercise, comp.importStrategy);
             expect(importTeamsStub).not.toHaveBeenCalled();
@@ -592,7 +588,7 @@ describe('TeamsImportDialogComponent', () => {
         it('should call importTeamsFromFile if not show import from exercise and call save error on Error', () => {
             const error = { status: 404 };
             comp.showImportFromExercise = false;
-            importTeamsStub.mockReturnValue(throwError(error));
+            importTeamsStub.mockReturnValue(throwError(() => error));
             comp.importTeams();
             expect(importFromSourceExerciseStub).not.toHaveBeenCalled();
             expect(importTeamsStub).toHaveBeenCalledWith(comp.exercise, comp.sourceTeams, comp.importStrategy);

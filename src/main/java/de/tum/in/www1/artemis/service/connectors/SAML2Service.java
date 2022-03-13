@@ -1,6 +1,7 @@
 package de.tum.in.www1.artemis.service.connectors;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,8 @@ public class SAML2Service {
 
     private final MailService mailService;
 
+    private final Map<String, Pattern> extractionPatterns;
+
     /**
      * Constructs a new instance.
      *
@@ -67,6 +70,12 @@ public class SAML2Service {
         this.properties = properties;
         this.userServiceProducer = userServiceProducer;
         this.mailService = mailService;
+        this.extractionPatterns = generateExtractionPatterns(properties);
+    }
+
+    private Map<String, Pattern> generateExtractionPatterns(final SAML2Properties properties) {
+        return properties.getValueExtractionPatterns().stream()
+                .collect(Collectors.toMap(SAML2Properties.ExtractionPattern::getKey, pattern -> Pattern.compile(pattern.getValuePattern())));
     }
 
     /**
@@ -91,9 +100,8 @@ public class SAML2Service {
 
             if (saml2EnablePassword.isPresent() && Boolean.TRUE.equals(saml2EnablePassword.get())) {
                 log.debug("Sending SAML2 creation mail");
-                User mailUser = userServiceProducer.requestPasswordReset(user.get().getEmail());
-                if (mailUser != null) {
-                    mailService.sendSAML2SetPasswordMail(mailUser);
+                if (userServiceProducer.prepareUserForPasswordReset(user.get())) {
+                    mailService.sendSAML2SetPasswordMail(user.get());
                 }
                 else {
                     log.error("User {} was created but could not be found in the database!", user.get());
@@ -134,13 +142,39 @@ public class SAML2Service {
         return authorities.stream().map(Authority::getName).map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
     }
 
-    private static String substituteAttributes(final String input, final Saml2AuthenticatedPrincipal principal) {
+    private String substituteAttributes(final String input, final Saml2AuthenticatedPrincipal principal) {
         String output = input;
         for (String key : principal.getAttributes().keySet()) {
             final String escapedKey = Pattern.quote(key);
-            output = output.replaceAll("\\{" + escapedKey + "\\}", principal.getFirstAttribute(key));
+            output = output.replaceAll("\\{" + escapedKey + "\\}", getAttributeValue(principal, key));
         }
         return output.replaceAll("\\{[^\\}]*?\\}", "");
     }
 
+    /**
+     * Gets the value associated with the given key from the principal.
+     *
+     * @param principal containing the user information.
+     * @param key of the attribute that should be extracted.
+     * @return the value associated with the given key.
+     */
+    private String getAttributeValue(final Saml2AuthenticatedPrincipal principal, final String key) {
+        final String value = principal.getFirstAttribute(key);
+        if (value == null) {
+            return "";
+        }
+
+        final Pattern extractionPattern = extractionPatterns.get(key);
+        if (extractionPattern == null) {
+            return value;
+        }
+
+        final Matcher matcher = extractionPattern.matcher(value);
+        if (matcher.matches()) {
+            return matcher.group(SAML2Properties.ATTRIBUTE_VALUE_EXTRACTION_GROUP_NAME);
+        }
+        else {
+            return value;
+        }
+    }
 }

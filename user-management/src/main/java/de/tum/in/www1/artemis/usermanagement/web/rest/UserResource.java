@@ -12,8 +12,10 @@ import javax.validation.Valid;
 import de.tum.in.www1.artemis.config.Constants;
 import de.tum.in.www1.artemis.domain.User;
 import de.tum.in.www1.artemis.repository.AuthorityRepository;
+import de.tum.in.www1.artemis.repository.LtiUserIdRepository;
 import de.tum.in.www1.artemis.repository.UserRepository;
 import de.tum.in.www1.artemis.service.dto.UserDTO;
+import de.tum.in.www1.artemis.service.dto.UserInitializationDTO;
 import de.tum.in.www1.artemis.usermanagement.service.messaging.services.UserServiceProducer;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserCreationService;
 import de.tum.in.www1.artemis.usermanagement.service.user.UserService;
@@ -90,13 +92,17 @@ public class UserResource {
 
     private final UserServiceProducer userServiceProducer;
 
+    private final LtiUserIdRepository ltiUserIdRepository;
+
     public UserResource(UserRepository userRepository, UserService userService, UserCreationService userCreationService,
-                        AuthorityRepository authorityRepository, UserServiceProducer userServiceProducer) {
+                        AuthorityRepository authorityRepository, UserServiceProducer userServiceProducer,
+                        LtiUserIdRepository ltiUserIdRepository) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.userCreationService = userCreationService;
         this.authorityRepository = authorityRepository;
         this.userServiceProducer = userServiceProducer;
+        this.ltiUserIdRepository = ltiUserIdRepository;
     }
 
     private static void checkUsernameAndPasswordValidity(String username, String password) {
@@ -302,7 +308,7 @@ public class UserResource {
      * @param showAllNotifications is true if all notifications should be displayed in the sidebar else depending on the HideNotificationsUntil property
      * @return void
      */
-    @PutMapping("/users/notification-visibility")
+    @PutMapping("users/notification-visibility")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> updateUserNotificationVisibility(@RequestBody boolean showAllNotifications) {
         log.debug("REST request to update notification visibility for logged in user");
@@ -311,5 +317,26 @@ public class UserResource {
         ZonedDateTime hideUntil = showAllNotifications ? null : ZonedDateTime.now();
         userService.updateUserNotificationVisibility(user.getId(), hideUntil);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Initialises users that are flagged as such and are LTI users by setting a new password that gets returned
+     *
+     * @return The ResponseEntity with a status 200 (Ok) and either an empty password or the newly created password
+     */
+    @PutMapping("users/initialize")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UserInitializationDTO> initializeUser() {
+        User user = userRepository.getUser();
+        if (user.getActivated()) {
+            return ResponseEntity.ok().body(new UserInitializationDTO());
+        }
+        if (ltiUserIdRepository.findByUser(user).isEmpty() || !user.isInternal()) {
+            user.setActivated(true);
+            userRepository.save(user);
+            return ResponseEntity.ok().body(new UserInitializationDTO());
+        }
+        String result = userCreationService.setRandomPasswordAndReturn(user);
+        return ResponseEntity.ok().body(new UserInitializationDTO(result));
     }
 }
