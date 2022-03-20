@@ -140,7 +140,7 @@ To reduce the time required for each test run, these docker containers already i
 </ul>
 </li>
 <li><p>Wait for the build in Dockerhub of the newly created Tag</p></li>
-<li><p>Change the docker image used in Artemis to the newly created tag: <a class="reference external" href="https://github.com/ls1intum/Artemis/blob/develop/src/main/java/de/tum/in/www1/artemis/service/connectors/ContinuousIntegrationService.java">ContinuousIntegrationService.java</a></p></li>
+<li><p>Change the docker image used in Artemis to the newly created tag: <a class="reference external" href="https://github.com/ls1intum/Artemis/blob/develop/src/main/resources/config/application.yml">application.yml</a></p></li>
 <li><p>If the used docker container should also be changed for already created exercises you have to change the build plan of that exercise</p>
 <ul class="simple">
 <li><p>Change the docker image used by following this path: Configure Buildplan &gt; Default Job &gt; Docker &gt; Docker Image</p></li>
