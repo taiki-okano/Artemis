@@ -154,35 +154,19 @@ setup is present.</p>
 <h2><a class="toc-backref" href="#id9">Docker-Compose</a><a class="headerlink" href="#docker-compose" title="Permalink to this headline"></a></h2>
 <p>Before you start the docker-compose, check if the bamboo version in the
 <code class="docutils literal notranslate"><span class="pre">build.gradle</span></code> (search for <code class="docutils literal notranslate"><span class="pre">com.atlassian.bamboo:bamboo-specs</span></code>) is
-equal to the bamboo version number in the Dockerfiles of bamboo stored in
-<code class="docutils literal notranslate"><span class="pre">src/main/docker/bamboo</span></code> (<code class="docutils literal notranslate"><span class="pre">src/main/docker/bamboo/Dockerfile</span></code>, <code class="docutils literal notranslate"><span class="pre">src/main/docker/bamboo/swift/Dockerfile</span></code>, and <code class="docutils literal notranslate"><span class="pre">src/main/docker/bamboo/c/Dockerfile</span></code>).
-If the version number is not equal, adjust the version number in the Dockerfile.</p>
-<p>In case you want to enable Swift or C programming exercises, you need to change
-the specified Dockerfile in the docker-compose file <code class="docutils literal notranslate"><span class="pre">atlassian.yml</span></code> stored in <code class="docutils literal notranslate"><span class="pre">src/main/docker</span></code>.
-To use the Swift Dockerfile, change the following:</p>
-<blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bamboo</span><span class="p">:</span>
-        <span class="n">container_name</span><span class="p">:</span> <span class="n">artemis_bamboo</span>
-        <span class="n">build</span><span class="p">:</span> <span class="n">bamboo</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>to:</p>
-<blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bamboo</span><span class="p">:</span>
-        <span class="n">container_name</span><span class="p">:</span> <span class="n">artemis_bamboo</span>
-        <span class="n">build</span><span class="p">:</span> <span class="n">bamboo</span><span class="o">/</span><span class="n">swift</span>
-</pre></div>
-</div>
-</div></blockquote>
+equal to the bamboo version number in the docker compose in
+<code class="docutils literal notranslate"><span class="pre">src/main/docker/atlassian.yml</span></code>
+If the version number is not equal, adjust the version number. Further details about the docker-compose setup can be found in
+<code class="docutils literal notranslate"><span class="pre">src/main/docker</span></code></p>
 <p>Execute the docker-compose file e.g. with
-<code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/atlassian.yml</span> <span class="pre">up</span> <span class="pre">-d</span></code>.
-If you notice that the used image didn’t change, append the flag <code class="docutils literal notranslate"><span class="pre">--build</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/atlassian.yml</span> <span class="pre">up</span> <span class="pre">-d</span></code>.</p>
 <p>Error Handling: It can happen that there is an overload with other
 docker networks
 <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">Pool</span> <span class="pre">overlaps</span> <span class="pre">with</span> <span class="pre">other</span> <span class="pre">one</span> <span class="pre">on</span> <span class="pre">this</span> <span class="pre">address</span> <span class="pre">space</span></code>. Use the
 command <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">network</span> <span class="pre">prune</span></code> to resolve this issue.</p>
 <p>Make sure that docker has enough memory (~ 6GB). To adapt it, go to <code class="docutils literal notranslate"><span class="pre">Settings</span> <span class="pre">-&gt;</span> <span class="pre">Resources</span></code></p>
+<p>In case you want to enable Swift or C programming exercises, refer to the readme in
+<code class="docutils literal notranslate"><span class="pre">src/main/docker</span></code></p>
 </div>
 <div class="section" id="configure-bamboo-bitbucket-and-jira">
 <h2><a class="toc-backref" href="#id10">Configure Bamboo, Bitbucket and Jira</a><a class="headerlink" href="#configure-bamboo-bitbucket-and-jira" title="Permalink to this headline"></a></h2>
