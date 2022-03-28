@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Troubleshooting &mdash; Artemis  documentation</title>
+  <title>Known Issues &mdash; Artemis  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/style.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
-    <link rel="next" title="Known Issues" href="../knownIssues/" />
-    <link rel="prev" title="Access Rights" href="../accessRights/" /> 
+    <link rel="prev" title="Troubleshooting" href="../troubleshooting/" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -60,11 +59,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../registration/">User Registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../accessRights/">Access Rights</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#repository-download-of-large-courses-fails">Repository download of large courses fails</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Known Issues</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#no-user-updates-with-jenkins-without-password">No user updates with Jenkins without password</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../knownIssues/">Known Issues</a></li>
 </ul>
 
         </div>
@@ -81,9 +80,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../" class="icon icon-home"></a> &raquo;</li>
-      <li>Troubleshooting</li>
+      <li>Known Issues</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/ls1intum/Artemis/blob/develop/docs/admin/troubleshooting.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/ls1intum/Artemis/blob/develop/docs/admin/knownIssues.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -91,22 +90,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="troubleshooting">
-<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline"></a></h1>
-<div class="section" id="repository-download-of-large-courses-fails">
-<h2>Repository download of large courses fails<a class="headerlink" href="#repository-download-of-large-courses-fails" title="Permalink to this headline"></a></h2>
-<p>The most likely issue is that the configured timeouts on the reverse proxy are too low.</p>
-<p>If you set up your Artemis instance with the <a class="reference external" href="https://github.com/ls1intum/artemis-ansible-collection">Ansible Role (&gt;=v0.1.1)</a>, you can set the timeout values with the following variables:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">proxy_send_timeout</span><span class="p">:</span> <span class="s">&quot;900s&quot;</span>
-<span class="nt">proxy_read_timeout</span><span class="p">:</span> <span class="s">&quot;900s&quot;</span>
-<span class="nt">fastcgi_send_timeout</span><span class="p">:</span> <span class="s">&quot;900s&quot;</span>
-<span class="nt">fastcgi_read_timeout</span><span class="p">:</span> <span class="s">&quot;900s&quot;</span>
-</pre></div>
-</div>
-<p>If you configured the nginx reverse proxy by hand, you have to adapt the following variables in your nginx configurations:</p>
+  <div class="section" id="known-issues">
+<h1>Known Issues<a class="headerlink" href="#known-issues" title="Permalink to this headline"></a></h1>
+<div class="section" id="no-user-updates-with-jenkins-without-password">
+<h2>No user updates with Jenkins without password<a class="headerlink" href="#no-user-updates-with-jenkins-without-password" title="Permalink to this headline"></a></h2>
+<p>Currently, Jenkins doesn’t allow to update the user details. We would have to delete and create the user with the new information.
+We can only do this if we have the password, which we don’t have unless the admin provides a new password as the passwords are hashed in our database.
+If you update the user details in Artemis you have the following options if you use Jenkins:</p>
+<ol class="loweralpha simple">
+<li><p>Update the user manually in Jenkins. As admins rarely update the users themselves, this wouldn’t be too much work.</p></li>
+<li><p>Leave it as it is. You have to decide for yourself whether the user details in Jenkins are important.</p></li>
+<li><p>Provide a password. <strong>Not recommended!</strong> You would need to provide the user with the new password which is itself a security issue and then the user has to change the password which might not be done reliably.</p></li>
+</ol>
+<p>Important to know:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout">https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout</a></p></li>
-<li><p><a class="reference external" href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_send_timeout">https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_send_timeout</a></p></li>
+<li><p>Group/Permission updates get always delegated. They are separate from user details.</p></li>
+<li><p>If users change their password after a not delegated user change, the user change gets automatically applied when recreating the Jenkins user.</p></li>
 </ul>
 </div>
 </div>
@@ -115,8 +114,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../accessRights/" class="btn btn-neutral float-left" title="Access Rights" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../knownIssues/" class="btn btn-neutral float-right" title="Known Issues" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../troubleshooting/" class="btn btn-neutral float-left" title="Troubleshooting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

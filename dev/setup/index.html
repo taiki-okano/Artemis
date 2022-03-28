@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../admin/registration/">User Registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../admin/accessRights/">Access Rights</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../admin/troubleshooting/">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../admin/knownIssues/">Known Issues</a></li>
 </ul>
 
         </div>
@@ -220,7 +221,9 @@ You can override the following configuration options in this file.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">artemis</span><span class="p">:</span>
     <span class="nt">repo-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos/</span>
     <span class="nt">repo-download-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos-download/</span>
-    <span class="nt">encryption-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;encrypt-password&gt;</span>     <span class="c1"># arbitrary password for encrypting database values</span>
+    <span class="nt">encryption-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;encrypt-password&gt;</span>      <span class="c1"># LEGACY: arbitrary password for encrypting database values</span>
+    <span class="nt">bcrypt-salt-rounds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">11</span>   <span class="c1"># The number of salt rounds for the bcrypt password hashing. Lower numbers make it faster but more unsecure and vice versa.</span>
+                             <span class="c1"># Please use the bcrypt benchmark tool to determine the best number of rounds for your system. https://github.com/ls1intum/bcrypt-Benchmark</span>
     <span class="nt">user-management</span><span class="p">:</span>
         <span class="nt">use-external</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
         <span class="nt">password-reset</span><span class="p">:</span>

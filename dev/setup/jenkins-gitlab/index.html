@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../admin/registration/">User Registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../admin/accessRights/">Access Rights</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../admin/troubleshooting/">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/knownIssues/">Known Issues</a></li>
 </ul>
 
         </div>
@@ -192,7 +193,9 @@ below into your <code class="docutils literal notranslate"><span class="pre">app
  <span class="nt">course-archives-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./exports/courses</span>
  <span class="nt">repo-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos</span>
  <span class="nt">repo-download-clone-path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./repos-download</span>
- <span class="nt">encryption-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
+ <span class="nt">encryption-password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>           <span class="c1"># LEGACY: arbitrary password for encrypting database values</span>
+ <span class="nt">bcrypt-salt-rounds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">11</span>  <span class="c1"># The number of salt rounds for the bcrypt password hashing. Lower numbers make it faster but more unsecure and vice versa.</span>
+                         <span class="c1"># Please use the bcrypt benchmark tool to determine the best number of rounds for your system. https://github.com/ls1intum/bcrypt-Benchmark</span>
  <span class="nt">user-management</span><span class="p">:</span>
      <span class="nt">use-external</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
      <span class="nt">internal-admin</span><span class="p">:</span>
@@ -241,13 +244,7 @@ In case you use a different port than 80 (http) or 443 (https) for the
 communication, you have to append it to the <code class="docutils literal notranslate"><span class="pre">server.url</span></code> value,
 e.g. <code class="docutils literal notranslate"><span class="pre">127.0.0.1:8080</span></code>.</p>
 <p>When you start Artemis for the first time, it will automatically create
-an admin user based on the default encryption password specified in the
-yml file above. In case you want to use a different encryption password,
-you can insert users manually into the <code class="docutils literal notranslate"><span class="pre">jhi_user</span></code> table. You can use
-<a class="reference external" href="https://www.devglan.com/online-tools/jasypt-online-encryption-decryption">Jasypt Online Encryption
-Tool</a>
-to generate encryption strings. Use Two Way Encryption (With Secret
-Text).</p>
+an admin user.</p>
 <p><strong>Note:</strong> Sometimes Artemis does not generate the admin user which may lead to a startup
 error. You will have to create the user manually in the MySQL database and in Gitlab. Make sure
 both are set up correctly and follow these steps:</p>
