@@ -207,15 +207,15 @@ below into your <code class="docutils literal notranslate"><span class="pre">app
  <span class="nt">version-control</span><span class="p">:</span>
      <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost:8081</span>
      <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
-     <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.gitlab.admin.password&gt;</span> <span class="c1"># created in Gitlab Server Quickstart step 2</span>
-     <span class="nt">token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.gitlab.token&gt;</span> <span class="c1"># generated in Gitlab Server Quickstart steps 4 and 5</span>
-     <span class="nt">ci-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.ci.token&gt;</span> <span class="c1"># generated in Jenkins Server Quickstart step 8</span>
+     <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span> <span class="c1"># created in Gitlab Server Quickstart step 2</span>
+     <span class="nt">token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis-gitlab-token</span> <span class="c1"># generated in Gitlab Server Quickstart steps 4 and 5</span>
+     <span class="nt">ci-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jenkins-secret-token</span> <span class="c1"># generated in Jenkins Server Quickstart step 8</span>
  <span class="nt">continuous-integration</span><span class="p">:</span>
      <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
      <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
      <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost:8082</span>
      <span class="nt">empty-commit-necessary</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-     <span class="nt">secret-push-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;your.secret.push.token&gt;</span> <span class="c1"># generated in Jenkins Server Quickstart step 8</span>
+     <span class="nt">secret-push-token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">AQAAABAAAAAg/aKNFWpF9m2Ust7VHDKJJJvLkntkaap2Ka3ZBhy5XjRd8s16vZhBz4fxzd4TH8Su</span> <span class="c1"># generated in Automated Jenkins Server step 3</span>
      <span class="nt">vcs-credentials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_gitlab_admin_credentials</span>
      <span class="nt">artemis-authentication-token-key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_notification_plugin_token</span>
      <span class="nt">artemis-authentication-token-value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
@@ -223,10 +223,14 @@ below into your <code class="docutils literal notranslate"><span class="pre">app
  <span class="nt">git</span><span class="p">:</span>
      <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Artemis</span>
      <span class="nt">email</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis.in@tum.de</span>
- <span class="nt">jenkins</span><span class="p">:</span>
-     <span class="nt">internal-urls</span><span class="p">:</span>
-         <span class="nt">ci-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://jenkins:8080</span>
-         <span class="nt">vcs-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://gitlab:80</span>
+<span class="nt">jenkins</span><span class="p">:</span>
+    <span class="nt">internal-urls</span><span class="p">:</span>
+        <span class="nt">ci-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://jenkins:8080</span>
+        <span class="nt">vcs-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://gitlab:80</span>
+    <span class="nt">use-crumb</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">server</span><span class="p">:</span>
+     <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">8080</span>
+     <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://172.17.0.1:8080</span> <span class="c1"># `http://host.docker.internal:8080` for Windows</span>
 </pre></div>
 </div>
 <p>In addition, you have to start Artemis with the profiles <code class="docutils literal notranslate"><span class="pre">gitlab</span></code> and
@@ -282,37 +286,52 @@ email, and password are the same as the user from the database:</p>
 <div class="section" id="gitlab-server-quickstart">
 <h3><a class="toc-backref" href="#id12">Gitlab Server Quickstart</a><a class="headerlink" href="#gitlab-server-quickstart" title="Permalink to this headline"></a></h3>
 <p>The following steps describes how to set up the Gitlab server in a semi-automated way.
-This is ideal as a quickstart for developers. For a more detailed setup, see <a class="reference external" href="#gitlab-server-setup">Manual Gitlab Server Setup</a>.</p>
+This is ideal as a quickstart for developers. For a more detailed setup, see <a class="reference external" href="#gitlab-server-setup">Manual Gitlab Server Setup</a>.
+In a production setup, you have to at least change the root password (by either specifying it in step 1 or extracting the random password in step 2) and generate random access tokens (instead of the pre-defined values).
+Set the variable <code class="docutils literal notranslate"><span class="pre">GENERATE_ACCESS_TOKENS</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> in the <code class="docutils literal notranslate"><span class="pre">gitlab-local-setup.sh</span></code> script and use the generated tokens instead of the predefined ones.</p>
 <ol class="arabic">
 <li><p>Start the Gitlab container defined in <cite>src/main/docker/gitlab-jenkins-mysql.yml</cite> by running</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">jenkins</span><span class="o">-</span><span class="n">mysql</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">--</span><span class="n">build</span> <span class="o">-</span><span class="n">d</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GITLAB_ROOT_PASSWORD</span><span class="o">=</span><span class="n">artemis_admin</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">jenkins</span><span class="o">-</span><span class="n">mysql</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">--</span><span class="n">build</span> <span class="o">-</span><span class="n">d</span> <span class="n">gitlab</span>
 </pre></div>
 </div>
+<p>If you want to generate a random password for the <code class="docutils literal notranslate"><span class="pre">root</span></code> user, remove the part before <code class="docutils literal notranslate"><span class="pre">docker-compose</span></code> from the command.</p>
 <p>The file uses the <cite>GITLAB_OMNIBUS_CONFIG</cite> environment variable to configure the Gitlab instance after the container is started.
 It disables prometheus monitoring, sets the ssh port to <code class="docutils literal notranslate"><span class="pre">2222</span></code>, and adjusts the monitoring endpoint whitelist by default.</p>
 </li>
-<li><p>Wait a couple of minutes since Gitlab can take some time to set up. Open the instance in your browser and set a first admin password of your choosing.
-You can then login using the username <code class="docutils literal notranslate"><span class="pre">root</span></code> and your password.</p></li>
-<li><p>Open the Artemis configuration <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> file and insert the Gitlab admin account:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">artemis</span><span class="p">:</span>
-    <span class="nt">version-control</span><span class="p">:</span>
-        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
-        <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">your.gitlab.admin.password</span>
+<li><p>Wait a couple of minutes since Gitlab can take some time to set up. Open the instance in your browser (usually <code class="docutils literal notranslate"><span class="pre">http://localhost:8081</span></code>).</p>
+<p>You can then login using the username <code class="docutils literal notranslate"><span class="pre">root</span></code> and your password (which defaults to <code class="docutils literal notranslate"><span class="pre">artemis_admin</span></code>, if you used the command from above).
+If you did not specify the password, you can get the initial one using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose -f src/main/docker/gitlab-jenkins-mysql.yml <span class="nb">exec</span> gitlab cat /etc/gitlab/initial_root_password
 </pre></div>
 </div>
 </li>
-<li><p>You now need to generate an admin access token. Navigate to <code class="docutils literal notranslate"><span class="pre">http://localhost:8081/-/profile/personal_access_tokens</span></code> and generate a token with all scopes.
-Copy this token into the <code class="docutils literal notranslate"><span class="pre">ADMIN_PERSONAL_ACCESS_TOKEN</span></code> field in the <code class="docutils literal notranslate"><span class="pre">src/main/docker/gitlab/gitlab-local-setup.sh</span></code> file.</p></li>
-<li><p>Run the following command and copy the generated access tokens into the Artemis configuration <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">jenkins-casc-config.yml</span></code> files.</p>
+<li><p>Insert the Gitlab root user password in the file <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code> (in src/main/resources) and insert the Gitlab admin account.
+If you copied the template from above and used the default password, this is already done for you.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">artemis</span><span class="p">:</span>
+    <span class="nt">version-control</span><span class="p">:</span>
+        <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://localhost:8081</span>
+        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+        <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">your.gitlab.admin.password</span> <span class="c1"># artemis_admin</span>
+</pre></div>
+</div>
+</li>
+<li><p>You now need to create an admin access token. You can do that using the following command (which takes a while to execute):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">jenkins</span><span class="o">-</span><span class="n">mysql</span><span class="o">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">gitlab</span> <span class="n">gitlab</span><span class="o">-</span><span class="n">rails</span> <span class="n">runner</span> <span class="s2">&quot;token = User.find_by_username(&#39;root&#39;).personal_access_tokens.create(scopes: [:api, :read_user, :read_api, :read_repository, :write_repository, :sudo], name: &#39;Artemis Admin Token&#39;); token.set_token(&#39;artemis-gitlab-token&#39;); token.save!&quot;</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">You can also manually create in by navigating to <code class="docutils literal notranslate"><span class="pre">http://localhost:8081/-/profile/personal_access_tokens</span></code> and generate a token with all scopes.</div>
+<div class="line">Copy this token into the <code class="docutils literal notranslate"><span class="pre">ADMIN_PERSONAL_ACCESS_TOKEN</span></code> field in the <code class="docutils literal notranslate"><span class="pre">src/main/docker/gitlab/gitlab-local-setup.sh</span></code> file.</div>
+<div class="line">If you used the command to generate the token, you don’t have to change the <code class="docutils literal notranslate"><span class="pre">gitlab-local-setup.sh</span></code> file.</div>
+</div>
+</li>
+<li><p>Adjust the GitLab setup by running, this will configure GitLab’s network setting to allow local requests:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">jenkins</span><span class="o">-</span><span class="n">mysql</span><span class="o">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">gitlab</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;sh /gitlab-local-setup.sh&quot;</span>
 </pre></div>
 </div>
+<p>This script can also generate random access tokens, which should be used in a production setup. Change the variabe <code class="docutils literal notranslate"><span class="pre">$GENERATE_ACCESS_TOKENS</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> to generate the random tokens and insert them into the Artemis configuration file.</p>
 </li>
-<li><dl class="simple">
-<dt>You’re done! Follow the <a class="reference external" href="#automated-jenkins-server-setup">Automated Jenkins Server Setup</a> section for configuring Jenkins.</dt><dd><p>There you can skip steps 4, 5, and 10.</p>
-</dd>
-</dl>
-</li>
+<li><p>You’re done! Follow the <a class="reference external" href="#automated-jenkins-server-setup">Automated Jenkins Server Setup</a> section for configuring Jenkins.</p></li>
 </ol>
 </div>
 <div class="section" id="manual-gitlab-server-setup">
@@ -519,52 +538,29 @@ You can also remove all old images using <code class="docutils literal notransla
 <div class="section" id="automated-jenkins-server-setup">
 <h3><a class="toc-backref" href="#id16">Automated Jenkins Server Setup</a><a class="headerlink" href="#automated-jenkins-server-setup" title="Permalink to this headline"></a></h3>
 <p>The following steps describe how to deploy a pre-configured version of the Jenkins server.
-This is ideal as a quickstart for developers. For a more detailed setup, see <a class="reference external" href="#manual-jenkins-server-setup">Manual Jenkins Server Setup</a>.</p>
-<ol class="arabic simple">
-<li><p>Open the dockerfile located at <code class="docutils literal notranslate"><span class="pre">src/main/docker/jenkins/Dockerfile</span></code> or <code class="docutils literal notranslate"><span class="pre">src/main/docker/jenkins/swift/Dockerfile</span></code> (in case you want to additionally install Swift/SwiftLint).</p></li>
-<li><p>Uncomment the line which installs the docker client. Jenkins uses build agents to build code. The automated setup configures a local agent running from within Jenkins container.</p></li>
-<li><p>Uncomment the line that disables the first-time setup wizard and save the dockerfile:</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ENV</span> <span class="n">JAVA_OPTS</span> <span class="o">-</span><span class="n">Djenkins</span><span class="o">.</span><span class="n">install</span><span class="o">.</span><span class="n">runSetupWizard</span><span class="o">=</span><span class="n">false</span>
+This is ideal as a quickstart for developers. For a more detailed setup, see <a class="reference external" href="#manual-jenkins-server-setup">Manual Jenkins Server Setup</a>.
+In a production setup, you have to at least change the user credentials (in the file <code class="docutils literal notranslate"><span class="pre">jenkins-casc-config.yml</span></code>) and generate random access tokens and push tokens.</p>
+<ol class="arabic">
+<li><p>Create a new access token in Gitlab named <code class="docutils literal notranslate"><span class="pre">Jenkins</span></code> and give it <strong>api</strong> and <strong>read_repository</strong> rights. You can do either do it manually or using the following command:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">jenkins</span><span class="o">-</span><span class="n">mysql</span><span class="o">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">gitlab</span> <span class="n">gitlab</span><span class="o">-</span><span class="n">rails</span> <span class="n">runner</span> <span class="s2">&quot;token = User.find_by_username(&#39;root&#39;).personal_access_tokens.create(scopes: [:api, :read_repository], name: &#39;Jenkins&#39;); token.set_token(&#39;jenkins-gitlab-token&#39;); token.save!&quot;</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="4">
-<li><p>Create a new access token in Gitlab named <code class="docutils literal notranslate"><span class="pre">Jenkins</span></code> and give it <strong>api</strong> and <strong>read_repository</strong> rights.</p></li>
-<li><p>Open the <code class="docutils literal notranslate"><span class="pre">src/main/docker/jenkins/jenkins-casc-config.yml</span></code> file with an editor and insert the generated token, the gitlab admin username, and password:</p></li>
-</ol>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">credentials</span><span class="p">:</span>
- <span class="nt">system</span><span class="p">:</span>
-     <span class="nt">domainCredentials</span><span class="p">:</span>
-         <span class="p p-Indicator">-</span> <span class="nt">credentials</span><span class="p">:</span>
-             <span class="p p-Indicator">-</span> <span class="nt">gitLabApiTokenImpl</span><span class="p">:</span>
-                 <span class="nt">apiToken</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">your.api.token</span>
-         <span class="p p-Indicator">-</span> <span class="nt">usernamePassword</span><span class="p">:</span>
-             <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_gitlab_admin_credentials</span>
-             <span class="nt">scope</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GLOBAL</span>
-             <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">your.gitlab.admin.username</span>
-             <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">your.gitlab.admin.password</span>
+</div></blockquote>
+</li>
+<li><p>You can now deploy Jenkins. A <code class="docutils literal notranslate"><span class="pre">src/main/docker/gitlab-jenkins-mysql.yml</span></code> file is provided which deploys the Jenkins, Gitlab, and Mysql containers bound to static ip addresses. You can deploy them by running:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JAVA_OPTS</span><span class="o">=-</span><span class="n">Djenkins</span><span class="o">.</span><span class="n">install</span><span class="o">.</span><span class="n">runSetupWizard</span><span class="o">=</span><span class="n">false</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">jenkins</span><span class="o">-</span><span class="n">mysql</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">--</span><span class="n">build</span> <span class="o">-</span><span class="n">d</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="6">
-<li><p>Navigate to the bottom of the file and set the url of your Gitlab instance. This is typically the ip address or hostname of the Gitlab container.</p></li>
-</ol>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">unclassified</span><span class="p">:</span>
-  <span class="nt">gitlabconnectionconfig</span><span class="p">:</span>
-    <span class="nt">connections</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="nt">apiTokenId</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_gitlab_api_token</span>
-        <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">your.gitlab.url</span>
-</pre></div>
-</div>
-<ol class="arabic simple" start="7">
-<li><p>You can now deploy Jenkins. A <code class="docutils literal notranslate"><span class="pre">src/main/docker/gitlab-jenkins-mysql.yml</span></code> file is provided which deploys the Jenkins, Gitlab, and Mysql containers bound to static ip addresses. You can deploy them by running:</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">jenkins</span><span class="o">-</span><span class="n">mysql</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">--</span><span class="n">build</span>
-</pre></div>
-</div>
-<p>If you already have a Gitlab and Mysql instance running, you can comment out all services except for jenkins and then run the docker-compose file.</p>
-<ol class="arabic simple" start="8">
-<li><p>You need to generate the <cite>ci-token</cite> and <cite>secret-push-token</cite>. Please follow the <a class="reference external" href="##gitlab-to-jenkins-push-notification-token">Gitlab to Jenkins push notification token</a> steps.</p></li>
-<li><p>The <cite>application-local.yml</cite> must be adapted with the values configured in <code class="docutils literal notranslate"><span class="pre">jenkins-casc-config.yml</span></code>:</p></li>
+</div></blockquote>
+<p>Jenkins is then reachable under <code class="docutils literal notranslate"><span class="pre">http://localhost:8082/</span></code> and you can login using the credentials specified in <code class="docutils literal notranslate"><span class="pre">jenkins-casc-config.yml</span></code> (defaults to <code class="docutils literal notranslate"><span class="pre">artemis_admin</span></code> as both username and password).</p>
+</li>
+<li><p>You need to generate the <cite>ci-token</cite> and <cite>secret-push-token</cite>.
+If you used the preset <code class="docutils literal notranslate"><span class="pre">master.key</span></code> within the file <code class="docutils literal notranslate"><span class="pre">gitlab-jenkins-mysql.yml</span></code>, you can skip this step.
+In a production setup, you should use a random <code class="docutils literal notranslate"><span class="pre">master.key</span></code>, then you have to follow the steps described in  <a class="reference external" href="#gitlab-to-jenkins-push-notification-token">Gitlab to Jenkins push notification token</a> to generate the token.</p></li>
+<li><p>The <cite>application-local.yml</cite> must be adapted with the values configured in <code class="docutils literal notranslate"><span class="pre">jenkins-casc-config.yml</span></code>:
+If you used the preset <code class="docutils literal notranslate"><span class="pre">master.key</span></code> and are running a development setup, the correct values are already correctly inserted in the template configuration in the beginning of this page.</p></li>
 </ol>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">artemis</span><span class="p">:</span>
     <span class="nt">user-management</span><span class="p">:</span>
@@ -584,11 +580,15 @@ This is ideal as a quickstart for developers. For a more detailed setup, see <a 
             <span class="nt">vcs-credentials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_gitlab_admin_credentials</span>
             <span class="nt">artemis-authentication-token-key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_notification_plugin_token</span>
             <span class="nt">artemis-authentication-token-value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">artemis_admin</span>
-            <span class="nt">secret-push-token</span><span class="p">:</span> <span class="c1"># generated in step 8</span>
+            <span class="nt">secret-push-token</span><span class="p">:</span> <span class="c1"># generated in step 3</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="10">
-<li><p>Open the <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-jenkins.yml</span></code> and change the following:</p></li>
+<ol class="arabic simple" start="5">
+<li><dl class="simple">
+<dt>Open the <code class="docutils literal notranslate"><span class="pre">src/main/resources/config/application-jenkins.yml</span></code> and change the following:</dt><dd><p>Again, if you are using a development setup, the template in the beginning of this page already contains the correct values.</p>
+</dd>
+</dl>
+</li>
 </ol>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">jenkins</span><span class="p">:</span>
     <span class="nt">internal-urls</span><span class="p">:</span>
@@ -596,7 +596,7 @@ This is ideal as a quickstart for developers. For a more detailed setup, see <a 
         <span class="nt">vcs-url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://gitlab:80</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="11">
+<ol class="arabic simple" start="6">
 <li><p>You’re done. You can now run Artemis with the Gitlab/Jenkins environment.</p></li>
 </ol>
 </div>
@@ -935,6 +935,10 @@ for the Jenkins admin account:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GET</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">your</span><span class="o">.</span><span class="n">jenkins</span><span class="o">.</span><span class="n">domain</span><span class="o">/</span><span class="n">job</span><span class="o">/</span><span class="n">TestProject</span><span class="o">/</span><span class="n">config</span><span class="o">.</span><span class="n">xml</span>
 </pre></div>
 </div>
+<p>If you have xmllint installed, you can use this command, which will output the <code class="docutils literal notranslate"><span class="pre">secret-push-token</span></code> from steps 9 and 10 (you may have to adjust the username and password):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">u</span> <span class="n">artemis_admin</span><span class="p">:</span><span class="n">artemis_admin</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8082</span><span class="o">/</span><span class="n">job</span><span class="o">/</span><span class="n">TestProject</span><span class="o">/</span><span class="n">config</span><span class="o">.</span><span class="n">xml</span> <span class="o">|</span> <span class="n">xmllint</span> <span class="o">--</span><span class="n">nowarning</span> <span class="o">--</span><span class="n">xpath</span> <span class="s2">&quot;//project/triggers/com.dabsquared.gitlabjenkins.GitLabPushTrigger/secretToken/text()&quot;</span> <span class="o">-</span> <span class="o">|</span> <span class="n">sed</span> <span class="s1">&#39;s/^.\(.*\).$/</span><span class="se">\1</span><span class="s1">/&#39;</span>
+</pre></div>
+</div>
 </li>
 <li><p>You will get the whole configuration XML of the just created build
 plan, there you will find the following tag:</p>
@@ -965,27 +969,9 @@ the placeholders with the actual values you wrote down)</p>
 </div>
 </li>
 <li><p>In a local setup, you have to disable CSRF otherwise some API endpoints will return HTTP Status 403 Forbidden.
-This is done by creating a groovy script inside the <code class="docutils literal notranslate"><span class="pre">jenkins</span></code> docker container at <code class="docutils literal notranslate"><span class="pre">jenkins_home/init.groovy</span></code>
-with the following contents:</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">jenkins.model.Jenkins</span>
-<span class="kt">def</span> <span class="n">instance</span> <span class="o">=</span> <span class="n">Jenkins</span><span class="o">.</span><span class="na">instance</span>
-<span class="n">instance</span><span class="o">.</span><span class="na">setCrumbIssuer</span><span class="o">(</span><span class="kc">null</span><span class="o">)</span>
-</pre></div>
-</div>
-<p>In order to save the script, first create a file called <code class="docutils literal notranslate"><span class="pre">jenkins-disable-csrf.groovy</span></code> with the groovy code from above.</p>
-<p>Then create a <cite>init.groovy</cite> file in your Jenkins container:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="n">jenkins</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;cd /var/jenkins_home; touch init.groovy&quot;</span>
-</pre></div>
-</div>
-<p>Now we need to pipe the script into the container:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">i</span> <span class="n">jenkins</span> <span class="n">dd</span> <span class="n">of</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">jenkins_home</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">groovy</span> <span class="o">&lt;</span> <span class="n">jenkins</span><span class="o">-</span><span class="n">disable</span><span class="o">-</span><span class="n">csrf</span><span class="o">.</span><span class="n">groovy</span>
-</pre></div>
-</div>
-<p>To make sure that the commands worked as intended, the following command should output the script from above:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="n">jenkins</span> <span class="n">cat</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">jenkins_home</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">groovy</span>
-</pre></div>
-</div>
-<p>The last step is to disable the <code class="docutils literal notranslate"><span class="pre">use-crumb</span></code> option in <code class="docutils literal notranslate"><span class="pre">application-jenkins.yml</span></code>:</p>
+This is done be executing the following command:
+<code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">-f</span> <span class="pre">src/main/docker/gitlab-jenkins-mysql.yml</span> <span class="pre">exec</span> <span class="pre">-T</span> <span class="pre">jenkins</span> <span class="pre">dd</span> <span class="pre">of=/var/jenkins_home/init.groovy</span> <span class="pre">&lt;</span> <span class="pre">src/main/docker/jenkins/jenkins-disable-csrf.groovy</span></code></p>
+<p>The last step is to disable the <code class="docutils literal notranslate"><span class="pre">use-crumb</span></code> option in <code class="docutils literal notranslate"><span class="pre">application-local.yml</span></code>:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">jenkins</span><span class="p">:</span>
     <span class="nt">use-crumb</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
 </pre></div>
