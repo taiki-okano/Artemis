@@ -338,22 +338,21 @@ For example, if you have a component that loads and displays some data when the 
 </div></blockquote>
 </li>
 <li><p>Try to make expectations as specific as possible. If you expect a specific result, compare to this result and do not compare to the absence of some arbitrary other value. This ensures that no faulty values you didn’t expect can sneak in the codebase without the tests failing. For example <code class="code docutils literal notranslate"><span class="pre">toBe(5)</span></code> is better than <code class="code docutils literal notranslate"><span class="pre">not.toBeUndefined()</span></code>, which would also pass if the value wrongly changes to 6.</p></li>
-<li><p>When expecting results use <code class="code docutils literal notranslate"><span class="pre">expect</span></code> for client tests. That call <strong>must</strong> be followed by another assertion statement like <code class="code docutils literal notranslate"><span class="pre">toBe(true)</span></code>. It is best practice to use more specific expect statements rather than always expecting boolean values. It is also recommended to extract as much as possible from the <cite>expect</cite> statement.</p>
+<li><p>When expecting results use <code class="code docutils literal notranslate"><span class="pre">expect</span></code> for client tests. That call <strong>must</strong> be followed by another assertion statement like <code class="code docutils literal notranslate"><span class="pre">toBeTrue()</span></code>. It is best practice to use more specific expect statements rather than always expecting boolean values. It is also recommended to extract as much as possible from the <cite>expect</cite> statement.</p>
 <blockquote>
 <div><p>For example, instead of</p>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">course</span> <span class="o">==</span> <span class="kc">undefined</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">course</span> <span class="o">==</span> <span class="kc">undefined</span><span class="p">).</span><span class="nx">toBeTrue</span><span class="p">();</span>
 <span class="nx">expect</span><span class="p">(</span><span class="nx">courseList</span><span class="p">.</span><span class="nx">length</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>extract as much as possible:</p>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">course</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">undefined</span><span class="p">);</span>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">course</span><span class="p">).</span><span class="nx">toBeUndefined</span><span class="p">();</span>
 <span class="nx">expect</span><span class="p">(</span><span class="nx">courseList</span><span class="p">).</span><span class="nx">toHaveLength</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
-<li><p>If you have minimized <code class="code docutils literal notranslate"><span class="pre">expect</span></code> and can choose between multiple verification functions providing the same functionality, choose the most generic one. This way we will use as few functions as possible. For example prefer <code class="code docutils literal notranslate"><span class="pre">toBe(true)</span></code> and <code class="code docutils literal notranslate"><span class="pre">toBe(false)</span></code> over <code class="code docutils literal notranslate"><span class="pre">toBeTrue()</span></code> and <code class="code docutils literal notranslate"><span class="pre">toBeFalse()</span></code>.</p></li>
-<li><p>Use <a class="reference external" href="https://jestjs.io/docs/expect">Jest</a> whenever possible. Use <a class="reference external" href="https://github.com/jest-community/jest-extended#api">Jest Extended</a> only if it shortens the expect statements considerably and makes it more readable.</p></li>
+<li><p>If you have minimized <code class="code docutils literal notranslate"><span class="pre">expect</span></code>, use the verification function that provides the most meaningful error message in case the verification fails. You can use verification functions from core Jest &lt;<a class="reference external" href="https://jestjs.io/docs/expect">https://jestjs.io/docs/expect</a>&gt; or from Jest Extended &lt;<a class="reference external" href="https://github.com/jest-community/jest-extended#api">https://github.com/jest-community/jest-extended#api</a>&gt;.</p></li>
 <li><p>For situations described below, only use the uniform solution to keep the codebase as consistent as possible.</p></li>
 </ol>
 <blockquote>
@@ -369,28 +368,27 @@ For example, if you have a component that loads and displays some data when the 
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Expecting a boolean value</p></td>
-<td><p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(true);</span></code></p>
-<p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(false);</span></code></p>
-</td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBeTrue();</span></code>
+<code class="code docutils literal notranslate"><span class="pre">expect(value).toBeFalse();</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Two objects should be the same reference</p></td>
 <td><p><code class="code docutils literal notranslate"><span class="pre">expect(object).toBe(referenceObject);</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>A CSS element should exist</p>
-<p>A CSS element should not exists</p>
+<p>A CSS element should not exist</p>
 </td>
-<td><p><code class="code docutils literal notranslate"><span class="pre">expect(element).not.toBe(null);</span></code></p>
-<p><code class="code docutils literal notranslate"><span class="pre">expect(element).toBe(null);</span></code></p>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(element).not.toBeNull();</span></code></p>
+<p><code class="code docutils literal notranslate"><span class="pre">expect(element).toBeNull();</span></code></p>
 </td>
 </tr>
 <tr class="row-odd"><td><p>A value should be undefined</p></td>
-<td><p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(undefined);</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">expect(value).toBeUndefined();</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>A value should be either null or undefined</p></td>
-<td><p>Use <code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(undefined);</span></code> for internal calls.</p>
+<td><p>Use <code class="code docutils literal notranslate"><span class="pre">expect(value).toBeUndefined();</span></code> for internal calls.</p>
 <p>If an external library uses null value, use
-<code class="code docutils literal notranslate"><span class="pre">expect(value).toBe(null);</span></code> and if not avoidable
-<code class="code docutils literal notranslate"><span class="pre">expect(value).not.toBe(null);</span></code>.</p>
+<code class="code docutils literal notranslate"><span class="pre">expect(value).toBeNull();</span></code> and if not avoidable
+<code class="code docutils literal notranslate"><span class="pre">expect(value).not.toBeNull();</span></code>.</p>
 <p><strong>Never use</strong> <code class="code docutils literal notranslate"><span class="pre">expect(value).not.toBeDefined()</span></code>
 or <code class="code docutils literal notranslate"><span class="pre">expect(value).toBeNil()</span></code> as they might not catch all
 failures under certain conditions.</p>
@@ -412,6 +410,22 @@ it might not catch all failures under certain conditions.</p>
 </tr>
 <tr class="row-even"><td><p>A spy should have been called once</p></td>
 <td><p><code class="code docutils literal notranslate"><span class="pre">expect(spy).toHaveBeenCalledTimes(1);</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>A spy should have been called with a value</p></td>
+<td><p>Always test the number of calls as well:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">spy</span><span class="p">).</span><span class="nx">toHaveBeenCalledTimes</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">spy</span><span class="p">).</span><span class="nx">toHaveBeenCalledWith</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If you have multiple calls, you can verify the parameters
+of each call separately:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">expect</span><span class="p">(</span><span class="nx">spy</span><span class="p">).</span><span class="nx">toHaveBeenCalledTimes</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">spy</span><span class="p">).</span><span class="nx">toHaveBeenNthCalledWith</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">value0</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">spy</span><span class="p">).</span><span class="nx">toHaveBeenNthCalledWith</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">value1</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">spy</span><span class="p">).</span><span class="nx">toHaveBeenNthCalledWith</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">value2</span><span class="p">);</span>
+</pre></div>
+</div>
+</td>
 </tr>
 </tbody>
 </table>
