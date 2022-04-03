@@ -71,37 +71,42 @@
                     </td>
                     <td>
                         <ng-container *ngIf="submission.participation?.submissionCount">
-                            <a
-                                *ngIf="exercise.isAtLeastInstructor && !examId"
-                                [routerLink]="[
-                                    '/course-management',
-                                    courseId,
-                                    exercise.type + '-exercises',
-                                    exercise.id,
-                                    'participations',
-                                    submission.participation!.id,
-                                    'submissions'
-                                ]"
-                            >
+                            <span *ngIf="exercise.isAtLeastInstructor; else nonInstructor">
+                                <a
+                                    *ngIf="!examId"
+                                    [routerLink]="[
+                                        '/course-management',
+                                        courseId,
+                                        exercise.type + '-exercises',
+                                        exercise.id,
+                                        'participations',
+                                        submission.participation!.id,
+                                        'submissions'
+                                    ]"
+                                >
+                                    {{ submission.participation?.submissionCount || '--' }}
+                                </a>
+                                <a
+                                    *ngIf="!!examId"
+                                    [routerLink]="[
+                                        '/course-management',
+                                        courseId,
+                                        'exams',
+                                        examId,
+                                        'exercise-groups',
+                                        exerciseGroupId,
+                                        exercise.type + '-exercises',
+                                        exercise.id,
+                                        'participations',
+                                        submission.participation!.id
+                                    ]"
+                                >
+                                    {{ submission.participation?.submissionCount || '--' }}
+                                </a>
+                            </span>
+                            <ng-template #nonInstructor>
                                 {{ submission.participation?.submissionCount || '--' }}
-                            </a>
-                            <a
-                                *ngIf="exercise.isAtLeastInstructor && !!examId"
-                                [routerLink]="[
-                                    '/course-management',
-                                    courseId,
-                                    'exams',
-                                    examId,
-                                    'exercise-groups',
-                                    exerciseGroupId,
-                                    exercise.type + '-exercises',
-                                    exercise.id,
-                                    'participations',
-                                    submission.participation!.id
-                                ]"
-                            >
-                                {{ submission.participation?.submissionCount || '--' }}
-                            </a>
+                            </ng-template>
                         </ng-container>
                     </td>
                     <td>

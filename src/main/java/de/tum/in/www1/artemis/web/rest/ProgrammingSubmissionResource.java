@@ -339,7 +339,9 @@ public class ProgrammingSubmissionResource {
                     correctionRound);
         }
         else {
-            programmingSubmissions = programmingSubmissionService.getProgrammingSubmissions(exerciseId, submittedOnly, examMode);
+            // Only instructors should see the student's information, TAs shouldn't have access.
+            final boolean isTAorEditor = !authCheckService.isAtLeastInstructorForExercise(exercise);
+            programmingSubmissions = programmingSubmissionService.getProgrammingSubmissions(exerciseId, submittedOnly, examMode, isTAorEditor);
         }
 
         if (!examMode) {

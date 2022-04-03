@@ -676,21 +676,26 @@ public class ProgrammingSubmissionService extends SubmissionService {
             }
         });
         List<ProgrammingSubmission> programmingSubmissions = submissions.stream().map(submission -> (ProgrammingSubmission) submission).collect(toList());
-        // In Exam-Mode, the Submissions are retrieved from the studentParticipationRepository, for which the Set<Submission> is appended
-        // In non-Exam Mode, the Submissions are retrieved from the submissionRepository, for which no Set<submission> is appended
-        return removeExerciseAndSubmissionSet(programmingSubmissions, examMode);
+
+        /*
+         * In Exam-Mode, the Submissions are retrieved from the studentParticipationRepository, for which the Set<Submission> is appended In non-Exam Mode, the Submissions are
+         * retrieved from the submissionRepository, for which no Set<submission> is appended As this method is used to retrieve the submissions for the assessment dashboard, the
+         * student's information can also be removed
+         */
+        return removeExerciseAndSubmissionSetAndStudentInformation(programmingSubmissions, examMode, true);
     }
 
     /**
      * Given an exerciseId, returns all the programming submissions for that exercise, including their results. Submissions can be filtered to include only already submitted
      * submissions
      *
-     * @param exerciseId    - the id of the exercise we are interested into
+     * @param exerciseId - the id of the exercise we are interested into
      * @param submittedOnly - if true, it returns only submission with submitted flag set to true
      * @param examMode - set flag to ignore test run submissions for exam exercises
+     * @param removeStudent - if true, remove the student attribute and the repositoryURL, so no connection between the submission and student exists
      * @return a list of programming submissions for the given exercise id
      */
-    public List<ProgrammingSubmission> getProgrammingSubmissions(long exerciseId, boolean submittedOnly, boolean examMode) {
+    public List<ProgrammingSubmission> getProgrammingSubmissions(long exerciseId, boolean submittedOnly, boolean examMode, boolean removeStudent) {
         List<StudentParticipation> participations;
         if (examMode) {
             participations = studentParticipationRepository.findAllWithEagerSubmissionsAndEagerResultsAndEagerAssessorByExerciseIdIgnoreTestRuns(exerciseId);
@@ -698,12 +703,14 @@ public class ProgrammingSubmissionService extends SubmissionService {
         else {
             participations = studentParticipationRepository.findAllWithEagerSubmissionsAndEagerResultsAndEagerAssessorByExerciseId(exerciseId);
         }
+
         List<ProgrammingSubmission> programmingSubmissions = new ArrayList<>();
         participations.stream().peek(participation -> participation.getExercise().setStudentParticipations(null)).map(StudentParticipation::findLatestLegalOrIllegalSubmission)
                 // filter out non submitted submissions if the flag is set to true
                 .filter(optionalSubmission -> optionalSubmission.isPresent() && (!submittedOnly || optionalSubmission.get().isSubmitted()))
                 .forEach(optionalSubmission -> programmingSubmissions.add((ProgrammingSubmission) optionalSubmission.get()));
-        return removeExerciseAndSubmissionSet(programmingSubmissions, true);
+
+        return removeExerciseAndSubmissionSetAndStudentInformation(programmingSubmissions, true, removeStudent);
     }
 
     /**
@@ -711,11 +718,16 @@ public class ProgrammingSubmissionService extends SubmissionService {
      * If removeSubmissionSet = true, also the Set participation.submissions is removed. The number of submissions will be
      * stored in the attribute participation.submissionCount instead of being determined by the size of the set of all submissions.
      * This method is intended to reduce the amount of data transferred to the client.
+     * To foster the double-blind assessment, this method can remove the Student-object and the repositoryURL from the ProgrammingSubmission,
+     * so TAs are not able to determine the student behind the participation.
+     *
      * @param programmingSubmissionList - a List with all ProgrammingSubmissions to be modified
      * @param removeSubmissionSet - option to also remove the SubmissionSet from the ProgrammingSubmssion
+     * @param removeStudent - option to remove the student-object from the participation
      * @return a List with ProgrammingSubmissions and removed attributes
      */
-    private List<ProgrammingSubmission> removeExerciseAndSubmissionSet(List<ProgrammingSubmission> programmingSubmissionList, boolean removeSubmissionSet) {
+    private List<ProgrammingSubmission> removeExerciseAndSubmissionSetAndStudentInformation(List<ProgrammingSubmission> programmingSubmissionList, boolean removeSubmissionSet,
+            boolean removeStudent) {
         programmingSubmissionList.forEach(programmingSubmission -> {
             if (programmingSubmission.getParticipation() != null) {
                 Participation participation = programmingSubmission.getParticipation();
@@ -724,6 +736,12 @@ public class ProgrammingSubmissionService extends SubmissionService {
                     // Only remove the Submissions and store them in submissionsCount, if the Set<Submissions> is present.
                     participation.setSubmissionCount(participation.getSubmissions().size());
                     participation.setSubmissions(null);
+                }
+                if (removeStudent) {
+                    participation.filterSensitiveInformation();
+                    if (participation instanceof ProgrammingExerciseStudentParticipation) {
+                        ((ProgrammingExerciseStudentParticipation) participation).setRepositoryUrl("");
+                    }
                 }
             }
         });
